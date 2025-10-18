@@ -170,8 +170,8 @@ Post-MVP planned features:
 - [x] Technology stack selection
 - [ ] Backend API development
 - [ ] Frontend application development
-- [ ] Database schema implementation
-- [ ] Authentication system
+- [x] Database schema implementation
+- [x] Authentication system
 - [ ] Core CRUD operations
 - [ ] Email notification system
 - [ ] Document upload functionality

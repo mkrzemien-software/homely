@@ -1,0 +1,324 @@
+<div class="theme-showcase">
+  <!-- Header -->
+  <header class="showcase-header">
+    <div class="container">
+      <h1 class="showcase-title">🏠 {{ title }}</h1>
+      <p class="showcase-subtitle">
+        System zarządzania terminami serwisów i wizyt domowych
+      </p>
+    </div>
+  </header>
+
+  <!-- Theme Toggle -->
+  <section class="showcase-section">
+    <div class="container">
+      <h2 class="section-title">Theme Controls</h2>
+      <app-theme-toggle></app-theme-toggle>
+    </div>
+  </section>
+
+  <!-- Colors Showcase -->
+  <section class="showcase-section">
+    <div class="container">
+      <h2 class="section-title">Brand Colors</h2>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch color-swatch--primary"></div>
+          <div class="color-info">
+            <div class="color-name">Primary</div>
+            <div class="color-value">--color-primary</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch color-swatch--secondary"></div>
+          <div class="color-info">
+            <div class="color-name">Secondary</div>
+            <div class="color-value">--color-secondary</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch color-swatch--success"></div>
+          <div class="color-info">
+            <div class="color-name">Success</div>
+            <div class="color-value">--color-success</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch color-swatch--warning"></div>
+          <div class="color-info">
+            <div class="color-name">Warning</div>
+            <div class="color-value">--color-warning</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch color-swatch--danger"></div>
+          <div class="color-info">
+            <div class="color-name">Danger</div>
+            <div class="color-value">--color-danger</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch color-swatch--info"></div>
+          <div class="color-info">
+            <div class="color-name">Info</div>
+            <div class="color-value">--color-info</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Colors -->
+  <section class="showcase-section">
+    <div class="container">
+      <h2 class="section-title">Category Colors</h2>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch color-swatch--technical"></div>
+          <div class="color-info">
+            <div class="color-name">Technical Inspections</div>
+            <div class="color-value">--category-technical</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch color-swatch--waste"></div>
+          <div class="color-info">
+            <div class="color-name">Waste Collection</div>
+            <div class="color-value">--category-waste</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch color-swatch--medical"></div>
+          <div class="color-info">
+            <div class="color-name">Medical Visits</div>
+            <div class="color-value">--category-medical</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Typography -->
+  <section class="showcase-section">
+    <div class="container">
+      <h2 class="section-title">Typography</h2>
+      <div class="typography-showcase">
+        <h1 class="typo-sample typo-h1">Heading 1</h1>
+        <h2 class="typo-sample typo-h2">Heading 2</h2>
+        <h3 class="typo-sample typo-h3">Heading 3</h3>
+        <h4 class="typo-sample typo-h4">Heading 4</h4>
+        <p class="typo-sample typo-body">
+          Body text: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        </p>
+        <p class="typo-sample typo-small">
+          Small text: Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section class="showcase-section">
+    <div class="container">
+      <h2 class="section-title">Buttons</h2>
+      <div class="button-showcase">
+        <button class="btn btn--primary">Primary Button</button>
+        <button class="btn btn--secondary">Secondary Button</button>
+        <button class="btn btn--success">Success Button</button>
+        <button class="btn btn--danger">Danger Button</button>
+        <button class="btn btn--outline">Outline Button</button>
+        <button class="btn btn--ghost">Ghost Button</button>
+      </div>
+
+      <h3 class="subsection-title">Button Sizes</h3>
+      <div class="button-showcase">
+        <button class="btn btn--primary btn--sm">Small</button>
+        <button class="btn btn--primary">Default</button>
+        <button class="btn btn--primary btn--lg">Large</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cards -->
+  <section class="showcase-section">
+    <div class="container">
+      <h2 class="section-title">Cards</h2>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card__header">
+            <h3 class="card__title">Przegląd techniczny</h3>
+            <span class="badge badge--technical">Techniczny</span>
+          </div>
+          <div class="card__body">
+            <p class="card__text">
+              Przegląd kotła gazowego - zaplanowany na 15.11.2025
+            </p>
+            <div class="card__meta">
+              <span class="card__meta-item">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                15.11.2025
+              </span>
+              <span class="badge badge--warning">Wysoki priorytet</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__header">
+            <h3 class="card__title">Wywóz śmieci</h3>
+            <span class="badge badge--waste">Wywóz</span>
+          </div>
+          <div class="card__body">
+            <p class="card__text">
+              Segregowane odpady - każdy poniedziałek
+            </p>
+            <div class="card__meta">
+              <span class="card__meta-item">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Co tydzień
+              </span>
+              <span class="badge badge--success">Aktywne</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__header">
+            <h3 class="card__title">Wizyta lekarska</h3>
+            <span class="badge badge--medical">Medyczna</span>
+          </div>
+          <div class="card__body">
+            <p class="card__text">
+              Kontrolna wizyta u dentysty - Anna
+            </p>
+            <div class="card__meta">
+              <span class="card__meta-item">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                20.10.2025
+              </span>
+              <span class="badge badge--danger">Przeterminowane</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form Elements -->
+  <section class="showcase-section">
+    <div class="container">
+      <h2 class="section-title">Form Elements</h2>
+      <form class="form-showcase">
+        <div class="form-group">
+          <label class="form-label" for="input-text">Text Input</label>
+          <input
+            class="form-input"
+            type="text"
+            id="input-text"
+            placeholder="Enter text..."
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="input-email">Email Input</label>
+          <input
+            class="form-input"
+            type="email"
+            id="input-email"
+            placeholder="email@example.com"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="select">Select</label>
+          <select class="form-select" id="select">
+            <option>Wybierz kategorię...</option>
+            <option>Przeglądy techniczne</option>
+            <option>Wywóz śmieci</option>
+            <option>Wizyty medyczne</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="textarea">Textarea</label>
+          <textarea
+            class="form-textarea"
+            id="textarea"
+            rows="4"
+            placeholder="Enter description..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" />
+            <span>I agree to the terms and conditions</span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn--primary" type="submit">Submit</button>
+          <button class="btn btn--outline" type="button">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Status Badges -->
+  <section class="showcase-section">
+    <div class="container">
+      <h2 class="section-title">Status Badges</h2>
+      <div class="badge-showcase">
+        <span class="badge badge--pending">Pending</span>
+        <span class="badge badge--completed">Completed</span>
+        <span class="badge badge--overdue">Overdue</span>
+        <span class="badge badge--cancelled">Cancelled</span>
+      </div>
+
+      <h3 class="subsection-title">Priority Badges</h3>
+      <div class="badge-showcase">
+        <span class="badge badge--priority-low">Low Priority</span>
+        <span class="badge badge--priority-medium">Medium Priority</span>
+        <span class="badge badge--priority-high">High Priority</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shadows -->
+  <section class="showcase-section">
+    <div class="container">
+      <h2 class="section-title">Shadows</h2>
+      <div class="shadow-grid">
+        <div class="shadow-card shadow-sm">
+          <div class="shadow-label">Small</div>
+          <code>--shadow-sm</code>
+        </div>
+        <div class="shadow-card shadow-md">
+          <div class="shadow-label">Medium</div>
+          <code>--shadow-md</code>
+        </div>
+        <div class="shadow-card shadow-lg">
+          <div class="shadow-label">Large</div>
+          <code>--shadow-lg</code>
+        </div>
+        <div class="shadow-card shadow-xl">
+          <div class="shadow-label">Extra Large</div>
+          <code>--shadow-xl</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="showcase-footer">
+    <div class="container">
+      <p>Homely - System zarządzania gospodarstwem domowym © 2025</p>
+    </div>
+  </footer>
+</div>
