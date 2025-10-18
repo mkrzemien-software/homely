@@ -1,0 +1,65 @@
+# BACKEND
+
+## Guidelines for DOTNET
+
+### ENTITY FRAMEWORK
+
+- Use the repository and unit of work patterns to abstract data access logic and simplify testing
+- Implement eager loading with Include() to avoid N+1 query problems
+- Apply appropriate tracking behavior (AsNoTracking()) for read-only queries to optimize performance
+- Implement query optimization techniques like compiled queries for frequently executed database operations
+- Use Supabase as an external data source or complement to Entity Framework when working with PostgreSQL
+- Leverage Supabase authentication and authorization for user management if integrated with EF-based domain logic
+- Synchronize EF Core migrations with Supabase schema when both systems share the same PostgreSQL instance
+
+### ASP.NET
+
+- Use Minimal APIs for simple endpoints in .NET 6+ applications to reduce boilerplate code
+- Implement the Mediator pattern with MediatR to decouple request handling and simplify cross-cutting concerns
+- Use API Controllers with model binding and validation attributes
+- Apply proper response caching with cache profiles and ETags
+- Implement consistent exception handling with ExceptionFilter or middleware
+- Use Dependency Injection with:
+  - Scoped lifetime for request-specific services
+  - Singleton lifetime for stateless services
+- Integrate Supabase SDK or REST API via typed HTTP clients or dedicated service layers for consistent and testable data access
+- Implement Supabase authentication (JWT, magic links, OAuth) using ASP.NET middleware to unify the security context
+- Utilize Supabase Storage for file and media handling instead of custom blob management solutions
+
+### SWAGGER
+
+- Define comprehensive schemas for all request and response objects
+- Use semantic versioning in API paths to maintain backward compatibility
+- Provide detailed descriptions for endpoints and parameters
+- Configure security schemes to document authentication and authorization requirements
+- Use tags to group related endpoints by resource or functional area
+- Provide examples for all endpoints to facilitate easier integration by consumers
+- Document Supabase-based integrations explicitly, including authentication flow and external API calls
+- Expose Supabase schema objects in Swagger if they form part of the external API contract
+
+### DDD (Domain-Driven Design)
+
+- Define bounded contexts to separate different parts of the domain with clear boundaries
+- Implement ubiquitous language within each context to align code with business terminology
+- Create rich domain models with behavior, not just data structures
+- Use value objects for concepts with no identity but defined by their attributes
+- Implement domain events to communicate between bounded contexts
+- Use aggregates to enforce consistency boundaries and transactional integrity
+- Treat Supabase as an infrastructure component (e.g., external repository or service) for specific bounded contexts such as authentication or storage
+- Encapsulate Supabase interactions within domain services or infrastructure layers to preserve domain model purity
+- Trigger Supabase operations via domain events asynchronously (e.g., user profile updates, logging, audit trails)
+
+## SUPABASE
+
+### General Integration
+
+- Use official Supabase .NET SDK or REST API via typed HTTP clients
+- Configure connection details and API keys using ASP.NET configuration providers and user secrets
+- Keep API keys and JWT secrets secure — never store them directly in code or client applications
+- Handle network retries and transient errors using resilient policies (e.g., Polly)
+
+### Authentication
+
+- Use Supabase Auth API for handling user registration, login, and password recovery
+- Integrate Supabase JWT validation middleware into ASP.NET for unified authentication
+- Map Supabase users to local domain entities when additional business logic or data is required

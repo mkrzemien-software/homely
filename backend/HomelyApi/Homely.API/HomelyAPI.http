@@ -1,0 +1,71 @@
+@Homely_API_HostAddress = http://localhost:5000
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjU0MzIxL2F1dGgvdjEiLCJzdWIiOiJmYWQ4ZTVhNC01ZDI2LTRhMWUtYWZlZC0zNDIzNjUzOGY4ODQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzYwODE0OTk2LCJpYXQiOjE3NjA4MTEzOTYsImVtYWlsIjoibWtyemVtaWVuQGZ1dHVyZS1wcm9jZXNzaW5nLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzYwODExMjk0fV0sInNlc3Npb25faWQiOiJjY2FiNTZlOS1iZmQ3LTRjMDItYjRlMi0wNTYzZjYzYmVmODAiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.nf9jDYs3K5NvjpPIwMTxYHEdt0aFqhZKf0iGObvRCVY
+
+### Health Check
+GET {{Homely_API_HostAddress}}/health
+Accept: application/json
+
+###
+
+### Login - Valid User
+POST {{Homely_API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "mkrzemien@future-processing.com",
+  "password": "q1w2e3r4t5",
+  "rememberMe": true
+}
+
+###
+
+### Login - Invalid Credentials
+POST {{Homely_API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "invalid@example.com", 
+  "password": "wrongpassword"
+}
+
+###
+
+### Login - Invalid Request (Missing Email)
+POST {{Homely_API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "password": "password123"
+}
+
+###
+
+### Refresh Token
+POST {{Homely_API_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "your_refresh_token_here"
+}
+
+###
+
+### Get Current User (Requires Authentication)
+GET {{Homely_API_HostAddress}}/api/auth/me
+Authorization: Bearer {{access_token}}
+Accept: application/json
+
+###
+
+### Logout (Requires Authentication)  
+POST {{Homely_API_HostAddress}}/api/auth/logout
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+###
+
+### Legacy WeatherForecast (For Testing)
+GET {{Homely_API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
