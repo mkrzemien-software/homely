@@ -1,4 +1,4 @@
-# Homely 🏠
+#  <img  src="frontend/public/homely-icon.ico" alt="Homely Icon">  Homely
 
 A comprehensive web application for managing household service appointments and family visits, designed to help homeowners efficiently organize and track various home maintenance tasks and family schedules.
 
