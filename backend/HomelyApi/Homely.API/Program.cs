@@ -1,4 +1,5 @@
 using Homely.API.Configuration;
+using Homely.API.Extensions;
 using Homely.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -9,7 +10,9 @@ using Client = Supabase.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add configuration sections
+// ============================================================================
+// CONFIGURATION SECTIONS
+// ============================================================================
 builder.Services.Configure<SupabaseSettings>(
     builder.Configuration.GetSection(SupabaseSettings.SectionName));
 builder.Services.Configure<JwtSettings>(
@@ -21,7 +24,18 @@ var supabaseSettings = builder.Configuration.GetSection(SupabaseSettings.Section
 var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
     ?? throw new InvalidOperationException("JWT configuration is missing");
 
-// Add Supabase client
+// ============================================================================
+// DATABASE CONFIGURATION
+// ============================================================================
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+// Add Homely services (Entity Framework + Repositories)
+builder.Services.AddHomelyServices(connectionString);
+
+// ============================================================================
+// SUPABASE CLIENT (for authentication)
+// ============================================================================
 builder.Services.AddSingleton(provider =>
 {
     var options = new SupabaseOptions
@@ -35,13 +49,19 @@ builder.Services.AddSingleton(provider =>
     return client;
 });
 
-// Add services
+// ============================================================================
+// BUSINESS SERVICES
+// ============================================================================
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Add controllers
+// ============================================================================
+// CORE SERVICES
+// ============================================================================
 builder.Services.AddControllers();
 
-// Add JWT Authentication
+// ============================================================================
+// AUTHENTICATION & AUTHORIZATION
+// ============================================================================
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -80,10 +100,11 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Add Authorization
 builder.Services.AddAuthorization();
 
-// Add API documentation (Swagger)
+// ============================================================================
+// API DOCUMENTATION (Swagger)
+// ============================================================================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -91,7 +112,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Homely API",
         Version = "v1",
-        Description = "API for Homely - Home Management System",
+        Description = "API for Homely - Home Management System with Repository Pattern",
         Contact = new OpenApiContact
         {
             Name = "Homely Team",
@@ -134,7 +155,9 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
-// Add CORS policy for development and production
+// ============================================================================
+// CORS POLICY
+// ============================================================================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -159,7 +182,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ============================================================================
+// CONFIGURE HTTP REQUEST PIPELINE
+// ============================================================================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -167,7 +192,7 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Homely API V1");
         c.RoutePrefix = "swagger";
-        c.DocumentTitle = "Homely API Documentation";
+        c.DocumentTitle = "Homely API Documentation - Repository Pattern";
     });
 }
 
@@ -196,8 +221,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Health check endpoint
-app.MapGet("/health", () => new { Status = "Healthy", Timestamp = DateTime.UtcNow })
+// ============================================================================
+// HEALTH CHECK ENDPOINT
+// ============================================================================
+app.MapGet("/health", () => new { 
+        Status = "Healthy", 
+        Timestamp = DateTime.UtcNow,
+        Database = "EntityFramework with Repository Pattern",
+        Authentication = "Supabase + JWT"
+    })
     .WithName("HealthCheck")
     .WithOpenApi();
 

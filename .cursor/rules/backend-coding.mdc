@@ -5,6 +5,7 @@
 ### ENTITY FRAMEWORK
 
 - Use the repository and unit of work patterns to abstract data access logic and simplify testing
+- Implement the Unit of Work pattern to manage transactions across multiple repositories, ensuring atomic operations and consistent data state
 - Implement eager loading with Include() to avoid N+1 query problems
 - Apply appropriate tracking behavior (AsNoTracking()) for read-only queries to optimize performance
 - Implement query optimization techniques like compiled queries for frequently executed database operations
@@ -24,7 +25,6 @@
   - Singleton lifetime for stateless services
 - Integrate Supabase SDK or REST API via typed HTTP clients or dedicated service layers for consistent and testable data access
 - Implement Supabase authentication (JWT, magic links, OAuth) using ASP.NET middleware to unify the security context
-- Utilize Supabase Storage for file and media handling instead of custom blob management solutions
 
 ### SWAGGER
 

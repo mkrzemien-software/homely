@@ -1,3 +1,8 @@
+using Homely.API.Entities;
+using Homely.API.Examples;
+using Homely.API.Models.Constants;
+using Homely.API.Repositories.Base;
+using Homely.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Homely.API.Controllers
@@ -12,10 +17,14 @@ namespace Homely.API.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(
+            ILogger<WeatherForecastController> logger,
+            IUnitOfWork  unitOfWork)
         {
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -28,6 +37,21 @@ namespace Homely.API.Controllers
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
+        }
+        
+        [HttpPost("create")]
+        public async Task<IActionResult> Post()
+        {
+            var household = new HouseholdEntity
+            {
+                Name = "EMPEKA !"
+            };
+            
+            await _unitOfWork.Households.AddAsync(household);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return Ok(household);
         }
     }
 }
