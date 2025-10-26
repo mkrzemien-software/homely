@@ -1,0 +1,246 @@
+// Login Form Styles
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  // Error Message
+  &__error-message {
+    width: 100%;
+    margin-bottom: 0.5rem;
+
+    ::ng-deep .p-message {
+      width: 100%;
+
+      .p-message-wrapper {
+        padding: 0.75rem 1rem;
+      }
+
+      .p-message-text {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  // Form Field
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &--checkbox {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+
+  // Label
+  &__label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-color);
+    display: block;
+  }
+
+  &__required {
+    color: var(--red-500);
+    margin-left: 0.25rem;
+  }
+
+  // Input Field
+  &__input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 0.5rem;
+    background: var(--surface-card);
+    color: var(--text-color);
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: var(--primary-color);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+    }
+
+    &.ng-invalid.ng-dirty {
+      border-color: var(--red-500);
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      }
+    }
+
+    &::placeholder {
+      color: var(--text-color-secondary);
+      opacity: 0.6;
+    }
+  }
+
+  // Password Field (PrimeNG override)
+  &__password {
+    width: 100%;
+
+    ::ng-deep {
+      .p-password {
+        width: 100%;
+        display: block;
+      }
+
+      .p-inputtext {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 1px solid var(--surface-border);
+        border-radius: 0.5rem;
+        background: var(--surface-card);
+        color: var(--text-color);
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: var(--primary-color);
+        }
+
+        &:focus {
+          outline: none;
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+        }
+      }
+
+      .p-input-icon-right {
+        width: 100%;
+      }
+    }
+
+    &.ng-invalid.ng-dirty {
+      ::ng-deep .p-inputtext {
+        border-color: var(--red-500);
+
+        &:focus {
+          box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+      }
+    }
+  }
+
+  // Error Text
+  &__error-text {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--red-500);
+    margin-top: 0.25rem;
+  }
+
+  // Checkbox
+  &__checkbox {
+    ::ng-deep {
+      .p-checkbox {
+        display: flex;
+        align-items: center;
+
+        .p-checkbox-label {
+          font-size: 0.875rem;
+          color: var(--text-color);
+          margin-left: 0.5rem;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  // Actions
+  &__actions {
+    margin-top: 0.5rem;
+  }
+
+  // Submit Button
+  &__submit-button {
+    width: 100%;
+
+    ::ng-deep .p-button {
+      width: 100%;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .p-button-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  // Responsive Design
+  @media (max-width: 480px) {
+    gap: 1.25rem;
+
+    &__field {
+      gap: 0.375rem;
+    }
+
+    &__label {
+      font-size: 0.8125rem;
+    }
+
+    &__input {
+      padding: 0.625rem 0.875rem;
+      font-size: 0.9375rem;
+    }
+
+    &__password {
+      ::ng-deep .p-inputtext {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.9375rem;
+      }
+    }
+
+    &__error-text {
+      font-size: 0.75rem;
+    }
+
+    &__submit-button {
+      ::ng-deep .p-button {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.9375rem;
+      }
+    }
+  }
+}
+
+// Loading State
+.login-form:has(.p-button-loading) {
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+// Focus Visible (for keyboard navigation)
+.login-form {
+  ::ng-deep {
+    *:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+  }
+}

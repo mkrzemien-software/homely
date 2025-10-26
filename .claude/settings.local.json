@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm start)"
+      "Bash(npm start)",
+      "Bash(tree:*)",
+      "Bash(ng generate:*)",
+      "Bash(netstat:*)",
+      "Bash(awk:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,204 @@
+// Login Page Styles
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  background: linear-gradient(135deg, var(--surface-50) 0%, var(--surface-100) 100%);
+
+  // Theme Toggle Position
+  &__theme-toggle {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 100;
+  }
+
+  // Main Container
+  &__container {
+    width: 100%;
+    max-width: 28rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  // Branding Section
+  &__branding {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  &__logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: var(--primary-color-text);
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  &__title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.025em;
+  }
+
+  &__subtitle {
+    font-size: 1rem;
+    color: var(--text-color-secondary);
+    margin: 0;
+  }
+
+  // Login Card
+  &__card {
+    background: var(--surface-card);
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+
+  &__card-header {
+    padding: 2rem 2rem 1.5rem 2rem;
+    border-bottom: 1px solid var(--surface-border);
+  }
+
+  &__card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 0.5rem 0;
+  }
+
+  &__card-description {
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+    margin: 0;
+  }
+
+  &__card-body {
+    padding: 2rem;
+  }
+
+  &__card-footer {
+    padding: 1.5rem 2rem 2rem 2rem;
+    border-top: 1px solid var(--surface-border);
+  }
+
+  // Footer
+  &__footer {
+    text-align: center;
+    padding-top: 1rem;
+  }
+
+  &__footer-text {
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+    margin: 0;
+  }
+
+  // Responsive Design
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+
+    &__theme-toggle {
+      top: 1rem;
+      right: 1rem;
+    }
+
+    &__container {
+      max-width: 100%;
+      gap: 1.5rem;
+    }
+
+    &__logo {
+      width: 4rem;
+      height: 4rem;
+
+      i {
+        font-size: 2.5rem !important;
+      }
+    }
+
+    &__title {
+      font-size: 2rem;
+    }
+
+    &__subtitle {
+      font-size: 0.9375rem;
+    }
+
+    &__card-header,
+    &__card-body,
+    &__card-footer {
+      padding: 1.5rem;
+    }
+
+    &__card-title {
+      font-size: 1.25rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+
+    &__theme-toggle {
+      top: 0.75rem;
+      right: 0.75rem;
+    }
+
+    &__container {
+      gap: 1rem;
+    }
+
+    &__logo {
+      width: 3.5rem;
+      height: 3.5rem;
+
+      i {
+        font-size: 2rem !important;
+      }
+    }
+
+    &__title {
+      font-size: 1.75rem;
+    }
+
+    &__subtitle {
+      font-size: 0.875rem;
+    }
+
+    &__card {
+      border-radius: 0.75rem;
+    }
+
+    &__card-header,
+    &__card-body,
+    &__card-footer {
+      padding: 1.25rem;
+    }
+
+    &__card-title {
+      font-size: 1.125rem;
+    }
+
+    &__card-description {
+      font-size: 0.8125rem;
+    }
+  }
+}
+
+// Dark Theme Adjustments
+[data-theme="dark"] {
+  .login-page {
+    background: linear-gradient(135deg, var(--surface-ground) 0%, var(--surface-section) 100%);
+  }
+}

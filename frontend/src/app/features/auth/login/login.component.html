@@ -1,0 +1,45 @@
+<div class="login-page">
+  <!-- Theme Toggle in top-right corner -->
+  <div class="login-page__theme-toggle">
+    <app-theme-toggle></app-theme-toggle>
+  </div>
+
+  <!-- Main Login Container -->
+  <div class="login-page__container">
+    <!-- Branding Section -->
+    <div class="login-page__branding">
+      <div class="login-page__logo">
+        <i class="pi pi-home" style="font-size: 3rem;"></i>
+      </div>
+      <h1 class="login-page__title">Homely</h1>
+      <p class="login-page__subtitle">
+        Household Management Made Simple
+      </p>
+    </div>
+
+    <!-- Login Form Card -->
+    <div class="login-page__card">
+      <div class="login-page__card-header">
+        <h2 class="login-page__card-title">Sign In</h2>
+        <p class="login-page__card-description">
+          Enter your credentials to access your account
+        </p>
+      </div>
+
+      <div class="login-page__card-body">
+        <app-login-form (loginSuccess)="onLoginSuccess()"></app-login-form>
+      </div>
+
+      <div class="login-page__card-footer">
+        <app-auth-links></app-auth-links>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="login-page__footer">
+      <p class="login-page__footer-text">
+        &copy; 2025 Homely. All rights reserved.
+      </p>
+    </div>
+  </div>
+</div>

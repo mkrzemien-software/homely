@@ -1,0 +1,92 @@
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" (keypress)="onKeyPress($event)">
+  <!-- Error Message Display -->
+  @if (errorMessage()) {
+    <p-message
+      severity="error"
+      [text]="errorMessage()!"
+      styleClass="login-form__error-message"
+      (onClose)="clearError()">
+    </p-message>
+  }
+
+  <!-- Email Field -->
+  <div class="login-form__field">
+    <label for="email" class="login-form__label">
+      Email Address
+      <span class="login-form__required">*</span>
+    </label>
+
+    <input
+      pInputText
+      id="email"
+      type="email"
+      formControlName="email"
+      placeholder="Enter your email"
+      autocomplete="email"
+      [class.ng-invalid]="hasError('email')"
+      [class.ng-dirty]="loginForm.get('email')?.dirty"
+      class="login-form__input"
+      aria-required="true"
+      aria-describedby="email-error"
+    />
+
+    @if (hasError('email')) {
+      <small id="email-error" class="login-form__error-text">
+        {{ getErrorMessage('email') }}
+      </small>
+    }
+  </div>
+
+  <!-- Password Field -->
+  <div class="login-form__field">
+    <label for="password" class="login-form__label">
+      Password
+      <span class="login-form__required">*</span>
+    </label>
+
+    <p-password
+      id="password"
+      formControlName="password"
+      placeholder="Enter your password"
+      [toggleMask]="true"
+      [feedback]="false"
+      autocomplete="current-password"
+      [inputStyle]="{'width': '100%'}"
+      styleClass="login-form__password"
+      [class.ng-invalid]="hasError('password')"
+      [class.ng-dirty]="loginForm.get('password')?.dirty"
+      aria-required="true"
+      aria-describedby="password-error">
+    </p-password>
+
+    @if (hasError('password')) {
+      <small id="password-error" class="login-form__error-text">
+        {{ getErrorMessage('password') }}
+      </small>
+    }
+  </div>
+
+  <!-- Remember Me Checkbox -->
+  <div class="login-form__field login-form__field--checkbox">
+    <p-checkbox
+      formControlName="rememberMe"
+      [binary]="true"
+      inputId="rememberMe"
+      label="Remember me"
+      styleClass="login-form__checkbox">
+    </p-checkbox>
+  </div>
+
+  <!-- Submit Button -->
+  <div class="login-form__actions">
+    <p-button
+      type="submit"
+      label="Sign In"
+      icon="pi pi-sign-in"
+      [loading]="isLoading()"
+      [disabled]="isLoading()"
+      styleClass="login-form__submit-button"
+      severity="primary">
+    </p-button>
+  </div>
+</form>
