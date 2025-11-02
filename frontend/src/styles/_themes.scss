@@ -26,6 +26,14 @@
   --surface: #{$light-surface};
   --surface-hover: #{$light-surface-hover};
 
+  // Surface Levels
+  --surface-50: #{$light-surface-50};
+  --surface-100: #{$light-surface-100};
+  --surface-card: #{$light-surface-card};
+  --surface-border: #{$light-surface-border};
+  --surface-ground: #{$light-surface-ground};
+  --surface-section: #{$light-surface-section};
+
   // Text Colors
   --text-primary: #{$light-text-primary};
   --text-secondary: #{$light-text-secondary};
@@ -36,6 +44,12 @@
   // Border Colors
   --border-color: #{$light-border};
   --border-hover: #{$light-border-hover};
+
+  // Compatibility Aliases
+  --primary-color: #{$homely-primary};
+  --primary-color-text: #ffffff;
+  --text-color: #{$light-text-primary};
+  --text-color-secondary: #{$light-text-secondary};
 
   // Category Colors
   --category-technical: #{$category-technical};
@@ -115,12 +129,26 @@
   --surface: #{$dark-surface};
   --surface-hover: #{$dark-surface-hover};
 
+  // Surface Levels
+  --surface-50: #{$dark-surface-50};
+  --surface-100: #{$dark-surface-100};
+  --surface-card: #{$dark-surface-card};
+  --surface-border: #{$dark-surface-border};
+  --surface-ground: #{$dark-surface-ground};
+  --surface-section: #{$dark-surface-section};
+
   // Text Colors
   --text-primary: #{$dark-text-primary};
   --text-secondary: #{$dark-text-secondary};
   --text-tertiary: #{$dark-text-tertiary};
   --text-disabled: #{$dark-text-disabled};
   --text-on-primary: #ffffff;
+
+  // Compatibility Aliases
+  --primary-color: #{$homely-primary};
+  --primary-color-text: #ffffff;
+  --text-color: #{$dark-text-primary};
+  --text-color-secondary: #{$dark-text-secondary};
 
   // Border Colors
   --border-color: #{$dark-border};
@@ -146,11 +174,25 @@
     --surface: #{$dark-surface};
     --surface-hover: #{$dark-surface-hover};
 
+    // Surface Levels
+    --surface-50: #{$dark-surface-50};
+    --surface-100: #{$dark-surface-100};
+    --surface-card: #{$dark-surface-card};
+    --surface-border: #{$dark-surface-border};
+    --surface-ground: #{$dark-surface-ground};
+    --surface-section: #{$dark-surface-section};
+
     // Text Colors
     --text-primary: #{$dark-text-primary};
     --text-secondary: #{$dark-text-secondary};
     --text-tertiary: #{$dark-text-tertiary};
     --text-disabled: #{$dark-text-disabled};
+
+    // Compatibility Aliases
+    --primary-color: #{$homely-primary};
+    --primary-color-text: #ffffff;
+    --text-color: #{$dark-text-primary};
+    --text-color-secondary: #{$dark-text-secondary};
 
     // Border Colors
     --border-color: #{$dark-border};

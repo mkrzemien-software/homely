@@ -13,16 +13,13 @@
   <div class="login-form__field">
     <label for="email" class="login-form__label">
       Email Address
-      <span class="login-form__required">*</span>
     </label>
 
     <input
       pInputText
       id="email"
-      type="email"
       formControlName="email"
       placeholder="Enter your email"
-      autocomplete="email"
       [class.ng-invalid]="hasError('email')"
       [class.ng-dirty]="loginForm.get('email')?.dirty"
       class="login-form__input"
@@ -41,23 +38,19 @@
   <div class="login-form__field">
     <label for="password" class="login-form__label">
       Password
-      <span class="login-form__required">*</span>
     </label>
-
-    <p-password
+    
+    <input
+      pInputText
       id="password"
       formControlName="password"
       placeholder="Enter your password"
-      [toggleMask]="true"
-      [feedback]="false"
-      autocomplete="current-password"
-      [inputStyle]="{'width': '100%'}"
-      styleClass="login-form__password"
       [class.ng-invalid]="hasError('password')"
       [class.ng-dirty]="loginForm.get('password')?.dirty"
+      class="login-form__input"
       aria-required="true"
-      aria-describedby="password-error">
-    </p-password>
+      aria-describedby="password-error"
+    />
 
     @if (hasError('password')) {
       <small id="password-error" class="login-form__error-text">
@@ -82,10 +75,8 @@
     <p-button
       type="submit"
       label="Sign In"
-      icon="pi pi-sign-in"
       [loading]="isLoading()"
       [disabled]="isLoading()"
-      styleClass="login-form__submit-button"
       severity="primary">
     </p-button>
   </div>

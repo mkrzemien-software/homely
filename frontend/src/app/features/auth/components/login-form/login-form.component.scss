@@ -95,7 +95,7 @@
 
       .p-inputtext {
         width: 100%;
-        padding: 0.75rem 1rem;
+        padding: 0.75rem 3rem 0.75rem 1rem; // Extra right padding for eye icon
         font-size: 1rem;
         border: 1px solid var(--surface-border);
         border-radius: 0.5rem;
@@ -116,6 +116,24 @@
 
       .p-input-icon-right {
         width: 100%;
+        position: relative;
+        
+        // Eye icon positioning for password toggle
+        .p-password-toggle-mask-icon {
+          position: absolute;
+          right: 0.75rem;
+          top: 50%;
+          transform: translateY(-50%);
+          cursor: pointer;
+          color: var(--text-color-secondary);
+          font-size: 1rem;
+          z-index: 2;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: var(--primary-color);
+          }
+        }
       }
     }
 
@@ -158,21 +176,22 @@
   // Actions
   &__actions {
     margin-top: 0.5rem;
-  }
-
-  // Submit Button
-  &__submit-button {
-    width: 100%;
 
     ::ng-deep .p-button {
       width: 100%;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 500;
+      font-size: 0.9375rem;
+      padding: 0.625rem 1.25rem;
+      border: 2px solid var(--primary-color);
       border-radius: 0.5rem;
+      background: transparent;
+      color: var(--primary-color);
+      font-weight: 600;
       transition: all 0.2s ease;
 
       &:hover:not(:disabled) {
+        background: var(--primary-color);
+        color: var(--primary-color-text);
+        text-decoration: none;
         transform: translateY(-1px);
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
       }
@@ -186,11 +205,13 @@
         cursor: not-allowed;
       }
 
-      .p-button-icon {
-        margin-right: 0.5rem;
+      .p-button-label {
+        font-size: 0.9375rem;
+        font-weight: 600;
       }
     }
   }
+
 
   // Responsive Design
   @media (max-width: 480px) {
@@ -210,9 +231,18 @@
     }
 
     &__password {
-      ::ng-deep .p-inputtext {
-        padding: 0.625rem 0.875rem;
-        font-size: 0.9375rem;
+      ::ng-deep {
+        .p-inputtext {
+          padding: 0.625rem 0.875rem;
+          font-size: 0.9375rem;
+          padding-right: 2.5rem; // Make space for eye icon on mobile
+        }
+        
+        // Adjust eye icon for mobile
+        .p-password-toggle-mask-icon {
+          right: 0.625rem;
+          font-size: 0.9375rem;
+        }
       }
     }
 
@@ -220,10 +250,14 @@
       font-size: 0.75rem;
     }
 
-    &__submit-button {
+    &__actions {
       ::ng-deep .p-button {
-        padding: 0.625rem 1.25rem;
-        font-size: 0.9375rem;
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        
+        .p-button-label {
+          font-size: 0.875rem;
+        }
       }
     }
   }
