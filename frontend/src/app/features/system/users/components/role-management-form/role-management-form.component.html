@@ -1,0 +1,86 @@
+<div class="role-management-form">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <h3>Role Management</h3>
+      </div>
+    </ng-template>
+
+    <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
+      <!-- Success Message -->
+      @if (successMessage()) {
+        <p-message
+          severity="success"
+          [text]="successMessage() || ''"
+          styleClass="w-full mb-3"
+        ></p-message>
+      }
+
+      <!-- Error Message -->
+      @if (errorMessage()) {
+        <p-message
+          severity="error"
+          [text]="errorMessage() || ''"
+          styleClass="w-full mb-3"
+        ></p-message>
+      }
+
+      <!-- Role Dropdown -->
+      <div class="form-field">
+        <label for="role">User Role</label>
+        <p-dropdown
+          inputId="role"
+          formControlName="role"
+          [options]="roleOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select a role"
+          [style]="{ width: '100%' }"
+          [disabled]="isSubmitting()"
+        >
+          <ng-template let-option pTemplate="item">
+            <div class="role-option">
+              <div class="role-label">{{ option.label }}</div>
+              <div class="role-description">{{ option.description }}</div>
+            </div>
+          </ng-template>
+        </p-dropdown>
+
+        @if (hasRoleChanged()) {
+          <small class="help-text">
+            {{ getSelectedRoleDescription() }}
+          </small>
+        }
+      </div>
+
+      <!-- Warning Message -->
+      @if (hasRoleChanged()) {
+        <p-message
+          severity="warn"
+          text="Changing user role will immediately affect their permissions and access level."
+          styleClass="w-full mt-3"
+        ></p-message>
+      }
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <p-button
+          type="button"
+          label="Cancel"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="onCancel()"
+          [disabled]="isSubmitting() || !hasRoleChanged()"
+        ></p-button>
+
+        <p-button
+          type="submit"
+          label="Update Role"
+          icon="pi pi-save"
+          [loading]="isSubmitting()"
+          [disabled]="!hasRoleChanged() || roleForm.invalid"
+        ></p-button>
+      </div>
+    </form>
+  </p-card>
+</div>

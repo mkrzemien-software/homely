@@ -10,6 +10,7 @@ public class HomelyDbContext : DbContext
     {
     }
 
+    public DbSet<UserProfileEntity> UserProfiles { get; set; }
     public DbSet<PlanTypeEntity> PlanTypes { get; set; }
     public DbSet<HouseholdEntity> Households { get; set; }
     public DbSet<HouseholdMemberEntity> HouseholdMembers { get; set; }
@@ -26,6 +27,14 @@ public class HomelyDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // User Profiles
+        modelBuilder.Entity<UserProfileEntity>()
+            .HasIndex(up => up.DeletedAt)
+            .HasDatabaseName("idx_user_profiles_deleted_at");
+
+        modelBuilder.Entity<UserProfileEntity>()
+            .HasIndex(up => up.LastActiveAt)
+            .HasDatabaseName("idx_user_profiles_last_active");
 
         // Plan Types
         modelBuilder.Entity<PlanTypeEntity>()
@@ -172,6 +181,14 @@ public class HomelyDbContext : DbContext
             .HasOne(hm => hm.Household)
             .WithMany(h => h.HouseholdMembers)
             .HasForeignKey(hm => hm.HouseholdId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // HouseholdMember -> UserProfile
+        modelBuilder.Entity<HouseholdMemberEntity>()
+            .HasOne<UserProfileEntity>()
+            .WithMany(up => up.HouseholdMemberships)
+            .HasForeignKey(hm => hm.UserId)
+            .HasPrincipalKey(up => up.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Category -> CategoryType

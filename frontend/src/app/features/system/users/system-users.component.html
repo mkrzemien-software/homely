@@ -1,0 +1,147 @@
+<div class="system-users-view">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>User Management</h1>
+    <p class="subtitle">Manage all user accounts across the system</p>
+  </div>
+
+  <!-- Search Component -->
+  <app-global-user-search (search)="onSearch($event)"></app-global-user-search>
+
+  <!-- Users Table -->
+  <p-card>
+    @if (isLoading()) {
+      <!-- Loading Skeleton -->
+      <div class="loading-skeleton">
+        <p-skeleton height="3rem" styleClass="mb-2"></p-skeleton>
+        <p-skeleton height="3rem" styleClass="mb-2"></p-skeleton>
+        <p-skeleton height="3rem" styleClass="mb-2"></p-skeleton>
+        <p-skeleton height="3rem" styleClass="mb-2"></p-skeleton>
+        <p-skeleton height="3rem"></p-skeleton>
+      </div>
+    } @else if (hasUsers()) {
+      <!-- Users Table -->
+      <p-table
+        [value]="users()"
+        [tableStyle]="{ 'min-width': '100%' }"
+        styleClass="p-datatable-striped"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Household</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Last Login</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-user>
+          <tr>
+            <!-- User Name -->
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar-small">
+                  {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                </div>
+                <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+              </div>
+            </td>
+
+            <!-- Email -->
+            <td>{{ user.email }}</td>
+
+            <!-- Household -->
+            <td>{{ user.householdName }}</td>
+
+            <!-- Role -->
+            <td>
+              <p-tag
+                [value]="getRoleLabel(user.role)"
+                [severity]="getRoleSeverity(user.role)"
+              ></p-tag>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <p-tag
+                [value]="getStatusLabel(user.status)"
+                [severity]="getStatusSeverity(user.status)"
+              ></p-tag>
+            </td>
+
+            <!-- Last Login -->
+            <td>{{ formatDate(user.lastLogin) }}</td>
+
+            <!-- Actions -->
+            <td class="actions-column">
+              <p-button
+                icon="pi pi-eye"
+                [rounded]="true"
+                [text]="true"
+                severity="info"
+                (onClick)="selectUser(user)"
+                pTooltip="View Details"
+                tooltipPosition="left"
+              ></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <!-- Pagination -->
+      <p-paginator
+        [rows]="pageSize()"
+        [totalRecords]="totalUsers()"
+        [rowsPerPageOptions]="[10, 20, 50, 100]"
+        (onPageChange)="onPageChange($event)"
+        styleClass="mt-3"
+      ></p-paginator>
+    } @else {
+      <!-- No Users Found -->
+      <div class="no-users">
+        <i class="pi pi-users" style="font-size: 3rem"></i>
+        <h3>No users found</h3>
+        <p>Try adjusting your search filters</p>
+      </div>
+    }
+  </p-card>
+
+  <!-- User Details Sidebar -->
+  <p-sidebar
+    [(visible)]="sidebarVisible"
+    position="right"
+    [style]="{ width: '50rem' }"
+    [modal]="true"
+    (onHide)="closeSidebar()"
+  >
+    @if (selectedUser()) {
+      <ng-template pTemplate="header">
+        <h2>User Details</h2>
+      </ng-template>
+
+      <ng-template pTemplate="content">
+        <div class="sidebar-content">
+          <!-- Account Actions Toolbar -->
+          <app-account-actions-toolbar
+            [user]="selectedUser()!"
+            (actionCompleted)="onActionCompleted()"
+          ></app-account-actions-toolbar>
+
+          <!-- User Details -->
+          <app-user-details-panel [user]="selectedUser()!"></app-user-details-panel>
+
+          <!-- Role Management -->
+          <div class="role-management-section">
+            <app-role-management-form
+              [user]="selectedUser()!"
+              (roleUpdated)="onRoleUpdated($event)"
+            ></app-role-management-form>
+          </div>
+        </div>
+      </ng-template>
+    }
+  </p-sidebar>
+</div>

@@ -297,7 +297,105 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 - **UX/Dostępność**: Clear security indicators, session management
 - **Bezpieczeństwo**: Session management, data export compliance
 
-### 2.7 Support & Error Views
+### 2.7 System Developer Views (Super Admin)
+
+#### Dashboard Systemu
+- **Ścieżka**: `/system/dashboard`
+- **Cel**: Główny panel administracyjny dla zarządzania całą platformą
+- **Kluczowe informacje**:
+  - Kluczowe metryki systemu (uptime, performance, errors)
+  - Przegląd aktywności gospodarstw
+  - Alerty systemowe i incydenty
+  - Szybkie statystyki (nowi użytkownicy, revenue, churn)
+- **Komponenty**:
+  - SystemMetricsDashboard
+  - AlertsPanel  
+  - QuickStats
+  - SystemHealthIndicator
+- **UX/Dostępność**: High-level overview, drill-down capabilities
+- **Bezpieczeństwo**: Super admin role verification, audit logging
+
+#### Zarządzanie Gospodarstwami
+- **Ścieżka**: `/system/households`
+- **Cel**: Przegląd i zarządzanie wszystkimi gospodarstwami w systemie
+- **Kluczowe informacje**:
+  - Lista wszystkich gospodarstw z podstawowymi statystykami
+  - Wyszukiwanie i filtry (plan, aktywność, problemy)
+  - Możliwość tworzenia nowych gospodarstw
+  - Zarządzanie administratorami gospodarstw
+- **Komponenty**:
+  - HouseholdsDataTable z advanced filtering
+  - CreateHouseholdDialog
+  - HouseholdStatsCards
+  - AdminAssignmentForm
+- **UX/Dostępność**: Advanced search, bulk operations, export funkcje
+- **Bezpieczeństwo**: Audit trail dla wszystkich operacji
+
+#### Zarządzanie Użytkownikami Globalnie
+- **Ścieżka**: `/system/users`
+- **Cel**: Administracja wszystkich kont użytkowników w systemie
+- **Kluczowe informacje**:
+  - Wyszukiwanie użytkowników w całym systemie
+  - Historia aktywności i logowań
+  - Zarządzanie rolami i uprawnieniami
+  - Resetowanie haseł i odblokowywanie kont
+- **Komponenty**:
+  - GlobalUserSearch
+  - UserDetailsPanel
+  - RoleManagementForm
+  - AccountActionsToolbar
+- **UX/Dostępność**: Advanced search, user impersonation capability
+- **Bezpieczeństwo**: Strong authentication for sensitive operations
+
+#### Monitoring Subskrypcji
+- **Ścieżka**: `/system/subscriptions`
+- **Cel**: Przegląd wszystkich subskrypcji i metryk finansowych
+- **Kluczowe informacje**:
+  - Dashboard z MRR, churn rate, conversion metrics
+  - Lista aktywnych subskrypcji z datami odnowienia
+  - Zarządzanie promocjami i kodami rabatowymi
+  - Obsługa problemów płatności i refundów
+- **Komponenty**:
+  - RevenueMetricsDashboard
+  - SubscriptionsTable
+  - PaymentIssuesPanel
+  - PromoCodeManager
+- **UX/Dostępność**: Financial data visualization, export capabilities
+- **Bezpieczeństwo**: Financial data protection, PCI compliance
+
+#### Administracja Systemowa
+- **Ścieżka**: `/system/administration`
+- **Cel**: Monitoring techniczny i zarządzanie infrastrukturą
+- **Kluczowe informacje**:
+  - Monitoring wydajności (CPU, memoria, database)
+  - Logi aplikacji z filtrowaniem i wyszukiwaniem
+  - Zarządzanie backup'ami i restore
+  - Konfiguracja feature flags i deployment
+- **Komponenty**:
+  - SystemMonitoringDashboard
+  - LogViewer z advanced search
+  - BackupManager
+  - FeatureFlagsPanel
+- **UX/Dostępność**: Technical interface, real-time monitoring
+- **Bezpieczeństwo**: Secure system access, operation logging
+
+#### Wsparcie Techniczne
+- **Ścieżka**: `/system/support`
+- **Cel**: Narzędzia do udzielania wsparcia użytkownikom
+- **Kluczowe informacje**:
+  - System ticketów z historią konwersacji
+  - Możliwość impersonacji użytkownika
+  - Narzędzia diagnostyczne i troubleshooting
+  - Baza wiedzy dla zespołu wsparcia
+- **Komponenty**:
+  - SupportTicketsPanel
+  - UserImpersonationTool
+  - DiagnosticTools
+  - KnowledgeBaseEditor
+- **UX/Dostępność**: Efficient support workflows, quick user lookup
+- **Bezpieczeństwo**: Impersonation audit trail, secure data access
+
+### 2.8 Support & Error Views
 
 #### Pomoc/FAQ
 - **Ścieżka**: `/help`
@@ -383,11 +481,28 @@ Advanced Management
 - Value-demonstrating analytics
 - Advanced planning capabilities
 
+### 3.5 System Developer Workflow
+
+```
+Login → System Dashboard → 
+[Monitor Alerts/Issues] → 
+System Administration (Users/Households/Subscriptions) → 
+Support Tools → Technical Monitoring
+```
+
+**Kluczowe punkty**:
+- System-wide oversight and control
+- Proactive monitoring and issue resolution  
+- Platform administration and user support
+- Technical operations and maintenance
+
 ## 4. Układ i struktura nawigacji
 
 ### 4.1 Primary Navigation (Role-Based)
 
 #### Sidebar Navigation (Desktop/Tablet)
+
+**Standard Users (Admin, Domownik, Dashboard):**
 ```
 📊 Dashboard (wszystkie role)
 📅 Kalendarz (wszystkie role)  
@@ -398,6 +513,18 @@ Advanced Management
 🔬 Analizy (Premium only)
 ⚙️ Ustawienia (Admin, Domownik)
 ❓ Pomoc (wszystkie role)
+```
+
+**System Developer (Super Admin):**
+```
+🖥️ System Dashboard 
+🏢 Gospodarstwa
+👤 Użytkownicy
+💳 Subskrypcje
+🔧 Administracja
+🎧 Wsparcie
+📈 Metryki Systemu
+⚙️ Konfiguracja
 ```
 
 #### Bottom Navigation (Mobile)
@@ -425,12 +552,26 @@ Advanced Management
 
 ```typescript
 interface NavigationRules {
+  // Standard User Routes
   '/dashboard': ['admin', 'member', 'dashboard'],
   '/calendar': ['admin', 'member', 'dashboard'],
   '/items': ['admin', 'member'],
   '/households/*/manage': ['admin'],
   '/premium/*': ['premium_subscription'],
-  '/monitor': ['dashboard'] // special monitor mode
+  '/monitor': ['dashboard'], // special monitor mode
+  
+  // System Developer Routes (Super Admin)
+  '/system/*': ['system_developer'],
+  '/system/dashboard': ['system_developer'],
+  '/system/households': ['system_developer'],
+  '/system/users': ['system_developer'],
+  '/system/subscriptions': ['system_developer'],
+  '/system/administration': ['system_developer'],
+  '/system/support': ['system_developer'],
+  
+  // Admin + System Developer Combined Access
+  '/settings/*': ['admin', 'member', 'system_developer'],
+  '/help': ['admin', 'member', 'dashboard', 'system_developer']
 }
 ```
 
@@ -590,6 +731,79 @@ interface NavigationRules {
   - Trend analysis
   - Customizable widgets
 - **Reusability**: Analytics page, premium dashboard
+
+### 5.8 System Developer Components (Super Admin)
+
+#### SystemMetricsDashboard
+- **Cel**: Monitoring kluczowych metryk systemowych
+- **Features**:
+  - Real-time system health indicators
+  - Performance metrics visualization
+  - Alert panels z system notifications
+  - Drill-down capabilities do szczegółów
+- **Reusability**: System dashboard, monitoring views
+- **Security**: Super admin access validation, audit logging
+
+#### HouseholdsDataTable
+- **Cel**: Zarządzanie wszystkimi gospodarstwami w systemie
+- **Features**:
+  - Advanced filtering i search functionality
+  - Bulk operations na wielu gospodarstwach
+  - Inline editing podstawowych informacji
+  - Export capabilities (CSV, Excel)
+  - Pagination dla dużych zbiorów danych
+- **Reusability**: System households view
+- **Security**: Permission-based actions, operation audit trail
+
+#### GlobalUserSearch
+- **Cel**: Wyszukiwanie i zarządzanie użytkownikami globalnie
+- **Features**:
+  - Cross-household user search
+  - Advanced filters (role, activity, subscription)
+  - User impersonation capabilities
+  - Account management actions
+- **Reusability**: System users view, support tools
+- **Security**: Strong authentication for sensitive operations
+
+#### RevenueMetricsDashboard
+- **Cel**: Monitoring finansowy i subskrypcje
+- **Features**:
+  - MRR/ARR tracking with trend analysis
+  - Churn rate i conversion metrics
+  - Payment issues dashboard
+  - Subscription lifecycle management
+- **Reusability**: System subscriptions view, financial reports
+- **Security**: PCI compliance, financial data protection
+
+#### UserImpersonationTool
+- **Cel**: Bezpieczna impersonacja użytkowników dla wsparcia
+- **Features**:
+  - Secure user session switching
+  - Complete audit trail logging
+  - Time-limited impersonation sessions
+  - Clear indicators podczas impersonacji
+- **Reusability**: Support tools, troubleshooting
+- **Security**: Multi-factor authentication required, comprehensive logging
+
+#### SystemMonitoringDashboard
+- **Cel**: Monitoring techniczny infrastruktury
+- **Features**:
+  - Real-time performance monitoring
+  - Resource utilization tracking
+  - Alert management system
+  - Historical trend analysis
+- **Reusability**: System administration view
+- **Security**: Technical access control, operational security
+
+#### SupportTicketsPanel
+- **Cel**: Zarządzanie ticketami wsparcia technicznego
+- **Features**:
+  - Ticket lifecycle management
+  - Priority i category filtering
+  - Response templates i knowledge base integration
+  - SLA tracking i escalation rules
+- **Reusability**: Support dashboard, customer service tools
+- **Security**: Customer data protection, access controls
 
 Każdy komponent uwzględnia:
 - **Accessibility**: ARIA labels, keyboard navigation, screen reader support

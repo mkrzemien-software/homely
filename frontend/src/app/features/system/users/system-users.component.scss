@@ -1,0 +1,180 @@
+.system-users-view {
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+.page-header {
+  margin-bottom: 2rem;
+
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--text-color-secondary);
+    font-size: 1rem;
+  }
+}
+
+.loading-skeleton {
+  padding: 2rem 0;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .user-avatar-small {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+  }
+
+  .user-name {
+    font-weight: 500;
+  }
+}
+
+.actions-column {
+  text-align: center;
+  width: 100px;
+}
+
+.no-users {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-color-secondary);
+
+  i {
+    margin-bottom: 1rem;
+    color: var(--text-color-secondary);
+    opacity: 0.5;
+  }
+
+  h3 {
+    margin: 0 0 0.5rem;
+    color: var(--text-color);
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.role-management-section {
+  margin-top: 1.5rem;
+}
+
+:host ::ng-deep {
+  .p-card {
+    box-shadow: var(--card-shadow);
+    border-radius: var(--border-radius);
+  }
+
+  .p-datatable {
+    .p-datatable-header {
+      background: var(--surface-100);
+      padding: 1rem;
+      border-top-left-radius: var(--border-radius);
+      border-top-right-radius: var(--border-radius);
+    }
+
+    .p-datatable-thead > tr > th {
+      background: var(--surface-100);
+      font-weight: 600;
+      padding: 1rem;
+      border-bottom: 2px solid var(--surface-border);
+    }
+
+    .p-datatable-tbody > tr > td {
+      padding: 1rem;
+    }
+
+    .p-datatable-tbody > tr:hover {
+      background: var(--surface-hover);
+    }
+  }
+
+  .p-paginator {
+    background: var(--surface-card);
+    border-top: 1px solid var(--surface-border);
+    padding: 1rem;
+  }
+
+  .p-sidebar {
+    .p-sidebar-header {
+      padding: 1.5rem;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+
+      h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+    }
+
+    .p-sidebar-content {
+      padding: 1.5rem;
+      background: var(--surface-ground);
+    }
+  }
+
+  .mb-2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .mt-3 {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  :host ::ng-deep {
+    .p-sidebar {
+      width: 100% !important;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+
+  :host ::ng-deep {
+    .p-datatable {
+      font-size: 0.875rem;
+
+      .p-datatable-thead > tr > th,
+      .p-datatable-tbody > tr > td {
+        padding: 0.75rem 0.5rem;
+      }
+    }
+  }
+}

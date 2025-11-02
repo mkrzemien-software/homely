@@ -1,0 +1,342 @@
+<div class="system-households-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Household Management</h1>
+      <p class="subtitle">System-wide household administration</p>
+    </div>
+    <div class="header-right">
+      <p-button
+        icon="pi pi-refresh"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (onClick)="refresh()"
+        pTooltip="Refresh data"
+      />
+      <p-button
+        label="Create Household"
+        icon="pi pi-plus"
+        (onClick)="showCreateDialog()"
+      />
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  @if (householdStats()) {
+    <div class="stats-grid">
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <i class="pi pi-home stat-icon"></i>
+          <div class="stat-details">
+            <div class="stat-value">{{ householdStats()!.totalHouseholds }}</div>
+            <div class="stat-label">Total Households</div>
+          </div>
+        </div>
+      </p-card>
+
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <i class="pi pi-check-circle stat-icon success"></i>
+          <div class="stat-details">
+            <div class="stat-value">{{ householdStats()!.activeHouseholds }}</div>
+            <div class="stat-label">Active</div>
+          </div>
+        </div>
+      </p-card>
+
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <i class="pi pi-users stat-icon info"></i>
+          <div class="stat-details">
+            <div class="stat-value">{{ householdStats()!.totalMembers }}</div>
+            <div class="stat-label">Total Members</div>
+          </div>
+        </div>
+      </p-card>
+
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <i class="pi pi-box stat-icon warning"></i>
+          <div class="stat-details">
+            <div class="stat-value">{{ householdStats()!.totalItems }}</div>
+            <div class="stat-label">Total Items</div>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  }
+
+  <!-- Search and Filters -->
+  <p-card class="search-card">
+    <div class="search-container">
+      <span class="p-input-icon-left flex-1">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          pInputText
+          placeholder="Search by household name or address..."
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="onSearch()"
+          class="w-full"
+        />
+      </span>
+      <p-button
+        label="Search"
+        icon="pi pi-search"
+        (onClick)="onSearch()"
+      />
+      <p-button
+        label="Clear"
+        icon="pi pi-times"
+        severity="secondary"
+        [text]="true"
+        (onClick)="clearSearch()"
+      />
+    </div>
+  </p-card>
+
+  <!-- Households Table -->
+  <p-card class="table-card">
+    @if (isLoading()) {
+      <div class="loading-container">
+        <p-skeleton height="4rem" styleClass="mb-2"></p-skeleton>
+        <p-skeleton height="4rem" styleClass="mb-2"></p-skeleton>
+        <p-skeleton height="4rem" styleClass="mb-2"></p-skeleton>
+        <p-skeleton height="4rem" styleClass="mb-2"></p-skeleton>
+      </div>
+    } @else {
+      <p-table
+        [value]="households()"
+        [rows]="pageSize()"
+        [rowHover]="true"
+        styleClass="p-datatable-striped"
+        [tableStyle]="{ 'min-width': '60rem' }"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Plan</th>
+            <th>Status</th>
+            <th>Members</th>
+            <th>Items</th>
+            <th>Tasks</th>
+            <th>Created</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-household>
+          <tr
+            class="clickable-row"
+            (click)="viewHouseholdDetails(household)"
+          >
+            <td>
+              <div class="household-name">
+                <strong>{{ household.name }}</strong>
+                @if (household.isDeleted) {
+                  <p-tag value="Deleted" severity="danger" />
+                }
+              </div>
+            </td>
+            <td>{{ household.address || 'N/A' }}</td>
+            <td>{{ household.planName }}</td>
+            <td>
+              <p-tag
+                [value]="getStatusLabel(household.subscriptionStatus)"
+                [severity]="getStatusSeverity(household.subscriptionStatus)"
+              />
+            </td>
+            <td>{{ household.memberCount }}</td>
+            <td>{{ household.itemCount }}</td>
+            <td>{{ household.taskCount }}</td>
+            <td>{{ formatDate(household.createdAt) }}</td>
+            <td class="text-center">
+              <div class="action-buttons">
+                <p-button
+                  icon="pi pi-eye"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="info"
+                  (onClick)="viewHouseholdDetails(household)"
+                  pTooltip="View Details"
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="danger"
+                  (onClick)="deleteHousehold(household, $event)"
+                  pTooltip="Delete Household"
+                />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="9" class="text-center">
+              <div class="empty-state">
+                <i class="pi pi-inbox empty-icon"></i>
+                <p class="empty-text">No households found</p>
+                <p class="empty-subtext">Try adjusting your search criteria</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <!-- Pagination -->
+      @if (hasHouseholds()) {
+        <p-paginator
+          [rows]="pageSize()"
+          [totalRecords]="totalHouseholds()"
+          [rowsPerPageOptions]="[10, 20, 50, 100]"
+          (onPageChange)="onPageChange($event)"
+        ></p-paginator>
+      }
+    }
+  </p-card>
+
+  <!-- Details Sidebar -->
+  <p-sidebar
+    [visible]="detailsSidebarVisible()"
+    position="right"
+    [style]="{ width: '40rem' }"
+    (onHide)="closeDetailsSidebar()"
+  >
+    <ng-template pTemplate="header">
+      <h3>Household Details</h3>
+    </ng-template>
+
+    @if (selectedHousehold()) {
+      <div class="household-details">
+        <!-- Basic Information -->
+        <div class="detail-section">
+          <h4>Basic Information</h4>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Name</label>
+              <div class="detail-value">{{ selectedHousehold()!.name }}</div>
+            </div>
+            <div class="detail-item">
+              <label>Address</label>
+              <div class="detail-value">{{ selectedHousehold()!.address || 'N/A' }}</div>
+            </div>
+            <div class="detail-item">
+              <label>Plan</label>
+              <div class="detail-value">{{ selectedHousehold()!.planName }}</div>
+            </div>
+            <div class="detail-item">
+              <label>Status</label>
+              <div class="detail-value">
+                <p-tag
+                  [value]="getStatusLabel(selectedHousehold()!.subscriptionStatus)"
+                  [severity]="getStatusSeverity(selectedHousehold()!.subscriptionStatus)"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="detail-section">
+          <h4>Statistics</h4>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Members</label>
+              <div class="detail-value">
+                {{ selectedHousehold()!.memberCount }}
+                @if (selectedHousehold()!.maxMembers) {
+                  / {{ selectedHousehold()!.maxMembers }}
+                }
+              </div>
+            </div>
+            <div class="detail-item">
+              <label>Items</label>
+              <div class="detail-value">
+                {{ selectedHousehold()!.itemCount }}
+                @if (selectedHousehold()!.maxItems) {
+                  / {{ selectedHousehold()!.maxItems }}
+                }
+              </div>
+            </div>
+            <div class="detail-item">
+              <label>Active Tasks</label>
+              <div class="detail-value">{{ selectedHousehold()!.taskCount }}</div>
+            </div>
+            <div class="detail-item">
+              <label>Completed Tasks</label>
+              <div class="detail-value">{{ selectedHousehold()!.completedTasksCount }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Members List -->
+        <div class="detail-section">
+          <h4>Members ({{ selectedHousehold()!.members.length }})</h4>
+          <div class="members-list">
+            @for (member of selectedHousehold()!.members; track member.id) {
+              <div class="member-item">
+                <div class="member-info">
+                  <div class="member-name">
+                    {{ member.firstName }} {{ member.lastName }}
+                  </div>
+                  <div class="member-email">{{ member.email }}</div>
+                </div>
+                <p-tag [value]="member.role" />
+              </div>
+            }
+            @if (selectedHousehold()!.members.length === 0) {
+              <div class="empty-members">No members found</div>
+            }
+          </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="detail-section">
+          <h4>Dates</h4>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Created</label>
+              <div class="detail-value">{{ formatDate(selectedHousehold()!.createdAt) }}</div>
+            </div>
+            <div class="detail-item">
+              <label>Updated</label>
+              <div class="detail-value">{{ formatDate(selectedHousehold()!.updatedAt) }}</div>
+            </div>
+            @if (selectedHousehold()!.lastActivityAt) {
+              <div class="detail-item">
+                <label>Last Activity</label>
+                <div class="detail-value">{{ formatDate(selectedHousehold()!.lastActivityAt) }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </p-sidebar>
+
+  <!-- Create Dialog -->
+    <p-dialog
+      [(visible)]="createDialogVisible"
+      [modal]="true"
+      [style]="{ width: '35rem' }"
+      header="Create New Household"
+      (onHide)="hideCreateDialog()"
+      [closable]="true"
+      [draggable]="false"
+      [resizable]="false"
+    >
+    <app-create-household-dialog
+      (householdCreated)="refresh()"
+      (dialogClosed)="hideCreateDialog()"
+    />
+  </p-dialog>
+
+  <!-- Toast Messages -->
+  <p-toast />
+
+  <!-- Confirmation Dialog -->
+  <p-confirmDialog />
+</div>

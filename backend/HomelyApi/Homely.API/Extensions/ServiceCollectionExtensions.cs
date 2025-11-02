@@ -3,6 +3,7 @@ using Homely.API.Data;
 using Homely.API.Repositories.Interfaces;
 using Homely.API.Repositories.Implementations;
 using Homely.API.Repositories.Base;
+using Homely.API.Services;
 
 namespace Homely.API.Extensions;
 
@@ -31,6 +32,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IUserProfileRepository, UserProfileRepository>();
         services.AddScoped<IPlanTypeRepository, PlanTypeRepository>();
         services.AddScoped<IHouseholdRepository, HouseholdRepository>();
         services.AddScoped<IHouseholdMemberRepository, HouseholdMemberRepository>();
@@ -45,6 +47,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBusinessServices(this IServiceCollection services)
     {
+        services.AddScoped<ISystemUsersService, SystemUsersService>();
+        services.AddScoped<ISystemHouseholdsService, SystemHouseholdsService>();
         // services.AddScoped<IHouseholdService, HouseholdService>();
         // services.AddScoped<ITaskService, TaskService>();
         // services.AddScoped<IItemService, ItemService>();

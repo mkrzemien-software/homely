@@ -1,0 +1,60 @@
+<div class="global-user-search">
+  <form [formGroup]="searchForm" class="search-form">
+    <!-- Search Input -->
+    <div class="search-field">
+      <p-iconfield iconPosition="left">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          type="text"
+          pInputText
+          formControlName="searchTerm"
+          placeholder="Search by email, name, or household..."
+          class="w-full"
+          aria-label="Search users"
+        />
+      </p-iconfield>
+    </div>
+
+    <!-- Role Filter -->
+    <div class="filter-field">
+      <p-dropdown
+        formControlName="role"
+        [options]="roleOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Filter by role"
+        [showClear]="true"
+        styleClass="w-full"
+        aria-label="Filter by role"
+      ></p-dropdown>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="filter-field">
+      <p-dropdown
+        formControlName="status"
+        [options]="statusOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Filter by status"
+        [showClear]="true"
+        styleClass="w-full"
+        aria-label="Filter by status"
+      ></p-dropdown>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-buttons">
+      @if (hasFilters()) {
+        <p-button
+          label="Reset"
+          icon="pi pi-times"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="resetSearch()"
+          aria-label="Reset filters"
+        ></p-button>
+      }
+    </div>
+  </form>
+</div>

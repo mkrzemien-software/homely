@@ -6,7 +6,16 @@
       "Bash(ng generate:*)",
       "Bash(netstat:*)",
       "Bash(awk:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run build:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(npx supabase status)",
+      "Bash(cat:*)",
+      "Bash(npx supabase migration:*)",
+      "Bash(npx supabase db push)",
+      "Bash(npx supabase:*)"
     ],
     "deny": [],
     "ask": []

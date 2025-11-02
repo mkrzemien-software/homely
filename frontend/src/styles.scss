@@ -127,3 +127,36 @@ a {
     padding: 0 var(--spacing-md);
   }
 }
+
+// PrimeNG Dialog Overlay/Mask
+.p-dialog-mask {
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  transition: all 0.3s;
+}
+
+.p-dialog {
+  .p-dialog-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--surface-border);
+    padding: 1.25rem;
+
+    .p-dialog-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: var(--text-color);
+    }
+  }
+
+  .p-dialog-content {
+    background: var(--surface);
+    padding: 1.5rem;
+    color: var(--text-color);
+  }
+
+  .p-dialog-footer {
+    background: var(--surface);
+    border-top: 1px solid var(--surface-border);
+    padding: 1rem 1.25rem;
+  }
+}

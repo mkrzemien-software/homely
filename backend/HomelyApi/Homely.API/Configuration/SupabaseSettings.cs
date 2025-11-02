@@ -19,5 +19,11 @@ namespace Homely.API.Configuration
         /// Supabase anonymous API key
         /// </summary>
         public string Key { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Supabase service role key for admin operations (user creation, deletion, etc.)
+        /// IMPORTANT: Never expose this key to the client
+        /// </summary>
+        public string ServiceRoleKey { get; set; } = string.Empty;
     }
 }

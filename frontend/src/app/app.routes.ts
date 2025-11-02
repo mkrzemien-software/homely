@@ -41,6 +41,25 @@ export const routes: Routes = [
     // TODO: Create DashboardComponent and add auth guard
   },
   {
+    path: 'system',
+    children: [
+      {
+        path: 'users',
+        loadComponent: () => import('./features/system/users/system-users.component').then(m => m.SystemUsersComponent),
+        title: 'User Management - Homely System',
+        // TODO: Uncomment when authentication is fully implemented
+        // canActivate: [systemDeveloperGuard]
+      },
+      {
+        path: 'households',
+        loadComponent: () => import('./features/system/households/system-households.component').then(m => m.SystemHouseholdsComponent),
+        title: 'Household Management - Homely System',
+        // TODO: Uncomment when authentication is fully implemented
+        // canActivate: [systemDeveloperGuard]
+      }
+    ]
+  },
+  {
     path: '**',
     redirectTo: '/auth/login'
   }

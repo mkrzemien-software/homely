@@ -1,0 +1,46 @@
+<div class="account-actions-toolbar">
+  <p-toolbar>
+    <ng-template pTemplate="start">
+      <div class="toolbar-title">
+        <h3>Account Actions</h3>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="end">
+      <div class="action-buttons">
+        <!-- Reset Password -->
+        <p-button
+          label="Reset Password"
+          icon="pi pi-key"
+          severity="danger"
+          [outlined]="true"
+          (onClick)="onResetPassword()"
+          [disabled]="isActionInProgress()"
+          [loading]="isProcessing()"
+          pTooltip="Send password reset email to user"
+          tooltipPosition="bottom"
+        ></p-button>
+
+        <!-- Unlock Account -->
+        @if (isAccountLocked()) {
+          <p-button
+            label="Unlock Account"
+            icon="pi pi-unlock"
+            severity="success"
+            (onClick)="onUnlockAccount()"
+            [disabled]="isActionInProgress()"
+            [loading]="isProcessing()"
+            pTooltip="Unlock user account"
+            tooltipPosition="bottom"
+          ></p-button>
+        }
+      </div>
+    </ng-template>
+  </p-toolbar>
+
+  <!-- Confirmation Dialog -->
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Toast Messages -->
+  <p-toast></p-toast>
+</div>

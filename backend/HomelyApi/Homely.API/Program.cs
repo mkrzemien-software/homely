@@ -50,9 +50,15 @@ builder.Services.AddSingleton(provider =>
 });
 
 // ============================================================================
+// HTTP CLIENT FACTORY (for Supabase Admin API)
+// ============================================================================
+builder.Services.AddHttpClient();
+
+// ============================================================================
 // BUSINESS SERVICES
 // ============================================================================
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISupabaseAuthService, SupabaseAuthService>();
 
 // ============================================================================
 // CORE SERVICES

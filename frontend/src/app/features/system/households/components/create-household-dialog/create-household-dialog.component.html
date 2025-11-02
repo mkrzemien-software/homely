@@ -1,0 +1,61 @@
+<form [formGroup]="createHouseholdForm" (ngSubmit)="onSubmit()">
+  <div class="dialog-content">
+    <div class="form-field">
+      <label for="name">Household Name</label>
+      <input
+        id="name"
+        type="text"
+        pInputText
+        formControlName="name"
+        placeholder="e.g. Smith Family Home"
+        [class.ng-invalid]="createHouseholdForm.controls['name'].invalid && createHouseholdForm.controls['name'].touched"
+        [class.ng-dirty]="createHouseholdForm.controls['name'].dirty"
+      />
+      @if (createHouseholdForm.controls['name'].invalid && createHouseholdForm.controls['name'].touched) {
+        <small class="p-error">
+          @if (createHouseholdForm.controls['name'].errors?.['required']) {
+            Household name is required.
+          }
+          @if (createHouseholdForm.controls['name'].errors?.['maxlength']) {
+            Name cannot exceed 100 characters.
+          }
+        </small>
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="address">Address (Optional)</label>
+      <textarea
+        id="address"
+        pInputTextarea
+        formControlName="address"
+        placeholder="e.g. 123 Main St, Anytown, USA"
+        [rows]="3"
+        [class.ng-invalid]="createHouseholdForm.controls['address'].invalid && createHouseholdForm.controls['address'].touched"
+        [class.ng-dirty]="createHouseholdForm.controls['address'].dirty"
+      ></textarea>
+        @if (createHouseholdForm.controls['address'].invalid && createHouseholdForm.controls['address'].touched) {
+        <small class="p-error">
+          @if (createHouseholdForm.controls['address'].errors?.['maxlength']) {
+            Address cannot exceed 255 characters.
+          }
+        </small>
+      }
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <p-button
+      label="Cancel"
+      severity="secondary"
+      (onClick)="closeDialog()"
+      [disabled]="isLoading()"
+    />
+    <p-button
+      label="Create Household"
+      type="submit"
+      [loading]="isLoading()"
+      [disabled]="createHouseholdForm.invalid || isLoading()"
+    />
+  </div>
+</form>

@@ -57,6 +57,16 @@ Aplikacja rozwiązuje te problemy poprzez:
 - Zgodność z RODO przy zbieraniu danych osobowych
 
 #### 3.1.2 Role i uprawnienia
+
+System Developer (Super Admin):
+- Zarządzanie wszystkimi gospodarstwami w systemie
+- Tworzenie nowych gospodarstw i przypisywanie administratorów
+- Dostęp do globalnych statystyk i metryk platformy
+- Zarządzanie subskrypcjami wszystkich użytkowników
+- Administracja systemowa i wsparcie techniczne
+- Dostęp do logów systemowych i diagnostyki
+- Zarządzanie kategoriami globalnymi i ustawieniami platformy
+
 Administrator:
 - Tworzenie i zarządzanie gospodarstwem domowym
 - Dodawanie i usuwanie członków gospodarstwa
@@ -149,6 +159,113 @@ Dla każdej kategorii (przeglądy techniczne, wywóz śmieci, wizyty medyczne):
 - Duża czcionka
 - Wyświetlanie tylko najbliższych 5 terminów
 - Auto-refresh co 5 minut
+
+#### 3.4.5 Panel Administratora
+Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
+
+##### 3.4.5.1 Zarządzanie gospodarstwem domowym
+- Edycja nazwy i adresu gospodarstwa
+- Przegląd statystyk gospodarstwa (liczba członków, urządzeń, terminów)
+- Historia zmian w gospodarstwie (audit log)
+- Ustawienia domyślne dla nowych urządzeń/wizyt
+- Archiwum usuniętych pozycji z możliwością przywrócenia
+
+##### 3.4.5.2 Zarządzanie członkami gospodarstwa
+- Lista wszystkich członków z rolami i statusami
+- Formularz dodawania nowych członków z wysyłką zaproszeń
+- Edycja ról i uprawnień istniejących członków
+- Historia aktywności członków (ostatnie logowanie, akcje)
+- Usuwanie członków z reassignment ich terminów
+- Zarządzanie zaproszeniami (pending, expired, resend)
+
+##### 3.4.5.3 Centralne zarządzanie terminami i urządzeniami
+- Widok globalny wszystkich urządzeń/wizyt w gospodarstwie
+- Możliwość edycji terminów wszystkich członków
+- Masowe operacje (zmiana interwałów, reassignment odpowiedzialnych)
+- Przegląd konfliktów terminów i ich rozwiązywanie
+- Konfiguracja priorytetów i kategorii
+- Import/export danych urządzeń (CSV)
+
+##### 3.4.5.4 Zarządzanie subskrypcją i limitami
+- Przegląd aktualnego planu i wykorzystania limitów
+- Historia płatności i faktur
+- Upgrade/downgrade planu subskrypcji
+- Zarządzanie metodami płatności
+- Ustawienia automatycznej odnowy
+- Przegląd kosztów gospodarstwa (tylko premium)
+
+##### 3.4.5.5 Ustawienia systemowe gospodarstwa
+- Konfiguracja stref czasowych i formatów dat
+- Ustawienia powiadomień dla całego gospodarstwa
+- Zarządzanie kategoriami i priorytetami
+- Backup i przywracanie danych
+- Integracje z zewnętrznymi systemami
+- Logi systemowe i diagnostyka
+
+##### 3.4.5.6 Raporty i analizy administratora
+- Dashboard z kluczowymi metrykami gospodarstwa
+- Raporty wykorzystania funkcji przez członków
+- Analiza efektywności zarządzania terminami
+- Statystyki potwierdzanych vs przegapionych terminów
+- Przegląd najczęściej używanych urządzeń/kategorii
+- Export raportów dla zewnętrznych systemów księgowych
+
+#### 3.4.6 Panel System Developer (Super Admin)
+Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów systemu:
+
+##### 3.4.6.1 Zarządzanie gospodarstwami
+- Lista wszystkich gospodarstw w systemie z podstawowymi statystykami
+- Wyszukiwanie i filtrowanie gospodarstw (po nazwie, dacie utworzenia, planie)
+- Tworzenie nowych gospodarstw z przypisaniem administratorów
+- Edycja podstawowych danych gospodarstw (nazwa, adres, ustawienia)
+- Usuwanie i archiwizowanie nieaktywnych gospodarstw
+- Przenoszenie członków między gospodarstwami
+- Historia zmian i operacji na gospodarstwach
+
+##### 3.4.6.2 Zarządzanie użytkownikami globalnie  
+- Lista wszystkich użytkowników w systemie
+- Wyszukiwanie użytkowników po email, imieniu, gospodarstwie
+- Zmiana ról użytkowników w ramach ich gospodarstw
+- Przypisywanie użytkowników do gospodarstw
+- Resetowanie haseł i odblokowanie kont
+- Historia aktywności użytkowników (logowania, akcje)
+- Usuwanie kont i dane RODO compliance
+
+##### 3.4.6.3 Monitorowanie subskrypcji i płatności
+- Dashboard wszystkich subskrypcji w systemie
+- Przegląd przychodów i metryk finansowych
+- Zarządzanie promocjami i kodami rabatowymi
+- Ręczna modyfikacja planów subskrypcji
+- Obsługa sporów i refundacji
+- Analiza churn rate i conversion metrics
+- Export danych finansowych dla księgowości
+
+##### 3.4.6.4 Administracja systemowa
+- Monitorowanie wydajności i uptime systemu
+- Przegląd logów systemowych i błędów
+- Zarządzanie backup'ami i disaster recovery
+- Konfiguracja globalnych ustawień platformy
+- Zarządzanie kategoriami i szabłonami systemowymi
+- Aktualizacje systemu i maintenance mode
+- Monitoring bezpieczeństwa i incident response
+
+##### 3.4.6.5 Analizy i metryki globalne
+- Dashboard z kluczowymi KPI całej platformy
+- Analizy wzrostu użytkowników i retention
+- Statystyki wykorzystania funkcji na poziomie systemu  
+- Raporty wydajności i cost optimization
+- A/B testing results i feature adoption
+- Przewidywania trendu i capacity planning
+- Export danych dla business intelligence
+
+##### 3.4.6.6 Wsparcie techniczne
+- System ticketów i obsługa użytkowników
+- Narzędzia diagnostyczne i troubleshooting
+- Impersonacja użytkowników (z audit trail)
+- Masowe operacje i data migration tools
+- Feature flags i rollout management  
+- Monitoring alertów i incident management
+- Dokumentacja techniczna i runbooks
 
 ### 3.5 Bezpieczeństwo i prywatność
 
@@ -359,6 +476,242 @@ Kryteria akceptacji:
 - Powiadomienie email do użytkownika o zmianie roli
 - Niemożność zmiany roli własnej (wymaga innego administratora)
 - Wymagany przynajmniej jeden administrator w gospodarstwie
+
+### 5.2.1 Panel administratora - zarządzanie gospodarstwem
+
+US-046: Przegląd statystyk gospodarstwa
+Jako administrator
+Chcę widzieć kluczowe statystyki mojego gospodarstwa
+Aby monitorować aktywność i wykorzystanie systemu
+
+Kryteria akceptacji:
+- Dashboard ze statystykami: liczba członków, urządzeń, terminów w miesiącu
+- Wykresy aktywności członków w czasie
+- Wykorzystanie limitów planu (urządzenia, członkowie, storage)
+- Lista ostatnich akcji w gospodarstwie (audit log)
+- Porównanie z poprzednim miesiącem
+- Export statystyk do CSV/PDF
+
+US-047: Konfiguracja ustawień gospodarstwa
+Jako administrator
+Chcę konfigurować globalne ustawienia dla całego gospodarstwa
+Aby dostosować system do naszych potrzeb
+
+Kryteria akceptacji:
+- Edycja nazwy i adresu gospodarstwa
+- Ustawienia domyślnych interwałów dla nowych urządzeń
+- Konfiguracja kategorii i priorytetów
+- Ustawienia stref czasowych i formatów dat
+- Domyślne ustawienia powiadomień dla nowych członków
+- Język interfejsu dla gospodarstwa
+
+US-048: Zarządzanie zaproszeniami
+Jako administrator
+Chcę zarządzać wysłanymi zaproszeniami do gospodarstwa
+Aby kontrolować proces dołączania nowych członków
+
+Kryteria akceptacji:
+- Lista wszystkich wysłanych zaproszeń z statusami
+- Opcje: pending, accepted, expired, cancelled
+- Możliwość ponownego wysłania zaproszenia
+- Anulowanie niewykorzystanych zaproszeń
+- Historia zaproszeń z datami i akcjami
+- Ustawienie czasu wygaśnięcia zaproszeń
+
+US-049: Historia aktywności członków
+Jako administrator
+Chcę monitorować aktywność członków gospodarstwa
+Aby ocenić zaangażowanie i zapewnić bezpieczeństwo
+
+Kryteria akceptacji:
+- Lista członków z ostatnim logowaniem i aktywnością
+- Historia akcji każdego członka (dodane urządzenia, potwierdzone terminy)
+- Statystyki wykonanych vs przegapionych terminów na członka
+- Identyfikacja nieaktywnych członków (brak logowania >30 dni)
+- Możliwość wysłania przypomnienia do nieaktywnych
+- Eksport danych aktywności
+
+US-050: Masowe zarządzanie urządzeniami
+Jako administrator
+Chcę wykonywać operacje na wielu urządzeniach jednocześnie
+Aby efektywnie zarządzać dużym gospodarstwem
+
+Kryteria akceptacji:
+- Selekcja wielu urządzeń (checkbox)
+- Masowa zmiana osoby odpowiedzialnej
+- Masowa aktualizacja interwałów
+- Masowe dodanie etykiet/kategorii
+- Masowe archiwizowanie/usuwanie
+- Potwierdzenie przed wykonaniem operacji masowej
+- Preview zmian przed aplikacją
+
+US-051: Zarządzanie konfliktami terminów
+Jako administrator
+Chcę identyfikować i rozwiązywać konflikty terminów
+Aby zapewnić płynne funkcjonowanie gospodarstwa
+
+Kryteria akceptacji:
+- Widok wszystkich konfliktów terminów (ten sam dzień, ta sama osoba)
+- Automatyczne wykrywanie nakładających się terminów
+- Sugestie rozwiązania (przesunięcie, zmiana odpowiedzialnego)
+- Możliwość ręcznej zmiany terminów w konflikcie
+- Powiadomienia członków o zmianach
+- Historia rozwiązanych konfliktów
+
+### 5.2.2 Panel administratora - subskrypcja i finanse
+
+US-052: Przegląd wykorzystania planu
+Jako administrator
+Chcę monitorować wykorzystanie limitów mojego planu
+Aby planować ewentualny upgrade
+
+Kryteria akceptacji:
+- Dashborad z wykorzystaniem: członkowie, urządzenia, storage
+- Wykresy trendu wykorzystania w czasie
+- Prognozy osiągnięcia limitów
+- Porównanie planów (current vs available upgrades)
+- Kalkulacja oszczędności przy rocznej płatności
+- Historia zmian planu
+
+US-053: Zarządzanie metodami płatności
+Jako administrator z subskrypcją premium
+Chcę zarządzać metodami płatności
+Aby kontrolować finansowanie subskrypcji
+
+Kryteria akceptacji:
+- Lista wszystkich dodanych kart/kont
+- Dodawanie nowej metody płatności
+- Usuwanie starych metod płatności
+- Ustawianie domyślnej metody
+- Testowanie ważności karty
+- Powiadomienia o zbliżającym się wygaśnięciu karty
+
+US-054: Historia płatności i faktury
+Jako administrator z subskrypcją premium
+Chcę przeglądać historię płatności i pobierać faktury
+Aby prowadzić rozliczenia finansowe
+
+Kryteria akceptacji:
+- Lista wszystkich płatności z datami i kwotami
+- Status płatności (successful, failed, pending, refunded)
+- Pobieranie faktur w formacie PDF
+- Wysyłka faktur emailem na dodatkowy adres
+- Filtrowanie po okresach i statusach
+- Export zestawienia dla księgowości
+
+### 5.2.3 Panel administratora - analizy i raporty
+
+US-055: Raporty efektywności gospodarstwa
+Jako administrator
+Chcę generować raporty efektywności mojego gospodarstwa
+Aby optymalizować zarządzanie terminami
+
+Kryteria akceptacji:
+- Raport potwierdzanych vs przegapionych terminów
+- Analiza najbardziej problematycznych urządzeń
+- Statystyki aktywności członków
+- Średnie czasy reakcji na terminy
+- Identyfikacja wzorców sezonowych
+- Rekomendacje optymalizacji
+
+US-056: Dashboard analityczny administratora
+Jako administrator
+Chcę mieć szybki dostęp do kluczowych metryk
+Aby na bieżąco monitorować stan gospodarstwa
+
+Kryteria akceptacji:
+- Widget z nadchodzącymi terminami krytycznymi
+- Mierniki wykorzystania planu
+- Alerty o problemach (przekroczone terminy, konflikty)
+- Statystyki aktywności w czasie rzeczywistym
+- Szybkie akcje (dodaj członka, wyślij przypomnienie)
+- Personalizacja widżetów na dashboardzie
+
+### 5.2.4 Panel System Developer - zarządzanie systemem
+
+US-057: Przegląd wszystkich gospodarstw w systemie
+Jako System Developer
+Chcę widzieć listę wszystkich gospodarstw w systemie
+Aby monitorować aktywność platformy i udzielać wsparcia
+
+Kryteria akceptacji:
+- Lista gospodarstw z podstawowymi statystykami (liczba członków, urządzeń, ostatnia aktywność)
+- Wyszukiwanie po nazwie gospodarstwa lub email administratora
+- Filtrowanie po planie subskrypcji, dacie utworzenia, statusie aktywności
+- Sortowanie po różnych kryteriach
+- Paginacja dla dużych ilości danych
+- Export listy do CSV/Excel
+- Oznaczenie gospodarstw wymagających uwagi (nieaktywne, problemy płatności)
+
+US-058: Tworzenie gospodarstwa dla użytkownika
+Jako System Developer
+Chcę móc tworzyć nowe gospodarstwa i przypisywać administratorów
+Aby wspierać użytkowników w procesie onboardingu lub migracji
+
+Kryteria akceptacji:
+- Formularz tworzenia gospodarstwa z polami: nazwa, adres, plan subskrypcji
+- Wyszukiwanie i dodawanie administratora po email
+- Opcja utworzenia nowego konta administratora
+- Wysłanie zaproszenia z hasłem tymczasowym
+- Konfiguracja początkowych ustawień gospodarstwa
+- Powiadomienie email do nowego administratora
+- Audit log operacji tworzenia
+
+US-059: Zarządzanie użytkownikami globalnie
+Jako System Developer
+Chcę zarządzać kontami użytkowników w całym systemie
+Aby rozwiązywać problemy i udzielać wsparcia technicznego
+
+Kryteria akceptacji:
+- Wyszukiwanie użytkowników po email, imieniu, gospodarstwie
+- Wyświetlanie szczegółów konta: role, ostatnia aktywność, subskrypcja
+- Resetowanie hasła użytkownika z powiadomieniem email
+- Odblokowywanie zablokowanych kont
+- Zmiana roli użytkownika w ramach gospodarstwa
+- Przenoszenie użytkownika do innego gospodarstwa
+- Historia wszystkich akcji na koncie użytkownika
+
+US-060: Monitorowanie subskrypcji i płatności
+Jako System Developer
+Chcę monitorować wszystkie subskrypcje i płatności w systemie
+Aby zapewnić stabilność finansową platformy
+
+Kryteria akceptacji:
+- Dashboard z kluczowymi metrykami: MRR, churn rate, conversion rate
+- Lista wszystkich aktywnych subskrypcji z datami odnowienia
+- Przegląd nieudanych płatności z możliwością retry
+- Zarządzanie promocjami i kodami rabatowymi
+- Ręczna modyfikacja planu subskrypcji dla użytkownika
+- Historia wszystkich transakcji z możliwością refund
+- Alerty o problemach płatności
+
+US-061: Administracja systemowa i monitoring
+Jako System Developer
+Chcę monitorować wydajność i stabilność systemu
+Aby zapewnić wysoką jakość usługi
+
+Kryteria akceptacji:
+- Dashboard z metrykami systemu: uptime, response time, error rate
+- Przegląd logów aplikacji z filtrowaniem po poziomie i dacie
+- Monitoring wykorzystania zasobów (CPU, memoria, storage)
+- Zarządzanie backup'ami z możliwością restore
+- Konfiguracja alertów o problemach systemowych
+- Maintenance mode z komunikatem dla użytkowników
+- Feature flags do kontrolowanego rollout nowych funkcji
+
+US-062: Wsparcie techniczne i troubleshooting
+Jako System Developer
+Chcę mieć narzędzia do diagnozowania i rozwiązywania problemów użytkowników
+Aby szybko udzielać skutecznego wsparcia
+
+Kryteria akceptacji:
+- Impersonacja użytkownika z pełnym audit trail
+- Narzędzia diagnostyczne do analizy problemów
+- System ticketów wsparcia z historią konwersacji
+- Szablony odpowiedzi dla typowych problemów
+- Możliwość ręcznej synchronizacji danych użytkownika
+- Narzędzia do masowych operacji (bulk updates)
+- Dokumentacja troubleshooting dla zespołu wsparcia
 
 ### 5.3 Zarządzanie urządzeniami i wizytami
 
@@ -887,27 +1240,126 @@ Cel: NPS > 30 w pierwszym roku
 Pomiar: Ankieta co 3 miesiące "Jak prawdopodobne że polecisz aplikację?"
 Częstotliwość: Kwartalna
 
-### 6.8 Metryki techniczne
+### 6.8 Metryki panelu administratora
 
-6.8.1 Uptime
+6.8.1 Adoption rate funkcji administratora
+Definicja: Procent administratorów korzystających z zaawansowanych funkcji panelu
+Cel: 
+- Zarządzanie członkami: 95%
+- Przegląd statystyk: 80%
+- Masowe operacje: 60%
+- Raporty: 40%
+Pomiar: Tracking użycia funkcji w panelu administratora
+Częstotliwość: Miesięczna
+
+6.8.2 Efektywność zarządzania gospodarstwem
+Definicja: Średnia liczba członków i urządzeń zarządzanych przez administratora
+Cel: 
+- Free plan: 3 członków, 5 urządzeń
+- Premium: 6 członków, 20 urządzeń
+Pomiar: Średnie wartości na gospodarstwo z rolą administratora
+Częstotliwość: Miesięczna
+
+6.8.3 Czas rozwiązywania konfliktów terminów
+Definicja: Średni czas od wykrycia konfliktu do jego rozwiązania
+Cel: < 24 godziny dla konfliktów krytycznych
+Pomiar: Timestamp wykrycia vs rozwiązania konfliktu
+Częstotliwość: Tygodniowa
+
+6.8.4 Wykorzystanie funkcji masowych
+Definicja: Procent administratorów używających operacji masowych
+Cel: 50% administratorów z >10 urządzeniami używa funkcji masowych
+Pomiar: Tracking użycia bulk operations
+Częstotliwość: Miesięczna
+
+6.8.5 Retention administratorów vs domowników
+Definicja: Porównanie retention rate między rolami
+Cel: Administratorzy 60% retention vs 40% domownicy (3 miesiące)
+Pomiar: Cohort analysis pogrupowany po rolach
+Częstotliwość: Miesięczna
+
+### 6.9 Metryki systemu dla System Developer
+
+6.9.1 Wzrost liczby gospodarstw
+Definicja: Liczba nowych gospodarstw utworzonych w okresie
+Cel: 
+- Miesiąc 1-3: 50 nowych gospodarstw/miesiąc
+- Miesiąc 4-12: 200 nowych gospodarstw/miesiąc
+Pomiar: Count nowych gospodarstw w okresie
+Częstotliwość: Tygodniowa
+
+6.9.2 Aktywność gospodarstw
+Definicja: Procent gospodarstw aktywnych w ostatnich 30 dniach
+Cel: 85% gospodarstw aktywnych
+Pomiar: Gospodarstwa z aktywnością (logowanie, akcje) w ostatnich 30 dniach
+Częstotliwość: Tygodniowa
+
+6.9.3 Wykorzystanie zasobów systemu
+Definicja: Obciążenie serwerów i baz danych
+Cel: 
+- CPU utilization < 70%
+- Memory usage < 80%
+- Database response time < 100ms
+Pomiar: Monitoring infrastruktury
+Częstotliwość: Ciągła
+
+6.9.4 Revenue metrics (MRR/ARR)
+Definicja: Miesięczne i roczne przychody z subskrypcji
+Cel:
+- MRR: $10,000 w pierwszym roku
+- Churn rate < 5% miesięcznie
+- Average Revenue Per User (ARPU): $15/miesiąc
+Pomiar: Stripe/PayPal analytics + własne kalkulacje
+Częstotliwość: Miesięczna
+
+6.9.5 System reliability metrics
+Definicja: Metryki niezawodności i wydajności systemu
+Cel:
+- Uptime: 99.9%
+- Mean Time to Recovery (MTTR): < 2 godziny
+- Alert response time: < 15 minut
+Pomiar: Monitoring tools (Datadog, New Relic)
+Częstotliwość: Ciągła
+
+6.9.6 Support effectiveness
+Definicja: Efektywność wsparcia technicznego
+Cel:
+- First Response Time: < 2 godziny
+- Resolution Time: < 24 godziny (critical), < 3 dni (medium)
+- Customer Satisfaction Score: > 4.5/5
+Pomiar: Ticketing system analytics
+Częstotliwość: Tygodniowa
+
+6.9.7 Platform adoption metrics
+Definicja: Adopcja funkcji na poziomie całej platformy
+Cel:
+- Feature adoption rate: > 60% dla nowych funkcji w 3 miesiące
+- API usage growth: 20% miesięcznie
+- Mobile vs desktop usage ratio tracking
+Pomiar: Feature usage analytics + API metrics
+Częstotliwość: Miesięczna
+
+### 6.10 Metryki techniczne
+
+6.10.1 Uptime
 Definicja: Procent czasu, w którym aplikacja jest dostępna
 Cel: 99.5% uptime
 Pomiar: Monitoring serwera
 Częstotliwość: Ciągła
 
-6.8.2 Średni czas ładowania strony
+6.10.2 Średni czas ładowania strony
 Definicja: Time to Interactive dla kluczowych stron
 Cel: < 2 sekundy dla dashboard, < 3 sekundy dla innych stron
 Pomiar: Real User Monitoring (RUM)
 Częstotliwość: Ciągła
 
-6.8.3 Error rate
+6.10.3 Error rate
 Definicja: Procent requestów kończących się błędem 5xx
 Cel: < 0.1% error rate
 Pomiar: Server logs
 Częstotliwość: Ciągła
 
-### 6.9 Metodologia pomiaru
+### 6.11 Metodologia pomiaru
 
 Wszystkie metryki będą mierzone za pomocą:
 - Google Analytics 4 dla behawioralnych metryk użytkownika
@@ -921,7 +1373,7 @@ Raporty będą generowane:
 - Monthly report dla metryk biznesowych i retention
 - Quarterly review dla strategicznych decyzji produktowych
 
-### 6.10 Kryteria sukcesu MVP
+### 6.12 Kryteria sukcesu MVP
 
 MVP zostanie uznane za sukces jeśli po 3 miesiącach od uruchomienia:
 - Osiągniemy 1000 zarejestrowanych użytkowników

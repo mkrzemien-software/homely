@@ -1,0 +1,138 @@
+:host {
+  form {
+    width: 100%;
+  }
+
+  .dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem 0;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-color);
+      margin-bottom: 0.25rem;
+
+      &::after {
+        content: ' *';
+        color: var(--red-500);
+        display: none;
+      }
+    }
+
+    // Show asterisk for required fields
+    &:has(input[formControlName='name']) label::after {
+      display: inline;
+    }
+  }
+
+  input[pInputText],
+  textarea[pInputTextarea] {
+    width: 100%;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem var(--primary-color-opacity);
+    }
+
+    &::placeholder {
+      color: var(--text-color-secondary);
+      opacity: 0.6;
+    }
+
+    &.ng-invalid.ng-touched {
+      border-color: var(--red-500);
+
+      &:focus {
+        box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.2);
+      }
+    }
+
+    &.ng-valid.ng-dirty {
+      border-color: var(--green-500);
+
+      &:focus {
+        box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.2);
+      }
+    }
+  }
+
+  textarea[pInputTextarea] {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+  }
+
+  .p-error {
+    font-size: 0.875rem;
+    color: var(--red-500);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+    animation: shake 0.3s ease-in-out;
+
+    &::before {
+      content: '⚠';
+      font-size: 1rem;
+    }
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--surface-border);
+
+    p-button {
+      ::ng-deep .p-button {
+        min-width: 100px;
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Animations
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-5px);
+    }
+    75% {
+      transform: translateX(5px);
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    .dialog-content {
+      gap: 1.25rem;
+    }
+
+    .dialog-footer {
+      flex-direction: column-reverse;
+      gap: 0.5rem;
+
+      p-button {
+        ::ng-deep .p-button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
