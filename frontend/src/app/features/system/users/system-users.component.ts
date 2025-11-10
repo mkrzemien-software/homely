@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 // PrimeNG Components
 import { TableModule } from 'primeng/table';
@@ -9,12 +10,14 @@ import { CardModule } from 'primeng/card';
 import { SkeletonModule } from 'primeng/skeleton';
 import { PaginatorModule } from 'primeng/paginator';
 import { SidebarModule } from 'primeng/sidebar';
+import { DialogModule } from 'primeng/dialog';
 
 // Custom Components
 import { GlobalUserSearchComponent } from './components/global-user-search/global-user-search.component';
 import { UserDetailsPanelComponent } from './components/user-details-panel/user-details-panel.component';
 import { RoleManagementFormComponent } from './components/role-management-form/role-management-form.component';
 import { AccountActionsToolbarComponent } from './components/account-actions-toolbar/account-actions-toolbar.component';
+import { CreateUserDialogComponent } from './components/create-user-dialog/create-user-dialog.component';
 
 // Services and Interfaces
 import { SystemUsersService, SystemUser, UserSearchFilters, UserRole, UserAccountStatus } from '../../../core/services/system-users.service';
@@ -23,6 +26,7 @@ import { SystemUsersService, SystemUser, UserSearchFilters, UserRole, UserAccoun
   selector: 'app-system-users',
   imports: [
     CommonModule,
+    RouterModule,
     TableModule,
     ButtonModule,
     TagModule,
@@ -30,10 +34,12 @@ import { SystemUsersService, SystemUser, UserSearchFilters, UserRole, UserAccoun
     SkeletonModule,
     PaginatorModule,
     SidebarModule,
+    DialogModule,
     GlobalUserSearchComponent,
     UserDetailsPanelComponent,
     RoleManagementFormComponent,
-    AccountActionsToolbarComponent
+    AccountActionsToolbarComponent,
+    CreateUserDialogComponent
   ],
   templateUrl: './system-users.component.html',
   styleUrl: './system-users.component.scss'
@@ -52,6 +58,7 @@ export class SystemUsersComponent implements OnInit {
   pageSize = signal<number>(20);
   currentFilters = signal<UserSearchFilters>({});
   sidebarVisible = signal<boolean>(false);
+  createDialogVisible = signal<boolean>(false);
 
   // Computed values
   totalPages = computed(() => Math.ceil(this.totalUsers() / this.pageSize()));
@@ -196,5 +203,28 @@ export class SystemUsersComponent implements OnInit {
   formatDate(date: Date | null): string {
     if (!date) return 'Never';
     return new Date(date).toLocaleDateString();
+  }
+
+  /**
+   * Show create user dialog
+   */
+  showCreateDialog(): void {
+    this.createDialogVisible.set(true);
+  }
+
+  /**
+   * Hide create user dialog
+   */
+  hideCreateDialog(): void {
+    this.createDialogVisible.set(false);
+  }
+
+  /**
+   * Handle user created event
+   */
+  onUserCreated(): void {
+    // Reload users to show the new user
+    this.loadUsers();
+    this.hideCreateDialog();
   }
 }

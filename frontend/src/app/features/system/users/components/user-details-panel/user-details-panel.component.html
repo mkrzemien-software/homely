@@ -14,15 +14,15 @@
 
     <!-- User Details -->
     <div class="details-section">
-      <h3>Account Information</h3>
+      <h3>Informacje o koncie</h3>
 
       <div class="detail-row">
-        <span class="detail-label">User ID:</span>
+        <span class="detail-label">ID Użytkownika:</span>
         <span class="detail-value">{{ user().id }}</span>
       </div>
 
       <div class="detail-row">
-        <span class="detail-label">Role:</span>
+        <span class="detail-label">Rola:</span>
         <span class="detail-value">
           <p-tag
             [value]="getRoleLabel(user().role)"
@@ -42,22 +42,22 @@
       </div>
 
       <div class="detail-row">
-        <span class="detail-label">Household:</span>
+        <span class="detail-label">Gospodarstwo:</span>
         <span class="detail-value">{{ user().householdName }}</span>
       </div>
 
       <div class="detail-row">
-        <span class="detail-label">Last Login:</span>
+        <span class="detail-label">Ostatnie logowanie:</span>
         <span class="detail-value">{{ formatDate(user().lastLogin) }}</span>
       </div>
 
       <div class="detail-row">
-        <span class="detail-label">Created:</span>
+        <span class="detail-label">Utworzono:</span>
         <span class="detail-value">{{ formatDate(user().createdAt) }}</span>
       </div>
 
       <div class="detail-row">
-        <span class="detail-label">Updated:</span>
+        <span class="detail-label">Zaktualizowano:</span>
         <span class="detail-value">{{ formatDate(user().updatedAt) }}</span>
       </div>
     </div>
@@ -66,7 +66,7 @@
 
     <!-- Activity History -->
     <div class="activity-section">
-      <h3>Recent Activity</h3>
+      <h3>Ostatnia aktywność</h3>
 
       @if (isLoadingActivity()) {
         <div class="loading-skeleton">
@@ -78,9 +78,9 @@
         <p-table [value]="activityHistory()" [tableStyle]="{ 'min-width': '100%' }">
           <ng-template pTemplate="header">
             <tr>
-              <th>Action</th>
-              <th>Description</th>
-              <th>Timestamp</th>
+              <th>Akcja</th>
+              <th>Opis</th>
+              <th>Data i czas</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-activity>
@@ -92,7 +92,7 @@
           </ng-template>
         </p-table>
       } @else {
-        <p class="no-activity">No recent activity found</p>
+        <p class="no-activity">Nie znaleziono ostatniej aktywności</p>
       }
     </div>
   </p-card>

@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 // PrimeNG Components
 import { TableModule } from 'primeng/table';
@@ -38,6 +39,7 @@ import {
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     TableModule,
     ButtonModule,
     TagModule,

@@ -2,7 +2,7 @@
   <p-card>
     <ng-template pTemplate="header">
       <div class="card-header">
-        <h3>Role Management</h3>
+        <h3>Zarządzanie rolą</h3>
       </div>
     </ng-template>
 
@@ -27,14 +27,14 @@
 
       <!-- Role Dropdown -->
       <div class="form-field">
-        <label for="role">User Role</label>
+        <label for="role">Rola użytkownika</label>
         <p-dropdown
           inputId="role"
           formControlName="role"
           [options]="roleOptions()"
           optionLabel="label"
           optionValue="value"
-          placeholder="Select a role"
+          placeholder="Wybierz rolę"
           [style]="{ width: '100%' }"
           [disabled]="isSubmitting()"
         >
@@ -57,7 +57,7 @@
       @if (hasRoleChanged()) {
         <p-message
           severity="warn"
-          text="Changing user role will immediately affect their permissions and access level."
+          text="Zmiana roli użytkownika natychmiast wpłynie na jego uprawnienia i poziom dostępu."
           styleClass="w-full mt-3"
         ></p-message>
       }
@@ -66,7 +66,7 @@
       <div class="form-actions">
         <p-button
           type="button"
-          label="Cancel"
+          label="Anuluj"
           severity="secondary"
           [outlined]="true"
           (onClick)="onCancel()"
@@ -75,7 +75,7 @@
 
         <p-button
           type="submit"
-          label="Update Role"
+          label="Zaktualizuj rolę"
           icon="pi pi-save"
           [loading]="isSubmitting()"
           [disabled]="!hasRoleChanged() || roleForm.invalid"

@@ -1,0 +1,181 @@
+<form [formGroup]="createUserForm" (ngSubmit)="onSubmit()">
+  <div class="dialog-content">
+    <!-- Success Message -->
+    @if (successMessage()) {
+      <p-message
+        severity="success"
+        [text]="successMessage() || ''"
+        styleClass="w-full mb-3">
+      </p-message>
+    }
+
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <p-message
+        severity="error"
+        [text]="errorMessage() || ''"
+        styleClass="w-full mb-3">
+      </p-message>
+    }
+
+    <!-- Email Field -->
+    <div class="form-field">
+      <label for="email">Email *</label>
+      <input
+        id="email"
+        type="email"
+        pInputText
+        formControlName="email"
+        placeholder="np. jan.kowalski@example.com"
+        [class.ng-invalid]="controls['email'].invalid && controls['email'].touched"
+        [class.ng-dirty]="controls['email'].dirty"
+      />
+      @if (controls['email'].invalid && controls['email'].touched) {
+        <small class="p-error">
+          @if (controls['email'].errors?.['required']) {
+            Email jest wymagany.
+          }
+          @if (controls['email'].errors?.['email']) {
+            Wprowadź poprawny adres email.
+          }
+          @if (controls['email'].errors?.['maxlength']) {
+            Email nie może przekroczyć 255 znaków.
+          }
+        </small>
+      }
+    </div>
+
+    <!-- First Name Field -->
+    <div class="form-field">
+      <label for="firstName">Imię *</label>
+      <input
+        id="firstName"
+        type="text"
+        pInputText
+        formControlName="firstName"
+        placeholder="np. Jan"
+        [class.ng-invalid]="controls['firstName'].invalid && controls['firstName'].touched"
+        [class.ng-dirty]="controls['firstName'].dirty"
+      />
+      @if (controls['firstName'].invalid && controls['firstName'].touched) {
+        <small class="p-error">
+          @if (controls['firstName'].errors?.['required']) {
+            Imię jest wymagane.
+          }
+          @if (controls['firstName'].errors?.['maxlength']) {
+            Imię nie może przekroczyć 100 znaków.
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Last Name Field -->
+    <div class="form-field">
+      <label for="lastName">Nazwisko *</label>
+      <input
+        id="lastName"
+        type="text"
+        pInputText
+        formControlName="lastName"
+        placeholder="np. Kowalski"
+        [class.ng-invalid]="controls['lastName'].invalid && controls['lastName'].touched"
+        [class.ng-dirty]="controls['lastName'].dirty"
+      />
+      @if (controls['lastName'].invalid && controls['lastName'].touched) {
+        <small class="p-error">
+          @if (controls['lastName'].errors?.['required']) {
+            Nazwisko jest wymagane.
+          }
+          @if (controls['lastName'].errors?.['maxlength']) {
+            Nazwisko nie może przekroczyć 100 znaków.
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Password Field -->
+    <div class="form-field">
+      <label for="password">Hasło *</label>
+      <p-password
+        inputId="password"
+        formControlName="password"
+        [toggleMask]="true"
+        [feedback]="true"
+        placeholder="Minimum 8 znaków"
+        styleClass="w-full"
+        [inputStyleClass]="'w-full'"
+        [class.ng-invalid]="controls['password'].invalid && controls['password'].touched"
+        [class.ng-dirty]="controls['password'].dirty"
+        promptLabel="Wprowadź hasło"
+        weakLabel="Słabe"
+        mediumLabel="Średnie"
+        strongLabel="Silne">
+      </p-password>
+      @if (controls['password'].invalid && controls['password'].touched) {
+        <small class="p-error">
+          @if (controls['password'].errors?.['required']) {
+            Hasło jest wymagane.
+          }
+          @if (controls['password'].errors?.['minlength']) {
+            Hasło musi zawierać minimum 8 znaków.
+          }
+          @if (controls['password'].errors?.['maxlength']) {
+            Hasło nie może przekroczyć 100 znaków.
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Household Field (Optional) -->
+    <div class="form-field">
+      <label for="householdId">Gospodarstwo (opcjonalnie)</label>
+      <p-dropdown
+        inputId="householdId"
+        formControlName="householdId"
+        [options]="householdOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Wybierz gospodarstwo"
+        [showClear]="true"
+        styleClass="w-full">
+      </p-dropdown>
+      <small class="help-text">
+        Użytkownik może być przypisany do gospodarstwa później.
+      </small>
+    </div>
+
+    <!-- Role Field -->
+    <div class="form-field">
+      <label for="role">Rola *</label>
+      <p-dropdown
+        inputId="role"
+        formControlName="role"
+        [options]="roleOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Wybierz rolę"
+        styleClass="w-full">
+      </p-dropdown>
+      <small class="help-text">
+        Domyślna rola: Członek. Może być zmieniona później.
+      </small>
+    </div>
+  </div>
+
+  <!-- Dialog Footer -->
+  <div class="dialog-footer">
+    <p-button
+      label="Anuluj"
+      severity="secondary"
+      (onClick)="closeDialog()"
+      [disabled]="isLoading()"
+    />
+    <p-button
+      label="Utwórz użytkownika"
+      type="submit"
+      icon="pi pi-user-plus"
+      [loading]="isLoading()"
+      [disabled]="createUserForm.invalid || isLoading()"
+    />
+  </div>
+</form>

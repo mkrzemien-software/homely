@@ -1,35 +1,35 @@
 <form [formGroup]="createHouseholdForm" (ngSubmit)="onSubmit()">
   <div class="dialog-content">
     <div class="form-field">
-      <label for="name">Household Name</label>
+      <label for="name">Nazwa gospodarstwa</label>
       <input
         id="name"
         type="text"
         pInputText
         formControlName="name"
-        placeholder="e.g. Smith Family Home"
+        placeholder="np. Dom rodziny Kowalskich"
         [class.ng-invalid]="createHouseholdForm.controls['name'].invalid && createHouseholdForm.controls['name'].touched"
         [class.ng-dirty]="createHouseholdForm.controls['name'].dirty"
       />
       @if (createHouseholdForm.controls['name'].invalid && createHouseholdForm.controls['name'].touched) {
         <small class="p-error">
           @if (createHouseholdForm.controls['name'].errors?.['required']) {
-            Household name is required.
+            Nazwa gospodarstwa jest wymagana.
           }
           @if (createHouseholdForm.controls['name'].errors?.['maxlength']) {
-            Name cannot exceed 100 characters.
+            Nazwa nie może przekroczyć 100 znaków.
           }
         </small>
       }
     </div>
 
     <div class="form-field">
-      <label for="address">Address (Optional)</label>
+      <label for="address">Adres (opcjonalnie)</label>
       <textarea
         id="address"
         pInputTextarea
         formControlName="address"
-        placeholder="e.g. 123 Main St, Anytown, USA"
+        placeholder="np. ul. Główna 123, Warszawa"
         [rows]="3"
         [class.ng-invalid]="createHouseholdForm.controls['address'].invalid && createHouseholdForm.controls['address'].touched"
         [class.ng-dirty]="createHouseholdForm.controls['address'].dirty"
@@ -37,7 +37,7 @@
         @if (createHouseholdForm.controls['address'].invalid && createHouseholdForm.controls['address'].touched) {
         <small class="p-error">
           @if (createHouseholdForm.controls['address'].errors?.['maxlength']) {
-            Address cannot exceed 255 characters.
+            Adres nie może przekroczyć 255 znaków.
           }
         </small>
       }
@@ -46,13 +46,13 @@
 
   <div class="dialog-footer">
     <p-button
-      label="Cancel"
+      label="Anuluj"
       severity="secondary"
       (onClick)="closeDialog()"
       [disabled]="isLoading()"
     />
     <p-button
-      label="Create Household"
+      label="Utwórz gospodarstwo"
       type="submit"
       [loading]="isLoading()"
       [disabled]="createHouseholdForm.invalid || isLoading()"

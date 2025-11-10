@@ -1,0 +1,40 @@
+<div class="system-dashboard-container">
+  <!-- Header Section -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="dashboard-title">
+          <i class="pi pi-th-large" aria-hidden="true"></i>
+          {{ pageTitle }}
+        </h1>
+        <p class="dashboard-subtitle">{{ pageSubtitle }}</p>
+      </div>
+
+      <!-- Optional: Quick Stats -->
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-label">Dostępne sekcje</span>
+          <span class="stat-value">{{ getEnabledTilesCount() }}/{{ getTotalTilesCount() }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <p-divider></p-divider>
+
+  <!-- Navigation Tiles Section -->
+  <section class="dashboard-content">
+    <app-navigation-tiles
+      [tiles]="navigationTiles()"
+      (tileClick)="onTileClick($event)">
+    </app-navigation-tiles>
+  </section>
+
+  <!-- Footer Info -->
+  <footer class="dashboard-footer">
+    <p class="footer-text">
+      <i class="pi pi-info-circle" aria-hidden="true"></i>
+      Sekcje oznaczone jako "Post-MVP" będą dostępne w przyszłych wersjach platformy.
+    </p>
+  </footer>
+</div>

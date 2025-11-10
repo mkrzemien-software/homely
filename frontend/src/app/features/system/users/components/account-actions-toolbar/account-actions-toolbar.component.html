@@ -2,7 +2,7 @@
   <p-toolbar>
     <ng-template pTemplate="start">
       <div class="toolbar-title">
-        <h3>Account Actions</h3>
+        <h3>Akcje konta</h3>
       </div>
     </ng-template>
 
@@ -10,27 +10,27 @@
       <div class="action-buttons">
         <!-- Reset Password -->
         <p-button
-          label="Reset Password"
+          label="Resetuj hasło"
           icon="pi pi-key"
           severity="danger"
           [outlined]="true"
           (onClick)="onResetPassword()"
           [disabled]="isActionInProgress()"
           [loading]="isProcessing()"
-          pTooltip="Send password reset email to user"
+          pTooltip="Wyślij email z resetem hasła do użytkownika"
           tooltipPosition="bottom"
         ></p-button>
 
         <!-- Unlock Account -->
         @if (isAccountLocked()) {
           <p-button
-            label="Unlock Account"
+            label="Odblokuj konto"
             icon="pi pi-unlock"
             severity="success"
             (onClick)="onUnlockAccount()"
             [disabled]="isActionInProgress()"
             [loading]="isProcessing()"
-            pTooltip="Unlock user account"
+            pTooltip="Odblokuj konto użytkownika"
             tooltipPosition="bottom"
           ></p-button>
         }

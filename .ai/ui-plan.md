@@ -303,16 +303,23 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 - **Ścieżka**: `/system/dashboard`
 - **Cel**: Główny panel administracyjny dla zarządzania całą platformą
 - **Kluczowe informacje**:
-  - Kluczowe metryki systemu (uptime, performance, errors)
-  - Przegląd aktywności gospodarstw
-  - Alerty systemowe i incydenty
-  - Szybkie statystyki (nowi użytkownicy, revenue, churn)
+  - Kafelki nawigacyjne do głównych sekcji systemowych
+  - **(Post-MVP)** Kluczowe metryki systemu (uptime, performance, errors)
+  - **(Post-MVP)** Przegląd aktywności gospodarstw
+  - **(Post-MVP)** Alerty systemowe i incydenty
+  - **(Post-MVP)** Szybkie statystyki (nowi użytkownicy, revenue, churn)
 - **Komponenty**:
-  - SystemMetricsDashboard
-  - AlertsPanel  
-  - QuickStats
-  - SystemHealthIndicator
-- **UX/Dostępność**: High-level overview, drill-down capabilities
+  - NavigationTiles (duże przyciski z ikonami do sekcji systemowych):
+    - 🏢 Gospodarstwa (`/system/households`)
+    - 👤 Użytkownicy (`/system/users`)
+    - 💳 Subskrypcje (`/system/subscriptions`)
+    - 🔧 Administracja (`/system/administration`)
+    - 🎧 Wsparcie (`/system/support`)
+  - **(Post-MVP)** SystemMetricsDashboard
+  - **(Post-MVP)** AlertsPanel  
+  - **(Post-MVP)** QuickStats
+  - **(Post-MVP)** SystemHealthIndicator
+- **UX/Dostępność**: Quick navigation via tiles; **(Post-MVP)** High-level overview, drill-down capabilities
 - **Bezpieczeństwo**: Super admin role verification, audit logging
 
 #### Zarządzanie Gospodarstwami
@@ -733,6 +740,18 @@ interface NavigationRules {
 - **Reusability**: Analytics page, premium dashboard
 
 ### 5.8 System Developer Components (Super Admin)
+
+#### NavigationTiles
+- **Cel**: Szybka nawigacja do głównych sekcji systemu z dashboardu
+- **Features**:
+  - Duże, klikalne kafelki z ikonami i opisami
+  - Responsive grid layout (2-3 kolumny w zależności od rozmiaru ekranu)
+  - Hover effects z subtle animations
+  - Badge indicators dla alertów/powiadomień na kafelkach
+  - Liczniki pokazujące aktualne statystyki każdej sekcji
+  - Keyboard navigation support (tab, enter)
+- **Reusability**: System dashboard, admin quick access panels
+- **Security**: Dynamic rendering based on super admin permissions
 
 #### SystemMetricsDashboard
 - **Cel**: Monitoring kluczowych metryk systemowych

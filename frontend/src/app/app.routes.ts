@@ -2,11 +2,6 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
-    path: '',
-    redirectTo: '/dashboard',
-    pathMatch: 'full'
-  },
-  {
     path: 'auth',
     children: [
       {
@@ -35,14 +30,15 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'dashboard',
-    loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
-    title: 'Dashboard - Homely'
-    // TODO: Create DashboardComponent and add auth guard
-  },
-  {
     path: 'system',
     children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/system/dashboard/system-dashboard.component').then(m => m.SystemDashboardComponent),
+        title: 'System Dashboard - Homely',
+        // TODO: Uncomment when authentication is fully implemented
+        // canActivate: [systemDeveloperGuard]
+      },
       {
         path: 'users',
         loadComponent: () => import('./features/system/users/system-users.component').then(m => m.SystemUsersComponent),
@@ -58,9 +54,5 @@ export const routes: Routes = [
         // canActivate: [systemDeveloperGuard]
       }
     ]
-  },
-  {
-    path: '**',
-    redirectTo: '/auth/login'
   }
 ];

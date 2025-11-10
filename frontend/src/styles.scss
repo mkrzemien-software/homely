@@ -5,6 +5,22 @@
 // Import PrimeNG styles
 @import 'primeicons/primeicons.css';
 
+// PrimeNG Button Customization
+p-button button,
+.p-button {
+  padding: var(--p-button-padding-y, 10px) var(--p-button-padding-x, 10px) !important;
+  gap: var(--p-button-gap, 10px) !important;
+  border-radius: 10px !important;
+}
+
+// PrimeNG Toast Customization
+.p-toast-message-content {
+  padding: 10px !important;
+  .p-toast-message-icon {
+    padding-right: 5px !important;
+  }
+}
+
 // Global Reset and Base Styles
 *,
 *::before,

@@ -8,9 +8,9 @@
           type="text"
           pInputText
           formControlName="searchTerm"
-          placeholder="Search by email, name, or household..."
+          placeholder="Szukaj po emailu, nazwisku lub gospodarstwie..."
           class="w-full"
-          aria-label="Search users"
+          aria-label="Szukaj użytkowników"
         />
       </p-iconfield>
     </div>
@@ -22,10 +22,10 @@
         [options]="roleOptions()"
         optionLabel="label"
         optionValue="value"
-        placeholder="Filter by role"
+        placeholder="Filtruj po roli"
         [showClear]="true"
         styleClass="w-full"
-        aria-label="Filter by role"
+        aria-label="Filtruj po roli"
       ></p-dropdown>
     </div>
 
@@ -36,10 +36,10 @@
         [options]="statusOptions()"
         optionLabel="label"
         optionValue="value"
-        placeholder="Filter by status"
+        placeholder="Filtruj po statusie"
         [showClear]="true"
         styleClass="w-full"
-        aria-label="Filter by status"
+        aria-label="Filtruj po statusie"
       ></p-dropdown>
     </div>
 
@@ -47,12 +47,12 @@
     <div class="action-buttons">
       @if (hasFilters()) {
         <p-button
-          label="Reset"
+          label="Resetuj"
           icon="pi pi-times"
           severity="secondary"
           [outlined]="true"
           (onClick)="resetSearch()"
-          aria-label="Reset filters"
+          aria-label="Resetuj filtry"
         ></p-button>
       }
     </div>

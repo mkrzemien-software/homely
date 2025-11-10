@@ -3,6 +3,11 @@
 // Centralized theme management system
 // ============================================
 
+// SCSS Functions
+@function hexToRgb($hex) {
+  @return red($hex), green($hex), blue($hex);
+}
+
 // Color Palette Base
 $homely-primary: #6366f1;      // Indigo
 $homely-secondary: #8b5cf6;    // Purple

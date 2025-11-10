@@ -3,6 +3,7 @@
 // CSS Custom Properties for dynamic theming
 // ============================================
 
+@use 'sass:color';
 @use './variables' as *;
 
 // Light Theme (Default)
@@ -115,6 +116,86 @@
   --transition-fast: #{$transition-fast};
   --transition-normal: #{$transition-normal};
   --transition-slow: #{$transition-slow};
+
+  // PrimeNG Button Variables
+  --p-button-padding-x: 10px;
+  --p-button-padding-y: 10px;
+  --p-button-gap: 10px;
+
+  --p-button-primary-background: #{$homely-primary};
+  --p-button-primary-border-color: #{$homely-primary};
+  --p-button-primary-color: #ffffff;
+  --p-button-primary-hover-background: #{color.adjust($homely-primary, $lightness: -5%)};
+  --p-button-primary-hover-border-color: #{color.adjust($homely-primary, $lightness: -5%)};
+  --p-button-primary-hover-color: #ffffff;
+
+  --p-button-secondary-background: #{$homely-secondary};
+  --p-button-secondary-border-color: #{$homely-secondary};
+  --p-button-secondary-color: #ffffff;
+  --p-button-secondary-hover-background: #{color.adjust($homely-secondary, $lightness: -5%)};
+  --p-button-secondary-hover-border-color: #{color.adjust($homely-secondary, $lightness: -5%)};
+  --p-button-secondary-hover-color: #ffffff;
+
+  --p-button-outlined-primary-border-color: #{$homely-primary};
+  --p-button-outlined-primary-color: #{$homely-primary};
+  --p-button-outlined-primary-hover-background: rgba(#{hexToRgb($homely-primary)}, 0.1);
+  --p-button-outlined-primary-hover-border-color: #{$homely-primary};
+  --p-button-outlined-primary-hover-color: #{$homely-primary};
+
+  --p-button-outlined-secondary-border-color: #{$homely-secondary};
+  --p-button-outlined-secondary-color: #{$homely-secondary};
+  --p-button-outlined-secondary-hover-background: rgba(#{hexToRgb($homely-secondary)}, 0.1);
+  --p-button-outlined-secondary-hover-border-color: #{$homely-secondary};
+  --p-button-outlined-secondary-hover-color: #{$homely-secondary};
+
+  --p-button-text-primary-color: #{$homely-primary};
+  --p-button-text-primary-hover-background: rgba(#{hexToRgb($homely-primary)}, 0.1);
+  --p-button-text-primary-hover-color: #{$homely-primary};
+
+  --p-button-success-background: #{$homely-success};
+  --p-button-success-border-color: #{$homely-success};
+  --p-button-success-color: #ffffff;
+
+  --p-button-danger-background: #{$homely-danger};
+  --p-button-danger-border-color: #{$homely-danger};
+  --p-button-danger-color: #ffffff;
+
+  --p-button-warning-background: #{$homely-warning};
+  --p-button-warning-border-color: #{$homely-warning};
+  --p-button-warning-color: #ffffff;
+
+  --p-button-info-background: #{$homely-info};
+  --p-button-info-border-color: #{$homely-info};
+  --p-button-info-color: #ffffff;
+
+  // PrimeNG Form Field Variables
+  --p-form-field-padding-x: 0.75rem;
+  --p-form-field-padding-y: 0.5rem;
+  --p-form-field-border-radius: 6px;
+  --p-form-field-border-color: var(--border-color);
+  --p-form-field-background: var(--surface);
+  --p-form-field-color: var(--text-primary);
+  --p-form-field-focus-border-color: var(--color-primary);
+  --p-form-field-hover-border-color: var(--border-hover);
+  --p-form-field-placeholder-color: var(--text-tertiary);
+  --p-form-field-disabled-background: var(--bg-tertiary);
+  --p-form-field-disabled-color: var(--text-disabled);
+
+  // PrimeNG IconField Variables
+  --p-iconfield-icon-color: var(--text-tertiary);
+  --p-iconfield-icon-hover-color: var(--text-secondary);
+
+  // PrimeNG Icon Variables
+  --p-icon-size: 1rem;
+
+  // PrimeNG Select Variables
+  --p-select-list-padding: 0.5rem 0;
+  --p-select-overlay-background: var(--surface);
+  --p-select-overlay-border-color: var(--border-color);
+  --p-select-option-padding: 0.5rem 1rem;
+  --p-select-option-focus-background: var(--surface-hover);
+  --p-select-option-selected-background: #{$homely-primary};
+  --p-select-option-selected-color: #ffffff;
 
   // Theme specific
   --theme-name: 'light';

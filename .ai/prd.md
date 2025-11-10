@@ -213,6 +213,21 @@ Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
 #### 3.4.6 Panel System Developer (Super Admin)
 Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów systemu:
 
+##### 3.4.6.0 Dashboard systemu
+- Główny panel administracyjny z kluczowymi metrykami platformy
+- **Kafelki nawigacyjne** (duże przyciski z ikonami) do głównych sekcji systemowych:
+  - 🏢 Gospodarstwa - przejście do `/system/households`
+  - 👤 Użytkownicy - przejście do `/system/users`
+  - 💳 Subskrypcje - przejście do `/system/subscriptions`
+  - 🔧 Administracja - przejście do `/system/administration`
+  - 🎧 Wsparcie - przejście do `/system/support`
+- **(Post-MVP)** Kluczowe metryki systemu (uptime, performance, error rate, response time)
+- **(Post-MVP)** Przegląd aktywności gospodarstw (nowe, aktywne, nieaktywne)
+- **(Post-MVP)** Panel alertów systemowych i incydentów wymagających uwagi
+- **(Post-MVP)** Szybkie statystyki biznesowe (nowi użytkownicy, MRR, churn rate)
+- **(Post-MVP)** Wykresy trendu wzrostu użytkowników i przychodów
+- **(Post-MVP)** Real-time monitoring statusu systemu
+
 ##### 3.4.6.1 Zarządzanie gospodarstwami
 - Lista wszystkich gospodarstw w systemie z podstawowymi statystykami
 - Wyszukiwanie i filtrowanie gospodarstw (po nazwie, dacie utworzenia, planie)

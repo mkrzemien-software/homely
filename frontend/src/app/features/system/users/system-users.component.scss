@@ -11,6 +11,39 @@
 .page-header {
   margin-bottom: 2rem;
 
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+
+  .header-text {
+    flex: 1;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      width: 100%;
+
+      ::ng-deep .p-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
   h1 {
     margin: 0 0 0.5rem;
     font-size: 2rem;
@@ -22,6 +55,10 @@
     margin: 0;
     color: var(--text-color-secondary);
     font-size: 1rem;
+  }
+
+  ::ng-deep .back-button {
+    white-space: nowrap;
   }
 }
 

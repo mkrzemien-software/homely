@@ -2,8 +2,8 @@
   <!-- Page Header -->
   <div class="page-header">
     <div class="header-left">
-      <h1>Household Management</h1>
-      <p class="subtitle">System-wide household administration</p>
+      <h1>Zarządzanie Gospodarstwami</h1>
+      <p class="subtitle">Administracja gospodarstwami w całym systemie</p>
     </div>
     <div class="header-right">
       <p-button
@@ -12,10 +12,15 @@
         [text]="true"
         severity="secondary"
         (onClick)="refresh()"
-        pTooltip="Refresh data"
       />
       <p-button
-        label="Create Household"
+        label="Powrót do Dashboard"
+        icon="pi pi-arrow-left"
+        [outlined]="true"
+        routerLink="/system/dashboard"
+      />
+      <p-button
+        label="Utwórz Gospodarstwo"
         icon="pi pi-plus"
         (onClick)="showCreateDialog()"
       />
@@ -30,7 +35,7 @@
           <i class="pi pi-home stat-icon"></i>
           <div class="stat-details">
             <div class="stat-value">{{ householdStats()!.totalHouseholds }}</div>
-            <div class="stat-label">Total Households</div>
+            <div class="stat-label">Wszystkie Gospodarstwa</div>
           </div>
         </div>
       </p-card>
@@ -40,7 +45,7 @@
           <i class="pi pi-check-circle stat-icon success"></i>
           <div class="stat-details">
             <div class="stat-value">{{ householdStats()!.activeHouseholds }}</div>
-            <div class="stat-label">Active</div>
+            <div class="stat-label">Aktywne</div>
           </div>
         </div>
       </p-card>
@@ -50,7 +55,7 @@
           <i class="pi pi-users stat-icon info"></i>
           <div class="stat-details">
             <div class="stat-value">{{ householdStats()!.totalMembers }}</div>
-            <div class="stat-label">Total Members</div>
+            <div class="stat-label">Wszyscy Członkowie</div>
           </div>
         </div>
       </p-card>
@@ -60,7 +65,7 @@
           <i class="pi pi-box stat-icon warning"></i>
           <div class="stat-details">
             <div class="stat-value">{{ householdStats()!.totalItems }}</div>
-            <div class="stat-label">Total Items</div>
+            <div class="stat-label">Wszystkie Elementy</div>
           </div>
         </div>
       </p-card>
@@ -75,19 +80,19 @@
         <input
           type="text"
           pInputText
-          placeholder="Search by household name or address..."
+          placeholder="Szukaj po nazwie lub adresie gospodarstwa..."
           [(ngModel)]="searchTerm"
           (keyup.enter)="onSearch()"
           class="w-full"
         />
       </span>
       <p-button
-        label="Search"
+        label="Szukaj"
         icon="pi pi-search"
         (onClick)="onSearch()"
       />
       <p-button
-        label="Clear"
+        label="Wyczyść"
         icon="pi pi-times"
         severity="secondary"
         [text]="true"
@@ -115,15 +120,15 @@
       >
         <ng-template pTemplate="header">
           <tr>
-            <th>Name</th>
-            <th>Address</th>
+            <th>Nazwa</th>
+            <th>Adres</th>
             <th>Plan</th>
             <th>Status</th>
-            <th>Members</th>
-            <th>Items</th>
-            <th>Tasks</th>
-            <th>Created</th>
-            <th class="text-center">Actions</th>
+            <th>Członkowie</th>
+            <th>Elementy</th>
+            <th>Zadania</th>
+            <th>Utworzono</th>
+            <th class="text-center">Akcje</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-household>
@@ -159,7 +164,7 @@
                   [text]="true"
                   severity="info"
                   (onClick)="viewHouseholdDetails(household)"
-                  pTooltip="View Details"
+                  pTooltip="Zobacz szczegóły"
                 />
                 <p-button
                   icon="pi pi-trash"
@@ -167,7 +172,7 @@
                   [text]="true"
                   severity="danger"
                   (onClick)="deleteHousehold(household, $event)"
-                  pTooltip="Delete Household"
+                  pTooltip="Usuń gospodarstwo"
                 />
               </div>
             </td>
@@ -178,8 +183,8 @@
             <td colspan="9" class="text-center">
               <div class="empty-state">
                 <i class="pi pi-inbox empty-icon"></i>
-                <p class="empty-text">No households found</p>
-                <p class="empty-subtext">Try adjusting your search criteria</p>
+                <p class="empty-text">Nie znaleziono gospodarstw</p>
+                <p class="empty-subtext">Spróbuj dostosować kryteria wyszukiwania</p>
               </div>
             </td>
           </tr>
@@ -206,22 +211,22 @@
     (onHide)="closeDetailsSidebar()"
   >
     <ng-template pTemplate="header">
-      <h3>Household Details</h3>
+      <h3>Szczegóły gospodarstwa</h3>
     </ng-template>
 
     @if (selectedHousehold()) {
       <div class="household-details">
         <!-- Basic Information -->
         <div class="detail-section">
-          <h4>Basic Information</h4>
+          <h4>Podstawowe informacje</h4>
           <div class="detail-grid">
             <div class="detail-item">
-              <label>Name</label>
+              <label>Nazwa</label>
               <div class="detail-value">{{ selectedHousehold()!.name }}</div>
             </div>
             <div class="detail-item">
-              <label>Address</label>
-              <div class="detail-value">{{ selectedHousehold()!.address || 'N/A' }}</div>
+              <label>Adres</label>
+              <div class="detail-value">{{ selectedHousehold()!.address || 'Brak' }}</div>
             </div>
             <div class="detail-item">
               <label>Plan</label>
@@ -241,10 +246,10 @@
 
         <!-- Statistics -->
         <div class="detail-section">
-          <h4>Statistics</h4>
+          <h4>Statystyki</h4>
           <div class="detail-grid">
             <div class="detail-item">
-              <label>Members</label>
+              <label>Członkowie</label>
               <div class="detail-value">
                 {{ selectedHousehold()!.memberCount }}
                 @if (selectedHousehold()!.maxMembers) {
@@ -253,7 +258,7 @@
               </div>
             </div>
             <div class="detail-item">
-              <label>Items</label>
+              <label>Elementy</label>
               <div class="detail-value">
                 {{ selectedHousehold()!.itemCount }}
                 @if (selectedHousehold()!.maxItems) {
@@ -262,11 +267,11 @@
               </div>
             </div>
             <div class="detail-item">
-              <label>Active Tasks</label>
+              <label>Aktywne zadania</label>
               <div class="detail-value">{{ selectedHousehold()!.taskCount }}</div>
             </div>
             <div class="detail-item">
-              <label>Completed Tasks</label>
+              <label>Ukończone zadania</label>
               <div class="detail-value">{{ selectedHousehold()!.completedTasksCount }}</div>
             </div>
           </div>
@@ -274,7 +279,7 @@
 
         <!-- Members List -->
         <div class="detail-section">
-          <h4>Members ({{ selectedHousehold()!.members.length }})</h4>
+          <h4>Członkowie ({{ selectedHousehold()!.members.length }})</h4>
           <div class="members-list">
             @for (member of selectedHousehold()!.members; track member.id) {
               <div class="member-item">
@@ -288,26 +293,26 @@
               </div>
             }
             @if (selectedHousehold()!.members.length === 0) {
-              <div class="empty-members">No members found</div>
+              <div class="empty-members">Nie znaleziono członków</div>
             }
           </div>
         </div>
 
         <!-- Dates -->
         <div class="detail-section">
-          <h4>Dates</h4>
+          <h4>Daty</h4>
           <div class="detail-grid">
             <div class="detail-item">
-              <label>Created</label>
+              <label>Utworzono</label>
               <div class="detail-value">{{ formatDate(selectedHousehold()!.createdAt) }}</div>
             </div>
             <div class="detail-item">
-              <label>Updated</label>
+              <label>Zaktualizowano</label>
               <div class="detail-value">{{ formatDate(selectedHousehold()!.updatedAt) }}</div>
             </div>
             @if (selectedHousehold()!.lastActivityAt) {
               <div class="detail-item">
-                <label>Last Activity</label>
+                <label>Ostatnia aktywność</label>
                 <div class="detail-value">{{ formatDate(selectedHousehold()!.lastActivityAt) }}</div>
               </div>
             }
@@ -322,7 +327,7 @@
       [(visible)]="createDialogVisible"
       [modal]="true"
       [style]="{ width: '35rem' }"
-      header="Create New Household"
+      header="Utwórz nowe gospodarstwo"
       (onHide)="hideCreateDialog()"
       [closable]="true"
       [draggable]="false"

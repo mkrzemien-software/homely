@@ -1,0 +1,71 @@
+<div class="navigation-tiles-container">
+  <div class="tiles-grid">
+    @for (tile of tiles(); track tile.id) {
+      <div
+        [class]="getTileClasses(tile)"
+        [attr.tabindex]="tile.enabled === false ? -1 : 0"
+        [attr.aria-disabled]="tile.enabled === false"
+        [attr.role]="'button'"
+        [attr.aria-label]="tile.title + ': ' + tile.description"
+        [routerLink]="tile.enabled !== false ? tile.route : null"
+        (click)="onTileClick(tile)"
+        (keydown)="onKeyDown($event, tile)"
+        pRipple>
+
+        <!-- Badge for notifications/alerts -->
+        @if (shouldShowBadge(tile)) {
+          <p-badge
+            [value]="formatBadgeCount(tile.badgeCount!)"
+            [severity]="tile.badgeSeverity || 'danger'"
+            class="tile-badge">
+          </p-badge>
+        }
+
+        <!-- Tile Content -->
+        <div class="tile-content">
+          <!-- Icon -->
+          <div class="tile-icon-wrapper">
+            <i [class]="getIconClasses(tile)" aria-hidden="true"></i>
+          </div>
+
+          <!-- Text Content -->
+          <div class="tile-text">
+            <h3 class="tile-title">{{ tile.title }}</h3>
+            <p class="tile-description">{{ tile.description }}</p>
+          </div>
+
+          <!-- Statistics (if available) -->
+          @if (shouldShowStats(tile)) {
+            <div class="tile-stats">
+              <div class="stat-value">{{ tile.stats!.value }}</div>
+              <div class="stat-label">{{ tile.stats!.label }}</div>
+              @if (tile.stats!.trend) {
+                <div class="stat-trend" [class]="getTrendColorClass(tile.stats!.trend)">
+                  <i [class]="getTrendIcon(tile.stats!.trend)"></i>
+                  @if (tile.stats!.trendValue) {
+                    <span>{{ tile.stats!.trendValue }}%</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Disabled Overlay -->
+          @if (tile.enabled === false) {
+            <div class="tile-disabled-overlay">
+              <span class="disabled-badge">
+                <i class="pi pi-lock" aria-hidden="true"></i>
+                Post-MVP
+              </span>
+            </div>
+          }
+        </div>
+
+        <!-- Hover Arrow -->
+        <div class="tile-arrow" aria-hidden="true">
+          <i class="pi pi-arrow-right"></i>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -92,6 +92,18 @@ export interface RoleUpdateRequest {
   newRole: UserRole;
 }
 
+/**
+ * Create user request
+ */
+export interface CreateUserRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  householdId?: string;
+  role?: UserRole;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -252,6 +264,23 @@ export class SystemUsersService {
         if (this.selectedUser()?.id === updatedUser.id) {
           this.selectedUser.set(updatedUser);
         }
+      }),
+      catchError((error: HttpErrorResponse) => {
+        return throwError(() => this.handleError(error));
+      })
+    );
+  }
+
+  /**
+   * Create new user (system admin only)
+   */
+  createUser(request: CreateUserRequest): Observable<SystemUser> {
+    return this.http.post<SystemUser>(this.API_URL, request).pipe(
+      tap((newUser) => {
+        // Add the new user to the list
+        const users = this.users();
+        this.users.set([newUser, ...users]);
+        this.totalUsers.set(this.totalUsers() + 1);
       }),
       catchError((error: HttpErrorResponse) => {
         return throwError(() => this.handleError(error));

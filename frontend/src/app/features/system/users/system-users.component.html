@@ -1,8 +1,27 @@
 <div class="system-users-view">
   <!-- Page Header -->
   <div class="page-header">
-    <h1>User Management</h1>
-    <p class="subtitle">Manage all user accounts across the system</p>
+    <div class="header-content">
+      <div class="header-text">
+        <h1>Zarządzanie Użytkownikami</h1>
+        <p class="subtitle">Zarządzaj wszystkimi kontami użytkowników w systemie</p>
+      </div>
+      <div class="header-actions">
+        <p-button
+          label="Powrót do Dashboard"
+          icon="pi pi-arrow-left"
+          [outlined]="true"
+          routerLink="/system/dashboard"
+          styleClass="back-button"
+        ></p-button>
+        <p-button
+            label="Dodaj użytkownika"
+            icon="pi pi-user-plus"
+            (onClick)="showCreateDialog()"
+            styleClass="create-user-button"
+          ></p-button>
+      </div>
+    </div>
   </div>
 
   <!-- Search Component -->
@@ -28,13 +47,13 @@
       >
         <ng-template pTemplate="header">
           <tr>
-            <th>User</th>
+            <th>Użytkownik</th>
             <th>Email</th>
-            <th>Household</th>
-            <th>Role</th>
+            <th>Gospodarstwo</th>
+            <th>Rola</th>
             <th>Status</th>
-            <th>Last Login</th>
-            <th class="actions-column">Actions</th>
+            <th>Ostatnie logowanie</th>
+            <th class="actions-column">Akcje</th>
           </tr>
         </ng-template>
 
@@ -83,7 +102,7 @@
                 [text]="true"
                 severity="info"
                 (onClick)="selectUser(user)"
-                pTooltip="View Details"
+                pTooltip="Zobacz szczegóły"
                 tooltipPosition="left"
               ></p-button>
             </td>
@@ -103,8 +122,8 @@
       <!-- No Users Found -->
       <div class="no-users">
         <i class="pi pi-users" style="font-size: 3rem"></i>
-        <h3>No users found</h3>
-        <p>Try adjusting your search filters</p>
+        <h3>Nie znaleziono użytkowników</h3>
+        <p>Spróbuj dostosować filtry wyszukiwania</p>
       </div>
     }
   </p-card>
@@ -119,7 +138,7 @@
   >
     @if (selectedUser()) {
       <ng-template pTemplate="header">
-        <h2>User Details</h2>
+        <h2>Szczegóły użytkownika</h2>
       </ng-template>
 
       <ng-template pTemplate="content">
@@ -144,4 +163,21 @@
       </ng-template>
     }
   </p-sidebar>
+
+  <!-- Create User Dialog -->
+  <p-dialog
+    [(visible)]="createDialogVisible"
+    [modal]="true"
+    [style]="{ width: '40rem' }"
+    header="Utwórz nowego użytkownika"
+    (onHide)="hideCreateDialog()"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <app-create-user-dialog
+      (userCreated)="onUserCreated()"
+      (dialogClosed)="hideCreateDialog()"
+    />
+  </p-dialog>
 </div>
