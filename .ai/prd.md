@@ -138,39 +138,41 @@ Dla każdej kategorii (przeglądy techniczne, wywóz śmieci, wizyty medyczne):
 ### 3.4 Widoki i nawigacja
 
 #### 3.4.1 Dashboard główny
-- Lista nadchodzących terminów (7 dni)
-- Wyróżnienie terminów przekroczonych
+- **Kafelki nawigacyjne** (duże przyciski z ikonami) do przełączania widoków:
+  - 📋 Zadania - lista nadchodzących terminów (7 dni) z szybkimi akcjami
+  - 🏷️ Kategorie - widok urządzeń/wizyt pogrupowanych po kategoriach
+  - ⚙️ Ustawienia - szybki dostęp do konfiguracji gospodarstwa
+- **Zintegrowany kalendarz** - dostępny z poziomu dashboardu jako widget lub tryb widoku
+  - Miesięczny widok terminów
+  - Kolorowe oznaczenia kategorii
+  - Możliwość kliknięcia w termin i wykonania akcji
+- Lista nadchodzących terminów z wyróżnieniem terminów przekroczonych
 - Szybkie akcje: potwierdź, przełóż, edytuj
 - Statystyki: liczba urządzeń, wykorzystanie limitu
 
-#### 3.4.2 Widok kalendarza
-- Miesięczny widok terminów
-- Kolorowe oznaczenia kategorii
-- Możliwość kliknięcia w termin i wykonania akcji
-
-#### 3.4.3 Lista urządzeń/wizyt
+#### 3.4.2 Lista urządzeń/wizyt
 - Wszystkie pozycje pogrupowane po kategorii
 - Sortowanie: po dacie, nazwie, priorytecie
 - Filtrowanie po kategorii, osobie odpowiedzialnej
 - Szybka edycja inline
 
-#### 3.4.4 Widok Dashboard (monitor)
+#### 3.4.3 Widok Dashboard (monitor)
 - Uproszczony, czytelny interfejs
 - Duża czcionka
 - Wyświetlanie tylko najbliższych 5 terminów
 - Auto-refresh co 5 minut
 
-#### 3.4.5 Panel Administratora
+#### 3.4.4 Panel Administratora
 Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
 
-##### 3.4.5.1 Zarządzanie gospodarstwem domowym
+##### 3.4.4.1 Zarządzanie gospodarstwem domowym
 - Edycja nazwy i adresu gospodarstwa
 - Przegląd statystyk gospodarstwa (liczba członków, urządzeń, terminów)
 - Historia zmian w gospodarstwie (audit log)
 - Ustawienia domyślne dla nowych urządzeń/wizyt
 - Archiwum usuniętych pozycji z możliwością przywrócenia
 
-##### 3.4.5.2 Zarządzanie członkami gospodarstwa
+##### 3.4.4.2 Zarządzanie członkami gospodarstwa
 - Lista wszystkich członków z rolami i statusami
 - Formularz dodawania nowych członków z wysyłką zaproszeń
 - Edycja ról i uprawnień istniejących członków
@@ -178,7 +180,7 @@ Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
 - Usuwanie członków z reassignment ich terminów
 - Zarządzanie zaproszeniami (pending, expired, resend)
 
-##### 3.4.5.3 Centralne zarządzanie terminami i urządzeniami
+##### 3.4.4.3 Centralne zarządzanie terminami i urządzeniami
 - Widok globalny wszystkich urządzeń/wizyt w gospodarstwie
 - Możliwość edycji terminów wszystkich członków
 - Masowe operacje (zmiana interwałów, reassignment odpowiedzialnych)
@@ -186,7 +188,7 @@ Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
 - Konfiguracja priorytetów i kategorii
 - Import/export danych urządzeń (CSV)
 
-##### 3.4.5.4 Zarządzanie subskrypcją i limitami
+##### 3.4.4.4 Zarządzanie subskrypcją i limitami
 - Przegląd aktualnego planu i wykorzystania limitów
 - Historia płatności i faktur
 - Upgrade/downgrade planu subskrypcji
@@ -194,7 +196,7 @@ Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
 - Ustawienia automatycznej odnowy
 - Przegląd kosztów gospodarstwa (tylko premium)
 
-##### 3.4.5.5 Ustawienia systemowe gospodarstwa
+##### 3.4.4.5 Ustawienia systemowe gospodarstwa
 - Konfiguracja stref czasowych i formatów dat
 - Ustawienia powiadomień dla całego gospodarstwa
 - Zarządzanie kategoriami i priorytetami
@@ -202,7 +204,7 @@ Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
 - Integracje z zewnętrznymi systemami
 - Logi systemowe i diagnostyka
 
-##### 3.4.5.6 Raporty i analizy administratora
+##### 3.4.4.6 Raporty i analizy administratora
 - Dashboard z kluczowymi metrykami gospodarstwa
 - Raporty wykorzystania funkcji przez członków
 - Analiza efektywności zarządzania terminami
@@ -210,10 +212,10 @@ Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
 - Przegląd najczęściej używanych urządzeń/kategorii
 - Export raportów dla zewnętrznych systemów księgowych
 
-#### 3.4.6 Panel System Developer (Super Admin)
+#### 3.4.5 Panel System Developer (Super Admin)
 Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów systemu:
 
-##### 3.4.6.0 Dashboard systemu
+##### 3.4.5.0 Dashboard systemu
 - Główny panel administracyjny z kluczowymi metrykami platformy
 - **Kafelki nawigacyjne** (duże przyciski z ikonami) do głównych sekcji systemowych:
   - 🏢 Gospodarstwa - przejście do `/system/households`
@@ -228,7 +230,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - **(Post-MVP)** Wykresy trendu wzrostu użytkowników i przychodów
 - **(Post-MVP)** Real-time monitoring statusu systemu
 
-##### 3.4.6.1 Zarządzanie gospodarstwami
+##### 3.4.5.1 Zarządzanie gospodarstwami
 - Lista wszystkich gospodarstw w systemie z podstawowymi statystykami
 - Wyszukiwanie i filtrowanie gospodarstw (po nazwie, dacie utworzenia, planie)
 - Tworzenie nowych gospodarstw z przypisaniem administratorów
@@ -237,7 +239,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - Przenoszenie członków między gospodarstwami
 - Historia zmian i operacji na gospodarstwach
 
-##### 3.4.6.2 Zarządzanie użytkownikami globalnie  
+##### 3.4.5.2 Zarządzanie użytkownikami globalnie  
 - Lista wszystkich użytkowników w systemie
 - Wyszukiwanie użytkowników po email, imieniu, gospodarstwie
 - Zmiana ról użytkowników w ramach ich gospodarstw
@@ -246,7 +248,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - Historia aktywności użytkowników (logowania, akcje)
 - Usuwanie kont i dane RODO compliance
 
-##### 3.4.6.3 Monitorowanie subskrypcji i płatności
+##### 3.4.5.3 Monitorowanie subskrypcji i płatności
 - Dashboard wszystkich subskrypcji w systemie
 - Przegląd przychodów i metryk finansowych
 - Zarządzanie promocjami i kodami rabatowymi
@@ -255,7 +257,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - Analiza churn rate i conversion metrics
 - Export danych finansowych dla księgowości
 
-##### 3.4.6.4 Administracja systemowa
+##### 3.4.5.4 Administracja systemowa
 - Monitorowanie wydajności i uptime systemu
 - Przegląd logów systemowych i błędów
 - Zarządzanie backup'ami i disaster recovery
@@ -264,7 +266,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - Aktualizacje systemu i maintenance mode
 - Monitoring bezpieczeństwa i incident response
 
-##### 3.4.6.5 Analizy i metryki globalne
+##### 3.4.5.5 Analizy i metryki globalne
 - Dashboard z kluczowymi KPI całej platformy
 - Analizy wzrostu użytkowników i retention
 - Statystyki wykorzystania funkcji na poziomie systemu  
@@ -273,7 +275,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - Przewidywania trendu i capacity planning
 - Export danych dla business intelligence
 
-##### 3.4.6.6 Wsparcie techniczne
+##### 3.4.5.6 Wsparcie techniczne
 - System ticketów i obsługa użytkowników
 - Narzędzia diagnostyczne i troubleshooting
 - Impersonacja użytkowników (z audit trail)

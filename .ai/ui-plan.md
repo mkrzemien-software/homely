@@ -53,35 +53,29 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 
 #### Dashboard Główny
 - **Ścieżka**: `/dashboard`
-- **Cel**: Centralny przegląd nadchodzących terminów i kluczowych statystyk gospodarstwa
+- **Cel**: Centralny hub z nawigacją kafelkową i przeglądem terminów
 - **Kluczowe informacje**: 
+  - **Kafelki nawigacyjne** (duże przyciski z ikonami) do zmiany widoku:
+    - 📋 Zadania - widok listy nadchodzących terminów (7 dni)
+    - 🏷️ Kategorie - widok urządzeń/wizyt pogrupowanych po kategoriach
+    - ⚙️ Ustawienia - szybki dostęp do konfiguracji gospodarstwa
+  - **Zintegrowany kalendarz** - dostępny jako widget/modal z poziomu dashboardu
   - Terminy na najbliższe 7 dni z oznaczeniem pilności
   - Statystyki wykorzystania limitu (wersja darmowa)
   - Szybkie akcje (potwierdź, przełóż, edytuj)
   - Przełącznik gospodarstw (jeśli dostęp do wielu)
 - **Komponenty**:
+  - NavigationTiles (kafelki do zmiany widoku - zadania/kategorie/ustawienia)
+  - CalendarWidget (zintegrowany mini kalendarz lub modal)
   - UpcomingTasksList z color-coded urgency
+  - CategoryGroupedView (widok pogrupowany po kategoriach)
   - QuickActionButtons (potwierdź, przełóż, szczegóły)
   - UsageStatistics (progress bars dla limitów freemium)
   - HouseholdSwitcher
-- **UX/Dostępność**: Auto-refresh co 5 minut, keyboard shortcuts, ARIA live regions
+- **UX/Dostępność**: Auto-refresh co 5 minut, keyboard shortcuts, ARIA live regions, tile-based navigation
 - **Bezpieczeństwo**: Role-based task visibility, permission checks na akcjach
 
-#### Widok Kalendarza
-- **Ścieżka**: `/calendar`
-- **Cel**: Wizualizacja terminów w układzie miesięcznym z możliwością szybkich akcji
-- **Kluczowe informacje**:
-  - Kalendarz miesięczny z kolorowymi oznaczeniami kategorii
-  - Legenda kategorii i priorytetów
-  - Szczegóły terminów po kliknięciu
-  - Nawigacja między miesiącami
-- **Komponenty**:
-  - PrimeNG FullCalendar z custom event rendering
-  - CalendarLegend
-  - TaskDetailsModal
-  - MonthNavigation
-- **UX/Dostępność**: Keyboard navigation przez daty, screen reader announcements
-- **Bezpieczeństwo**: Filtrowanie wydarzeń based on user permissions
+**Uwaga**: Kalendarz jest zintegrowany z dashboardem jako widget/modal, nie posiada osobnego widoku.
 
 #### Lista Urządzeń/Wizyt
 - **Ścieżka**: `/items`
@@ -453,13 +447,15 @@ Add First Item → Dashboard → Explore Features
 ```
 Login → Dashboard (Review Upcoming Tasks) → 
 Quick Actions (Confirm/Postpone) → 
-[Optional: Calendar View for Planning] → 
+[Optional: Switch Tile Views (Tasks/Categories/Settings)] → 
+[Optional: Open Integrated Calendar] → 
 [Optional: Items Management] → Logout
 ```
 
 **Kluczowe punkty**:
 - Fast access do najważniejszych informacji
 - One-click actions dla common tasks
+- Tile-based navigation dla różnych perspektyw
 - Optional deeper management functions
 
 ### 3.3 Administrator Workflow
@@ -511,8 +507,7 @@ Support Tools → Technical Monitoring
 
 **Standard Users (Admin, Domownik, Dashboard):**
 ```
-📊 Dashboard (wszystkie role)
-📅 Kalendarz (wszystkie role)  
+📊 Dashboard (wszystkie role) - z kafelkami nawigacyjnymi i zintegrowanym kalendarzem
 🏠 Urządzenia/Wizyty (Admin, Domownik)
 👥 Gospodarstwo (Admin only)
 📈 Historia (Premium only)
@@ -536,8 +531,9 @@ Support Tools → Technical Monitoring
 
 #### Bottom Navigation (Mobile)
 ```
-[Dashboard] [Kalendarz] [Urządzenia] [Menu]
+[Dashboard] [Urządzenia] [Gospodarstwo] [Menu]
 ```
+**Uwaga**: Kalendarz dostępny z poziomu Dashboard jako widget/modal
 
 ### 4.2 Secondary Navigation
 
@@ -560,8 +556,7 @@ Support Tools → Technical Monitoring
 ```typescript
 interface NavigationRules {
   // Standard User Routes
-  '/dashboard': ['admin', 'member', 'dashboard'],
-  '/calendar': ['admin', 'member', 'dashboard'],
+  '/dashboard': ['admin', 'member', 'dashboard'], // includes integrated calendar
   '/items': ['admin', 'member'],
   '/households/*/manage': ['admin'],
   '/premium/*': ['premium_subscription'],
@@ -605,6 +600,38 @@ interface NavigationRules {
 
 ### 5.2 Data Display Components
 
+#### NavigationTiles (Dashboard)
+- **Cel**: Kafelki nawigacyjne do przełączania widoków na dashboardzie
+- **Features**:
+  - Duże, klikalne kafelki z ikonami (Zadania/Kategorie/Ustawienia)
+  - Responsive grid layout (2-3 kolumny w zależności od rozmiaru ekranu)
+  - Active state indicator dla wybranego widoku
+  - Hover effects z subtle animations
+  - Keyboard navigation support (tab, enter)
+- **Reusability**: Dashboard główny
+- **Security**: Dynamic rendering based on user permissions
+
+#### CalendarWidget
+- **Cel**: Zintegrowany kalendarz w dashboardzie
+- **Features**:
+  - Kompaktowy widok miesięczny lub modal z pełnym widokiem
+  - Kolorowe oznaczenia kategorii
+  - Click na dzień pokazuje szczegóły terminów
+  - Nawigacja między miesiącami
+  - Responsive design (collapse na mobile)
+- **Reusability**: Dashboard główny, modals
+- **Security**: Filtrowanie wydarzeń based on user permissions
+
+#### CategoryGroupedView
+- **Cel**: Widok urządzeń/wizyt pogrupowanych po kategoriach
+- **Features**:
+  - Grupowanie itemów po kategoriach z możliwością collapse/expand
+  - Licznik itemów w każdej kategorii
+  - Szybki dostęp do akcji na itemach
+  - Sortowanie wewnątrz grup
+- **Reusability**: Dashboard (widok Kategorie)
+- **Security**: Role-based item visibility
+
 #### EditableDataTable
 - **Cel**: Tabela z inline editing capabilities
 - **Features**: 
@@ -623,12 +650,12 @@ interface NavigationRules {
 - **Reusability**: Dashboard, calendar popups
 
 #### CalendarEventRenderer
-- **Cel**: Custom rendering wydarzeń w kalendarzu
+- **Cel**: Custom rendering wydarzeń w zintegrowanym kalendarzu
 - **Features**:
   - Category color coding
   - Priority indicators
   - Hover details
-- **Reusability**: Main calendar, mini calendars
+- **Reusability**: CalendarWidget, mini calendars w dashboardzie
 
 ### 5.3 Form Components
 
@@ -666,7 +693,7 @@ interface NavigationRules {
   - Context-aware actions
   - Bulk operations support
   - Responsive button grouping
-- **Reusability**: Dashboard, task lists, calendar
+- **Reusability**: Dashboard (wszystkie widoki kafelkowe), task lists, calendar widget
 
 #### ConfirmDialog
 - **Cel**: Reusable confirmation dialogs
