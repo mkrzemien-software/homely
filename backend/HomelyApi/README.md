@@ -228,16 +228,109 @@ Common error scenarios:
 - **401 Unauthorized**: Invalid credentials or expired token
 - **500 Internal Server Error**: Server-side errors
 
+## System Households Management
+
+### Endpoints
+
+#### Create Household
+```http
+POST /api/system/households
+Content-Type: application/json
+
+{
+  "name": "My Household",
+  "address": "123 Main St",
+  "planTypeId": 1,
+  "adminUserId": "optional-user-uuid"
+}
+```
+
+**Important**: The `adminUserId` field is **optional**. You can:
+- Create a household **without** an admin by omitting `adminUserId`
+- Assign an admin later using the assign-admin endpoint
+- Create a household **with** an admin by providing `adminUserId`
+
+**Response (201 Created):**
+```json
+{
+  "id": "household-uuid",
+  "name": "My Household",
+  "address": "123 Main St",
+  "planTypeId": 1,
+  "planName": "Free",
+  "subscriptionStatus": "free",
+  "memberCount": 1,
+  "itemCount": 0,
+  "taskCount": 0,
+  "createdAt": "2025-11-11T10:00:00Z",
+  "updatedAt": "2025-11-11T10:00:00Z",
+  "isDeleted": false
+}
+```
+
+#### Assign Admin to Household
+```http
+POST /api/system/households/assign-admin
+Content-Type: application/json
+
+{
+  "householdId": "household-uuid",
+  "userId": "user-uuid"
+}
+```
+
+Use this endpoint to:
+- Assign an admin to a household created without one
+- Promote an existing member to admin role
+- Add a new user as admin if they're not already a member
+
+**Response (200 OK):**
+Returns the updated household information.
+
+#### Search Households
+```http
+GET /api/system/households?searchTerm=term&planTypeId=1&page=1&pageSize=20
+```
+
+#### Get Household Details
+```http
+GET /api/system/households/{householdId}
+```
+
+#### Update Household
+```http
+PUT /api/system/households/{householdId}
+Content-Type: application/json
+
+{
+  "name": "Updated Name",
+  "address": "New Address",
+  "planTypeId": 2,
+  "subscriptionStatus": "premium"
+}
+```
+
+#### Delete Household (Soft Delete)
+```http
+DELETE /api/system/households/{householdId}
+```
+
+#### Get Household Statistics
+```http
+GET /api/system/households/stats
+```
+
+Returns overall system statistics including total households, active households, plan distribution, etc.
+
 ## Next Steps
 
 To complete the Homely application according to the PRD:
 
 1. **User Registration** - Add signup endpoint
 2. **Password Reset** - Add password reset flow
-3. **Household Management** - Add household creation and member management
-4. **Device/Visit Management** - Add CRUD operations for devices and visits
-5. **Scheduling System** - Add appointment scheduling logic
-6. **Premium Features** - Add subscription and premium feature checks
+3. **Device/Visit Management** - Add CRUD operations for devices and visits
+4. **Scheduling System** - Add appointment scheduling logic
+5. **Premium Features** - Add subscription and premium feature checks
 
 ## Dependencies
 

@@ -28,7 +28,9 @@ public interface ISystemHouseholdsService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Create new household with admin assignment
+    /// Create new household with optional admin assignment.
+    /// If AdminUserId is provided, the user will be added as household admin.
+    /// If AdminUserId is not provided, admin can be assigned later via AssignAdminAsync.
     /// </summary>
     Task<SystemHouseholdDto> CreateHouseholdAsync(
         CreateHouseholdDto createDto,
@@ -50,7 +52,8 @@ public interface ISystemHouseholdsService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Assign admin to household
+    /// Assign admin to household. If the user is already a member, their role will be updated to admin.
+    /// If the user is not a member, they will be added as an admin member.
     /// </summary>
     Task<SystemHouseholdDto> AssignAdminAsync(
         AssignAdminDto assignDto,

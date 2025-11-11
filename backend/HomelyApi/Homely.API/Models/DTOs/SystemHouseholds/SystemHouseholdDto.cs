@@ -108,8 +108,10 @@ public class CreateHouseholdDto
 
     public int PlanTypeId { get; set; } = 1; // Default to free plan
 
-    [Required]
-    public Guid AdminUserId { get; set; }
+    /// <summary>
+    /// Optional admin user ID. If not provided, admin can be assigned later using the assign-admin endpoint.
+    /// </summary>
+    public Guid? AdminUserId { get; set; }
 }
 
 /// <summary>

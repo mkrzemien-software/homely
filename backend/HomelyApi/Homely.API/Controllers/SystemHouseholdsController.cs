@@ -144,9 +144,31 @@ public class SystemHouseholdsController : ControllerBase
     /// <summary>
     /// Create new household
     /// </summary>
-    /// <param name="createHouseholdDto">Household creation data</param>
+    /// <param name="createHouseholdDto">Household creation data. AdminUserId is optional - if not provided, admin can be assigned later via the assign-admin endpoint.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Created household</returns>
+    /// <remarks>
+    /// Sample request without admin:
+    ///
+    ///     POST /api/system/households
+    ///     {
+    ///         "name": "My Household",
+    ///         "address": "123 Main St",
+    ///         "planTypeId": 1
+    ///     }
+    ///
+    /// Sample request with admin:
+    ///
+    ///     POST /api/system/households
+    ///     {
+    ///         "name": "My Household",
+    ///         "address": "123 Main St",
+    ///         "planTypeId": 1,
+    ///         "adminUserId": "00000000-0000-0000-0000-000000000000"
+    ///     }
+    ///
+    /// To assign admin later, use POST /api/system/households/assign-admin
+    /// </remarks>
     [HttpPost]
     [ProducesResponseType(typeof(SystemHouseholdDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -268,9 +290,24 @@ public class SystemHouseholdsController : ControllerBase
     /// <summary>
     /// Assign admin to household
     /// </summary>
-    /// <param name="assignAdminDto">Admin assignment data</param>
+    /// <param name="assignAdminDto">Admin assignment data (householdId and userId)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Updated household</returns>
+    /// <remarks>
+    /// Use this endpoint to assign an admin to a household that was created without an admin,
+    /// or to promote an existing member to admin role.
+    ///
+    /// Sample request:
+    ///
+    ///     POST /api/system/households/assign-admin
+    ///     {
+    ///         "householdId": "00000000-0000-0000-0000-000000000000",
+    ///         "userId": "00000000-0000-0000-0000-000000000000"
+    ///     }
+    ///
+    /// If the user is already a member, their role will be updated to admin.
+    /// If the user is not a member, they will be added as an admin.
+    /// </remarks>
     [HttpPost("assign-admin")]
     [ProducesResponseType(typeof(SystemHouseholdDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

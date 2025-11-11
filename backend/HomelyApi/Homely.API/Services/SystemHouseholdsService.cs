@@ -132,11 +132,14 @@ public class SystemHouseholdsService : ISystemHouseholdsService
         CreateHouseholdDto createDto,
         CancellationToken cancellationToken = default)
     {
-        // Verify admin user exists
-        var adminUser = await _userProfileRepository.GetByIdAsync(createDto.AdminUserId, cancellationToken);
-        if (adminUser == null)
+        // Verify admin user exists if provided
+        if (createDto.AdminUserId.HasValue)
         {
-            throw new InvalidOperationException($"User with ID {createDto.AdminUserId} not found");
+            var adminUser = await _userProfileRepository.GetByIdAsync(createDto.AdminUserId.Value, cancellationToken);
+            if (adminUser == null)
+            {
+                throw new InvalidOperationException($"User with ID {createDto.AdminUserId} not found");
+            }
         }
 
         // Create household
@@ -153,19 +156,22 @@ public class SystemHouseholdsService : ISystemHouseholdsService
         household = await _householdRepository.AddAsync(household, cancellationToken);
         await _householdRepository.SaveChangesAsync(cancellationToken);
 
-        // Add admin member
-        var adminMember = new HouseholdMemberEntity
+        // Add admin member if provided
+        if (createDto.AdminUserId.HasValue)
         {
-            HouseholdId = household.Id,
-            UserId = createDto.AdminUserId,
-            Role = DatabaseConstants.HouseholdRoles.Admin,
-            JoinedAt = DateTimeOffset.UtcNow,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
-        };
+            var adminMember = new HouseholdMemberEntity
+            {
+                HouseholdId = household.Id,
+                UserId = createDto.AdminUserId.Value,
+                Role = DatabaseConstants.HouseholdRoles.Admin,
+                JoinedAt = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
 
-        await _householdMemberRepository.AddAsync(adminMember, cancellationToken);
-        await _householdMemberRepository.SaveChangesAsync(cancellationToken);
+            await _householdMemberRepository.AddAsync(adminMember, cancellationToken);
+            await _householdMemberRepository.SaveChangesAsync(cancellationToken);
+        }
 
         // Reload household with details
         var createdHousehold = await _householdRepository.GetHouseholdWithMembersAsync(household.Id, cancellationToken);
