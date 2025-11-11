@@ -137,6 +137,39 @@ Dla każdej kategorii (przeglądy techniczne, wywóz śmieci, wizyty medyczne):
 
 ### 3.4 Widoki i nawigacja
 
+#### 3.4.0 Główne menu nawigacyjne (Sidebar)
+Aplikacja wykorzystuje wysuwane menu z lewej strony, które zawiera:
+
+**Sekcja 1: Widoki Gospodarstwa** (dostępne dla wszystkich użytkowników w kontekście aktualnie otwartego gospodarstwa):
+- 📊 Dashboard - główny widok z kafelkami i kalendarzem
+- 📋 Zadania - lista nadchodzących terminów
+- 🏷️ Kategorie - widok urządzeń/wizyt pogrupowanych po kategoriach
+- 🏠 Urządzenia/Wizyty - pełna lista z możliwością zarządzania (Admin, Domownik)
+- 👥 Gospodarstwo - zarządzanie członkami i ustawieniami (tylko Administrator)
+- 📈 Historia - archiwum wykonanych zadań (tylko Premium)
+- 📊 Raporty - zestawienia kosztów (tylko Premium)
+- 🔬 Analizy - zaawansowane analizy predykcyjne (tylko Premium)
+- ⚙️ Ustawienia - konfiguracja profilu i preferencji
+- ❓ Pomoc - FAQ i wsparcie
+
+**Sekcja 2: Widoki Systemowe** (widoczna tylko dla użytkowników z rolą System Developer):
+- 🖥️ System Dashboard - główny panel administracyjny platformy
+- 🏢 Gospodarstwa - zarządzanie wszystkimi gospodarstwami w systemie
+- 👤 Użytkownicy - administracja wszystkich kont użytkowników
+- 💳 Subskrypcje - monitoring płatności i metryk finansowych
+- 🔧 Administracja - zarządzanie infrastrukturą i konfiguracją
+- 🎧 Wsparcie - narzędzia do obsługi użytkowników i troubleshooting
+- 📈 Metryki Systemu - globalne statystyki i KPI platformy
+- ⚙️ Konfiguracja Systemu - ustawienia globalne platformy
+
+**Zachowanie menu**:
+- Desktop (>1024px): Persistent sidebar zawsze widoczny, możliwość zwinięcia do ikon
+- Tablet (768-1024px): Collapsible sidebar, domyślnie zwinięty
+- Mobile (<768px): Hamburger menu z pełnoekranowym overlay
+- Pozycje menu dynamicznie filtrowane na podstawie roli użytkownika i subskrypcji
+- Wyraźne wizualne oddzielenie sekcji (separator, nagłówki sekcji)
+- Active state indicator dla aktualnie wybranego widoku
+
 #### 3.4.1 Dashboard główny
 - **Kafelki nawigacyjne** (duże przyciski z ikonami) do przełączania widoków:
   - 📋 Zadania - lista nadchodzących terminów (7 dni) z szybkimi akcjami
@@ -389,6 +422,64 @@ Planowane w kolejnych iteracjach:
 - Udostępnianie dostępu sąsiadom (np. podlewanie roślin)
 
 ## 5. Historyjki użytkowników
+
+### 5.0 Nawigacja i interfejs użytkownika
+
+US-000: Nawigacja przez sidebar
+Jako użytkownik aplikacji
+Chcę używać wysuwnego menu z lewej strony
+Aby szybko przechodzić między różnymi widokami aplikacji
+
+Kryteria akceptacji:
+- Sidebar zawiera dwie sekcje: Widoki Gospodarstwa i Widoki Systemowe (jeśli System Developer)
+- Sekcja 1 wyświetla widoki dla aktualnie otwartego gospodarstwa
+- Pozycje menu są dynamicznie filtrowane na podstawie roli i subskrypcji użytkownika
+- Wizualne oznaczenie aktywnego widoku
+- Desktop: persistent sidebar z możliwością zwinięcia do ikon
+- Tablet: collapsible sidebar, domyślnie zwinięty
+- Mobile: hamburger menu z pełnoekranowym overlay
+- Smooth transitions przy collapse/expand
+- Keyboard navigation (Tab, Enter, Arrow keys)
+- Tooltips dla ikon w trybie zwiniętym
+
+US-000a: Sekcja widoków gospodarstwa w sidebar
+Jako użytkownik z dostępem do gospodarstwa
+Chcę widzieć menu z widokami dla mojego gospodarstwa
+Aby łatwo nawigować między funkcjami gospodarstwa
+
+Kryteria akceptacji:
+- Nagłówek sekcji z nazwą aktualnego gospodarstwa
+- Lista widoków: Dashboard, Zadania, Kategorie, Urządzenia/Wizyty, etc.
+- Ukrycie pozycji "Gospodarstwo" dla użytkowników nie będących administratorami
+- Oznaczenie funkcji premium (badge/icon) dla użytkowników bez subskrypcji
+- Zmiana gospodarstwa odświeża zawartość sekcji
+- Separator wizualny pomiędzy widokami gospodarstwa a widokami systemowymi
+
+US-000b: Sekcja widoków systemowych w sidebar
+Jako System Developer
+Chcę widzieć dodatkową sekcję menu z widokami administracyjnymi
+Aby szybko przechodzić do narzędzi zarządzania platformą
+
+Kryteria akceptacji:
+- Sekcja widoczna tylko dla użytkowników z rolą System Developer
+- Nagłówek sekcji "Administracja Systemu"
+- Lista widoków systemowych: System Dashboard, Gospodarstwa, Użytkownicy, etc.
+- Wizualne oddzielenie od sekcji gospodarstwa (separator, inny kolor tła)
+- Badge indicators dla alertów/powiadomień systemowych
+- Możliwość dostępu zarówno do widoków gospodarstwa jak i systemowych
+
+US-000c: Przełączanie gospodarstw z sidebar
+Jako użytkownik z dostępem do wielu gospodarstw
+Chcę przełączać się między gospodarstwami z poziomu sidebar
+Aby szybko zarządzać różnymi gospodarstwami
+
+Kryteria akceptacji:
+- Dropdown z listą gospodarstw w headerze sekcji gospodarstwa
+- Wyświetlanie roli w każdym gospodarstwie
+- Quick stats per household (liczba zadań, pilne terminy)
+- Zmiana gospodarstwa aktualizuje zawartość sekcji 1 sidebar
+- Zmiana gospodarstwa przekierowuje na dashboard wybranego gospodarstwa
+- Zapamiętanie ostatnio wybranego gospodarstwa
 
 ### 5.1 Rejestracja i uwierzytelnianie
 
@@ -786,7 +877,41 @@ Kryteria akceptacji:
 
 ### 5.4 Zarządzanie terminami
 
-US-013: Wyświetlanie nadchodzących terminów
+US-012a: Widok Zadań (lista terminów)
+Jako użytkownik
+Chcę mieć dedykowany widok z listą nadchodzących zadań
+Aby w jednym miejscu zarządzać wszystkimi terminami na najbliższe dni
+
+Kryteria akceptacji:
+- Dostęp przez sidebar (📋 Zadania) lub kafelek na dashboardzie
+- Lista terminów na najbliższe 7 dni
+- Sortowanie chronologiczne
+- Wyróżnienie kolorystyczne: przekroczony (czerwony), dzisiaj (pomarańczowy), nadchodzące (zielony)
+- Filtry: osoba odpowiedzialna, kategoria, priorytet
+- Licznik zadań według statusu (przekroczone/dzisiaj/nadchodzące)
+- Wyświetlanie: nazwa, kategoria, osoba odpowiedzialna, data
+- Szybkie akcje na każdym zadaniu: potwierdź, przełóż, edytuj
+- Możliwość zmiany widoku między listą a kalendarzem
+- Odświeżanie w czasie rzeczywistym
+
+US-012b: Widok Kategorii (urządzenia pogrupowane)
+Jako użytkownik
+Chcę widzieć moje urządzenia i wizyty pogrupowane po kategoriach
+Aby łatwiej zarządzać podobnymi elementami razem
+
+Kryteria akceptacji:
+- Dostęp przez sidebar (🏷️ Kategorie) lub kafelek na dashboardzie
+- Grupy kategorii z możliwością collapse/expand
+- Licznik itemów w każdej kategorii
+- Najbliższy termin dla każdego urządzenia/wizyty
+- Wyróżnienie itemów z przekroczonym terminem
+- Możliwość dodania nowego itemu bezpośrednio do kategorii
+- Szybki dostęp do edycji itemów
+- Sortowanie wewnątrz kategorii (nazwa, najbliższy termin, priorytet)
+- Możliwość przeciągania itemów między kategoriami
+- Accordion navigation z lazy loading dla dużych kategorii
+
+US-013: Wyświetlanie nadchodzących terminów na dashboardzie
 Jako użytkownik
 Chcę widzieć nadchodzące terminy na dashboardzie
 Aby być na bieżąco z obowiązkami
@@ -798,6 +923,7 @@ Kryteria akceptacji:
 - Wyświetlanie: nazwa, kategoria, osoba odpowiedzialna, data
 - Szybkie akcje: potwierdź, przełóż, edytuj
 - Odświeżanie w czasie rzeczywistym
+- Link do pełnego widoku zadań
 
 US-014: Potwierdzanie wykonania terminu
 Jako domownik

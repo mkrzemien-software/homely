@@ -1,0 +1,289 @@
+// Household Dashboard Container
+.household-dashboard-container {
+  min-height: 100vh;
+  padding: 2rem;
+  background: var(--surface-ground);
+
+  // Max width for better readability on large screens
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+// Dashboard Header
+.dashboard-header {
+  margin-bottom: 2rem;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+
+  .header-text {
+    flex: 1;
+  }
+}
+
+// Dashboard Title
+.dashboard-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
+
+  i {
+    font-size: 1.75rem;
+    color: var(--primary-color);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+
+    i {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+// Dashboard Subtitle
+.dashboard-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-color-secondary);
+  margin: 0;
+  line-height: 1.5;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}
+
+// Header Info (Household ID display)
+.header-info {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius);
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 0.5rem 1rem;
+  }
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  font-weight: 500;
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+}
+
+.info-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  font-family: var(--font-family-mono, 'Courier New', monospace);
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}
+
+// Divider spacing
+::ng-deep {
+  .p-divider {
+    margin: 2rem 0;
+
+    @media (max-width: 768px) {
+      margin: 1.5rem 0;
+    }
+  }
+}
+
+// Dashboard Content
+.dashboard-content {
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 1.5rem;
+  }
+}
+
+// Content Header
+.content-header {
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+  }
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0 0 0.5rem 0;
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}
+
+.section-description {
+  font-size: 1rem;
+  color: var(--text-color-secondary);
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+}
+
+// Dashboard Footer
+.dashboard-footer {
+  margin-top: 3rem;
+  padding: 1.5rem;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius);
+  text-align: center;
+
+  @media (max-width: 768px) {
+    margin-top: 2rem;
+    padding: 1rem;
+  }
+}
+
+.footer-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-color-secondary);
+  margin: 0;
+  line-height: 1.5;
+
+  i {
+    font-size: 1.1rem;
+    color: var(--blue-500);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+// Loading Container
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  padding: 2rem;
+}
+
+// Dark mode adjustments
+@media (prefers-color-scheme: dark) {
+  .household-dashboard-container {
+    background: var(--surface-ground);
+  }
+
+  .info-item {
+    background: var(--surface-section);
+  }
+
+  .dashboard-footer {
+    background: var(--surface-section);
+  }
+}
+
+// Print styles
+@media print {
+  .household-dashboard-container {
+    padding: 0;
+  }
+
+  .dashboard-footer {
+    display: none;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .dashboard-title i,
+  .info-value {
+    color: var(--primary-color);
+  }
+
+  .info-item,
+  .dashboard-footer {
+    border-width: 2px;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Responsive adjustments for tablets
+@media (min-width: 769px) and (max-width: 1024px) {
+  .household-dashboard-container {
+    padding: 1.5rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.75rem;
+  }
+
+  .header-info {
+    gap: 1rem;
+  }
+}
+
+// Large screen optimizations
+@media (min-width: 1441px) {
+  .household-dashboard-container {
+    max-width: 1600px;
+  }
+}

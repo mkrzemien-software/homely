@@ -54,5 +54,39 @@ export const routes: Routes = [
         // canActivate: [systemDeveloperGuard]
       }
     ]
+  },
+  {
+    path: ':householdId',
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/household/dashboard/household-dashboard.component').then(m => m.HouseholdDashboardComponent),
+        title: 'Dashboard - Homely',
+        // TODO: Uncomment when authentication is fully implemented
+        // canActivate: [authGuard, householdMemberGuard]
+      },
+      {
+        path: 'tasks',
+        redirectTo: 'dashboard', // TODO: Create TasksComponent
+        pathMatch: 'full'
+      },
+      {
+        path: 'categories',
+        loadComponent: () => import('./features/household/items/items-list.component').then(m => m.ItemsListComponent),
+        title: 'Urządzenia i Wizyty - Homely',
+        // TODO: Uncomment when authentication is fully implemented
+        // canActivate: [authGuard, householdMemberGuard]
+      },
+      {
+        path: 'settings',
+        redirectTo: 'dashboard', // TODO: Create SettingsComponent
+        pathMatch: 'full'
+      },
+      {
+        path: 'profile',
+        redirectTo: 'dashboard', // TODO: Create ProfileComponent (for member role)
+        pathMatch: 'full'
+      }
+    ]
   }
 ];

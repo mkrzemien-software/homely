@@ -1,3 +1,25 @@
+// App Layout with Sidebar
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--surface-ground);
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 280px; // Sidebar width expanded
+  min-height: 100vh;
+  transition: margin-left 0.3s ease-in-out;
+
+  @media (max-width: 1024px) {
+    margin-left: 80px; // Sidebar width collapsed
+  }
+
+  @media (max-width: 768px) {
+    margin-left: 0; // No sidebar margin on mobile
+  }
+}
+
 // Theme Showcase Styles
 .theme-showcase {
   min-height: 100vh;

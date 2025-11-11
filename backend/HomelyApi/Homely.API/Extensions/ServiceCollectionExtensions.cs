@@ -49,8 +49,9 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ISystemUsersService, SystemUsersService>();
         services.AddScoped<ISystemHouseholdsService, SystemHouseholdsService>();
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<ITaskService, TaskService>();
         // services.AddScoped<IHouseholdService, HouseholdService>();
-        // services.AddScoped<ITaskService, TaskService>();
         // services.AddScoped<IItemService, ItemService>();
 
         return services;

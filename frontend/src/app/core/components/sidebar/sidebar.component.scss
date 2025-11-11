@@ -1,0 +1,395 @@
+// Sidebar Navigation Styles
+
+// Variables
+$sidebar-width-expanded: 280px;
+$sidebar-width-collapsed: 80px;
+$sidebar-header-height: 70px;
+$sidebar-footer-height: 60px;
+$transition-duration: 0.3s;
+
+// Sidebar Container
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: $sidebar-width-expanded;
+  background: var(--surface-card);
+  border-right: 1px solid var(--surface-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: width $transition-duration ease-in-out, transform $transition-duration ease-in-out;
+  overflow: hidden;
+
+  // Collapsed state (desktop/tablet)
+  &.collapsed {
+    width: $sidebar-width-collapsed;
+
+    .menu-label,
+    .menu-badge,
+    .logo-text,
+    .section-title,
+    .household-name,
+    .footer-content {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .menu-item {
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .section-header {
+      padding: 0.5rem;
+    }
+  }
+
+  // Mobile state
+  &.mobile {
+    width: 100%;
+    max-width: 320px;
+    transform: translateX(-100%);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+
+    &.visible {
+      transform: translateX(0);
+    }
+  }
+}
+
+// Sidebar Header
+.sidebar-header {
+  height: $sidebar-header-height;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--surface-border);
+  flex-shrink: 0;
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+
+    i {
+      font-size: 2rem;
+    }
+
+    .logo-text {
+      transition: opacity $transition-duration ease-in-out;
+    }
+
+    &.collapsed {
+      justify-content: center;
+    }
+  }
+
+  .toggle-btn,
+  .close-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+// Sidebar Content
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem 0;
+
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--surface-ground);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--surface-border);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--text-color-secondary);
+    }
+  }
+}
+
+// Menu Section
+.menu-section {
+  margin-bottom: 1.5rem;
+
+  .section-header {
+    padding: 0.75rem 1.5rem 0.5rem;
+    transition: padding $transition-duration ease-in-out;
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-color-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 0.5rem 0;
+      transition: opacity $transition-duration ease-in-out;
+    }
+
+    .household-name {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-color);
+      margin-top: 0.25rem;
+      padding: 0.5rem;
+      background: var(--surface-ground);
+      border-radius: var(--border-radius);
+      transition: opacity $transition-duration ease-in-out;
+
+      i {
+        color: var(--primary-color);
+      }
+    }
+
+    .section-divider {
+      height: 2px;
+      background: var(--surface-border);
+      margin: 0.5rem 0;
+    }
+  }
+}
+
+// Menu Items
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0 0.5rem;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  color: var(--text-color);
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  position: relative;
+
+  .menu-icon {
+    font-size: 1.25rem;
+    color: var(--text-color-secondary);
+    transition: color 0.2s ease-in-out;
+    flex-shrink: 0;
+  }
+
+  .menu-label {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: opacity $transition-duration ease-in-out;
+  }
+
+  .menu-badge {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.5rem;
+    transition: opacity $transition-duration ease-in-out;
+  }
+
+  // Hover state
+  &:hover {
+    background: var(--surface-hover);
+
+    .menu-icon {
+      color: var(--primary-color);
+    }
+  }
+
+  // Active state
+  &.active {
+    background: var(--primary-color);
+    color: var(--primary-color-text);
+
+    .menu-icon {
+      color: var(--primary-color-text);
+    }
+
+    .menu-label {
+      font-weight: 600;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 70%;
+      background: var(--primary-color-text);
+      border-radius: 0 2px 2px 0;
+    }
+  }
+
+  // Focus state (keyboard navigation)
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+}
+
+// Sidebar Footer
+.sidebar-footer {
+  height: $sidebar-footer-height;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--surface-border);
+  flex-shrink: 0;
+
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-color-secondary);
+    transition: opacity $transition-duration ease-in-out;
+
+    .footer-text {
+      font-weight: 500;
+    }
+
+    .footer-version {
+      opacity: 0.7;
+    }
+  }
+}
+
+// Mobile Overlay
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Hamburger Button (Mobile)
+.hamburger-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 998;
+  width: 3rem;
+  height: 3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+// PrimeNG Divider customization
+::ng-deep {
+  .sidebar-container .p-divider {
+    margin: 0.5rem 0;
+
+    &.p-divider-horizontal {
+      &::before {
+        border-top-color: var(--surface-border);
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .sidebar-container {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar-container {
+    width: $sidebar-width-collapsed;
+
+    &:not(.collapsed) {
+      width: $sidebar-width-expanded;
+    }
+  }
+}
+
+// Dark mode adjustments
+@media (prefers-color-scheme: dark) {
+  .sidebar-container {
+    background: var(--surface-section);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .menu-item {
+    &:hover {
+      background: var(--surface-ground);
+    }
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .sidebar-container {
+    border-right-width: 2px;
+  }
+
+  .menu-item {
+    border: 1px solid transparent;
+
+    &.active {
+      border-color: var(--primary-color-text);
+    }
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-container,
+  .menu-item,
+  .menu-icon,
+  .menu-label,
+  .menu-badge,
+  .logo-text,
+  .section-title,
+  .household-name,
+  .footer-content {
+    transition: none;
+  }
+
+  .sidebar-overlay {
+    animation: none;
+  }
+}
+
+// Print styles
+@media print {
+  .sidebar-container,
+  .sidebar-overlay,
+  .hamburger-btn {
+    display: none;
+  }
+}

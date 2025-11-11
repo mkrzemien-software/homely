@@ -1,0 +1,131 @@
+<!-- Sidebar Navigation -->
+<div
+  class="sidebar-container"
+  [class.collapsed]="isCollapsed()"
+  [class.mobile]="isMobileView()"
+  [class.visible]="isVisible()"
+>
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    @if (!isCollapsed()) {
+      <div class="sidebar-logo">
+        <i class="pi pi-home"></i>
+        <span class="logo-text">Homely</span>
+      </div>
+    } @else {
+      <div class="sidebar-logo collapsed">
+        <i class="pi pi-home"></i>
+      </div>
+    }
+
+    <!-- Toggle button (desktop/tablet) -->
+    @if (!isMobileView()) {
+      <button
+        pButton
+        type="button"
+        class="p-button-text p-button-rounded toggle-btn"
+        [icon]="isCollapsed() ? 'pi pi-angle-right' : 'pi pi-angle-left'"
+        (click)="toggleCollapsed()"
+        pTooltip="Zwiń/Rozwiń menu"
+        tooltipPosition="right"
+      ></button>
+    }
+
+    <!-- Close button (mobile) -->
+    @if (isMobileView()) {
+      <button
+        pButton
+        type="button"
+        class="p-button-text p-button-rounded close-btn"
+        icon="pi pi-times"
+        (click)="closeSidebar()"
+      ></button>
+    }
+  </div>
+
+  <p-divider></p-divider>
+
+  <!-- Menu Sections -->
+  <div class="sidebar-content">
+    @for (section of menuSections(); track section.id) {
+      <div class="menu-section">
+        <!-- Section Header -->
+        <div class="section-header">
+          @if (!isCollapsed()) {
+            <h3 class="section-title">{{ section.title }}</h3>
+
+            <!-- Household Name (Section 1 only) -->
+            @if (section.id === 'household-section' && currentHouseholdId()) {
+              <div class="household-name">
+                <i class="pi pi-building"></i>
+                <span>{{ householdName() }}</span>
+              </div>
+            }
+          } @else {
+            <div class="section-divider"></div>
+          }
+        </div>
+
+        <!-- Menu Items -->
+        <nav class="menu-items">
+          @for (item of section.items; track item.id) {
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              class="menu-item"
+              [class.has-badge]="item.badge"
+              [pTooltip]="isCollapsed() ? item.label : item.tooltip || ''"
+              tooltipPosition="right"
+              (click)="navigateTo(item.route!)"
+            >
+              <i [class]="item.icon" class="menu-icon"></i>
+
+              @if (!isCollapsed()) {
+                <span class="menu-label">{{ item.label }}</span>
+
+                @if (item.badge) {
+                  <span class="menu-badge p-badge p-badge-warning">
+                    {{ item.badge }}
+                  </span>
+                }
+              }
+            </a>
+          }
+        </nav>
+
+        <!-- Section Separator -->
+        @if (section.showSeparator && !isCollapsed()) {
+          <p-divider></p-divider>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    @if (!isCollapsed()) {
+      <div class="footer-content">
+        <span class="footer-text">© 2024 Homely</span>
+        <span class="footer-version">v1.0.0</span>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Overlay for mobile -->
+@if (isMobileView() && isVisible()) {
+  <div class="sidebar-overlay" (click)="closeSidebar()"></div>
+}
+
+<!-- Hamburger button for mobile (outside sidebar) -->
+@if (isMobileView() && !isVisible()) {
+  <button
+    pButton
+    type="button"
+    class="p-button-rounded hamburger-btn"
+    icon="pi pi-bars"
+    (click)="toggleSidebar()"
+    pTooltip="Otwórz menu"
+    tooltipPosition="right"
+  ></button>
+}

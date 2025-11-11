@@ -77,6 +77,41 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 
 **Uwaga**: Kalendarz jest zintegrowany z dashboardem jako widget/modal, nie posiada osobnego widoku.
 
+#### Widok Zadań
+- **Ścieżka**: `/tasks`
+- **Cel**: Lista nadchodzących terminów na najbliższe 7 dni z możliwością wykonywania akcji
+- **Kluczowe informacje**:
+  - Lista terminów chronologicznie
+  - Wyróżnienie kolorystyczne (przekroczony/dzisiaj/nadchodzący)
+  - Szybkie akcje na każdym zadaniu
+  - Filtry (osoba odpowiedzialna, kategoria, priorytet)
+  - Licznik zadań według statusu
+- **Komponenty**:
+  - TasksList z filtering
+  - TaskCard z quick actions
+  - TaskFilters
+  - TaskActionButtons
+- **UX/Dostępność**: Focus management, keyboard shortcuts dla akcji
+- **Bezpieczeństwo**: Permission checks per task based on assignment
+- **Dostęp przez**: Sidebar (📋 Zadania) lub kafelek na dashboardzie
+
+#### Widok Kategorii
+- **Ścieżka**: `/categories`
+- **Cel**: Urządzenia i wizyty pogrupowane po kategoriach dla lepszego przeglądu
+- **Kluczowe informacje**:
+  - Grupy kategorii z możliwością collapse/expand
+  - Licznik itemów w każdej kategorii
+  - Najbliższy termin dla każdego itemu
+  - Szybki dostęp do edycji itemów
+- **Komponenty**:
+  - CategoryGroupedView
+  - CategoryAccordion
+  - ItemCard z next task date
+  - AddItemButton per category
+- **UX/Dostępność**: Accordion navigation, lazy loading dla dużych kategorii
+- **Bezpieczeństwo**: Role-based item visibility and edit permissions
+- **Dostęp przez**: Sidebar (🏷️ Kategorie) lub kafelek na dashboardzie
+
 #### Lista Urządzeń/Wizyt
 - **Ścieżka**: `/items`
 - **Cel**: Kompleksowe zarządzanie wszystkimi urządzeniami i wizytami w gospodarstwie
@@ -447,6 +482,7 @@ Add First Item → Dashboard → Explore Features
 ```
 Login → Dashboard (Review Upcoming Tasks) → 
 Quick Actions (Confirm/Postpone) → 
+[Optional: Sidebar Navigation to Tasks/Categories/Items] → 
 [Optional: Switch Tile Views (Tasks/Categories/Settings)] → 
 [Optional: Open Integrated Calendar] → 
 [Optional: Items Management] → Logout
@@ -455,21 +491,25 @@ Quick Actions (Confirm/Postpone) →
 **Kluczowe punkty**:
 - Fast access do najważniejszych informacji
 - One-click actions dla common tasks
-- Tile-based navigation dla różnych perspektyw
+- Sidebar navigation dla szybkiego dostępu do wszystkich widoków
+- Tile-based navigation na dashboardzie dla alternatywnego sposobu nawigacji
 - Optional deeper management functions
 
 ### 3.3 Administrator Workflow
 
 ```
-Login → Dashboard → Household Management → 
+Login → Dashboard → [Sidebar Navigation] → 
+Household Management (via Sidebar) → 
 Member Management → Items/Tasks Management → 
 Subscription Management → Settings
 ```
 
 **Kluczowe punkty**:
 - Full control nad gospodarstwem
+- Sidebar z rozszerzoną sekcją widoków gospodarstwa (w tym opcja "Gospodarstwo")
 - Easy member onboarding
 - Clear subscription status i upgrade paths
+- Wszystkie funkcje dostępne bezpośrednio z sidebar
 
 ### 3.4 Premium User Workflow
 
@@ -488,16 +528,22 @@ Advanced Management
 
 ```
 Login → System Dashboard → 
+[Sidebar with 2 sections visible] → 
+  Section 1: Household Views (if accessing specific household) →
+  Section 2: System Views (primary workflow) → 
 [Monitor Alerts/Issues] → 
-System Administration (Users/Households/Subscriptions) → 
+System Administration (Users/Households/Subscriptions via Sidebar) → 
 Support Tools → Technical Monitoring
 ```
 
 **Kluczowe punkty**:
 - System-wide oversight and control
+- **Dual sidebar sections**: Sekcja gospodarstwa + Sekcja systemowa
+- Możliwość dostępu zarówno do funkcji gospodarstwa jak i administracji systemu
 - Proactive monitoring and issue resolution  
 - Platform administration and user support
 - Technical operations and maintenance
+- Szybki dostęp do wszystkich narzędzi administracyjnych przez sidebar
 
 ## 4. Układ i struktura nawigacji
 
@@ -505,35 +551,77 @@ Support Tools → Technical Monitoring
 
 #### Sidebar Navigation (Desktop/Tablet)
 
-**Standard Users (Admin, Domownik, Dashboard):**
+Aplikacja wykorzystuje **wysuwane menu z lewej strony** podzielone na sekcje kontekstowe:
+
+**Sekcja 1: Widoki Gospodarstwa**
+Pierwsza sekcja menu zawiera widoki związane z aktualnie otwartym gospodarstwem domowym. Dostępne opcje zależą od roli użytkownika i statusu subskrypcji:
+
 ```
-📊 Dashboard (wszystkie role) - z kafelkami nawigacyjnymi i zintegrowanym kalendarzem
+=== GOSPODARSTWO: [Nazwa gospodarstwa] ===
+
+📊 Dashboard (wszystkie role)
+   └─ z kafelkami nawigacyjnymi i zintegrowanym kalendarzem
+📋 Zadania (Admin, Domownik)
+   └─ lista nadchodzących terminów (7 dni)
+🏷️ Kategorie (Admin, Domownik)
+   └─ widok urządzeń/wizyt pogrupowanych po kategoriach
 🏠 Urządzenia/Wizyty (Admin, Domownik)
+   └─ pełna lista z możliwością zarządzania
 👥 Gospodarstwo (Admin only)
+   └─ zarządzanie członkami i ustawieniami
 📈 Historia (Premium only)
-📊 Raporty (Premium only) 
+   └─ archiwum wykonanych zadań
+📊 Raporty (Premium only)
+   └─ zestawienia kosztów
 🔬 Analizy (Premium only)
+   └─ zaawansowane analizy predykcyjne
 ⚙️ Ustawienia (Admin, Domownik)
+   └─ konfiguracja profilu i preferencji
 ❓ Pomoc (wszystkie role)
+   └─ FAQ i wsparcie
 ```
 
-**System Developer (Super Admin):**
+**Sekcja 2: Widoki Systemowe** 
+Druga sekcja menu (widoczna **tylko dla użytkowników z rolą System Developer**) zawiera widoki administracyjne całej platformy:
+
 ```
-🖥️ System Dashboard 
+=== ADMINISTRACJA SYSTEMU ===
+
+🖥️ System Dashboard
+   └─ główny panel administracyjny platformy
 🏢 Gospodarstwa
+   └─ zarządzanie wszystkimi gospodarstwami w systemie
 👤 Użytkownicy
+   └─ administracja wszystkich kont użytkowników
 💳 Subskrypcje
+   └─ monitoring płatności i metryk finansowych
 🔧 Administracja
+   └─ zarządzanie infrastrukturą i konfiguracją
 🎧 Wsparcie
+   └─ narzędzia do obsługi użytkowników i troubleshooting
 📈 Metryki Systemu
-⚙️ Konfiguracja
+   └─ globalne statystyki i KPI platformy
+⚙️ Konfiguracja Systemu
+   └─ ustawienia globalne platformy
 ```
+
+**Właściwości Sidebar:**
+- **Separatory**: Wyraźne wizualne oddzielenie sekcji (linia + nagłówek sekcji)
+- **Dynamic Rendering**: Pozycje menu filtrowane na podstawie roli użytkownika i subskrypcji
+- **Active State**: Indicator dla aktualnie wybranego widoku
+- **Collapse/Expand**: 
+  - Desktop (>1024px): Persistent sidebar z możliwością zwinięcia do ikon
+  - Tablet (768-1024px): Collapsible sidebar, domyślnie zwinięty
+  - Mobile (<768px): Hamburger menu z pełnoekranowym overlay
+- **Context Switching**: Zmiana gospodarstwa dynamicznie odświeża Sekcję 1
 
 #### Bottom Navigation (Mobile)
 ```
-[Dashboard] [Urządzenia] [Gospodarstwo] [Menu]
+[Dashboard] [Zadania] [Kategorie] [Menu]
 ```
-**Uwaga**: Kalendarz dostępny z poziomu Dashboard jako widget/modal
+**Uwaga**: 
+- Kalendarz dostępny z poziomu Dashboard jako widget/modal
+- Przycisk Menu otwiera pełny sidebar z obiema sekcjami (jeśli użytkownik ma uprawnienia)
 
 ### 4.2 Secondary Navigation
 
@@ -555,25 +643,79 @@ Support Tools → Technical Monitoring
 
 ```typescript
 interface NavigationRules {
-  // Standard User Routes
+  // ===== SEKCJA 1: WIDOKI GOSPODARSTWA =====
+  // Dostępne w kontekście aktualnie otwartego gospodarstwa
+  
   '/dashboard': ['admin', 'member', 'dashboard'], // includes integrated calendar
-  '/items': ['admin', 'member'],
-  '/households/*/manage': ['admin'],
-  '/premium/*': ['premium_subscription'],
-  '/monitor': ['dashboard'], // special monitor mode
+  '/tasks': ['admin', 'member'], // lista zadań (7 dni)
+  '/categories': ['admin', 'member'], // widok pogrupowany po kategoriach
+  '/items': ['admin', 'member'], // pełna lista urządzeń/wizyt
+  '/households/:id/manage': ['admin'], // zarządzanie gospodarstwem
   
-  // System Developer Routes (Super Admin)
-  '/system/*': ['system_developer'],
-  '/system/dashboard': ['system_developer'],
-  '/system/households': ['system_developer'],
-  '/system/users': ['system_developer'],
-  '/system/subscriptions': ['system_developer'],
-  '/system/administration': ['system_developer'],
-  '/system/support': ['system_developer'],
+  // Premium features (wymagają subskrypcji)
+  '/premium/history': ['admin', 'member', 'premium_subscription'],
+  '/premium/reports': ['admin', 'member', 'premium_subscription'],
+  '/premium/analytics': ['admin', 'member', 'premium_subscription'],
   
-  // Admin + System Developer Combined Access
-  '/settings/*': ['admin', 'member', 'system_developer'],
-  '/help': ['admin', 'member', 'dashboard', 'system_developer']
+  '/settings/profile': ['admin', 'member'], // ustawienia profilu
+  '/settings/account': ['admin', 'member'], // ustawienia konta
+  '/help': ['admin', 'member', 'dashboard'], // pomoc i FAQ
+  
+  '/monitor': ['dashboard'], // special monitor mode (read-only)
+  
+  // ===== SEKCJA 2: WIDOKI SYSTEMOWE =====
+  // Dostępne tylko dla System Developer (Super Admin)
+  
+  '/system/*': ['system_developer'], // guard dla całej sekcji systemowej
+  '/system/dashboard': ['system_developer'], // główny panel systemu
+  '/system/households': ['system_developer'], // wszystkie gospodarstwa
+  '/system/users': ['system_developer'], // globalna administracja użytkowników
+  '/system/subscriptions': ['system_developer'], // monitoring subskrypcji
+  '/system/administration': ['system_developer'], // administracja techniczna
+  '/system/support': ['system_developer'], // wsparcie techniczne
+  '/system/metrics': ['system_developer'], // metryki systemu
+  '/system/configuration': ['system_developer'], // konfiguracja globalna
+  
+  // ===== SHARED ROUTES =====
+  // Dostępne dla wielu typów użytkowników
+  
+  '/upgrade': ['admin', 'member'], // upgrade do premium
+  '/onboarding': ['admin', 'member'], // first-time setup
+}
+
+// Sidebar menu items visibility rules
+interface SidebarSectionRules {
+  section1_household: {
+    visible_for: ['admin', 'member', 'dashboard'],
+    context: 'current_household_id_required',
+    items: {
+      dashboard: ['admin', 'member', 'dashboard'],
+      tasks: ['admin', 'member'],
+      categories: ['admin', 'member'],
+      items: ['admin', 'member'],
+      household_manage: ['admin'],
+      history: ['admin', 'member', 'premium_subscription'],
+      reports: ['admin', 'member', 'premium_subscription'],
+      analytics: ['admin', 'member', 'premium_subscription'],
+      settings: ['admin', 'member'],
+      help: ['admin', 'member', 'dashboard']
+    }
+  },
+  
+  section2_system: {
+    visible_for: ['system_developer'],
+    context: 'global_system_access',
+    items: {
+      system_dashboard: ['system_developer'],
+      households: ['system_developer'],
+      users: ['system_developer'],
+      subscriptions: ['system_developer'],
+      administration: ['system_developer'],
+      support: ['system_developer'],
+      metrics: ['system_developer'],
+      configuration: ['system_developer']
+    }
+  }
 }
 ```
 
@@ -590,12 +732,37 @@ interface NavigationRules {
 
 #### AppLayout
 - **Cel**: Main layout wrapper z responsive navigation
-- **Features**: Sidebar toggle, theme switching, breadcrumbs
+- **Features**: Sidebar integration, theme switching, breadcrumbs, header bar
 - **Reusability**: Base layout dla wszystkich authenticated views
+
+#### Sidebar
+- **Cel**: Główne wysuwane menu nawigacyjne z lewej strony
+- **Features**:
+  - **Sekcja 1: Widoki Gospodarstwa** - dynamicznie renderowana na podstawie aktualnie wybranego gospodarstwa
+    - Lista widoków związanych z gospodarstwem (Dashboard, Zadania, Kategorie, Urządzenia, etc.)
+    - Nagłówek sekcji z nazwą gospodarstwa
+    - Filtrowanie pozycji na podstawie roli użytkownika (Admin/Domownik/Dashboard)
+    - Oznaczenie funkcji premium (badge/icon)
+  - **Sekcja 2: Widoki Systemowe** - widoczna tylko dla System Developer
+    - Lista widoków administracyjnych platformy
+    - Nagłówek sekcji "Administracja Systemu"
+    - Separator wizualny między sekcjami
+  - **Responsive behavior**:
+    - Desktop (>1024px): Persistent sidebar, możliwość zwinięcia do ikon
+    - Tablet (768-1024px): Collapsible sidebar, domyślnie zwinięty
+    - Mobile (<768px): Hamburger menu z pełnoekranowym overlay
+  - **Active state indicator** dla aktualnie wybranego widoku
+  - **Household switcher** w headerze sekcji 1 (jeśli użytkownik ma dostęp do wielu gospodarstw)
+  - **Tooltips** dla ikon w trybie zwiniętym
+  - **Badge indicators** dla powiadomień/alertów
+  - **Smooth transitions** przy collapse/expand
+  - **Keyboard navigation** (Tab, Enter, Arrow keys)
+- **Reusability**: Wszystkie authenticated views (oprócz monitor mode)
+- **Security**: Role-based rendering, permission checks per menu item
 
 #### MonitorLayout  
 - **Cel**: Uproszczony layout dla monitor dashboard
-- **Features**: Full-screen mode, auto-refresh, minimal UI
+- **Features**: Full-screen mode, auto-refresh, minimal UI, no sidebar
 - **Reusability**: Specjalistyczny layout dla display monitors
 
 ### 5.2 Data Display Components

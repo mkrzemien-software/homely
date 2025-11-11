@@ -1,0 +1,63 @@
+<div class="household-dashboard-container">
+  @if (isLoaded()) {
+    <!-- Header Section -->
+    <header class="dashboard-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="dashboard-title">
+            <i class="pi pi-home" aria-hidden="true"></i>
+            Dashboard Gospodarstwa
+          </h1>
+          <p class="dashboard-subtitle">{{ pageSubtitle }}</p>
+        </div>
+
+        <!-- Household Info -->
+        <div class="header-info">
+          <div class="info-item">
+            <span class="info-label">ID Gospodarstwa</span>
+            <span class="info-value">{{ householdId() }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <p-divider></p-divider>
+
+    <!-- Navigation Tiles Section -->
+    <section class="dashboard-content">
+      <div class="content-header">
+        <h2 class="section-title">Szybka nawigacja</h2>
+        <p class="section-description">
+          Wybierz jedną z poniższych sekcji, aby zarządzać gospodarstwem
+        </p>
+      </div>
+
+      <app-navigation-tiles
+        [tiles]="navigationTiles()"
+        (tileClick)="onTileClick($event)">
+      </app-navigation-tiles>
+    </section>
+
+    <!-- TODO: Future sections will be added here -->
+    <!-- - Integrated calendar widget -->
+    <!-- - Upcoming tasks list (7 days) with quick actions -->
+    <!-- - Statistics: number of devices, usage limits -->
+
+    <!-- Footer Info -->
+    <footer class="dashboard-footer">
+      <p class="footer-text">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        Dodatkowe widoki (kalendarz, statystyki) zostaną zaimplementowane w kolejnych iteracjach.
+      </p>
+    </footer>
+  } @else {
+    <!-- Loading state -->
+    <div class="loading-container">
+      <p-message
+        severity="info"
+        text="Ładowanie danych gospodarstwa..."
+        [closable]="false">
+      </p-message>
+    </div>
+  }
+</div>
