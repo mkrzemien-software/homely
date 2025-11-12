@@ -7,7 +7,7 @@
   align-items: center;
   gap: 1.5rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-600) 100%);
+  background: linear-gradient(135deg, var(--p-primary-color) 0%, var(--primary-600) 100%);
   color: white;
 
   .user-avatar {
@@ -48,7 +48,7 @@
     margin: 0 0 1rem;
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--p-text-color);
   }
 }
 
@@ -57,7 +57,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--p-border-color);
 
   &:last-child {
     border-bottom: none;
@@ -65,12 +65,12 @@
 
   .detail-label {
     font-weight: 500;
-    color: var(--text-color-secondary);
+    color: var(--p-text-muted-color);
   }
 
   .detail-value {
     font-weight: 400;
-    color: var(--text-color);
+    color: var(--p-text-color);
     text-align: right;
   }
 }
@@ -82,7 +82,7 @@
 .no-activity {
   text-align: center;
   padding: 2rem 0;
-  color: var(--text-color-secondary);
+  color: var(--p-text-muted-color);
   font-style: italic;
 }
 
@@ -95,7 +95,7 @@
     font-size: 0.9rem;
 
     th {
-      background: var(--surface-100);
+      background: var(--p-surface-100);
       font-weight: 600;
     }
 

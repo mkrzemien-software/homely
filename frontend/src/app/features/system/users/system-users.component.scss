@@ -48,12 +48,12 @@
     margin: 0 0 0.5rem;
     font-size: 2rem;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--p-text-color);
   }
 
   .subtitle {
     margin: 0;
-    color: var(--text-color-secondary);
+    color: var(--p-text-muted-color);
     font-size: 1rem;
   }
 
@@ -75,7 +75,7 @@
     width: 2rem;
     height: 2rem;
     border-radius: 50%;
-    background: var(--primary-color);
+    background: var(--p-primary-color);
     color: white;
     display: flex;
     align-items: center;
@@ -97,17 +97,17 @@
 .no-users {
   text-align: center;
   padding: 4rem 2rem;
-  color: var(--text-color-secondary);
+  color: var(--p-text-muted-color);
 
   i {
     margin-bottom: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--p-text-muted-color);
     opacity: 0.5;
   }
 
   h3 {
     margin: 0 0 0.5rem;
-    color: var(--text-color);
+    color: var(--p-text-color);
   }
 
   p {
@@ -128,22 +128,22 @@
 :host ::ng-deep {
   .p-card {
     box-shadow: var(--card-shadow);
-    border-radius: var(--border-radius);
+    border-radius: 0.5rem;
   }
 
   .p-datatable {
     .p-datatable-header {
-      background: var(--surface-100);
+      background: var(--p-surface-100);
       padding: 1rem;
-      border-top-left-radius: var(--border-radius);
-      border-top-right-radius: var(--border-radius);
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
     }
 
     .p-datatable-thead > tr > th {
-      background: var(--surface-100);
+      background: var(--p-surface-100);
       font-weight: 600;
       padding: 1rem;
-      border-bottom: 2px solid var(--surface-border);
+      border-bottom: 2px solid var(--p-border-color);
     }
 
     .p-datatable-tbody > tr > td {
@@ -151,21 +151,21 @@
     }
 
     .p-datatable-tbody > tr:hover {
-      background: var(--surface-hover);
+      background: var(--p-content-hover-background);
     }
   }
 
   .p-paginator {
-    background: var(--surface-card);
-    border-top: 1px solid var(--surface-border);
+    background: var(--p-surface-0);
+    border-top: 1px solid var(--p-border-color);
     padding: 1rem;
   }
 
   .p-sidebar {
     .p-sidebar-header {
       padding: 1.5rem;
-      background: var(--surface-card);
-      border-bottom: 1px solid var(--surface-border);
+      background: var(--p-surface-0);
+      border-bottom: 1px solid var(--p-border-color);
 
       h2 {
         margin: 0;
@@ -176,7 +176,7 @@
 
     .p-sidebar-content {
       padding: 1.5rem;
-      background: var(--surface-ground);
+      background: var(--p-surface-100);
     }
   }
 

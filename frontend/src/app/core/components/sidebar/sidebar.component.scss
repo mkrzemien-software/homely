@@ -14,8 +14,8 @@ $transition-duration: 0.3s;
   left: 0;
   height: 100vh;
   width: $sidebar-width-expanded;
-  background: var(--surface-card);
-  border-right: 1px solid var(--surface-border);
+  background: var(--p-surface-50);  // Elevated from main background
+  border-right: 1px solid var(--p-border-color);
   display: flex;
   flex-direction: column;
   z-index: 1000;
@@ -66,7 +66,7 @@ $transition-duration: 0.3s;
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--p-border-color);
   flex-shrink: 0;
 
   .sidebar-logo {
@@ -75,7 +75,7 @@ $transition-duration: 0.3s;
     gap: 0.75rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--p-primary-color);
 
     i {
       font-size: 2rem;
@@ -110,15 +110,15 @@ $transition-duration: 0.3s;
   }
 
   &::-webkit-scrollbar-track {
-    background: var(--surface-ground);
+    background: var(--p-surface-100);
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--surface-border);
+    background: var(--p-border-color);
     border-radius: 3px;
 
     &:hover {
-      background: var(--text-color-secondary);
+      background: var(--p-text-muted-color);
     }
   }
 }
@@ -134,7 +134,7 @@ $transition-duration: 0.3s;
     .section-title {
       font-size: 0.75rem;
       font-weight: 700;
-      color: var(--text-color-secondary);
+      color: var(--p-text-muted-color);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin: 0 0 0.5rem 0;
@@ -146,21 +146,21 @@ $transition-duration: 0.3s;
       align-items: center;
       gap: 0.5rem;
       font-size: 0.9rem;
-      color: var(--text-color);
+      color: var(--p-text-color);
       margin-top: 0.25rem;
       padding: 0.5rem;
-      background: var(--surface-ground);
-      border-radius: var(--border-radius);
+      background: var(--p-surface-100);
+      border-radius: 0.5rem;
       transition: opacity $transition-duration ease-in-out;
 
       i {
-        color: var(--primary-color);
+        color: var(--p-primary-color);
       }
     }
 
     .section-divider {
       height: 2px;
-      background: var(--surface-border);
+      background: var(--p-border-color);
       margin: 0.5rem 0;
     }
   }
@@ -179,16 +179,16 @@ $transition-duration: 0.3s;
   align-items: center;
   gap: 1rem;
   padding: 0.875rem 1rem;
-  color: var(--text-color);
+  color: var(--p-text-color);
   text-decoration: none;
-  border-radius: var(--border-radius);
+  border-radius: 0.5rem;
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   position: relative;
 
   .menu-icon {
     font-size: 1.25rem;
-    color: var(--text-color-secondary);
+    color: var(--p-text-muted-color);
     transition: color 0.2s ease-in-out;
     flex-shrink: 0;
   }
@@ -209,20 +209,20 @@ $transition-duration: 0.3s;
 
   // Hover state
   &:hover {
-    background: var(--surface-hover);
+    background: var(--p-content-hover-background);
 
     .menu-icon {
-      color: var(--primary-color);
+      color: var(--p-primary-color);
     }
   }
 
   // Active state
   &.active {
-    background: var(--primary-color);
-    color: var(--primary-color-text);
+    background: var(--p-primary-color);
+    color: var(--p-primary-contrast-color);
 
     .menu-icon {
-      color: var(--primary-color-text);
+      color: var(--p-primary-contrast-color);
     }
 
     .menu-label {
@@ -237,31 +237,76 @@ $transition-duration: 0.3s;
       transform: translateY(-50%);
       width: 4px;
       height: 70%;
-      background: var(--primary-color-text);
+      background: var(--p-primary-contrast-color);
       border-radius: 0 2px 2px 0;
     }
   }
 
   // Focus state (keyboard navigation)
   &:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--p-primary-color);
     outline-offset: 2px;
   }
 }
 
 // Sidebar Footer
 .sidebar-footer {
-  height: $sidebar-footer-height;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   padding: 1rem 1.5rem;
-  border-top: 1px solid var(--surface-border);
+  border-top: 1px solid var(--p-border-color);
   flex-shrink: 0;
+
+  .theme-toggle-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1rem;
+    color: var(--p-text-color);
+    border-color: var(--p-border-color);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: var(--p-primary-color);
+      border-color: var(--p-primary-color);
+      background: var(--p-content-hover-background);
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 2px var(--p-primary-color);
+    }
+
+    i {
+      font-size: 1.25rem;
+    }
+
+    .theme-toggle-text {
+      font-size: 0.875rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+  }
+
+  // When collapsed, show only icon as rounded button
+  .collapsed & {
+    .theme-toggle-btn {
+      width: 2.5rem;
+      height: 2.5rem;
+      padding: 0;
+      justify-content: center;
+      border-radius: 50%;
+    }
+  }
 
   .footer-content {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     font-size: 0.75rem;
-    color: var(--text-color-secondary);
+    color: var(--p-text-muted-color);
     transition: opacity $transition-duration ease-in-out;
 
     .footer-text {
@@ -313,7 +358,7 @@ $transition-duration: 0.3s;
 
     &.p-divider-horizontal {
       &::before {
-        border-top-color: var(--surface-border);
+        border-top-color: var(--p-border-color);
       }
     }
   }
@@ -338,15 +383,15 @@ $transition-duration: 0.3s;
 }
 
 // Dark mode adjustments
-@media (prefers-color-scheme: dark) {
+:global(.p-dark) {
   .sidebar-container {
-    background: var(--surface-section);
+    background: var(--p-surface-50);
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
   }
 
   .menu-item {
     &:hover {
-      background: var(--surface-ground);
+      background: var(--p-surface-100);
     }
   }
 }
@@ -361,7 +406,7 @@ $transition-duration: 0.3s;
     border: 1px solid transparent;
 
     &.active {
-      border-color: var(--primary-color-text);
+      border-color: var(--p-primary-contrast-color);
     }
   }
 }

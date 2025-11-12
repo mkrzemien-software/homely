@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 
 // Components
 import { LoginFormComponent } from '../components/login-form/login-form.component';
-import { AuthLinksComponent } from '../components/auth-links/auth-links.component';
 import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
 
 // Services
@@ -15,9 +14,8 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [
     CommonModule,
     LoginFormComponent,
-    AuthLinksComponent,
     ThemeToggleComponent
-  ],
+],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })

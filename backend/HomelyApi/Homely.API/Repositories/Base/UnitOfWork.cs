@@ -13,6 +13,7 @@ public class UnitOfWork : IUnitOfWork
     private IPlanTypeRepository? _planTypes;
     private IHouseholdRepository? _households;
     private IHouseholdMemberRepository? _householdMembers;
+    private ICategoryTypeRepository? _categoryTypes;
     private ICategoryRepository? _categories;
     private IItemRepository? _items;
     private ITaskRepository? _tasks;
@@ -48,6 +49,15 @@ public class UnitOfWork : IUnitOfWork
         {
             _householdMembers ??= new HouseholdMemberRepository(_context);
             return _householdMembers;
+        }
+    }
+
+    public ICategoryTypeRepository CategoryTypes
+    {
+        get
+        {
+            _categoryTypes ??= new CategoryTypeRepository(_context);
+            return _categoryTypes;
         }
     }
 

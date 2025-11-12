@@ -72,8 +72,8 @@ export class AccountActionsToolbarComponent {
         this.isProcessing.set(false);
         this.messageService.add({
           severity: 'success',
-          summary: 'Success',
-          detail: response.message || 'Password reset email sent successfully',
+          summary: 'Sukces',
+          detail: response.message || 'E-mail z resetem hasła został wysłany pomyślnie',
           life: 5000
         });
         this.actionCompleted.emit();
@@ -82,8 +82,8 @@ export class AccountActionsToolbarComponent {
         this.isProcessing.set(false);
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: error.message || 'Failed to reset password',
+          summary: 'Błąd',
+          detail: error.message || 'Nie udało się zresetować hasła',
           life: 5000
         });
       }
@@ -118,8 +118,8 @@ export class AccountActionsToolbarComponent {
         this.isProcessing.set(false);
         this.messageService.add({
           severity: 'success',
-          summary: 'Success',
-          detail: response.message || 'Account unlocked successfully',
+          summary: 'Sukces',
+          detail: response.message || 'Konto zostało odblokowane pomyślnie',
           life: 5000
         });
         this.actionCompleted.emit();
@@ -128,8 +128,8 @@ export class AccountActionsToolbarComponent {
         this.isProcessing.set(false);
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: error.message || 'Failed to unlock account',
+          summary: 'Błąd',
+          detail: error.message || 'Nie udało się odblokować konta',
           life: 5000
         });
       }

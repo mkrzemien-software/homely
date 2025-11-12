@@ -14,7 +14,7 @@
 
   label {
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--p-text-color);
     font-size: 0.95rem;
   }
 
@@ -34,13 +34,13 @@
   }
 
   small.p-error {
-    color: var(--red-500);
+    color: var(--p-red-500);
     font-size: 0.85rem;
     margin-top: 0.25rem;
   }
 
   small.help-text {
-    color: var(--text-color-secondary);
+    color: var(--p-text-muted-color);
     font-size: 0.85rem;
     margin-top: 0.25rem;
   }
@@ -48,7 +48,7 @@
   input.ng-invalid.ng-touched,
   ::ng-deep .p-inputtext.ng-invalid.ng-touched,
   ::ng-deep .p-password.ng-invalid.ng-touched .p-inputtext {
-    border-color: var(--red-500);
+    border-color: var(--p-red-500);
   }
 }
 
@@ -57,7 +57,7 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--surface-border);
+  border-top: 1px solid var(--p-border-color);
   margin-top: 1rem;
 }
 

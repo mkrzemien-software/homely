@@ -14,12 +14,12 @@
         margin: 0;
         font-size: 2rem;
         font-weight: 600;
-        color: var(--text-color);
+        color: var(--p-text-color);
       }
 
       .subtitle {
         margin: 0.5rem 0 0;
-        color: var(--text-color-secondary);
+        color: var(--p-text-muted-color);
         font-size: 1rem;
       }
     }
@@ -50,18 +50,18 @@
 
         .stat-icon {
           font-size: 2.5rem;
-          color: var(--primary-color);
+          color: var(--p-primary-color);
 
           &.success {
-            color: var(--green-500);
+            color: var(--p-green-500);
           }
 
           &.info {
-            color: var(--blue-500);
+            color: var(--p-blue-500);
           }
 
           &.warning {
-            color: var(--orange-500);
+            color: var(--p-orange-500);
           }
         }
 
@@ -69,13 +69,13 @@
           .stat-value {
             font-size: 2rem;
             font-weight: 600;
-            color: var(--text-color);
+            color: var(--p-text-color);
             line-height: 1;
           }
 
           .stat-label {
             margin-top: 0.5rem;
-            color: var(--text-color-secondary);
+            color: var(--p-text-muted-color);
             font-size: 0.875rem;
           }
         }
@@ -95,6 +95,12 @@
       display: flex;
       gap: 1rem;
       align-items: center;
+
+      .p-input-icon-left {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
 
       .flex-1 {
         flex: 1;
@@ -121,7 +127,7 @@
       transition: background-color 0.2s;
 
       &:hover {
-        background-color: var(--surface-hover) !important;
+        background-color: var(--p-content-hover-background) !important;
       }
     }
 
@@ -147,7 +153,7 @@
 
       .empty-icon {
         font-size: 4rem;
-        color: var(--text-color-secondary);
+        color: var(--p-text-muted-color);
         opacity: 0.5;
       }
 
@@ -155,12 +161,12 @@
         margin: 1rem 0 0.5rem;
         font-size: 1.25rem;
         font-weight: 500;
-        color: var(--text-color);
+        color: var(--p-text-color);
       }
 
       .empty-subtext {
         margin: 0;
-        color: var(--text-color-secondary);
+        color: var(--p-text-muted-color);
       }
     }
   }
@@ -171,7 +177,7 @@
       .detail-section {
         margin-bottom: 2rem;
         padding-bottom: 2rem;
-        border-bottom: 1px solid var(--surface-border);
+        border-bottom: 1px solid var(--p-border-color);
 
         &:last-child {
           border-bottom: none;
@@ -181,7 +187,7 @@
           margin: 0 0 1.5rem;
           font-size: 1.125rem;
           font-weight: 600;
-          color: var(--text-color);
+          color: var(--p-text-color);
         }
 
         .detail-grid {
@@ -195,14 +201,14 @@
               margin-bottom: 0.5rem;
               font-size: 0.875rem;
               font-weight: 500;
-              color: var(--text-color-secondary);
+              color: var(--p-text-muted-color);
               text-transform: uppercase;
               letter-spacing: 0.5px;
             }
 
             .detail-value {
               font-size: 1rem;
-              color: var(--text-color);
+              color: var(--p-text-color);
               font-weight: 500;
             }
           }
@@ -214,7 +220,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 1rem;
-            background: var(--surface-ground);
+            background: var(--p-surface-100);
             border-radius: 6px;
             margin-bottom: 0.75rem;
 
@@ -225,13 +231,13 @@
             .member-info {
               .member-name {
                 font-weight: 500;
-                color: var(--text-color);
+                color: var(--p-text-color);
                 margin-bottom: 0.25rem;
               }
 
               .member-email {
                 font-size: 0.875rem;
-                color: var(--text-color-secondary);
+                color: var(--p-text-muted-color);
               }
             }
           }
@@ -239,7 +245,7 @@
           .empty-members {
             padding: 2rem;
             text-align: center;
-            color: var(--text-color-secondary);
+            color: var(--p-text-muted-color);
             font-style: italic;
           }
         }

@@ -230,7 +230,7 @@ export function getMenuSections(
   }
 
   // Section 2: System Views (only for System Developer)
-  if (userRole === 'system_developer') {
+  // if (userRole === 'system_developer') {
     sections.push({
       id: 'system-section',
       title: 'ADMINISTRACJA SYSTEMU',
@@ -238,7 +238,7 @@ export function getMenuSections(
       roles: ['system_developer'],
       showSeparator: false
     });
-  }
+  // }
 
   return sections;
 }

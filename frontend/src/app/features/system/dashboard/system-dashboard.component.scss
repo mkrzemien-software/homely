@@ -2,7 +2,7 @@
 .system-dashboard-container {
   min-height: 100vh;
   padding: 2rem;
-  background: var(--surface-ground);
+  // No background - inherit gradient from body
 
   // Max width for better readability on large screens
   max-width: 1600px;
@@ -43,13 +43,13 @@
   gap: 0.75rem;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--text-color);
+  color: var(--p-text-color);
   margin: 0 0 0.5rem 0;
   line-height: 1.2;
 
   i {
     font-size: 1.75rem;
-    color: var(--primary-color);
+    color: var(--p-primary-color);
   }
 
   @media (max-width: 768px) {
@@ -64,7 +64,7 @@
 // Dashboard Subtitle
 .dashboard-subtitle {
   font-size: 1.1rem;
-  color: var(--text-color-secondary);
+  color: var(--p-text-muted-color);
   margin: 0;
   line-height: 1.5;
 
@@ -91,9 +91,9 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.75rem 1.5rem;
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--border-radius);
+  background: var(--p-surface-0);
+  border: 1px solid var(--p-border-color);
+  border-radius: 0.5rem;
   min-width: 140px;
 
   @media (max-width: 768px) {
@@ -104,7 +104,7 @@
 
 .stat-label {
   font-size: 0.85rem;
-  color: var(--text-color-secondary);
+  color: var(--p-text-muted-color);
   text-align: center;
 
   @media (max-width: 768px) {
@@ -115,7 +115,7 @@
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary-color);
+  color: var(--p-primary-color);
 
   @media (max-width: 768px) {
     font-size: 1.25rem;
@@ -146,9 +146,9 @@
 .dashboard-footer {
   margin-top: 3rem;
   padding: 1.5rem;
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--border-radius);
+  background: var(--p-surface-0);
+  border: 1px solid var(--p-border-color);
+  border-radius: 0.5rem;
   text-align: center;
 
   @media (max-width: 768px) {
@@ -162,13 +162,13 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.95rem;
-  color: var(--text-color-secondary);
+  color: var(--p-text-muted-color);
   margin: 0;
   line-height: 1.5;
 
   i {
     font-size: 1.1rem;
-    color: var(--blue-500);
+    color: var(--p-blue-500);
   }
 
   @media (max-width: 768px) {
@@ -179,17 +179,17 @@
 }
 
 // Dark mode adjustments
-@media (prefers-color-scheme: dark) {
+:global(.p-dark) {
   .system-dashboard-container {
-    background: var(--surface-ground);
+    background: var(--p-surface-100);
   }
 
   .stat-item {
-    background: var(--surface-section);
+    background: var(--p-surface-50);
   }
 
   .dashboard-footer {
-    background: var(--surface-section);
+    background: var(--p-surface-50);
   }
 }
 
@@ -208,7 +208,7 @@
 @media (prefers-contrast: high) {
   .dashboard-title i,
   .stat-value {
-    color: var(--primary-color);
+    color: var(--p-primary-color);
   }
 
   .stat-item,

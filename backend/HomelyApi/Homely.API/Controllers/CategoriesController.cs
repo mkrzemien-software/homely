@@ -53,9 +53,9 @@ public class CategoriesController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of categories</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CategoriesResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllCategories(
+    public async Task<ActionResult<CategoriesResponse>> GetAllCategories(
         [FromQuery] int? categoryTypeId = null,
         CancellationToken cancellationToken = default)
     {
@@ -72,7 +72,8 @@ public class CategoriesController : ControllerBase
                 categories = await _categoryService.GetAllCategoriesAsync(cancellationToken);
             }
 
-            return Ok(categories);
+            // Return in the format specified by API plan: { "data": [...] }
+            return Ok(new CategoriesResponse { Data = categories });
         }
         catch (Exception ex)
         {

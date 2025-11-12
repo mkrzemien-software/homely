@@ -103,6 +103,23 @@
 
   <!-- Sidebar Footer -->
   <div class="sidebar-footer">
+    <!-- Theme Toggle -->
+    <button
+      pButton
+      type="button"
+      class="p-button-outlined theme-toggle-btn"
+      [icon]="currentTheme() === 'dark' ? 'pi pi-sun' : 'pi pi-moon'"
+      (click)="toggleTheme()"
+      [pTooltip]="isCollapsed() ? (currentTheme() === 'dark' ? 'Tryb Jasny' : 'Tryb Ciemny') : ''"
+      tooltipPosition="right"
+    >
+      @if (!isCollapsed()) {
+        <span class="theme-toggle-text">
+          {{ currentTheme() === 'dark' ? 'Tryb Jasny' : 'Tryb Ciemny' }}
+        </span>
+      }
+    </button>
+
     @if (!isCollapsed()) {
       <div class="footer-content">
         <span class="footer-text">© 2025 Homely</span>

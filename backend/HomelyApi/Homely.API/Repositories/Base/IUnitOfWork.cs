@@ -7,6 +7,7 @@ public interface IUnitOfWork : IDisposable
     IPlanTypeRepository PlanTypes { get; }
     IHouseholdRepository Households { get; }
     IHouseholdMemberRepository HouseholdMembers { get; }
+    ICategoryTypeRepository CategoryTypes { get; }
     ICategoryRepository Categories { get; }
     IItemRepository Items { get; }
     ITaskRepository Tasks { get; }

@@ -5,10 +5,10 @@
       <div class="header-text">
         <h1 class="page-title">
           <i class="pi pi-tags" aria-hidden="true"></i>
-          Urządzenia i Wizyty
+          Kategorie
         </h1>
         <p class="page-subtitle">
-          Zarządzaj urządzeniami i wizytami w gospodarstwie, pogrupowane według kategorii
+          Zarządzaj kategoriami w systemie, pogrupowane według typów
         </p>
       </div>
 
@@ -16,14 +16,12 @@
       <div class="header-stats">
         <div class="stat-item">
           <span class="stat-label">Łącznie</span>
-          <span class="stat-value">{{ totalItemsCount() }}</span>
+          <span class="stat-value">{{ totalCategoriesCount() }}</span>
         </div>
-        @if (isFreePlanLimitReached()) {
-          <div class="stat-item limit-warning">
-            <span class="stat-label">Limit planu darmowego</span>
-            <span class="stat-value">5/5</span>
-          </div>
-        }
+        <div class="stat-item">
+          <span class="stat-label">Widoczne</span>
+          <span class="stat-value">{{ filteredCategoriesCount() }}</span>
+        </div>
       </div>
     </div>
   </header>
@@ -39,11 +37,20 @@
         <input
           pInputText
           type="text"
-          placeholder="Szukaj urządzenia..."
+          placeholder="Szukaj kategorii..."
           [ngModel]="searchText()"
           (ngModelChange)="onSearch($event)"
         />
       </span>
+
+      <!-- Category type filter -->
+      <p-dropdown
+        [options]="categoryTypeOptions()"
+        [ngModel]="selectedCategoryTypeId()"
+        (ngModelChange)="onCategoryTypeFilterChange($event)"
+        placeholder="Filtruj po typie"
+        [style]="{ minWidth: '200px' }"
+      ></p-dropdown>
 
       <!-- View mode toggle -->
       <p-button
@@ -57,22 +64,6 @@
     </div>
 
     <div class="toolbar-right">
-      <!-- Sort dropdown -->
-      <p-dropdown
-        [options]="sortOptions"
-        [(ngModel)]="currentSort().field"
-        (ngModelChange)="onSortChange($event)"
-        placeholder="Sortuj według"
-        [style]="{ minWidth: '200px' }"
-      >
-        <ng-template pTemplate="selectedItem" let-option>
-          <div class="sort-option">
-            <i class="pi" [class]="currentSort().direction === 'asc' ? 'pi-sort-amount-up' : 'pi-sort-amount-down'"></i>
-            <span>{{ option.label }}</span>
-          </div>
-        </ng-template>
-      </p-dropdown>
-
       <!-- Refresh button -->
       <p-button
         icon="pi pi-refresh"
@@ -85,23 +76,13 @@
       <!-- Add button -->
       <p-button
         icon="pi pi-plus"
-        label="Dodaj urządzenie"
+        label="Dodaj kategorię"
         severity="success"
-        (onClick)="addNewItem()"
-        [disabled]="isFreePlanLimitReached()"
-        [pTooltip]="isFreePlanLimitReached() ? 'Osiągnięto limit planu darmowego (5 urządzeń)' : 'Dodaj nowe urządzenie lub wizytę'"
+        (onClick)="addNewCategory()"
+        pTooltip="Dodaj nową kategorię"
       ></p-button>
     </div>
   </div>
-
-  <!-- Free plan limit warning -->
-  @if (isFreePlanLimitReached()) {
-    <p-message
-      severity="warn"
-      text="Osiągnięto limit 5 urządzeń w planie darmowym. Przejdź na plan Premium aby dodać więcej."
-      styleClass="limit-message"
-    ></p-message>
-  }
 
   <!-- Loading state -->
   @if (isLoading()) {
@@ -122,30 +103,30 @@
   }
 
   <!-- Empty state -->
-  @else if (filteredItemsCount() === 0 && totalItemsCount() === 0) {
+  @else if (filteredCategoriesCount() === 0 && totalCategoriesCount() === 0) {
     <div class="empty-state">
       <i class="pi pi-inbox empty-icon"></i>
-      <h3>Brak urządzeń</h3>
-      <p>Dodaj pierwsze urządzenie lub wizytę, aby rozpocząć zarządzanie gospodarstwem.</p>
+      <h3>Brak kategorii</h3>
+      <p>Dodaj pierwszą kategorię, aby rozpocząć zarządzanie systemem.</p>
       <p-button
         icon="pi pi-plus"
-        label="Dodaj urządzenie"
+        label="Dodaj kategorię"
         severity="primary"
-        (onClick)="addNewItem()"
+        (onClick)="addNewCategory()"
       ></p-button>
     </div>
   }
 
   <!-- No results from filter -->
-  @else if (filteredItemsCount() === 0 && totalItemsCount() > 0) {
+  @else if (filteredCategoriesCount() === 0 && totalCategoriesCount() > 0) {
     <div class="empty-state">
       <i class="pi pi-filter-slash empty-icon"></i>
       <h3>Brak wyników</h3>
-      <p>Nie znaleziono urządzeń spełniających kryteria wyszukiwania.</p>
+      <p>Nie znaleziono kategorii spełniających kryteria wyszukiwania.</p>
       <p-button
         label="Wyczyść filtry"
         severity="secondary"
-        (onClick)="onSearch('')"
+        (onClick)="onSearch(''); onCategoryTypeFilterChange(undefined)"
       ></p-button>
     </div>
   }
@@ -154,29 +135,30 @@
   @else if (viewMode() === 'grouped') {
     <div class="items-content grouped-view">
       <p-accordion [multiple]="true" [activeIndex]="[0, 1, 2]">
-        @for (categoryGroup of itemsByCategory(); track categoryGroup.categoryId) {
+        @for (typeGroup of categoriesByType(); track typeGroup.categoryTypeId) {
           <p-accordionTab>
             <ng-template pTemplate="header">
               <div class="category-header">
                 <div class="category-info">
-                  <i class="pi {{ categoryGroup.categoryIcon }} category-icon" [class]="'color-' + categoryGroup.categoryColor"></i>
-                  <span class="category-name">{{ categoryGroup.categoryName }}</span>
+                  <i class="pi {{ getCategoryTypeIcon(typeGroup.categoryTypeId) }} category-icon"
+                     [class]="'color-' + getCategoryTypeColor(typeGroup.categoryTypeId)"></i>
+                  <span class="category-name">{{ typeGroup.categoryTypeName }}</span>
                   <p-tag
-                    [value]="categoryGroup.itemCount.toString()"
-                    [severity]="categoryGroup.categoryColor"
+                    [value]="typeGroup.categoryCount.toString()"
+                    [severity]="getCategoryTypeColor(typeGroup.categoryTypeId)"
                     styleClass="category-count"
                   ></p-tag>
                 </div>
               </div>
             </ng-template>
 
-            <!-- Items in category -->
+            <!-- Categories in type -->
             <div class="items-grid">
-              @for (item of categoryGroup.items; track item.id) {
-                <p-card class="item-card" [styleClass]="'priority-' + item.priority">
+              @for (category of typeGroup.categories; track category.id) {
+                <p-card class="item-card">
                   <ng-template pTemplate="header">
                     <div class="item-card-header">
-                      <h3 class="item-name">{{ item.name }}</h3>
+                      <h3 class="item-name">{{ category.name }}</h3>
                       <div class="item-actions">
                         <p-button
                           icon="pi pi-pencil"
@@ -184,7 +166,7 @@
                           [text]="true"
                           [rounded]="true"
                           size="small"
-                          (onClick)="editItem(item)"
+                          (onClick)="editCategory(category)"
                           pTooltip="Edytuj"
                         ></p-button>
                         <p-button
@@ -193,7 +175,7 @@
                           [text]="true"
                           [rounded]="true"
                           size="small"
-                          (onClick)="deleteItem(item)"
+                          (onClick)="deleteCategory(category)"
                           pTooltip="Usuń"
                         ></p-button>
                       </div>
@@ -201,47 +183,19 @@
                   </ng-template>
 
                   <div class="item-details">
-                    <!-- Priority -->
-                    <div class="detail-row">
-                      <span class="detail-label">Priorytet:</span>
-                      <p-tag
-                        [value]="getPriorityLabel(item.priority)"
-                        [severity]="getPriorityColor(item.priority)"
-                      ></p-tag>
-                    </div>
-
-                    <!-- Interval -->
-                    <div class="detail-row">
-                      <span class="detail-label">Interwał:</span>
-                      <span class="detail-value">{{ formatInterval(item) }}</span>
-                    </div>
-
-                    <!-- Last service date -->
-                    @if (item.lastServiceDate) {
-                      <div class="detail-row">
-                        <span class="detail-label">Ostatni serwis:</span>
-                        <span class="detail-value">{{ item.lastServiceDate | date:'dd.MM.yyyy' }}</span>
-                      </div>
-                    }
-
-                    <!-- Assigned to -->
-                    @if (item.assignedMember) {
-                      <div class="detail-row">
-                        <span class="detail-label">Odpowiedzialny:</span>
-                        <span class="detail-value">
-                          <i class="pi pi-user"></i>
-                          {{ item.assignedMember.displayName || item.assignedMember.email }}
-                        </span>
-                      </div>
-                    }
-
                     <!-- Description -->
-                    @if (item.description) {
+                    @if (category.description) {
                       <div class="detail-row description">
-                        <span class="detail-label">Notatki:</span>
-                        <p class="detail-value">{{ item.description }}</p>
+                        <span class="detail-label">Opis:</span>
+                        <p class="detail-value">{{ category.description }}</p>
                       </div>
                     }
+
+                    <!-- Sort order -->
+                    <div class="detail-row">
+                      <span class="detail-label">Kolejność:</span>
+                      <span class="detail-value">{{ category.sortOrder }}</span>
+                    </div>
                   </div>
                 </p-card>
               }
@@ -256,11 +210,11 @@
   @else {
     <div class="items-content list-view">
       <div class="items-grid">
-        @for (item of filteredItems(); track item.id) {
-          <p-card class="item-card" [styleClass]="'priority-' + item.priority">
+        @for (category of filteredCategories(); track category.id) {
+          <p-card class="item-card">
             <ng-template pTemplate="header">
               <div class="item-card-header">
-                <h3 class="item-name">{{ item.name }}</h3>
+                <h3 class="item-name">{{ category.name }}</h3>
                 <div class="item-actions">
                   <p-button
                     icon="pi pi-pencil"
@@ -268,7 +222,7 @@
                     [text]="true"
                     [rounded]="true"
                     size="small"
-                    (onClick)="editItem(item)"
+                    (onClick)="editCategory(category)"
                     pTooltip="Edytuj"
                   ></p-button>
                   <p-button
@@ -277,7 +231,7 @@
                     [text]="true"
                     [rounded]="true"
                     size="small"
-                    (onClick)="deleteItem(item)"
+                    (onClick)="deleteCategory(category)"
                     pTooltip="Usuń"
                   ></p-button>
                 </div>
@@ -285,56 +239,31 @@
             </ng-template>
 
             <div class="item-details">
-              <!-- Category -->
+              <!-- Category Type -->
               <div class="detail-row">
-                <span class="detail-label">Kategoria:</span>
+                <span class="detail-label">Typ kategorii:</span>
                 <p-tag
-                  [value]="item.category?.name || 'Brak'"
-                  severity="secondary"
-                ></p-tag>
+                  [value]="category.categoryType?.name || 'Brak'"
+                  [severity]="getCategoryTypeColor(category.categoryTypeId)"
+                >
+                  <i class="pi {{ getCategoryTypeIcon(category.categoryTypeId) }}"></i>
+                  {{ category.categoryType?.name || 'Brak' }}
+                </p-tag>
               </div>
-
-              <!-- Priority -->
-              <div class="detail-row">
-                <span class="detail-label">Priorytet:</span>
-                <p-tag
-                  [value]="getPriorityLabel(item.priority)"
-                  [severity]="getPriorityColor(item.priority)"
-                ></p-tag>
-              </div>
-
-              <!-- Interval -->
-              <div class="detail-row">
-                <span class="detail-label">Interwał:</span>
-                <span class="detail-value">{{ formatInterval(item) }}</span>
-              </div>
-
-              <!-- Last service date -->
-              @if (item.lastServiceDate) {
-                <div class="detail-row">
-                  <span class="detail-label">Ostatni serwis:</span>
-                  <span class="detail-value">{{ item.lastServiceDate | date:'dd.MM.yyyy' }}</span>
-                </div>
-              }
-
-              <!-- Assigned to -->
-              @if (item.assignedMember) {
-                <div class="detail-row">
-                  <span class="detail-label">Odpowiedzialny:</span>
-                  <span class="detail-value">
-                    <i class="pi pi-user"></i>
-                    {{ item.assignedMember.displayName || item.assignedMember.email }}
-                  </span>
-                </div>
-              }
 
               <!-- Description -->
-              @if (item.description) {
+              @if (category.description) {
                 <div class="detail-row description">
-                  <span class="detail-label">Notatki:</span>
-                  <p class="detail-value">{{ item.description }}</p>
+                  <span class="detail-label">Opis:</span>
+                  <p class="detail-value">{{ category.description }}</p>
                 </div>
               }
+
+              <!-- Sort order -->
+              <div class="detail-row">
+                <span class="detail-label">Kolejność:</span>
+                <span class="detail-value">{{ category.sortOrder }}</span>
+              </div>
             </div>
           </p-card>
         }

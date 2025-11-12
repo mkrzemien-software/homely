@@ -57,8 +57,8 @@ export class CreateHouseholdDialogComponent {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Success',
-          detail: 'Household created successfully'
+          summary: 'Sukces',
+          detail: 'Gospodarstwo domowe zostało utworzone pomyślnie'
         });
         this.householdCreated.emit();
         this.closeDialog();
@@ -66,8 +66,8 @@ export class CreateHouseholdDialogComponent {
       error: (error) => {
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: error.message || 'Failed to create household'
+          summary: 'Błąd',
+          detail: error.message || 'Nie udało się utworzyć gospodarstwa domowego'
         });
         this.isLoading.set(false);
       },

@@ -7,7 +7,7 @@
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--p-text-color);
   }
 }
 
@@ -28,9 +28,9 @@
 
 :host ::ng-deep {
   .p-toolbar {
-    border-radius: var(--border-radius);
-    background: var(--surface-card);
-    border: 1px solid var(--surface-border);
+    border-radius: 0.5rem;
+    background: var(--p-surface-0);
+    border: 1px solid var(--p-border-color);
     padding: 1rem 1.5rem;
   }
 

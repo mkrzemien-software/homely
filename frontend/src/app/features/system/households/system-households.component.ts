@@ -101,8 +101,8 @@ export class SystemHouseholdsComponent implements OnInit {
       error: (error) => {
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: error.message || 'Failed to load households'
+          summary: 'Błąd',
+          detail: error.message || 'Nie udało się załadować gospodarstw domowych'
         });
       }
     });
@@ -164,8 +164,8 @@ export class SystemHouseholdsComponent implements OnInit {
       error: (error) => {
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: error.message || 'Failed to load household details'
+          summary: 'Błąd',
+          detail: error.message || 'Nie udało się załadować szczegółów gospodarstwa domowego'
         });
       }
     });
@@ -210,8 +210,8 @@ export class SystemHouseholdsComponent implements OnInit {
           next: () => {
             this.messageService.add({
               severity: 'success',
-              summary: 'Success',
-              detail: 'Household deleted successfully'
+              summary: 'Sukces',
+              detail: 'Gospodarstwo domowe zostało usunięte pomyślnie'
             });
             this.loadHouseholds();
             this.loadStats();
@@ -219,8 +219,8 @@ export class SystemHouseholdsComponent implements OnInit {
           error: (error) => {
             this.messageService.add({
               severity: 'error',
-              summary: 'Error',
-              detail: error.message || 'Failed to delete household'
+              summary: 'Błąd',
+              detail: error.message || 'Nie udało się usunąć gospodarstwa domowego'
             });
           }
         });
@@ -275,8 +275,8 @@ export class SystemHouseholdsComponent implements OnInit {
     this.loadStats();
     this.messageService.add({
       severity: 'info',
-      summary: 'Refreshed',
-      detail: 'Data has been refreshed'
+      summary: 'Odświeżono',
+      detail: 'Dane zostały odświeżone'
     });
   }
 }

@@ -17,35 +17,30 @@ import { TooltipModule } from 'primeng/tooltip';
 import { AccordionModule } from 'primeng/accordion';
 
 // Models
-import { Item, ItemsByCategory, getPriorityLabel, getPriorityColor, formatInterval } from './models/item.model';
 import {
-  ItemFilter,
-  ItemSort,
-  DEFAULT_ITEM_FILTER,
-  DEFAULT_ITEM_SORT,
-  SORT_FIELD_LABELS,
-  applyItemFilters,
-  applyItemSort,
-  groupItemsByCategory
-} from './models/item-filter.model';
+  Category,
+  CategoryType,
+  CategoriesByType,
+  getCategoryTypeIcon,
+  getCategoryTypeColor
+} from './models/category.model';
 
 // Services
-import { ItemService } from './services/item.service';
+import { CategoryService } from './services/category.service';
 
 /**
  * ItemsListComponent
  *
- * Main component for displaying and managing items (devices and visits) list.
- * Based on PRD section 3.4.2 - Lista urządzeń/wizyt
+ * Main component for displaying and managing categories.
+ * Based on API plan - GET /categories and GET /category-types
  *
  * Features:
- * - Display all items grouped by category
- * - Sorting: by date, name, priority
- * - Filtering: by category, assigned person
+ * - Display all categories grouped by category type
+ * - Sorting: by name, sort order
+ * - Filtering: by category type, search text
  * - Quick inline edit
- * - Add new item
- * - Delete item
- * - Freemium limits (5 items max for free plan)
+ * - Add new category
+ * - Delete category
  *
  * Route: /:householdId/categories
  *
@@ -79,7 +74,7 @@ import { ItemService } from './services/item.service';
 export class ItemsListComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private itemService = inject(ItemService);
+  private categoryService = inject(CategoryService);
 
   /**
    * Household ID from route
@@ -87,24 +82,19 @@ export class ItemsListComponent implements OnInit {
   householdId = signal<string>('');
 
   /**
-   * All items (raw from API)
+   * All categories (raw from API)
    */
-  allItems = signal<Item[]>([]);
+  allCategories = signal<Category[]>([]);
 
   /**
-   * Current filter configuration
+   * All category types (raw from API)
    */
-  currentFilter = signal<ItemFilter>({ ...DEFAULT_ITEM_FILTER });
+  allCategoryTypes = signal<CategoryType[]>([]);
 
   /**
-   * Current sort configuration
+   * Selected category type filter
    */
-  currentSort = signal<ItemSort>({ ...DEFAULT_ITEM_SORT });
-
-  /**
-   * Available categories for filtering
-   */
-  availableCategories = signal<{ id: number; name: string }[]>([]);
+  selectedCategoryTypeId = signal<number | undefined>(undefined);
 
   /**
    * Loading state
@@ -127,83 +117,105 @@ export class ItemsListComponent implements OnInit {
   searchText = signal<string>('');
 
   /**
-   * Filtered and sorted items
+   * Filtered categories
    */
-  filteredItems = computed(() => {
-    const items = this.allItems();
-    const filter = { ...this.currentFilter(), searchText: this.searchText() };
-    const sort = this.currentSort();
+  filteredCategories = computed(() => {
+    const categories = this.allCategories();
+    const searchText = this.searchText().toLowerCase();
+    const categoryTypeId = this.selectedCategoryTypeId();
 
-    // Apply filters
-    let filtered = applyItemFilters(items, filter);
+    let filtered = categories;
 
-    // Apply sort
-    filtered = applyItemSort(filtered, sort);
+    // Filter by category type
+    if (categoryTypeId !== undefined) {
+      filtered = filtered.filter(c => c.categoryTypeId === categoryTypeId);
+    }
 
-    return filtered;
+    // Filter by search text
+    if (searchText) {
+      filtered = filtered.filter(c =>
+        c.name.toLowerCase().includes(searchText) ||
+        c.description?.toLowerCase().includes(searchText)
+      );
+    }
+
+    // Sort by sortOrder, then by name
+    return filtered.sort((a, b) => {
+      if (a.sortOrder !== b.sortOrder) {
+        return a.sortOrder - b.sortOrder;
+      }
+      return a.name.localeCompare(b.name);
+    });
   });
 
   /**
-   * Items grouped by category
+   * Categories grouped by type
    */
-  itemsByCategory = computed<ItemsByCategory[]>(() => {
-    const items = this.filteredItems();
-    const grouped = groupItemsByCategory(items);
-    const categories = this.availableCategories();
+  categoriesByType = computed<CategoriesByType[]>(() => {
+    const categories = this.filteredCategories();
+    const categoryTypes = this.allCategoryTypes();
 
-    const result: ItemsByCategory[] = [];
+    // Group categories by type
+    const grouped = new Map<number, Category[]>();
+    categories.forEach(category => {
+      if (!grouped.has(category.categoryTypeId)) {
+        grouped.set(category.categoryTypeId, []);
+      }
+      grouped.get(category.categoryTypeId)!.push(category);
+    });
 
-    grouped.forEach((categoryItems, categoryId) => {
-      const category = categories.find(c => c.id === categoryId);
-      if (category) {
+    // Build result array
+    const result: CategoriesByType[] = [];
+    grouped.forEach((typeCategories, categoryTypeId) => {
+      const categoryType = categoryTypes.find(ct => ct.id === categoryTypeId);
+      if (categoryType) {
         result.push({
-          categoryId,
-          categoryName: category.name,
-          categoryColor: this.getCategoryColor(categoryId),
-          categoryIcon: this.getCategoryIcon(categoryId),
-          items: categoryItems,
-          itemCount: categoryItems.length
+          categoryTypeId,
+          categoryTypeName: categoryType.name,
+          categoryTypeDescription: categoryType.description,
+          categories: typeCategories,
+          categoryCount: typeCategories.length
         });
       }
     });
 
-    // Sort by category name
-    return result.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
+    // Sort by sortOrder
+    return result.sort((a, b) => {
+      const typeA = categoryTypes.find(ct => ct.id === a.categoryTypeId);
+      const typeB = categoryTypes.find(ct => ct.id === b.categoryTypeId);
+      if (typeA && typeB) {
+        return typeA.sortOrder - typeB.sortOrder;
+      }
+      return 0;
+    });
   });
 
   /**
-   * Total items count
+   * Total categories count
    */
-  totalItemsCount = computed(() => this.allItems().length);
+  totalCategoriesCount = computed(() => this.allCategories().length);
 
   /**
-   * Filtered items count
+   * Filtered categories count
    */
-  filteredItemsCount = computed(() => this.filteredItems().length);
+  filteredCategoriesCount = computed(() => this.filteredCategories().length);
 
   /**
-   * Check if free plan limit reached (5 items)
+   * Category type options for dropdown
    */
-  isFreePlanLimitReached = computed(() => {
-    // TODO: Check actual plan from household data
-    const FREE_PLAN_LIMIT = 5;
-    return this.totalItemsCount() >= FREE_PLAN_LIMIT;
+  categoryTypeOptions = computed(() => {
+    const types = this.allCategoryTypes();
+    return [
+      { label: 'Wszystkie typy', value: undefined },
+      ...types.map(type => ({ label: type.name, value: type.id }))
+    ];
   });
-
-  /**
-   * Sort options for dropdown
-   */
-  readonly sortOptions = Object.entries(SORT_FIELD_LABELS).map(([value, label]) => ({
-    label,
-    value
-  }));
 
   /**
    * Helper functions exposed to template
    */
-  readonly getPriorityLabel = getPriorityLabel;
-  readonly getPriorityColor = getPriorityColor;
-  readonly formatInterval = formatInterval;
+  readonly getCategoryTypeIcon = getCategoryTypeIcon;
+  readonly getCategoryTypeColor = getCategoryTypeColor;
 
   ngOnInit(): void {
     // Get household ID from route
@@ -211,67 +223,44 @@ export class ItemsListComponent implements OnInit {
       const id = params['householdId'];
       if (id) {
         this.householdId.set(id);
-        this.loadItems(id);
         this.loadCategories();
+        this.loadCategoryTypes();
       }
     });
   }
 
   /**
-   * Load items from API
+   * Load categories from API
    */
-  private loadItems(householdId: string): void {
+  private loadCategories(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    this.itemService.getHouseholdItems(householdId).subscribe({
-      next: (items) => {
-        this.allItems.set(items);
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading items:', error);
-        this.errorMessage.set('Nie udało się załadować listy urządzeń. Spróbuj ponownie później.');
-        this.isLoading.set(false);
-      }
-    });
-  }
-
-  /**
-   * Load categories
-   */
-  private loadCategories(): void {
-    this.itemService.getCategories().subscribe({
+    this.categoryService.getCategories().subscribe({
       next: (categories) => {
-        this.availableCategories.set(
-          categories.map(c => ({ id: c.id, name: c.name }))
-        );
+        this.allCategories.set(categories);
+        this.isLoading.set(false);
       },
       error: (error) => {
         console.error('Error loading categories:', error);
+        this.errorMessage.set('Nie udało się załadować listy kategorii. Spróbuj ponownie później.');
+        this.isLoading.set(false);
       }
     });
   }
 
   /**
-   * Handle sort change
+   * Load category types from API
    */
-  onSortChange(field: string): void {
-    const currentSort = this.currentSort();
-
-    if (currentSort.field === field) {
-      // Toggle direction
-      this.currentSort.set({
-        field: field as any,
-        direction: currentSort.direction === 'asc' ? 'desc' : 'asc'
-      });
-    } else {
-      // New field, default to asc
-      this.currentSort.set({
-        field: field as any,
-        direction: 'asc'
-      });
-    }
+  private loadCategoryTypes(): void {
+    this.categoryService.getCategoryTypes().subscribe({
+      next: (categoryTypes) => {
+        this.allCategoryTypes.set(categoryTypes);
+      },
+      error: (error) => {
+        console.error('Error loading category types:', error);
+      }
+    });
   }
 
   /**
@@ -282,6 +271,13 @@ export class ItemsListComponent implements OnInit {
   }
 
   /**
+   * Handle category type filter change
+   */
+  onCategoryTypeFilterChange(categoryTypeId: number | undefined): void {
+    this.selectedCategoryTypeId.set(categoryTypeId);
+  }
+
+  /**
    * Toggle view mode
    */
   toggleViewMode(): void {
@@ -289,80 +285,45 @@ export class ItemsListComponent implements OnInit {
   }
 
   /**
-   * Navigate to add new item
+   * Navigate to add new category
    */
-  addNewItem(): void {
-    if (this.isFreePlanLimitReached()) {
-      // TODO: Show upgrade dialog
-      alert('Osiągnięto limit 5 urządzeń w planie darmowym. Przejdź na plan Premium aby dodać więcej.');
-      return;
-    }
-
-    // TODO: Open add item dialog
-    console.log('Add new item');
+  addNewCategory(): void {
+    // TODO: Open add category dialog
+    console.log('Add new category');
   }
 
   /**
-   * Edit item
+   * Edit category
    */
-  editItem(item: Item): void {
+  editCategory(category: Category): void {
     // TODO: Open edit dialog
-    console.log('Edit item:', item);
+    console.log('Edit category:', category);
   }
 
   /**
-   * Delete item
+   * Delete category
    */
-  deleteItem(item: Item): void {
-    if (confirm(`Czy na pewno chcesz usunąć "${item.name}"?`)) {
-      this.itemService.deleteItem(item.id).subscribe({
+  deleteCategory(category: Category): void {
+    if (confirm(`Czy na pewno chcesz usunąć kategorię "${category.name}"?`)) {
+      this.categoryService.deleteCategory(category.id).subscribe({
         next: () => {
           // Remove from local state
-          const items = this.allItems();
-          this.allItems.set(items.filter(i => i.id !== item.id));
+          const categories = this.allCategories();
+          this.allCategories.set(categories.filter(c => c.id !== category.id));
         },
         error: (error) => {
-          console.error('Error deleting item:', error);
-          alert('Nie udało się usunąć urządzenia. Spróbuj ponownie.');
+          console.error('Error deleting category:', error);
+          alert('Nie udało się usunąć kategorii. Spróbuj ponownie.');
         }
       });
     }
   }
 
   /**
-   * Refresh items list
+   * Refresh categories list
    */
   refresh(): void {
-    const householdId = this.householdId();
-    if (householdId) {
-      this.loadItems(householdId);
-    }
-  }
-
-  /**
-   * Get category color
-   */
-  private getCategoryColor(categoryId: number): string {
-    // Map category IDs to colors
-    // TODO: Get from backend or configuration
-    const colorMap: Record<number, string> = {
-      1: 'primary',    // Technical inspections
-      2: 'success',    // Waste collection
-      3: 'danger'      // Medical visits
-    };
-    return colorMap[categoryId] || 'secondary';
-  }
-
-  /**
-   * Get category icon
-   */
-  private getCategoryIcon(categoryId: number): string {
-    // Map category IDs to icons
-    const iconMap: Record<number, string> = {
-      1: 'pi-cog',           // Technical inspections
-      2: 'pi-trash',         // Waste collection
-      3: 'pi-heart-fill'     // Medical visits
-    };
-    return iconMap[categoryId] || 'pi-tag';
+    this.loadCategories();
+    this.loadCategoryTypes();
   }
 }

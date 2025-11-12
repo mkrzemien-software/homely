@@ -2,7 +2,7 @@
 .app-layout {
   display: flex;
   min-height: 100vh;
-  background: var(--surface-ground);
+  // No background - inherit gradient from body
 }
 
 .main-content {

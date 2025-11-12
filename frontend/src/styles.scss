@@ -1,10 +1,24 @@
 // ============================================
 // HOMELY - Global Styles
-// Using PrimeNG Theming System with Aura preset
+// Using PrimeNG v19 Theming System with Aura preset
 // ============================================
 
 // Import PrimeIcons
 @import 'primeicons/primeicons.css';
+
+// ============================================
+// PRIMENG V19 DESIGN TOKENS REFERENCE
+// Available CSS variables from @primeuix/themes
+// ============================================
+// Surface Colors: --p-surface-0 (white) through --p-surface-950 (darkest)
+// Text Colors: --p-text-color, --p-text-muted-color, --p-text-hover-color
+// Primary Colors: --p-primary-color, --p-primary-contrast-color, --p-primary-hover-color
+// Backgrounds: --p-content-background, --p-content-hover-background
+// Form Fields: --p-form-field-background, --p-form-field-border-color
+// Overlays: --p-overlay-modal-background, --p-mask-background
+// Highlights: --p-highlight-background, --p-highlight-color
+// Borders: --p-border-color
+// ============================================
 
 // ============================================
 // CUSTOM DESIGN TOKENS
@@ -27,6 +41,27 @@
   --status-completed: #10b981;
   --status-overdue: #ef4444;
   --status-cancelled: #6b7280;
+
+  // Fallback for border color if not defined by PrimeNG
+  --p-border-color: var(--p-content-border-color, var(--p-surface-200));
+}
+
+// Dark mode border color fallback
+:global(.p-dark) {
+  --p-border-color: var(--p-content-border-color, var(--p-surface-700));
+
+  // Button outlined secondary colors for dark mode
+  --p-button-outlined-secondary-border-color: var(--p-surface-600, rgba(255, 255, 255, 0.3));
+  --p-button-outlined-secondary-color: rgba(255, 255, 255, 0.87);
+  --p-button-outlined-secondary-hover-background: var(--p-surface-800, rgba(255, 255, 255, 0.1));
+  --p-button-outlined-secondary-active-background: var(--p-surface-700, rgba(255, 255, 255, 0.15));
+
+  // Dialog/Modal colors for dark mode
+  --p-dialog-background: var(--p-overlay-modal-background, #27272a);
+  --p-dialog-border-color: var(--p-overlay-modal-border-color, #3f3f46);
+  --p-dialog-header-background: var(--p-overlay-modal-background, #27272a);
+  --p-dialog-content-background: var(--p-overlay-modal-background, #27272a);
+  --p-dialog-footer-background: var(--p-overlay-modal-background, #27272a);
 }
 
 // ============================================
@@ -47,6 +82,10 @@ p-button button,
   .p-toast-message-icon {
     padding-right: 5px !important;
   }
+}
+
+.p-toast-message-info .p-toast-detail {
+  color: var(--p-text-color) !important;
 }
 
 // PrimeNG Dialog Customization
@@ -94,11 +133,12 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--p-font-family);
-  font-size: var(--p-text-font-size);
+  font-family: var(--p-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  font-size: 1rem;
   line-height: 1.5;
   color: var(--p-text-color);
-  background: var(--p-content-background);
+  background: linear-gradient(96deg, var(--p-surface-0) 0%, var(--p-surface-100) 130%);  // Subtle gradient for depth
+  background-attachment: fixed;  // Keep gradient fixed during scroll
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -188,7 +228,7 @@ a {
 
 // Text color utilities
 .text-primary { color: var(--p-text-color); }
-.text-secondary { color: var(--p-text-secondary-color); }
+.text-secondary { color: var(--p-text-muted-color); }
 .text-muted { color: var(--p-text-muted-color); }
 
 // Background utilities

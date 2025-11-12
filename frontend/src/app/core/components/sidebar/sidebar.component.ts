@@ -7,6 +7,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { BadgeModule } from 'primeng/badge';
 import { DividerModule } from 'primeng/divider';
 import { MenuModule } from 'primeng/menu';
+import { ThemeService } from '../../../core/services/theme.service';
 import {
   MenuSection,
   MenuItem,
@@ -48,11 +49,15 @@ import {
 })
 export class SidebarComponent {
   private router = inject(Router);
+  private themeService = inject(ThemeService);
 
   // State signals
   isVisible = signal<boolean>(true);
   isCollapsed = signal<boolean>(false);
   isMobileView = signal<boolean>(false);
+
+  // Theme signals
+  currentTheme = this.themeService.appliedTheme;
 
   // User context signals (TODO: Connect to actual auth service)
   currentHouseholdId = signal<string | null>('test-household');
@@ -95,6 +100,11 @@ export class SidebarComponent {
   navigateTo(route: string): void {
     this.router.navigate([route]);
     this.closeSidebar();
+  }
+
+  // Toggle theme between light and dark
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
   }
 
   // Handle window resize

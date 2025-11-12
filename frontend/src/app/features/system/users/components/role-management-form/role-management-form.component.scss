@@ -4,13 +4,13 @@
 
 .card-header {
   padding: 1.5rem;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--p-border-color);
 
   h3 {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--p-text-color);
   }
 }
 
@@ -27,11 +27,11 @@ form {
 
   label {
     font-weight: 500;
-    color: var(--text-color);
+    color: var(--p-text-color);
   }
 
   .help-text {
-    color: var(--text-color-secondary);
+    color: var(--p-text-muted-color);
     font-size: 0.875rem;
     font-style: italic;
   }
@@ -42,13 +42,13 @@ form {
 
   .role-label {
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--p-text-color);
     margin-bottom: 0.25rem;
   }
 
   .role-description {
     font-size: 0.875rem;
-    color: var(--text-color-secondary);
+    color: var(--p-text-muted-color);
   }
 }
 
@@ -58,7 +58,7 @@ form {
   gap: 0.75rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--surface-border);
+  border-top: 1px solid var(--p-border-color);
 }
 
 :host ::ng-deep {
