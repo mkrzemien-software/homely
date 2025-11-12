@@ -1,9 +1,37 @@
-// Import theme system
-@use './styles/variables' as *;
-@use './styles/themes';
+// ============================================
+// HOMELY - Global Styles
+// Using PrimeNG Theming System with Aura preset
+// ============================================
 
-// Import PrimeNG styles
+// Import PrimeIcons
 @import 'primeicons/primeicons.css';
+
+// ============================================
+// CUSTOM DESIGN TOKENS
+// Business-specific colors not covered by PrimeNG
+// ============================================
+
+:root {
+  // Category Colors (from PRD)
+  --category-technical: #3b82f6;     // Blue - Technical inspections
+  --category-waste: #10b981;          // Green - Waste collection
+  --category-medical: #ef4444;        // Red - Medical visits
+
+  // Priority Colors
+  --priority-low: #6b7280;
+  --priority-medium: #f59e0b;
+  --priority-high: #ef4444;
+
+  // Status Colors
+  --status-pending: #f59e0b;
+  --status-completed: #10b981;
+  --status-overdue: #ef4444;
+  --status-cancelled: #6b7280;
+}
+
+// ============================================
+// PRIMENG COMPONENT CUSTOMIZATION
+// ============================================
 
 // PrimeNG Button Customization
 p-button button,
@@ -21,7 +49,36 @@ p-button button,
   }
 }
 
-// Global Reset and Base Styles
+// PrimeNG Dialog Customization
+.p-dialog-mask {
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  transition: all 0.3s;
+}
+
+.p-dialog {
+  .p-dialog-header {
+    padding: 1.25rem;
+
+    .p-dialog-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+  }
+
+  .p-dialog-content {
+    padding: 1.5rem;
+  }
+
+  .p-dialog-footer {
+    padding: 1rem 1.25rem;
+  }
+}
+
+// ============================================
+// GLOBAL RESET AND BASE STYLES
+// ============================================
+
 *,
 *::before,
 *::after {
@@ -37,73 +94,86 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-family);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
-  color: var(--text-primary);
-  background: var(--bg-primary);
-  transition: background-color var(--transition-normal), color var(--transition-normal);
+  font-family: var(--p-font-family);
+  font-size: var(--p-text-font-size);
+  line-height: 1.5;
+  color: var(--p-text-color);
+  background: var(--p-content-background);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-// Headings
+// ============================================
+// TYPOGRAPHY
+// ============================================
+
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
-  color: var(--text-primary);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--p-text-color);
 }
 
-h1 { font-size: var(--font-size-4xl); }
-h2 { font-size: var(--font-size-3xl); }
-h3 { font-size: var(--font-size-2xl); }
-h4 { font-size: var(--font-size-xl); }
-h5 { font-size: var(--font-size-lg); }
-h6 { font-size: var(--font-size-base); }
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.875rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
 
 // Links
 a {
-  color: var(--color-primary);
+  color: var(--p-primary-color);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: color 0.15s ease;
 
   &:hover {
-    color: var(--color-secondary);
+    color: var(--p-primary-hover-color);
   }
 }
 
 // Selection
 ::selection {
-  background: rgba(var(--color-primary-rgb), 0.2);
-  color: var(--text-primary);
+  background: var(--p-highlight-background);
+  color: var(--p-highlight-color);
 }
 
-// Scrollbar
+// ============================================
+// SCROLLBAR STYLING
+// ============================================
+
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: var(--p-content-background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-hover);
-  border-radius: var(--radius-full);
-  border: 3px solid var(--bg-secondary);
+  background: var(--p-surface-200);
+  border-radius: 9999px;
+  border: 3px solid var(--p-content-background);
 
   &:hover {
-    background: var(--text-tertiary);
+    background: var(--p-surface-300);
   }
 }
 
-// Focus visible
+// ============================================
+// FOCUS STYLES
+// ============================================
+
 *:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--p-primary-color);
   outline-offset: 2px;
 }
 
-// Utility Classes
+// ============================================
+// UTILITY CLASSES
+// ============================================
+
+// Screen reader only
 .sr-only {
   position: absolute;
   width: 1px;
@@ -116,22 +186,23 @@ a {
   border-width: 0;
 }
 
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-tertiary { color: var(--text-tertiary); }
-.text-disabled { color: var(--text-disabled); }
+// Text color utilities
+.text-primary { color: var(--p-text-color); }
+.text-secondary { color: var(--p-text-secondary-color); }
+.text-muted { color: var(--p-text-muted-color); }
 
-.bg-primary { background: var(--bg-primary); }
-.bg-secondary { background: var(--bg-secondary); }
-.bg-tertiary { background: var(--bg-tertiary); }
-.surface { background: var(--surface); }
+// Background utilities
+.bg-surface { background: var(--p-content-background); }
 
-// Responsive Container
+// ============================================
+// RESPONSIVE CONTAINER
+// ============================================
+
 .container {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-lg);
+  padding: 0 1.5rem;
 }
 
 @media (max-width: 768px) {
@@ -140,39 +211,22 @@ a {
   }
 
   .container {
-    padding: 0 var(--spacing-md);
+    padding: 0 1rem;
   }
 }
 
-// PrimeNG Dialog Overlay/Mask
-.p-dialog-mask {
-  background-color: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(2px);
-  transition: all 0.3s;
-}
+// ============================================
+// DARK MODE ADJUSTMENTS
+// ============================================
 
-.p-dialog {
-  .p-dialog-header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--surface-border);
-    padding: 1.25rem;
+.p-dark {
+  // Additional dark mode customizations if needed
 
-    .p-dialog-title {
-      font-weight: 600;
-      font-size: 1.25rem;
-      color: var(--text-color);
+  ::-webkit-scrollbar-thumb {
+    background: var(--p-surface-600);
+
+    &:hover {
+      background: var(--p-surface-500);
     }
-  }
-
-  .p-dialog-content {
-    background: var(--surface);
-    padding: 1.5rem;
-    color: var(--text-color);
-  }
-
-  .p-dialog-footer {
-    background: var(--surface);
-    border-top: 1px solid var(--surface-border);
-    padding: 1rem 1.25rem;
   }
 }

@@ -286,11 +286,11 @@ formatInterval(item)  // "1 rok, 6 miesięcy, 15 dni"
 ### calculateNextServiceDate()
 ```typescript
 const item = {
-  lastServiceDate: '2024-01-01',
+  lastServiceDate: '2025-01-01',
   monthsValue: 6
 };
 
-calculateNextServiceDate(item)  // Date: 2024-07-01
+calculateNextServiceDate(item)  // Date: 2025-07-01
 ```
 
 ### applyItemFilters()

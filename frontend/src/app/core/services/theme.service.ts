@@ -50,6 +50,7 @@ export class ThemeService {
 
   /**
    * Apply theme to document
+   * Uses PrimeNG convention: .p-dark class for dark mode
    */
   private applyTheme(): void {
     const preference = this.themePreference();
@@ -58,19 +59,20 @@ export class ThemeService {
     // Update applied theme signal
     this.appliedTheme.set(resolvedTheme);
 
-    // Apply to document
+    // Apply to document using PrimeNG convention
     const root = document.documentElement;
 
-    // Remove existing theme
+    // Remove existing theme classes/attributes
+    root.classList.remove('p-dark');
     root.removeAttribute('data-theme');
 
-    // Add new theme
-    if (preference !== 'auto') {
-      root.setAttribute('data-theme', preference);
-    } else {
-      // For auto, set based on system preference
-      root.setAttribute('data-theme', resolvedTheme);
+    // Add dark mode class if needed (PrimeNG convention)
+    if (resolvedTheme === 'dark') {
+      root.classList.add('p-dark');
     }
+
+    // Also set data-theme attribute for backward compatibility
+    root.setAttribute('data-theme', resolvedTheme);
 
     // Update meta theme-color for mobile browsers
     this.updateMetaThemeColor(resolvedTheme);
@@ -109,7 +111,16 @@ export class ThemeService {
         if (this.themePreference() === 'auto') {
           const newTheme = e.matches ? 'dark' : 'light';
           this.appliedTheme.set(newTheme);
-          document.documentElement.setAttribute('data-theme', newTheme);
+
+          const root = document.documentElement;
+          root.classList.remove('p-dark');
+          root.removeAttribute('data-theme');
+
+          if (newTheme === 'dark') {
+            root.classList.add('p-dark');
+          }
+          root.setAttribute('data-theme', newTheme);
+
           this.updateMetaThemeColor(newTheme);
         }
       });

@@ -15,7 +15,11 @@
       "Bash(cat:*)",
       "Bash(npx supabase migration:*)",
       "Bash(npx supabase db push)",
-      "Bash(npx supabase:*)"
+      "Bash(npx supabase:*)",
+      "WebFetch(domain:primeng.org)",
+      "WebSearch",
+      "Bash(npm uninstall @primeng/themes)",
+      "Bash(npm install @primeuix/themes)"
     ],
     "deny": [],
     "ask": []
