@@ -158,6 +158,21 @@ export interface UpdateCategoryTypeDto {
 }
 
 /**
+ * Single category sort order item
+ */
+export interface CategorySortOrderItem {
+  id: number;
+  sortOrder: number;
+}
+
+/**
+ * DTO for updating multiple categories sort order
+ */
+export interface UpdateCategoriesSortOrderDto {
+  items: CategorySortOrderItem[];
+}
+
+/**
  * Helper function to get category type color
  */
 export function getCategoryTypeColor(categoryTypeId: number): string {

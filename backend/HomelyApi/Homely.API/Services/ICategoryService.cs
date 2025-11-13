@@ -41,4 +41,9 @@ public interface ICategoryService
     /// Delete category (soft delete)
     /// </summary>
     Task<bool> DeleteCategoryAsync(int categoryId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Update sort order for multiple categories
+    /// </summary>
+    Task UpdateCategoriesSortOrderAsync(UpdateCategoriesSortOrderDto updateDto, CancellationToken cancellationToken = default);
 }

@@ -59,22 +59,6 @@ export function getHouseholdMenuItems(householdId: string): MenuItem[] {
       tooltip: 'Urządzenia i wizyty pogrupowane po kategoriach'
     },
     {
-      id: 'items',
-      label: 'Urządzenia/Wizyty',
-      icon: 'pi pi-box',
-      route: `/${householdId}/items`,
-      roles: ['admin', 'member'],
-      tooltip: 'Pełna lista z możliwością zarządzania'
-    },
-    {
-      id: 'household-manage',
-      label: 'Gospodarstwo',
-      icon: 'pi pi-users',
-      route: `/${householdId}/manage`,
-      roles: ['admin'],
-      tooltip: 'Zarządzanie członkami i ustawieniami'
-    },
-    {
       id: 'history',
       label: 'Historia',
       icon: 'pi pi-history',

@@ -9,7 +9,9 @@ import {
   CreateCategoryDto,
   UpdateCategoryDto,
   CreateCategoryTypeDto,
-  UpdateCategoryTypeDto
+  UpdateCategoryTypeDto,
+  CategorySortOrderItem,
+  UpdateCategoriesSortOrderDto
 } from '../models/category.model';
 
 /**
@@ -292,6 +294,36 @@ export class CategoryService {
         }),
         catchError(error => {
           console.error('Error deleting category type:', error);
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Update sort order for multiple categories
+   *
+   * @param updates - Array of category ID and sort order updates
+   * @returns Observable of success status
+   */
+  updateCategoriesOrder(updates: CategorySortOrderItem[]): Observable<{ success: boolean }> {
+    const dto: UpdateCategoriesSortOrderDto = { items: updates };
+
+    return this.http.patch<{ success: boolean }>(`${this.API_URL}/categories/sort-order`, dto)
+      .pipe(
+        tap(() => {
+          // Update cache with new sort orders
+          const current = this.categoriesCache$.value;
+          const updated = current.map(category => {
+            const update = updates.find(u => u.id === category.id);
+            if (update) {
+              return { ...category, sortOrder: update.sortOrder };
+            }
+            return category;
+          });
+          this.categoriesCache$.next(updated);
+        }),
+        catchError(error => {
+          console.error('Error updating categories order:', error);
           throw error;
         })
       );

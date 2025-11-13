@@ -17,6 +17,9 @@ import { TooltipModule } from 'primeng/tooltip';
 import { AccordionModule } from 'primeng/accordion';
 import { DialogModule } from 'primeng/dialog';
 
+// Angular CDK
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+
 // Models
 import {
   Category,
@@ -74,6 +77,7 @@ import { EditCategoryTypeDialogComponent } from './components/edit-category-type
     TooltipModule,
     AccordionModule,
     DialogModule,
+    DragDropModule,
     CreateCategoryDialogComponent,
     EditCategoryDialogComponent,
     CreateCategoryTypeDialogComponent,
@@ -444,5 +448,56 @@ export class CategoriesListComponent implements OnInit {
   refresh(): void {
     this.loadCategories();
     this.loadCategoryTypes();
+  }
+
+  /**
+   * Handle drop event for drag & drop reordering
+   * Only works in grouped view - subcategories can only be reordered within the same category
+   */
+  onCategoryDrop(event: CdkDragDrop<Category[]>, categoryTypeId: number): void {
+    // Get the categories for this category type
+    const categoryGroup = this.categoriesByType().find(
+      group => group.categoryTypeId === categoryTypeId
+    );
+
+    if (!categoryGroup) {
+      return;
+    }
+
+    // Create a copy of the categories array
+    const categories = [...categoryGroup.categories];
+
+    // Move the item in the array
+    moveItemInArray(categories, event.previousIndex, event.currentIndex);
+
+    // Recalculate sortOrder for all categories in this group
+    const updates = categories.map((category, index) => ({
+      id: category.id,
+      sortOrder: index
+    }));
+
+    // Optimistically update local state
+    const allCategories = this.allCategories();
+    const updatedCategories = allCategories.map(cat => {
+      const update = updates.find(u => u.id === cat.id);
+      if (update) {
+        return { ...cat, sortOrder: update.sortOrder };
+      }
+      return cat;
+    });
+    this.allCategories.set(updatedCategories);
+
+    // Call API to persist the changes
+    this.categoryService.updateCategoriesOrder(updates).subscribe({
+      next: () => {
+        // Success - state already updated optimistically
+      },
+      error: (error) => {
+        console.error('Error updating category order:', error);
+        // Rollback on error
+        this.loadCategories();
+        alert('Nie udało się zaktualizować kolejności podkategorii. Spróbuj ponownie.');
+      }
+    });
   }
 }

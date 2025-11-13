@@ -233,18 +233,18 @@
 
 .category-background {
   color: #000000ba;
-  // Kolory tęczy (Rainbow colors)
-  &.color-primary { background-color:  var(--p-red-500); }      // Czerwony
-  &.color-success { background-color:  var(--p-orange-500); }   // Pomarańczowy
-  &.color-danger { background-color:  var(--p-yellow-500); }    // Żółty
-  &.color-warning { background-color:  var(--p-green-500); }    // Zielony
-  &.color-secondary { background-color:  var(--p-blue-500); }   // Niebieski
-  &.color-info { background-color:  var(--p-indigo-500); }      // Indygo
-  &.color-purple { background-color:  var(--p-purple-500); }    // Fioletowy
-  &.color-teal { background-color:  var(--p-pink-500); }        // Różowy
-  &.color-gray { background-color:  var(--p-cyan-500); }        // Cyjan
-  &.color-light { background-color:  var(--p-lime-500); }       // Limonkowy
-  &.color-dark { background-color:  var(--p-amber-500); }       // Bursztynowy
+
+  &.color-primary { background-color: var(--p-emerald-600); }
+  &.color-success { background-color: var(--p-red-600); }
+  &.color-danger { background-color: var(--p-orange-600); }
+  &.color-warning { background-color: var(--p-blue-600); }
+  &.color-secondary { background-color: var(--p-purple-600); }
+  &.color-info { background-color: var(--p-pink-600); }
+  &.color-purple { background-color: var(--p-indigo-600); }
+  &.color-teal { background-color: var(--p-cyan-600); }
+  &.color-gray { background-color: var(--p-teal-600); }
+  &.color-light { background-color: var(--p-lime-500); }
+  &.color-dark { background-color: var(--p-amber-600); }
 }
 
 // Category header in accordion
@@ -265,18 +265,17 @@
 .category-icon {
   font-size: 1.5rem;
 
-  // Kolory tęczy (Rainbow colors)
-  &.color-primary { color: var(--p-red-500); }      // Czerwony
-  &.color-success { color: var(--p-orange-500); }   // Pomarańczowy
-  &.color-danger { color: var(--p-yellow-500); }    // Żółty
-  &.color-warning { color: var(--p-gree n-500); }    // Zielony
-  &.color-secondary { color: var(--p-blue-500); }   // Niebieski
-  &.color-info { color: var(--p-indigo-500); }      // Indygo
-  &.color-purple { color: var(--p-purple-500); }    // Fioletowy
-  &.color-teal { color: var(--p-pink-500); }        // Różowy
-  &.color-gray { color: var(--p-cyan-500); }        // Cyjan
-  &.color-light { color: var(--p-lime-500); }       // Limonkowy
-  &.color-dark { color: var(--p-amber-500); }       // Bursztynowy
+  &.color-primary { color: var(--p-emerald-600); }
+  &.color-success { color: var(--p-red-600); }
+  &.color-danger { color: var(--p-orange-600); }
+  &.color-warning { color: var(--p-blue-600); }
+  &.color-secondary { color: var(--p-purple-600); }
+  &.color-info { color: var(--p-pink-600); }
+  &.color-purple { color: var(--p-indigo-600); }
+  &.color-teal { color: var(--p-cyan-600); }
+  &.color-gray { color: var(--p-teal-600); }
+  &.color-light { color: var(--p-lime-500); }
+  &.color-dark { color: var(--p-amber-600); }
 }
 
 .category-name {
@@ -326,11 +325,57 @@
   }
 }
 
+// Drag & Drop styles
+.drag-handle {
+  font-size: 1.25rem;
+  color: var(--p-text-muted-color);
+  cursor: grab;
+  padding: 0.25rem;
+  margin-right: 0.5rem;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--p-primary-color);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+// CDK Drag & Drop styles
+::ng-deep {
+  .cdk-drag-preview {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+    border-radius: 0.5rem;
+
+    .item-card {
+      box-shadow: none;
+    }
+  }
+
+  .cdk-drag-placeholder {
+    opacity: 0.4;
+    background: var(--p-surface-100);
+    border: 2px dashed var(--p-primary-color);
+    border-radius: 0.5rem;
+  }
+
+  .cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  .items-grid.cdk-drop-list-dragging .item-card:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
 .item-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.5rem;
   padding: 1rem 1rem 0.5rem;
   background: var(--p-surface-0);
   border-bottom: 1px solid var(--p-border-color);

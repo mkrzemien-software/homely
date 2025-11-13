@@ -22,7 +22,8 @@
       "Bash(npm install @primeuix/themes)",
       "Bash(find:*)",
       "Bash(npx ng build:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

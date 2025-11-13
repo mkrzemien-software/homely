@@ -249,4 +249,58 @@ public class CategoriesController : ControllerBase
             return StatusCode(500, new { error = "An error occurred while deleting category" });
         }
     }
+
+    /// <summary>
+    /// Update sort order for multiple categories
+    /// </summary>
+    /// <param name="updateDto">List of category ID and sort order updates</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Success status</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     PATCH /api/categories/sort-order
+    ///     {
+    ///         "items": [
+    ///             { "id": 1, "sortOrder": 0 },
+    ///             { "id": 2, "sortOrder": 1 },
+    ///             { "id": 3, "sortOrder": 2 }
+    ///         ]
+    ///     }
+    ///
+    /// </remarks>
+    [HttpPatch("sort-order")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> UpdateCategoriesSortOrder(
+        [FromBody] UpdateCategoriesSortOrderDto updateDto,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (updateDto.Items == null || updateDto.Items.Count == 0)
+            {
+                return BadRequest(new { error = "Items list cannot be empty" });
+            }
+
+            await _categoryService.UpdateCategoriesSortOrderAsync(updateDto, cancellationToken);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Categories sort order updated successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating categories sort order");
+            return StatusCode(500, new { error = "An error occurred while updating categories sort order" });
+        }
+    }
 }

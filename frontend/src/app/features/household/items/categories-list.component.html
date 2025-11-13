@@ -5,7 +5,7 @@
       <div class="header-text">
         <h1 class="page-title">
           <i class="pi pi-tags" aria-hidden="true"></i>
-          Podkategorie
+          Kategorie
         </h1>
         <p class="page-subtitle">
           Zarządzaj podkategoriami w systemie, pogrupowane według kategorii
@@ -148,8 +148,6 @@
             <ng-template pTemplate="header">
               <div class="category-header">
                 <div class="category-info">
-                  <i class="pi pi-tags category-icon"
-                     [class]="'color-' + getCategoryTypeColor(typeGroup.categoryTypeId)"></i>
                   <span class="category-name">{{ typeGroup.categoryTypeName }}</span>
                   <p-button
                     icon="pi pi-pencil"
@@ -161,9 +159,10 @@
                     pTooltip="Edytuj kategorię"
                     styleClass="category-type-edit-btn"
                   ></p-button>
+                  {{typeGroup.categoryTypeId}}
                   <p-tag
                     [value]="typeGroup.categoryCount.toString()"
-                    [severity]="getCategoryTypeColor(typeGroup.categoryTypeId)"
+                    [class]="'category-background color-' + getCategoryTypeColor(typeGroup.categoryTypeId)"
                     styleClass="category-count"
                   ></p-tag>
                 </div>
@@ -171,11 +170,17 @@
             </ng-template>
 
             <!-- Categories in type -->
-            <div class="items-grid">
+            <div
+              class="items-grid"
+              cdkDropList
+              [cdkDropListData]="typeGroup.categories"
+              (cdkDropListDropped)="onCategoryDrop($event, typeGroup.categoryTypeId)"
+            >
               @for (category of typeGroup.categories; track category.id) {
-                <p-card class="item-card">
+                <p-card class="item-card" cdkDrag>
                   <ng-template pTemplate="header">
                     <div class="item-card-header">
+                      <i class="pi pi-bars drag-handle" cdkDragHandle></i>
                       <h3 class="item-name">{{ category.name }}</h3>
                       <div class="item-actions">
                         <p-button

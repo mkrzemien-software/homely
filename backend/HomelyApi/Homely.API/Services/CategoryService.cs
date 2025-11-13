@@ -186,6 +186,51 @@ public class CategoryService : ICategoryService
         }
     }
 
+    /// <inheritdoc/>
+    public async Task UpdateCategoriesSortOrderAsync(UpdateCategoriesSortOrderDto updateDto, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Get all category IDs to update
+            var categoryIds = updateDto.Items.Select(i => i.Id).ToList();
+
+            // Fetch all categories in one query
+            var categories = await _unitOfWork.Categories
+                .GetAllAsync(cancellationToken);
+
+            var categoriesToUpdate = categories
+                .Where(c => categoryIds.Contains(c.Id) && c.DeletedAt == null)
+                .ToList();
+
+            if (categoriesToUpdate.Count != categoryIds.Count)
+            {
+                _logger.LogWarning("Some categories not found or already deleted");
+            }
+
+            // Update sort order for each category
+            foreach (var item in updateDto.Items)
+            {
+                var category = categoriesToUpdate.FirstOrDefault(c => c.Id == item.Id);
+                if (category != null)
+                {
+                    category.SortOrder = item.SortOrder;
+                    category.UpdatedAt = DateTimeOffset.UtcNow;
+                    await _unitOfWork.Categories.UpdateAsync(category, cancellationToken);
+                }
+            }
+
+            // Save all changes in a single transaction
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Successfully updated sort order for {Count} categories", categoriesToUpdate.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating categories sort order");
+            throw;
+        }
+    }
+
     /// <summary>
     /// Maps CategoryEntity to CategoryDto
     /// </summary>
