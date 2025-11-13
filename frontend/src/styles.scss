@@ -47,7 +47,8 @@
 }
 
 // Dark mode border color fallback
-:global(.p-dark) {
+.p-dark,
+html.p-dark {
   --p-border-color: var(--p-content-border-color, var(--p-surface-700));
 
   // Button outlined secondary colors for dark mode
@@ -62,6 +63,10 @@
   --p-dialog-header-background: var(--p-overlay-modal-background, #27272a);
   --p-dialog-content-background: var(--p-overlay-modal-background, #27272a);
   --p-dialog-footer-background: var(--p-overlay-modal-background, #27272a);
+
+  // Select/Dropdown overlay colors for dark mode
+  --p-select-overlay-background: var(--p-surface-800, #27272a);
+  --p-select-overlay-border-color: var(--p-surface-700, #3f3f46);
 }
 
 // ============================================
@@ -267,6 +272,58 @@ a {
 
     &:hover {
       background: var(--p-surface-500);
+    }
+  }
+
+  // Dropdown/Select overlay panel for dark mode
+  .p-select-overlay,
+  .p-dropdown-overlay,
+  .p-select-panel,
+  .p-dropdown-panel {
+    background: #27272a !important;
+    border-color: #3f3f46 !important;
+    color: rgba(255, 255, 255, 0.87) !important;
+  }
+
+  // Dropdown items
+  .p-select-option,
+  .p-dropdown-item {
+    color: rgba(255, 255, 255, 0.87) !important;
+
+    &:hover {
+      background: #3f3f46 !important;
+    }
+
+    &.p-focus {
+      background: #3f3f46 !important;
+    }
+
+    &.p-select-option-selected,
+    &.p-dropdown-item-selected {
+      background: rgba(34, 197, 94, 0.16) !important;
+      color: #22c55e !important;
+    }
+  }
+
+  // Button outlined secondary for dark mode
+  .p-button-outlined.p-button-secondary,
+  .p-button-outlined.p-button-secondary:not(:disabled) {
+    background: transparent !important;
+    border-color: #52525b !important;
+    color: rgba(255, 255, 255, 0.87) !important;
+
+    &:hover {
+      background: #27272a !important;
+      border-color: #71717a !important;
+    }
+
+    &:active {
+      background: #3f3f46 !important;
+      border-color: #71717a !important;
+    }
+
+    &:focus-visible {
+      outline-color: #52525b !important;
     }
   }
 }
