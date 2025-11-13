@@ -21,4 +21,19 @@ public interface ICategoryTypeService
     /// Get category type by ID
     /// </summary>
     Task<CategoryTypeDto?> GetCategoryTypeByIdAsync(int categoryTypeId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Create new category type
+    /// </summary>
+    Task<CategoryTypeDto> CreateCategoryTypeAsync(CreateCategoryTypeDto createDto, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Update existing category type
+    /// </summary>
+    Task<CategoryTypeDto> UpdateCategoryTypeAsync(int categoryTypeId, UpdateCategoryTypeDto updateDto, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Delete category type (soft delete)
+    /// </summary>
+    Task<bool> DeleteCategoryTypeAsync(int categoryTypeId, CancellationToken cancellationToken = default);
 }

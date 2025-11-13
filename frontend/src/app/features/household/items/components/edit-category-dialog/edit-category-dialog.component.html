@@ -1,6 +1,6 @@
 <p-toast />
 
-<form [formGroup]="createCategoryForm" (ngSubmit)="onSubmit()">
+<form [formGroup]="editCategoryForm" (ngSubmit)="onSubmit()">
   <div class="dialog-content">
     <!-- Category Type -->
     <div class="form-field">
@@ -13,8 +13,8 @@
         optionValue="id"
         placeholder="Wybierz kategorię"
         [style]="{ width: '100%' }"
-        [class.ng-invalid]="createCategoryForm.controls['categoryTypeId'].invalid && createCategoryForm.controls['categoryTypeId'].touched"
-        [class.ng-dirty]="createCategoryForm.controls['categoryTypeId'].dirty"
+        [class.ng-invalid]="editCategoryForm.controls['categoryTypeId'].invalid && editCategoryForm.controls['categoryTypeId'].touched"
+        [class.ng-dirty]="editCategoryForm.controls['categoryTypeId'].dirty"
       >
         <ng-template pTemplate="selectedItem" let-selectedOption>
           @if (selectedOption) {
@@ -29,9 +29,9 @@
           </div>
         </ng-template>
       </p-dropdown>
-      @if (createCategoryForm.controls['categoryTypeId'].invalid && createCategoryForm.controls['categoryTypeId'].touched) {
+      @if (editCategoryForm.controls['categoryTypeId'].invalid && editCategoryForm.controls['categoryTypeId'].touched) {
         <small class="p-error">
-          @if (createCategoryForm.controls['categoryTypeId'].errors?.['required']) {
+          @if (editCategoryForm.controls['categoryTypeId'].errors?.['required']) {
             Kategoria jest wymagana.
           }
         </small>
@@ -47,15 +47,15 @@
         pInputText
         formControlName="name"
         placeholder="np. Kocioł gazowy, Kompost, Dentysta"
-        [class.ng-invalid]="createCategoryForm.controls['name'].invalid && createCategoryForm.controls['name'].touched"
-        [class.ng-dirty]="createCategoryForm.controls['name'].dirty"
+        [class.ng-invalid]="editCategoryForm.controls['name'].invalid && editCategoryForm.controls['name'].touched"
+        [class.ng-dirty]="editCategoryForm.controls['name'].dirty"
       />
-      @if (createCategoryForm.controls['name'].invalid && createCategoryForm.controls['name'].touched) {
+      @if (editCategoryForm.controls['name'].invalid && editCategoryForm.controls['name'].touched) {
         <small class="p-error">
-          @if (createCategoryForm.controls['name'].errors?.['required']) {
+          @if (editCategoryForm.controls['name'].errors?.['required']) {
             Nazwa podkategorii jest wymagana.
           }
-          @if (createCategoryForm.controls['name'].errors?.['maxlength']) {
+          @if (editCategoryForm.controls['name'].errors?.['maxlength']) {
             Nazwa nie może przekroczyć 100 znaków.
           }
         </small>
@@ -71,12 +71,12 @@
         formControlName="description"
         placeholder="Dodatkowe informacje o podkategorii"
         [rows]="3"
-        [class.ng-invalid]="createCategoryForm.controls['description'].invalid && createCategoryForm.controls['description'].touched"
-        [class.ng-dirty]="createCategoryForm.controls['description'].dirty"
+        [class.ng-invalid]="editCategoryForm.controls['description'].invalid && editCategoryForm.controls['description'].touched"
+        [class.ng-dirty]="editCategoryForm.controls['description'].dirty"
       ></textarea>
-      @if (createCategoryForm.controls['description'].invalid && createCategoryForm.controls['description'].touched) {
+      @if (editCategoryForm.controls['description'].invalid && editCategoryForm.controls['description'].touched) {
         <small class="p-error">
-          @if (createCategoryForm.controls['description'].errors?.['maxlength']) {
+          @if (editCategoryForm.controls['description'].errors?.['maxlength']) {
             Opis nie może przekroczyć 500 znaków.
           }
         </small>
@@ -92,12 +92,12 @@
         [min]="0"
         [showButtons]="true"
         [style]="{ width: '100%' }"
-        [class.ng-invalid]="createCategoryForm.controls['sortOrder'].invalid && createCategoryForm.controls['sortOrder'].touched"
-        [class.ng-dirty]="createCategoryForm.controls['sortOrder'].dirty"
+        [class.ng-invalid]="editCategoryForm.controls['sortOrder'].invalid && editCategoryForm.controls['sortOrder'].touched"
+        [class.ng-dirty]="editCategoryForm.controls['sortOrder'].dirty"
       ></p-inputNumber>
-      @if (createCategoryForm.controls['sortOrder'].invalid && createCategoryForm.controls['sortOrder'].touched) {
+      @if (editCategoryForm.controls['sortOrder'].invalid && editCategoryForm.controls['sortOrder'].touched) {
         <small class="p-error">
-          @if (createCategoryForm.controls['sortOrder'].errors?.['min']) {
+          @if (editCategoryForm.controls['sortOrder'].errors?.['min']) {
             Kolejność sortowania musi być większa lub równa 0.
           }
         </small>
@@ -113,10 +113,10 @@
       [disabled]="isLoading()"
     />
     <p-button
-      label="Utwórz podkategorię"
+      label="Zapisz zmiany"
       type="submit"
       [loading]="isLoading()"
-      [disabled]="createCategoryForm.invalid || isLoading()"
+      [disabled]="editCategoryForm.invalid || isLoading()"
     />
   </div>
 </form>

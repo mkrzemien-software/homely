@@ -97,20 +97,50 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 
 #### Widok Kategorii
 - **Ścieżka**: `/categories`
-- **Cel**: Urządzenia i wizyty pogrupowane po kategoriach dla lepszego przeglądu
+- **Cel**: Zarządzanie kategoriami i typami kategorii oraz podgląd urządzeń/wizyt pogrupowanych po kategoriach
 - **Kluczowe informacje**:
-  - Grupy kategorii z możliwością collapse/expand
-  - Licznik itemów w każdej kategorii
-  - Najbliższy termin dla każdego itemu
-  - Szybki dostęp do edycji itemów
+  - Lista wszystkich kategorii pogrupowanych po typach
+  - **Zarządzanie kategoriami**:
+    - Możliwość dodawania nowych kategorii (CreateCategoryDialogComponent)
+    - Możliwość edycji istniejących kategorii (EditCategoryDialogComponent)
+    - Możliwość usuwania kategorii (soft delete)
+    - Przycisk "Dodaj kategorię" w toolbar
+  - **Zarządzanie typami kategorii** (Admin/System Developer):
+    - Możliwość dodawania nowych typów kategorii (CreateCategoryTypeDialogComponent)
+    - Możliwość edycji istniejących typów kategorii (EditCategoryTypeDialogComponent)
+    - Ikona ołówka obok nazwy typu kategorii w widoku accordion
+    - Przycisk "Dodaj typ kategorii" w toolbar obok "Dodaj kategorię"
+  - Filtrowanie kategorii po typie
+  - Wyszukiwanie kategorii po nazwie
+  - Licznik itemów przypisanych do każdej kategorii
+  - Wyświetlanie w dwóch trybach: pogrupowane lub lista
+  - Szybki dostęp do akcji (edytuj, usuń) dla każdej kategorii
 - **Komponenty**:
-  - CategoryGroupedView
-  - CategoryAccordion
-  - ItemCard z next task date
-  - AddItemButton per category
-- **UX/Dostępność**: Accordion navigation, lazy loading dla dużych kategorii
-- **Bezpieczeństwo**: Role-based item visibility and edit permissions
-- **Dostęp przez**: Sidebar (🏷️ Kategorie) lub kafelek na dashboardzie
+  - CategoriesListComponent (główny komponent widoku)
+  - **Dialogi kategorii**:
+    - CreateCategoryDialogComponent (dialog dodawania kategorii)
+    - EditCategoryDialogComponent (dialog edycji kategorii)
+  - **Dialogi typów kategorii**:
+    - CreateCategoryTypeDialogComponent (dialog dodawania typu kategorii)
+    - EditCategoryTypeDialogComponent (dialog edycji typu kategorii)
+  - CategoryGroupedView (widok pogrupowany)
+  - CategoryAccordion (accordion dla grup z ikonami edycji)
+  - CategoryCard (karta pojedynczej kategorii)
+  - Filters i search bar
+- **UX/Dostępność**:
+  - Accordion navigation dla widoku pogrupowanego
+  - Przełączanie między widokiem pogrupowanym a listą
+  - Lazy loading dla dużych kategorii
+  - Toast notifications dla operacji CRUD (kategorie i typy)
+  - Confirmation dialogs dla operacji usuwania
+  - Ikony edycji przy typach kategorii nie rozwijają/zwijają accordion (stopPropagation)
+  - Dwa przyciski w toolbar: "Dodaj typ kategorii" i "Dodaj kategorię"
+- **Bezpieczeństwo**:
+  - Role-based visibility (Admin/System Developer)
+  - Permission checks dla operacji CRUD (kategorie i typy)
+  - Input validation i sanitization w formularzach
+  - Walidacja: maksymalna długość nazwy (100 znaków) i opisu (500 znaków)
+- **Dostęp przez**: Sidebar (🏷️ Kategorie)
 
 #### Lista Urządzeń/Wizyt
 - **Ścieżka**: `/items`
@@ -842,6 +872,30 @@ interface SidebarSectionRules {
   - Date/time pickers
   - Notes i attachments
 - **Reusability**: Task completion, postponement, editing
+
+#### CreateCategoryDialogComponent
+- **Cel**: Formularz dodawania nowych kategorii
+- **Features**:
+  - Wybór typu kategorii z dropdown
+  - Walidacja wymaganych pól (nazwa, typ)
+  - Opcjonalne pola (opis, sortOrder)
+  - Real-time validation feedback
+  - Loading states podczas zapisywania
+  - Toast notifications dla sukcesu/błędu
+- **Reusability**: Categories list view, admin panels
+- **Security**: Input sanitization, validation on frontend and backend
+
+#### EditCategoryDialogComponent
+- **Cel**: Formularz edycji istniejących kategorii
+- **Features**:
+  - Pre-populated form z danymi kategorii
+  - Możliwość zmiany typu kategorii
+  - Walidacja zmian
+  - Change detection dla dirty forms
+  - Loading states i error handling
+  - Toast notifications
+- **Reusability**: Categories list view, inline editing
+- **Security**: Permission checks, input validation
 
 ### 5.4 Interactive Components
 

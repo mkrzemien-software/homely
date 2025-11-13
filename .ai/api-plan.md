@@ -245,9 +245,9 @@
 ### Category Types
 
 #### GET /category-types
-- **Description**: Get available category types
-- **Response**: 
-  - **200**: 
+- **Description**: Get all available category types
+- **Response**:
+  - **200**:
 ```json
 {
   "data": [
@@ -260,6 +260,41 @@
   ]
 }
 ```
+
+#### GET /category-types/{id}
+- **Description**: Get specific category type by ID
+- **Response**:
+  - **200**: Category type object
+  - **404**: `{ "error": "Category type not found" }`
+
+#### POST /category-types
+- **Description**: Create new category type
+- **Request Body**:
+```json
+{
+  "name": "string",
+  "description": "string",
+  "sortOrder": "integer",
+  "isActive": "boolean"
+}
+```
+- **Response**:
+  - **201**: Created category type object
+  - **400**: `{ "error": "Validation failed" }`
+
+#### PUT /category-types/{id}
+- **Description**: Update existing category type
+- **Request Body**: Same as POST (all fields optional for partial updates)
+- **Response**:
+  - **200**: Updated category type object
+  - **404**: `{ "error": "Category type not found" }`
+  - **400**: `{ "error": "Validation failed" }`
+
+#### DELETE /category-types/{id}
+- **Description**: Soft delete category type
+- **Response**:
+  - **200**: `{ "success": true, "message": "Category type deleted successfully" }`
+  - **404**: `{ "error": "Category type not found" }`
 
 ### Categories
 

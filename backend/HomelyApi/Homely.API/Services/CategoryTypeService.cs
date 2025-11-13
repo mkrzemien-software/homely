@@ -71,6 +71,92 @@ public class CategoryTypeService : ICategoryTypeService
         }
     }
 
+    /// <inheritdoc/>
+    public async Task<CategoryTypeDto> CreateCategoryTypeAsync(CreateCategoryTypeDto createDto, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var entity = new CategoryTypeEntity
+            {
+                Name = createDto.Name,
+                Description = createDto.Description,
+                SortOrder = createDto.SortOrder,
+                IsActive = createDto.IsActive,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _unitOfWork.CategoryTypes.AddAsync(entity, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return MapToDto(entity);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating category type");
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<CategoryTypeDto> UpdateCategoryTypeAsync(int categoryTypeId, UpdateCategoryTypeDto updateDto, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var entity = await _unitOfWork.CategoryTypes.GetByIdAsync(categoryTypeId);
+
+            if (entity == null || entity.DeletedAt != null)
+            {
+                throw new InvalidOperationException($"Category type with ID {categoryTypeId} not found");
+            }
+
+            entity.Name = updateDto.Name;
+            entity.Description = updateDto.Description;
+            entity.SortOrder = updateDto.SortOrder;
+            entity.IsActive = updateDto.IsActive;
+            entity.UpdatedAt = DateTime.UtcNow;
+
+            await _unitOfWork.CategoryTypes.UpdateAsync(entity, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return MapToDto(entity);
+        }
+        catch (InvalidOperationException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating category type {CategoryTypeId}", categoryTypeId);
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> DeleteCategoryTypeAsync(int categoryTypeId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var entity = await _unitOfWork.CategoryTypes.GetByIdAsync(categoryTypeId);
+
+            if (entity == null || entity.DeletedAt != null)
+            {
+                return false;
+            }
+
+            // Soft delete
+            entity.DeletedAt = DateTime.UtcNow;
+            await _unitOfWork.CategoryTypes.UpdateAsync(entity, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting category type {CategoryTypeId}", categoryTypeId);
+            throw;
+        }
+    }
+
     /// <summary>
     /// Maps CategoryTypeEntity to CategoryTypeDto
     /// </summary>

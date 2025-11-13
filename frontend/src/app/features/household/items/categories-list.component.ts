@@ -22,7 +22,6 @@ import {
   Category,
   CategoryType,
   CategoriesByType,
-  getCategoryTypeIcon,
   getCategoryTypeColor
 } from './models/category.model';
 
@@ -31,6 +30,9 @@ import { CategoryService } from './services/category.service';
 
 // Components
 import { CreateCategoryDialogComponent } from './components/create-category-dialog/create-category-dialog.component';
+import { EditCategoryDialogComponent } from './components/edit-category-dialog/edit-category-dialog.component';
+import { CreateCategoryTypeDialogComponent } from './components/create-category-type-dialog/create-category-type-dialog.component';
+import { EditCategoryTypeDialogComponent } from './components/edit-category-type-dialog/edit-category-type-dialog.component';
 
 /**
  * CategoriesListComponent
@@ -72,7 +74,10 @@ import { CreateCategoryDialogComponent } from './components/create-category-dial
     TooltipModule,
     AccordionModule,
     DialogModule,
-    CreateCategoryDialogComponent
+    CreateCategoryDialogComponent,
+    EditCategoryDialogComponent,
+    CreateCategoryTypeDialogComponent,
+    EditCategoryTypeDialogComponent
   ],
   templateUrl: './categories-list.component.html',
   styleUrl: './categories-list.component.scss'
@@ -126,6 +131,31 @@ export class CategoriesListComponent implements OnInit {
    * Create category dialog visibility
    */
   createDialogVisible = signal<boolean>(false);
+
+  /**
+   * Create category type dialog visibility
+   */
+  createCategoryTypeDialogVisible = signal<boolean>(false);
+
+  /**
+   * Edit category dialog visibility
+   */
+  editDialogVisible = signal<boolean>(false);
+
+  /**
+   * Category to edit
+   */
+  categoryToEdit = signal<Category | null>(null);
+
+  /**
+   * Edit category type dialog visibility
+   */
+  editCategoryTypeDialogVisible = signal<boolean>(false);
+
+  /**
+   * Category type to edit
+   */
+  categoryTypeToEdit = signal<CategoryType | null>(null);
 
   /**
    * Filtered categories
@@ -217,7 +247,7 @@ export class CategoriesListComponent implements OnInit {
   categoryTypeOptions = computed(() => {
     const types = this.allCategoryTypes();
     return [
-      { label: 'Wszystkie typy', value: undefined },
+      { label: 'Wszystkie kategorie', value: undefined },
       ...types.map(type => ({ label: type.name, value: type.id }))
     ];
   });
@@ -225,7 +255,6 @@ export class CategoriesListComponent implements OnInit {
   /**
    * Helper functions exposed to template
    */
-  readonly getCategoryTypeIcon = getCategoryTypeIcon;
   readonly getCategoryTypeColor = getCategoryTypeColor;
 
   ngOnInit(): void {
@@ -254,7 +283,7 @@ export class CategoriesListComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading categories:', error);
-        this.errorMessage.set('Nie udało się załadować listy kategorii. Spróbuj ponownie później.');
+        this.errorMessage.set('Nie udało się załadować listy podkategorii. Spróbuj ponownie później.');
         this.isLoading.set(false);
       }
     });
@@ -318,18 +347,56 @@ export class CategoriesListComponent implements OnInit {
   }
 
   /**
+   * Open add new category type dialog
+   */
+  addNewCategoryType(): void {
+    this.createCategoryTypeDialogVisible.set(true);
+  }
+
+  /**
+   * Hide create category type dialog
+   */
+  hideCreateCategoryTypeDialog(): void {
+    this.createCategoryTypeDialogVisible.set(false);
+  }
+
+  /**
+   * Handle category type created event
+   */
+  onCategoryTypeCreated(): void {
+    this.hideCreateCategoryTypeDialog();
+    this.refresh();
+  }
+
+  /**
    * Edit category
    */
   editCategory(category: Category): void {
-    // TODO: Open edit dialog
-    console.log('Edit category:', category);
+    this.categoryToEdit.set(category);
+    this.editDialogVisible.set(true);
+  }
+
+  /**
+   * Hide edit category dialog
+   */
+  hideEditDialog(): void {
+    this.editDialogVisible.set(false);
+    this.categoryToEdit.set(null);
+  }
+
+  /**
+   * Handle category updated event
+   */
+  onCategoryUpdated(): void {
+    this.hideEditDialog();
+    this.refresh();
   }
 
   /**
    * Delete category
    */
   deleteCategory(category: Category): void {
-    if (confirm(`Czy na pewno chcesz usunąć kategorię "${category.name}"?`)) {
+    if (confirm(`Czy na pewno chcesz usunąć podkategorię "${category.name}"?`)) {
       this.categoryService.deleteCategory(category.id).subscribe({
         next: () => {
           // Remove from local state
@@ -338,10 +405,37 @@ export class CategoriesListComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error deleting category:', error);
-          alert('Nie udało się usunąć kategorii. Spróbuj ponownie.');
+          alert('Nie udało się usunąć podkategorii. Spróbuj ponownie.');
         }
       });
     }
+  }
+
+  /**
+   * Edit category type
+   */
+  editCategoryType(categoryTypeId: number): void {
+    const categoryType = this.allCategoryTypes().find(ct => ct.id === categoryTypeId);
+    if (categoryType) {
+      this.categoryTypeToEdit.set(categoryType);
+      this.editCategoryTypeDialogVisible.set(true);
+    }
+  }
+
+  /**
+   * Hide edit category type dialog
+   */
+  hideEditCategoryTypeDialog(): void {
+    this.editCategoryTypeDialogVisible.set(false);
+    this.categoryTypeToEdit.set(null);
+  }
+
+  /**
+   * Handle category type updated event
+   */
+  onCategoryTypeUpdated(): void {
+    this.hideEditCategoryTypeDialog();
+    this.refresh();
   }
 
   /**

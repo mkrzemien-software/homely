@@ -107,4 +107,138 @@ public class CategoryTypesController : ControllerBase
             return StatusCode(500, new { error = "An error occurred while retrieving category type" });
         }
     }
+
+    /// <summary>
+    /// Create new category type
+    /// </summary>
+    /// <param name="createDto">Category type creation data</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Created category type</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /api/category-types
+    ///     {
+    ///         "name": "Home Appliances",
+    ///         "description": "Maintenance for home appliances",
+    ///         "sortOrder": 10,
+    ///         "isActive": true
+    ///     }
+    ///
+    /// </remarks>
+    [HttpPost]
+    [ProducesResponseType(typeof(CategoryTypeDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CategoryTypeDto>> CreateCategoryType(
+        [FromBody] CreateCategoryTypeDto createDto,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var categoryType = await _categoryTypeService.CreateCategoryTypeAsync(createDto, cancellationToken);
+
+            return CreatedAtAction(
+                nameof(GetCategoryTypeById),
+                new { id = categoryType.Id },
+                categoryType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating category type");
+            return StatusCode(500, new { error = "An error occurred while creating category type" });
+        }
+    }
+
+    /// <summary>
+    /// Update existing category type
+    /// </summary>
+    /// <param name="id">Category type ID</param>
+    /// <param name="updateDto">Updated category type data</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Updated category type</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     PUT /api/category-types/1
+    ///     {
+    ///         "name": "Updated Home Appliances",
+    ///         "description": "Updated description",
+    ///         "sortOrder": 15,
+    ///         "isActive": true
+    ///     }
+    ///
+    /// </remarks>
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(CategoryTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CategoryTypeDto>> UpdateCategoryType(
+        int id,
+        [FromBody] UpdateCategoryTypeDto updateDto,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var categoryType = await _categoryTypeService.UpdateCategoryTypeAsync(id, updateDto, cancellationToken);
+            return Ok(categoryType);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation while updating category type");
+            return NotFound(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating category type {CategoryTypeId}", id);
+            return StatusCode(500, new { error = "An error occurred while updating category type" });
+        }
+    }
+
+    /// <summary>
+    /// Delete category type (soft delete)
+    /// </summary>
+    /// <param name="id">Category type ID to delete</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Success status</returns>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> DeleteCategoryType(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var success = await _categoryTypeService.DeleteCategoryTypeAsync(id, cancellationToken);
+
+            if (!success)
+            {
+                return NotFound(new { error = $"Category type with ID {id} not found" });
+            }
+
+            return Ok(new
+            {
+                success = true,
+                message = "Category type deleted successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting category type {CategoryTypeId}", id);
+            return StatusCode(500, new { error = "An error occurred while deleting category type" });
+        }
+    }
 }

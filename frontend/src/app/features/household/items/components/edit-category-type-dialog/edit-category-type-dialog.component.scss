@@ -1,0 +1,39 @@
+// Edit Category Type Dialog Component Styles
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-color);
+  }
+
+  input,
+  textarea,
+  ::ng-deep .p-inputnumber {
+    width: 100%;
+  }
+
+  small.p-error {
+    color: var(--red-500);
+    font-size: 0.875rem;
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--surface-border);
+}

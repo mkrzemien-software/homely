@@ -821,6 +821,53 @@ Kryteria akceptacji:
 - Narzędzia do masowych operacji (bulk updates)
 - Dokumentacja troubleshooting dla zespołu wsparcia
 
+### 5.2.5 Zarządzanie kategoriami i typami kategorii
+
+US-063: Przeglądanie i zarządzanie kategoriami
+Jako Administrator lub System Developer
+Chcę przeglądać, dodawać, edytować i usuwać kategorie
+Aby dostosować system do potrzeb gospodarstwa
+
+Kryteria akceptacji:
+- Dostęp do widoku kategorii przez sidebar (🏷️ Kategorie)
+- Lista wszystkich kategorii pogrupowanych po typach
+- Filtrowanie kategorii po typie i wyszukiwanie po nazwie
+- Możliwość dodania nowej kategorii z przypisaniem do typu
+- Możliwość edycji istniejącej kategorii (nazwa, opis, typ, kolejność)
+- Możliwość usunięcia kategorii (soft delete)
+- Sortowanie kategorii według kolejności (sortOrder) i nazwy
+- Wyświetlanie liczby itemów przypisanych do każdej kategorii
+
+US-064: Zarządzanie typami kategorii (System Developer)
+Jako System Developer
+Chcę zarządzać typami kategorii na poziomie systemu
+Aby rozszerzać funkcjonalność platformy o nowe obszary
+
+Kryteria akceptacji:
+- Dostęp do zarządzania typami kategorii w widoku Kategorie
+- Przycisk "Dodaj typ kategorii" w toolbar obok "Dodaj kategorię"
+- Dialog tworzenia nowego typu kategorii z polami: nazwa, opis, kolejność sortowania
+- Dialog edycji istniejącego typu (nazwa, opis, kolejność) otwierany przez ikonę ołówka
+- Możliwość usunięcia typu kategorii (soft delete)
+- Walidacja: nie można usunąć typu jeśli ma przypisane kategorie
+- Możliwość sortowania typów według kolejności
+- Automatyczne generowanie ikon i kolorów dla nowych typów
+- Powiadomienia toast o sukcesie/błędzie operacji
+- Automatyczne odświeżenie listy kategorii po zmianach
+
+US-065: Inline editing kategorii
+Jako Administrator
+Chcę szybko edytować podstawowe informacje o kategorii
+Aby efektywnie zarządzać kategoriami bez otwierania dialogów
+
+Kryteria akceptacji:
+- Możliwość edycji nazwy i opisu kategorii bezpośrednio na liście
+- Kliknięcie na nazwę kategorii otwiera pole edycji
+- Enter zapisuje zmiany, Escape anuluje
+- Wizualna informacja o zapisywaniu zmian
+- Powiadomienie o pomyślnym zapisaniu lub błędzie
+- Możliwość przeciągania kategorii między typami (drag & drop)
+
 ### 5.3 Zarządzanie urządzeniami i wizytami
 
 US-009: Dodawanie urządzenia/wizyty

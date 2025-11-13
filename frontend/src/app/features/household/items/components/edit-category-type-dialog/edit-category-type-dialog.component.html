@@ -1,0 +1,86 @@
+<p-toast />
+
+<form [formGroup]="editCategoryTypeForm" (ngSubmit)="onSubmit()">
+  <div class="dialog-content">
+    <!-- Name -->
+    <div class="form-field">
+      <label for="name">Nazwa kategorii *</label>
+      <input
+        id="name"
+        type="text"
+        pInputText
+        formControlName="name"
+        placeholder="np. Przeglądy techniczne, Wywóz odpadów"
+        [class.ng-invalid]="editCategoryTypeForm.controls['name'].invalid && editCategoryTypeForm.controls['name'].touched"
+        [class.ng-dirty]="editCategoryTypeForm.controls['name'].dirty"
+      />
+      @if (editCategoryTypeForm.controls['name'].invalid && editCategoryTypeForm.controls['name'].touched) {
+        <small class="p-error">
+          @if (editCategoryTypeForm.controls['name'].errors?.['required']) {
+            Nazwa kategorii jest wymagana.
+          }
+          @if (editCategoryTypeForm.controls['name'].errors?.['maxlength']) {
+            Nazwa nie może przekroczyć 100 znaków.
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Description -->
+    <div class="form-field">
+      <label for="description">Opis (opcjonalnie)</label>
+      <textarea
+        id="description"
+        pInputTextarea
+        formControlName="description"
+        placeholder="Dodatkowe informacje o kategorii"
+        [rows]="3"
+        [class.ng-invalid]="editCategoryTypeForm.controls['description'].invalid && editCategoryTypeForm.controls['description'].touched"
+        [class.ng-dirty]="editCategoryTypeForm.controls['description'].dirty"
+      ></textarea>
+      @if (editCategoryTypeForm.controls['description'].invalid && editCategoryTypeForm.controls['description'].touched) {
+        <small class="p-error">
+          @if (editCategoryTypeForm.controls['description'].errors?.['maxlength']) {
+            Opis nie może przekroczyć 500 znaków.
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Sort Order -->
+    <div class="form-field">
+      <label for="sortOrder">Kolejność sortowania</label>
+      <p-inputNumber
+        id="sortOrder"
+        formControlName="sortOrder"
+        [min]="0"
+        [showButtons]="true"
+        [style]="{ width: '100%' }"
+        [class.ng-invalid]="editCategoryTypeForm.controls['sortOrder'].invalid && editCategoryTypeForm.controls['sortOrder'].touched"
+        [class.ng-dirty]="editCategoryTypeForm.controls['sortOrder'].dirty"
+      ></p-inputNumber>
+      @if (editCategoryTypeForm.controls['sortOrder'].invalid && editCategoryTypeForm.controls['sortOrder'].touched) {
+        <small class="p-error">
+          @if (editCategoryTypeForm.controls['sortOrder'].errors?.['min']) {
+            Kolejność sortowania musi być większa lub równa 0.
+          }
+        </small>
+      }
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <p-button
+      label="Anuluj"
+      severity="secondary"
+      (onClick)="closeDialog()"
+      [disabled]="isLoading()"
+    />
+    <p-button
+      label="Zapisz zmiany"
+      type="submit"
+      [loading]="isLoading()"
+      [disabled]="editCategoryTypeForm.invalid || isLoading()"
+    />
+  </div>
+</form>

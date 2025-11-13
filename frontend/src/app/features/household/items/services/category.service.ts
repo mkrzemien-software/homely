@@ -7,7 +7,9 @@ import {
   CategoriesResponse,
   CategoryTypesResponse,
   CreateCategoryDto,
-  UpdateCategoryDto
+  UpdateCategoryDto,
+  CreateCategoryTypeDto,
+  UpdateCategoryTypeDto
 } from '../models/category.model';
 
 /**
@@ -205,6 +207,91 @@ export class CategoryService {
         }),
         catchError(error => {
           console.error('Error deleting category:', error);
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Get a single category type by ID
+   *
+   * @param categoryTypeId - The category type ID
+   * @returns Observable of category type
+   */
+  getCategoryType(categoryTypeId: number): Observable<CategoryType> {
+    return this.http.get<CategoryType>(`${this.API_URL}/category-types/${categoryTypeId}`)
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching category type:', error);
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Create a new category type
+   *
+   * @param createDto - Category type creation data
+   * @returns Observable of created category type
+   */
+  createCategoryType(createDto: CreateCategoryTypeDto): Observable<CategoryType> {
+    return this.http.post<CategoryType>(`${this.API_URL}/category-types`, createDto)
+      .pipe(
+        tap(categoryType => {
+          // Update cache
+          const current = this.categoryTypesCache$.value;
+          this.categoryTypesCache$.next([...current, categoryType]);
+        }),
+        catchError(error => {
+          console.error('Error creating category type:', error);
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Update an existing category type
+   *
+   * @param categoryTypeId - The category type ID
+   * @param updateDto - Update data
+   * @returns Observable of updated category type
+   */
+  updateCategoryType(categoryTypeId: number, updateDto: UpdateCategoryTypeDto): Observable<CategoryType> {
+    return this.http.put<CategoryType>(`${this.API_URL}/category-types/${categoryTypeId}`, updateDto)
+      .pipe(
+        tap(categoryType => {
+          // Update cache
+          const current = this.categoryTypesCache$.value;
+          const index = current.findIndex(ct => ct.id === categoryTypeId);
+          if (index !== -1) {
+            const updated = [...current];
+            updated[index] = categoryType;
+            this.categoryTypesCache$.next(updated);
+          }
+        }),
+        catchError(error => {
+          console.error('Error updating category type:', error);
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Delete a category type
+   *
+   * @param categoryTypeId - The category type ID
+   * @returns Observable of success status
+   */
+  deleteCategoryType(categoryTypeId: number): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.API_URL}/category-types/${categoryTypeId}`)
+      .pipe(
+        tap(() => {
+          // Remove from cache
+          const current = this.categoryTypesCache$.value;
+          this.categoryTypesCache$.next(current.filter(ct => ct.id !== categoryTypeId));
+        }),
+        catchError(error => {
+          console.error('Error deleting category type:', error);
           throw error;
         })
       );

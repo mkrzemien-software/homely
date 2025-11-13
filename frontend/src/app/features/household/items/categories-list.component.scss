@@ -231,6 +231,22 @@
   margin-bottom: 2rem;
 }
 
+.category-background {
+  color: #000000ba;
+  // Kolory tęczy (Rainbow colors)
+  &.color-primary { background-color:  var(--p-red-500); }      // Czerwony
+  &.color-success { background-color:  var(--p-orange-500); }   // Pomarańczowy
+  &.color-danger { background-color:  var(--p-yellow-500); }    // Żółty
+  &.color-warning { background-color:  var(--p-green-500); }    // Zielony
+  &.color-secondary { background-color:  var(--p-blue-500); }   // Niebieski
+  &.color-info { background-color:  var(--p-indigo-500); }      // Indygo
+  &.color-purple { background-color:  var(--p-purple-500); }    // Fioletowy
+  &.color-teal { background-color:  var(--p-pink-500); }        // Różowy
+  &.color-gray { background-color:  var(--p-cyan-500); }        // Cyjan
+  &.color-light { background-color:  var(--p-lime-500); }       // Limonkowy
+  &.color-dark { background-color:  var(--p-amber-500); }       // Bursztynowy
+}
+
 // Category header in accordion
 .category-header {
   width: 100%;
@@ -249,11 +265,18 @@
 .category-icon {
   font-size: 1.5rem;
 
-  &.color-primary { color: var(--p-primary-color); }
-  &.color-success { color: var(--p-green-500); }
-  &.color-danger { color: var(--p-red-500); }
-  &.color-warning { color: var(--p-orange-500); }
-  &.color-secondary { color: var(--p-text-muted-color); }
+  // Kolory tęczy (Rainbow colors)
+  &.color-primary { color: var(--p-red-500); }      // Czerwony
+  &.color-success { color: var(--p-orange-500); }   // Pomarańczowy
+  &.color-danger { color: var(--p-yellow-500); }    // Żółty
+  &.color-warning { color: var(--p-gree n-500); }    // Zielony
+  &.color-secondary { color: var(--p-blue-500); }   // Niebieski
+  &.color-info { color: var(--p-indigo-500); }      // Indygo
+  &.color-purple { color: var(--p-purple-500); }    // Fioletowy
+  &.color-teal { color: var(--p-pink-500); }        // Różowy
+  &.color-gray { color: var(--p-cyan-500); }        // Cyjan
+  &.color-light { color: var(--p-lime-500); }       // Limonkowy
+  &.color-dark { color: var(--p-amber-500); }       // Bursztynowy
 }
 
 .category-name {

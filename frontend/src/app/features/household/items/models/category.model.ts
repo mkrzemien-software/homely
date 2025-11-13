@@ -138,15 +138,23 @@ export interface UpdateCategoryDto {
 }
 
 /**
- * Helper function to get category type icon
+ * DTO for creating a new category type
  */
-export function getCategoryTypeIcon(categoryTypeId: number): string {
-  const iconMap: Record<number, string> = {
-    1: 'pi-cog',           // Technical inspections
-    2: 'pi-trash',         // Waste collection
-    3: 'pi-heart-fill'     // Medical visits
-  };
-  return iconMap[categoryTypeId] || 'pi-tag';
+export interface CreateCategoryTypeDto {
+  name: string;
+  description: string;
+  sortOrder?: number;
+  isActive?: boolean;
+}
+
+/**
+ * DTO for updating an existing category type
+ */
+export interface UpdateCategoryTypeDto {
+  name?: string;
+  description?: string;
+  sortOrder?: number;
+  isActive?: boolean;
 }
 
 /**
@@ -154,9 +162,17 @@ export function getCategoryTypeIcon(categoryTypeId: number): string {
  */
 export function getCategoryTypeColor(categoryTypeId: number): string {
   const colorMap: Record<number, string> = {
-    1: 'primary',    // Technical inspections
-    2: 'success',    // Waste collection
-    3: 'danger'      // Medical visits
+    1: 'primary',
+    2: 'success',
+    3: 'danger',
+    4: 'warning',
+    5: 'secondary',
+    6: 'info',
+    7: 'purple',
+    8: 'teal',
+    9: 'gray',
+    10: 'light',
+    11: 'dark',
   };
   return colorMap[categoryTypeId] || 'secondary';
 }

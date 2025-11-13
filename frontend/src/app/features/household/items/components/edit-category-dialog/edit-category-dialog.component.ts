@@ -1,4 +1,4 @@
-import { Component, inject, signal, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, inject, signal, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
@@ -16,10 +16,10 @@ import { MessageService } from 'primeng/api';
 import { CategoryService } from '../../services/category.service';
 
 // Models
-import { CategoryType, CreateCategoryDto } from '../../models/category.model';
+import { Category, CategoryType, UpdateCategoryDto } from '../../models/category.model';
 
 @Component({
-  selector: 'app-create-category-dialog',
+  selector: 'app-edit-category-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -33,23 +33,24 @@ import { CategoryType, CreateCategoryDto } from '../../models/category.model';
     ToastModule,
   ],
   providers: [MessageService],
-  templateUrl: './create-category-dialog.component.html',
-  styleUrls: ['./create-category-dialog.component.scss']
+  templateUrl: './edit-category-dialog.component.html',
+  styleUrls: ['./edit-category-dialog.component.scss']
 })
-export class CreateCategoryDialogComponent implements OnInit {
-  @Output() categoryCreated = new EventEmitter<void>();
+export class EditCategoryDialogComponent implements OnInit, OnChanges {
+  @Input() category: Category | null = null;
+  @Output() categoryUpdated = new EventEmitter<void>();
   @Output() dialogClosed = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
   private categoryService = inject(CategoryService);
   private messageService = inject(MessageService);
 
-  createCategoryForm: FormGroup;
+  editCategoryForm: FormGroup;
   isLoading = signal<boolean>(false);
   categoryTypes = signal<CategoryType[]>([]);
 
   constructor() {
-    this.createCategoryForm = this.fb.group({
+    this.editCategoryForm = this.fb.group({
       categoryTypeId: [null, [Validators.required]],
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(500)]],
@@ -59,6 +60,17 @@ export class CreateCategoryDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategoryTypes();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['category'] && this.category) {
+      this.editCategoryForm.patchValue({
+        categoryTypeId: this.category.categoryTypeId,
+        name: this.category.name,
+        description: this.category.description,
+        sortOrder: this.category.sortOrder
+      });
+    }
   }
 
   private loadCategoryTypes(): void {
@@ -78,36 +90,36 @@ export class CreateCategoryDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.createCategoryForm.invalid) {
-      this.createCategoryForm.markAllAsTouched();
+    if (this.editCategoryForm.invalid || !this.category) {
+      this.editCategoryForm.markAllAsTouched();
       return;
     }
 
     this.isLoading.set(true);
-    const formValue = this.createCategoryForm.value;
+    const formValue = this.editCategoryForm.value;
 
-    const createDto: CreateCategoryDto = {
+    const updateDto: UpdateCategoryDto = {
       categoryTypeId: formValue.categoryTypeId,
       name: formValue.name,
       description: formValue.description,
       sortOrder: formValue.sortOrder
     };
 
-    this.categoryService.createCategory(createDto).subscribe({
+    this.categoryService.updateCategory(this.category.id, updateDto).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
           summary: 'Sukces',
-          detail: 'Podkategoria została utworzona pomyślnie'
+          detail: 'Podkategoria została zaktualizowana pomyślnie'
         });
-        this.categoryCreated.emit();
+        this.categoryUpdated.emit();
         this.closeDialog();
       },
       error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Błąd',
-          detail: error.message || 'Nie udało się utworzyć podkategorii'
+          detail: error.message || 'Nie udało się zaktualizować podkategorii'
         });
         this.isLoading.set(false);
       },
@@ -118,7 +130,7 @@ export class CreateCategoryDialogComponent implements OnInit {
   }
 
   closeDialog(): void {
-    this.createCategoryForm.reset();
+    this.editCategoryForm.reset();
     this.dialogClosed.emit();
   }
 }
