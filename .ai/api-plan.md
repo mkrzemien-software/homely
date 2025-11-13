@@ -7,10 +7,10 @@
 - **HouseholdMembers** - Household membership with roles (`household_members` table)
 - **PlanTypes** - Subscription plan definitions (`plan_types` table)
 - **CategoryTypes** - High-level categories (`category_types` table)
-- **Categories** - Specific categories within types (`categories` table)
-- **Items** - Devices and visits (`items` table)
-- **Tasks** - Scheduled appointments (`tasks` table)
-- **TasksHistory** - Completed tasks archive (`tasks_history` table)
+- **Categories** - Specific categories within types (subcategories) (`categories` table)
+- **Tasks** - Task templates/definitions (`tasks` table)
+- **Events** - Scheduled appointments/occurrences (`events` table)
+- **EventsHistory** - Completed events archive (`events_history` table)
 - **Dashboard** - Aggregated dashboard data (multiple tables via views)
 
 ## 2. Endpoints
@@ -299,7 +299,7 @@
 ### Categories
 
 #### GET /categories
-- **Description**: Get categories by type
+- **Description**: Get categories (subcategories) by type
 - **Query Parameters**: `categoryTypeId` (optional)
 - **Response**: 
   - **200**: 
@@ -317,18 +317,18 @@
 }
 ```
 
-### Items
+### Tasks
 
-#### GET /items
-- **Description**: Get items for user's households
+#### GET /tasks
+- **Description**: Get task templates for user's households
 - **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**: 
   - `householdId` (optional)
-  - `categoryId` (optional)
-  - `assignedTo` (optional)
+  - `categoryId` (optional) - subcategory filter
   - `priority` (optional)
+  - `hasInterval` (optional: true/false)
   - `isActive` (optional, default: true)
-  - `sortBy` (optional: name, priority, nextDueDate)
+  - `sortBy` (optional: name, priority, createdAt)
   - `sortOrder` (optional: asc, desc)
   - `page` (optional, default: 1)
   - `limit` (optional, default: 20, max: 100)
@@ -356,8 +356,6 @@
         "weeks": "integer",
         "days": "integer"
       },
-      "lastDate": "date",
-      "nextDueDate": "date",
       "priority": "string",
       "notes": "string",
       "isActive": "boolean",
@@ -378,8 +376,8 @@
 }
 ```
 
-#### POST /items
-- **Description**: Create new item
+#### POST /tasks
+- **Description**: Create new task template
 - **Headers**: `Authorization: Bearer {token}`
 - **Request Body**:
 ```json
@@ -392,49 +390,49 @@
   "monthsValue": "integer",
   "weeksValue": "integer",
   "daysValue": "integer",
-  "lastDate": "date",
   "priority": "string",
   "notes": "string"
 }
 ```
 - **Response**: 
-  - **201**: Created item object with calculated next due date
-  - **400**: `{ "error": "Item limit reached for free plan" }`
-  - **422**: `{ "error": "At least one interval value required" }`
+  - **201**: Created task object
+  - **400**: `{ "error": "Task limit reached for free plan (maximum 5 tasks)" }`
+  - **422**: `{ "error": "Validation failed" }`
 
-#### GET /items/{id}
-- **Description**: Get specific item
+#### GET /tasks/{id}
+- **Description**: Get specific task template
 - **Headers**: `Authorization: Bearer {token}`
 - **Response**: 
-  - **200**: Item object
-  - **404**: `{ "error": "Item not found" }`
+  - **200**: Task object
+  - **404**: `{ "error": "Task not found" }`
   - **403**: `{ "error": "Access denied" }`
 
-#### PUT /items/{id}
-- **Description**: Update item
+#### PUT /tasks/{id}
+- **Description**: Update task template
 - **Headers**: `Authorization: Bearer {token}`
-- **Request Body**: Same as POST /items (partial updates allowed)
+- **Request Body**: Same as POST /tasks (partial updates allowed)
 - **Response**: 
-  - **200**: Updated item object
-  - **403**: `{ "error": "Can only edit assigned items or admin access required" }`
+  - **200**: Updated task object
+  - **403**: `{ "error": "Admin access required" }`
 
-#### DELETE /items/{id}
-- **Description**: Soft delete item
+#### DELETE /tasks/{id}
+- **Description**: Soft delete task template
 - **Headers**: `Authorization: Bearer {token}`
 - **Response**: 
-  - **200**: `{ "message": "Item deleted" }`
-  - **403**: `{ "error": "Can only delete assigned items or admin access required" }`
+  - **200**: `{ "message": "Task deleted" }`
+  - **403**: `{ "error": "Admin access required" }`
+  - **400**: `{ "error": "Cannot delete task with active events. Archive or complete all events first." }`
 
-### Tasks
+### Events
 
-#### GET /tasks
-- **Description**: Get tasks for user's households
+#### GET /events
+- **Description**: Get events (scheduled occurrences) for user's households
 - **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**: 
   - `householdId` (optional)
-  - `itemId` (optional)
+  - `taskId` (optional) - filter by task template
   - `assignedTo` (optional)
-  - `status` (optional)
+  - `status` (optional: pending, completed, postponed, cancelled)
   - `priority` (optional)
   - `dueDateFrom` (optional)
   - `dueDateTo` (optional)
@@ -449,7 +447,7 @@
   "data": [
     {
       "id": "uuid",
-      "item": {
+      "task": {
         "id": "uuid",
         "name": "string",
         "category": {
@@ -457,6 +455,12 @@
           "categoryType": {
             "name": "string"
           }
+        },
+        "interval": {
+          "years": "integer",
+          "months": "integer",
+          "weeks": "integer",
+          "days": "integer"
         }
       },
       "householdId": "uuid",
@@ -466,11 +470,10 @@
         "lastName": "string"
       },
       "dueDate": "date",
-      "title": "string",
-      "description": "string",
       "status": "string",
       "priority": "string",
       "urgencyStatus": "string",
+      "notes": "string",
       "createdAt": "datetime"
     }
   ],
@@ -483,42 +486,42 @@
 }
 ```
 
-#### POST /tasks
-- **Description**: Create new task
+#### POST /events
+- **Description**: Create new event (manually schedule occurrence from task template)
 - **Headers**: `Authorization: Bearer {token}`
 - **Request Body**:
 ```json
 {
-  "itemId": "uuid",
+  "taskId": "uuid",
   "assignedTo": "uuid",
   "dueDate": "date",
-  "title": "string",
-  "description": "string",
-  "priority": "string"
+  "priority": "string",
+  "notes": "string"
 }
 ```
 - **Response**: 
-  - **201**: Created task object
+  - **201**: Created event object
   - **400**: `{ "error": "Validation failed" }`
+  - **404**: `{ "error": "Task template not found" }`
 
-#### GET /tasks/{id}
-- **Description**: Get specific task
+#### GET /events/{id}
+- **Description**: Get specific event
 - **Headers**: `Authorization: Bearer {token}`
 - **Response**: 
-  - **200**: Task object
-  - **404**: `{ "error": "Task not found" }`
+  - **200**: Event object with full task details
+  - **404**: `{ "error": "Event not found" }`
   - **403**: `{ "error": "Access denied" }`
 
-#### PUT /tasks/{id}
-- **Description**: Update task
+#### PUT /events/{id}
+- **Description**: Update event
 - **Headers**: `Authorization: Bearer {token}`
-- **Request Body**: Same as POST /tasks (partial updates allowed)
+- **Request Body**: Same as POST /events (partial updates allowed)
 - **Response**: 
-  - **200**: Updated task object
-  - **403**: `{ "error": "Can only edit assigned tasks or admin access required" }`
+  - **200**: Updated event object
+  - **403**: `{ "error": "Can only edit assigned events or admin access required" }`
 
-#### POST /tasks/{id}/complete
-- **Description**: Mark task as completed
+#### POST /events/{id}/complete
+- **Description**: Mark event as completed (automatically generates next event if task has interval)
 - **Headers**: `Authorization: Bearer {token}`
 - **Request Body**:
 ```json
@@ -531,22 +534,28 @@
   - **200**: 
 ```json
 {
-  "message": "Task completed",
-  "completedTask": {
+  "message": "Event completed",
+  "completedEvent": {
     "id": "uuid",
     "completionDate": "date",
-    "completionNotes": "string"
+    "completionNotes": "string",
+    "status": "completed"
   },
-  "nextTask": {
+  "nextEvent": {
     "id": "uuid",
     "dueDate": "date",
-    "title": "string"
+    "assignedTo": {
+      "id": "uuid",
+      "firstName": "string",
+      "lastName": "string"
+    }
   }
 }
 ```
+- **Note**: If task template has interval, system automatically creates next event. If no interval, nextEvent will be null.
 
-#### POST /tasks/{id}/postpone
-- **Description**: Postpone task to new date
+#### POST /events/{id}/postpone
+- **Description**: Postpone event to new date
 - **Headers**: `Authorization: Bearer {token}`
 - **Request Body**:
 ```json
@@ -556,37 +565,52 @@
 }
 ```
 - **Response**: 
-  - **200**: Updated task object
-  - **403**: `{ "error": "Can only postpone assigned tasks" }`
+  - **200**: Updated event object with status "postponed"
+  - **403**: `{ "error": "Can only postpone assigned events" }`
 
-#### DELETE /tasks/{id}
-- **Description**: Cancel/delete task
+#### POST /events/{id}/cancel
+- **Description**: Cancel event (does not generate new event)
 - **Headers**: `Authorization: Bearer {token}`
-- **Query Parameters**: `generateNew` (boolean, optional, default: false)
+- **Request Body**:
+```json
+{
+  "cancelReason": "string"
+}
+```
 - **Response**: 
-  - **200**: `{ "message": "Task cancelled", "newTask": {} }` (if generateNew=true)
+  - **200**: `{ "message": "Event cancelled", "eventId": "uuid" }`
+  - **403**: `{ "error": "Can only cancel assigned events or admin access required" }`
 
-### Tasks History (Premium)
+#### DELETE /events/{id}
+- **Description**: Delete event permanently
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**: 
+  - **200**: `{ "message": "Event deleted" }`
+  - **403**: `{ "error": "Admin access required" }`
 
-#### GET /tasks-history
-- **Description**: Get completed tasks history (premium only)
+### Events History (Premium)
+
+#### GET /events-history
+- **Description**: Get completed events history (premium only)
 - **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**: 
   - `householdId` (optional)
-  - `itemId` (optional)
+  - `taskId` (optional) - filter by task template
   - `completedBy` (optional)
   - `completionDateFrom` (optional)
   - `completionDateTo` (optional)
+  - `sortBy` (optional: completionDate, dueDate)
+  - `sortOrder` (optional: asc, desc)
   - `page` (optional, default: 1)
   - `limit` (optional, default: 20, max: 100)
 - **Response**: 
-  - **200**: Array of completed tasks with completion details
+  - **200**: Array of completed events with completion details
   - **403**: `{ "error": "Premium subscription required" }`
 
 ### Dashboard
 
-#### GET /dashboard/upcoming-tasks
-- **Description**: Get upcoming tasks for dashboard
+#### GET /dashboard/upcoming-events
+- **Description**: Get upcoming events for dashboard
 - **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**: 
   - `days` (optional, default: 7)
@@ -599,9 +623,8 @@
     {
       "id": "uuid",
       "dueDate": "date",
-      "title": "string",
       "urgencyStatus": "string",
-      "item": {
+      "task": {
         "name": "string",
         "category": {
           "name": "string",
@@ -614,7 +637,8 @@
         "firstName": "string",
         "lastName": "string"
       },
-      "priority": "string"
+      "priority": "string",
+      "status": "string"
     }
   ],
   "summary": {
@@ -633,7 +657,7 @@
   - **200**: 
 ```json
 {
-  "items": {
+  "tasks": {
     "total": "integer",
     "byCategory": [
       {
@@ -642,14 +666,14 @@
       }
     ]
   },
-  "tasks": {
+  "events": {
     "pending": "integer",
     "overdue": "integer",
     "completedThisMonth": "integer"
   },
   "planUsage": {
-    "itemsUsed": "integer",
-    "itemsLimit": "integer",
+    "tasksUsed": "integer",
+    "tasksLimit": "integer",
     "membersUsed": "integer",
     "membersLimit": "integer"
   }
@@ -681,19 +705,20 @@
 
 ### Validation Rules
 
-#### Items
+#### Tasks (Templates)
 - **name**: Required, max 100 characters
+- **categoryId**: Required, must be valid subcategory
 - **priority**: Must be one of: 'low', 'medium', 'high'
-- **interval**: At least one of yearsValue, monthsValue, weeksValue, or daysValue must be > 0
-- **lastDate**: Cannot be in the future
-- **Freemium Limit**: Maximum 5 items per household on free plan
+- **interval**: Optional, but if provided at least one of yearsValue, monthsValue, weeksValue, or daysValue must be > 0
+- **Freemium Limit**: Maximum 5 tasks per household on free plan
 
-#### Tasks
-- **title**: Required, max 200 characters
+#### Events (Occurrences)
+- **taskId**: Required, must reference existing task template
+- **assignedTo**: Required, must be a member of the event's household
 - **dueDate**: Required, must be valid date
 - **status**: Must be one of: 'pending', 'completed', 'postponed', 'cancelled'
 - **priority**: Must be one of: 'low', 'medium', 'high'
-- **assignedTo**: Must be a member of the task's household
+- **No Limit**: Unlimited events on both free and premium plans
 
 #### Household Members
 - **role**: Must be one of: 'admin', 'member', 'dashboard'
@@ -705,25 +730,34 @@
 
 ### Business Logic Implementation
 
-#### Automatic Task Generation
-- When item is created: Calculate next due date based on lastDate + interval
-- When task is completed: Generate new task with dueDate = completionDate + interval
-- Task generation creates recurring tasks by default (isRecurring = true)
+#### Manual Event Creation
+- When task template is created: No automatic event generation
+- User must manually create first event via POST /events with taskId reference
+- Event inherits priority from task template by default (can be overridden)
+
+#### Automatic Event Generation on Completion
+- When event is completed via POST /events/{id}/complete:
+  - If task template has interval → automatically generate next event
+  - Next event dueDate = completionDate + interval (from task template)
+  - Next event inherits assignedTo from completed event (can be changed)
+  - Next event inherits priority from task template
+- If task template has no interval (one-time task) → no automatic generation
 
 #### Freemium Limitations
 - API enforces limits before creation operations
 - Returns HTTP 400 with upgrade suggestion when limits exceeded
-- Limits checked: household members (3), items (5)
+- Limits checked: household members (3 on free plan), tasks (5 on free plan)
+- Events have no limits on any plan
 
 #### Soft Delete Pattern
 - All DELETE operations set `deleted_at` timestamp instead of physical deletion
 - All GET operations filter out records where `deleted_at IS NOT NULL`
 - Cascade behavior preserves referential integrity for soft-deleted records
+- Cannot delete task template if it has active (non-completed) events
 
 #### Premium Feature Access
 - Endpoints marked as premium return HTTP 403 if user's household lacks active subscription
-- Premium features: tasks history, advanced analytics, unlimited limits
-
+- Premium features: events history, advanced analytics, unlimited tasks
 
 #### Data Isolation
 - All data operations automatically filter by user's household memberships

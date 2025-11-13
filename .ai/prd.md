@@ -70,15 +70,16 @@ System Developer (Super Admin):
 Administrator:
 - Tworzenie i zarządzanie gospodarstwem domowym
 - Dodawanie i usuwanie członków gospodarstwa
-- Zarządzanie wszystkimi urządzeniami i terminami
+- Zarządzanie wszystkimi zadaniami i wydarzeniami
 - Zarządzanie subskrypcją
 - Pełny dostęp do dokumentacji
 
 Domownik:
-- Odczyt wszystkich urządzeń i terminów w gospodarstwie
-- Edycja i zarządzanie urządzeniami/terminami przypisanymi do siebie
+- Odczyt wszystkich zadań i wydarzeń w gospodarstwie
+- Edycja i zarządzanie zadaniami przypisanymi do siebie
+- Tworzenie wydarzeń dla zadań
 - Upload dokumentacji dla przypisanych pozycji
-- Potwierdzanie i przełożenie własnych terminów
+- Potwierdzanie i przełożenie własnych wydarzeń
 
 Dashboard (tylko odczyt):
 - Widok terminów bez możliwości edycji
@@ -90,50 +91,85 @@ Dashboard (tylko odczyt):
 - Brak limitu w wersji premium
 - Możliwość przypisywania kolorów/ikon członkom rodziny dla lepszej wizualizacji
 
-### 3.2 Zarządzanie urządzeniami i wizytami
+### 3.2 Zarządzanie zadaniami i wydarzeniami
 
-#### 3.2.1 Dodawanie pozycji
-Dla każdej kategorii (przeglądy techniczne, wywóz śmieci, wizyty medyczne):
-- Nazwa urządzenia/typu wizyty
-- Kategoria
-- Przypisanie do członka gospodarstwa (odpowiedzialny)
-- Interwał czasowy (dni/tygodnie/miesiące)
-- Data ostatniego serwisu/wizyty
-- Notatki dodatkowe
+#### 3.2.1 Zadania (Tasks) - Szablony
+Zadanie to szablon definiujący powtarzalną aktywność powiązaną z podkategorią:
+- Nazwa zadania (np. "Serwis", "Przegląd")
+- Podkategoria (np. "Toyota" w kategorii "Samochody")
+- Interwał czasowy (lata/miesiące/tygodnie/dni) - opcjonalny
 - Priorytet (niski/średni/wysoki)
+- Notatki dodatkowe
 
-#### 3.2.2 Edycja i usuwanie
-- Możliwość modyfikacji wszystkich pól
+**Workflow Zadań:**
+- Zadanie definiuje "co" i "jak często" (jeśli ma interwał)
+- Jedno zadanie może generować wiele wydarzeń w czasie
+- Przykład: Zadanie "Serwis" dla podkategorii "Toyota" z interwałem 12 miesięcy
+
+#### 3.2.2 Wydarzenia (Events) - Konkretne wystąpienia
+Wydarzenie to konkretne zaplanowane wystąpienie zadania z przypisaną datą:
+- Referencja do zadania (taskId)
+- Przypisanie do członka gospodarstwa (odpowiedzialny)
+- Data terminu (dueDate)
+- Status (pending/completed/postponed/cancelled)
+- Notatki o wykonaniu
+- Data wykonania (completionDate)
+
+**Workflow Wydarzeń:**
+- Wydarzenia tworzone są **ręcznie** przez użytkownika dla konkretnego zadania
+- Pierwsze wydarzenie dla zadania użytkownik tworzy sam
+- Gdy wydarzenie jest oznaczone jako "completed" i zadanie ma interwał → system **automatycznie** generuje następne wydarzenie
+- Jeśli zadanie nie ma interwału (one-time), nie generuje kolejnych wydarzeń
+
+#### 3.2.3 Edycja i usuwanie
+**Zadania:**
+- Możliwość modyfikacji wszystkich pól zadania
+- Zmiana interwału wpływa tylko na przyszłe wydarzenia
 - Opcja archiwizacji zamiast usunięcia (zachowanie historii)
-- Potwierdzenie przed ostatecznym usunięciem
+- Potwierdzenie przed usunięciem (ostrzeżenie o powiązanych wydarzeniach)
 
-#### 3.2.3 Limity wersji darmowej
-- Maksymalnie 5 urządzeń/wizyt łącznie
-- Komunikat o limicie przy próbie dodania kolejnej pozycji
+**Wydarzenia:**
+- Możliwość edycji daty, osoby odpowiedzialnej, notatek
+- Możliwość anulowania pojedynczego wydarzenia
+- Nie wpływa na szablon zadania
+
+#### 3.2.4 Limity wersji darmowej
+- Maksymalnie 5 zadań (Tasks) łącznie
+- Brak limitu na liczbę wydarzeń (Events)
+- Komunikat o limicie przy próbie dodania kolejnego zadania
 - Propozycja upgrade'u do wersji premium
 
-### 3.3 System terminów
+### 3.3 System wydarzeń
 
-#### 3.3.1 Generowanie terminów
-- Automatyczne wyliczanie kolejnych terminów na podstawie interwału
-- Wyświetlanie nadchodzących terminów na dashboard
-- Oznaczenie przekroczonych terminów
+#### 3.3.1 Tworzenie wydarzeń
+- Użytkownik ręcznie tworzy pierwsze wydarzenie dla zadania
+- Wybór daty terminu (dueDate)
+- Przypisanie do członka gospodarstwa
+- Dziedziczenie priorytetu z zadania (możliwość zmiany)
 
-#### 3.3.2 Potwierdzanie wykonania
-- Możliwość potwierdzenia wykonania serwisu/wizyty
+#### 3.3.2 Automatyczne generowanie kolejnych wydarzeń
+- Gdy wydarzenie jest oznaczone jako "completed" i zadanie ma interwał
+- System automatycznie tworzy następne wydarzenie
+- Data następnego wydarzenia = completionDate + interval
+- Zachowanie przypisania do tej samej osoby (możliwość zmiany)
+
+#### 3.3.3 Potwierdzanie wykonania
+- Możliwość potwierdzenia wykonania wydarzenia
 - Opcjonalne dodanie notatki o wykonaniu
 - Upload zdjęcia/dokumentu potwierdzającego
-- Automatyczne ustawienie nowego terminu
+- Automatyczne wygenerowanie następnego wydarzenia (jeśli zadanie ma interwał)
 
-#### 3.3.3 Przełożenie terminu
-- Możliwość przesunięcia terminu o określoną liczbę dni
+#### 3.3.4 Przełożenie wydarzenia
+- Możliwość przesunięcia daty wydarzenia o określoną liczbę dni
 - Wymagane uzasadnienie/notatka
 - Historia przełożeń (dostępna w premium)
+- Nie wpływa na szablon zadania
 
-#### 3.3.4 Usunięcie terminu
-- Możliwość usunięcia pojedynczego terminu
-- Zachowanie urządzenia/wizyty w systemie
-- Wygenerowanie nowego terminu na podstawie daty usunięcia lub zachowanie oryginalnego harmonogramu
+#### 3.3.5 Anulowanie wydarzenia
+- Możliwość anulowania pojedynczego wydarzenia
+- Zachowanie zadania w systemie
+- Nie generuje automatycznie nowego wydarzenia
+- Historia anulowanych wydarzeń (premium)
 
 ### 3.4 Widoki i nawigacja
 
@@ -141,12 +177,12 @@ Dla każdej kategorii (przeglądy techniczne, wywóz śmieci, wizyty medyczne):
 Aplikacja wykorzystuje wysuwane menu z lewej strony, które zawiera:
 
 **Sekcja 1: Widoki Gospodarstwa** (dostępne dla wszystkich użytkowników w kontekście aktualnie otwartego gospodarstwa):
-- 📊 Dashboard - główny widok z kafelkami i kalendarzem
-- 📋 Zadania - lista nadchodzących terminów
-- 🏷️ Kategorie - widok urządzeń/wizyt pogrupowanych po kategoriach
-- 🏠 Urządzenia/Wizyty - pełna lista z możliwością zarządzania (Admin, Domownik)
+- 📊 Dashboard - główny widok z kafelkami nawigacyjnymi (Wydarzenia, Zadania, Kategorie, Ustawienia)
+- 📅 Wydarzenia - lista nadchodzących wydarzeń (konkretne terminy)
+- 📋 Zadania - zarządzanie szablonami zadań
+- 🏷️ Kategorie - widok kategorii i podkategorii (Admin, Domownik)
 - 👥 Gospodarstwo - zarządzanie członkami i ustawieniami (tylko Administrator)
-- 📈 Historia - archiwum wykonanych zadań (tylko Premium)
+- 📈 Historia - archiwum wykonanych wydarzeń (tylko Premium)
 - 📊 Raporty - zestawienia kosztów (tylko Premium)
 - 🔬 Analizy - zaawansowane analizy predykcyjne (tylko Premium)
 - ⚙️ Ustawienia - konfiguracja profilu i preferencji
@@ -171,57 +207,67 @@ Aplikacja wykorzystuje wysuwane menu z lewej strony, które zawiera:
 - Active state indicator dla aktualnie wybranego widoku
 
 #### 3.4.1 Dashboard główny
-- **Kafelki nawigacyjne** (duże przyciski z ikonami) do przełączania widoków:
-  - 📋 Zadania - lista nadchodzących terminów (7 dni) z szybkimi akcjami
-  - 🏷️ Kategorie - widok urządzeń/wizyt pogrupowanych po kategoriach
+- **Kafelki nawigacyjne** (duże przyciski z ikonami) do głównych widoków:
+  - 📅 Wydarzenia - lista nadchodzących wydarzeń (7 dni) z szybkimi akcjami
+  - 📋 Zadania - zarządzanie szablonami zadań
+  - 🏷️ Kategorie - widok kategorii i podkategorii
   - ⚙️ Ustawienia - szybki dostęp do konfiguracji gospodarstwa
 - **Zintegrowany kalendarz** - dostępny z poziomu dashboardu jako widget lub tryb widoku
-  - Miesięczny widok terminów
+  - Miesięczny widok wydarzeń
   - Kolorowe oznaczenia kategorii
-  - Możliwość kliknięcia w termin i wykonania akcji
-- Lista nadchodzących terminów z wyróżnieniem terminów przekroczonych
+  - Możliwość kliknięcia w wydarzenie i wykonania akcji
+- Lista nadchodzących wydarzeń z wyróżnieniem przekroczonych terminów
 - Szybkie akcje: potwierdź, przełóż, edytuj
-- Statystyki: liczba urządzeń, wykorzystanie limitu
+- Statystyki: liczba zadań, wykorzystanie limitu
 
-#### 3.4.2 Lista urządzeń/wizyt
-- Wszystkie pozycje pogrupowane po kategorii
-- Sortowanie: po dacie, nazwie, priorytecie
-- Filtrowanie po kategorii, osobie odpowiedzialnej
+#### 3.4.2 Widok Wydarzeń
+- Lista nadchodzących wydarzeń (konkretne terminy)
+- Sortowanie: chronologicznie, po priorytecie
+- Filtrowanie po kategorii, osobie odpowiedzialnej, statusie
+- Wyświetlanie informacji o powiązanym zadaniu
+- Szybkie akcje: potwierdź, przełóż, anuluj
+
+#### 3.4.3 Widok Zadań
+- Lista wszystkich szablonów zadań
+- Sortowanie: po nazwie, kategorii, priorytecie
+- Filtrowanie po podkategorii, interwale
+- Możliwość tworzenia wydarzenia z zadania
 - Szybka edycja inline
 
-#### 3.4.3 Widok Dashboard (monitor)
+#### 3.4.4 Widok Dashboard (monitor)
 - Uproszczony, czytelny interfejs
 - Duża czcionka
-- Wyświetlanie tylko najbliższych 5 terminów
+- Wyświetlanie tylko najbliższych 5 wydarzeń
 - Auto-refresh co 5 minut
 
-#### 3.4.4 Panel Administratora
+#### 3.4.5 Panel Administratora
 Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
 
-##### 3.4.4.1 Zarządzanie gospodarstwem domowym
+##### 3.4.5.1 Zarządzanie gospodarstwem domowym
 - Edycja nazwy i adresu gospodarstwa
-- Przegląd statystyk gospodarstwa (liczba członków, urządzeń, terminów)
+- Przegląd statystyk gospodarstwa (liczba członków, zadań, wydarzeń)
 - Historia zmian w gospodarstwie (audit log)
-- Ustawienia domyślne dla nowych urządzeń/wizyt
+- Ustawienia domyślne dla nowych zadań
 - Archiwum usuniętych pozycji z możliwością przywrócenia
 
-##### 3.4.4.2 Zarządzanie członkami gospodarstwa
+##### 3.4.5.2 Zarządzanie członkami gospodarstwa
 - Lista wszystkich członków z rolami i statusami
 - Formularz dodawania nowych członków z wysyłką zaproszeń
 - Edycja ról i uprawnień istniejących członków
 - Historia aktywności członków (ostatnie logowanie, akcje)
-- Usuwanie członków z reassignment ich terminów
+- Usuwanie członków z reassignment ich wydarzeń
 - Zarządzanie zaproszeniami (pending, expired, resend)
 
-##### 3.4.4.3 Centralne zarządzanie terminami i urządzeniami
-- Widok globalny wszystkich urządzeń/wizyt w gospodarstwie
-- Możliwość edycji terminów wszystkich członków
+##### 3.4.5.3 Centralne zarządzanie zadaniami i wydarzeniami
+- Widok globalny wszystkich zadań w gospodarstwie
+- Możliwość edycji zadań wszystkich kategorii
+- Widok wszystkich wydarzeń z możliwością filtrowania
 - Masowe operacje (zmiana interwałów, reassignment odpowiedzialnych)
-- Przegląd konfliktów terminów i ich rozwiązywanie
+- Przegląd konfliktów wydarzeń i ich rozwiązywanie
 - Konfiguracja priorytetów i kategorii
-- Import/export danych urządzeń (CSV)
+- Import/export danych zadań (CSV)
 
-##### 3.4.4.4 Zarządzanie subskrypcją i limitami
+##### 3.4.5.4 Zarządzanie subskrypcją i limitami
 - Przegląd aktualnego planu i wykorzystania limitów
 - Historia płatności i faktur
 - Upgrade/downgrade planu subskrypcji
@@ -229,7 +275,7 @@ Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
 - Ustawienia automatycznej odnowy
 - Przegląd kosztów gospodarstwa (tylko premium)
 
-##### 3.4.4.5 Ustawienia systemowe gospodarstwa
+##### 3.4.5.5 Ustawienia systemowe gospodarstwa
 - Konfiguracja stref czasowych i formatów dat
 - Ustawienia powiadomień dla całego gospodarstwa
 - Zarządzanie kategoriami i priorytetami
@@ -237,18 +283,18 @@ Specjalne widoki dostępne tylko dla użytkowników z rolą Administrator:
 - Integracje z zewnętrznymi systemami
 - Logi systemowe i diagnostyka
 
-##### 3.4.4.6 Raporty i analizy administratora
+##### 3.4.5.6 Raporty i analizy administratora
 - Dashboard z kluczowymi metrykami gospodarstwa
 - Raporty wykorzystania funkcji przez członków
-- Analiza efektywności zarządzania terminami
-- Statystyki potwierdzanych vs przegapionych terminów
-- Przegląd najczęściej używanych urządzeń/kategorii
+- Analiza efektywności zarządzania wydarzeniami
+- Statystyki potwierdzanych vs przegapionych wydarzeń
+- Przegląd najczęściej używanych zadań/kategorii
 - Export raportów dla zewnętrznych systemów księgowych
 
-#### 3.4.5 Panel System Developer (Super Admin)
+#### 3.4.6 Panel System Developer (Super Admin)
 Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów systemu:
 
-##### 3.4.5.0 Dashboard systemu
+##### 3.4.6.0 Dashboard systemu
 - Główny panel administracyjny z kluczowymi metrykami platformy
 - **Kafelki nawigacyjne** (duże przyciski z ikonami) do głównych sekcji systemowych:
   - 🏢 Gospodarstwa - przejście do `/system/households`
@@ -263,7 +309,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - **(Post-MVP)** Wykresy trendu wzrostu użytkowników i przychodów
 - **(Post-MVP)** Real-time monitoring statusu systemu
 
-##### 3.4.5.1 Zarządzanie gospodarstwami
+##### 3.4.6.1 Zarządzanie gospodarstwami
 - Lista wszystkich gospodarstw w systemie z podstawowymi statystykami
 - Wyszukiwanie i filtrowanie gospodarstw (po nazwie, dacie utworzenia, planie)
 - Tworzenie nowych gospodarstw z przypisaniem administratorów
@@ -272,7 +318,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - Przenoszenie członków między gospodarstwami
 - Historia zmian i operacji na gospodarstwach
 
-##### 3.4.5.2 Zarządzanie użytkownikami globalnie  
+##### 3.4.6.2 Zarządzanie użytkownikami globalnie  
 - Lista wszystkich użytkowników w systemie
 - Wyszukiwanie użytkowników po email, imieniu, gospodarstwie
 - Zmiana ról użytkowników w ramach ich gospodarstw
@@ -281,7 +327,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - Historia aktywności użytkowników (logowania, akcje)
 - Usuwanie kont i dane RODO compliance
 
-##### 3.4.5.3 Monitorowanie subskrypcji i płatności
+##### 3.4.6.3 Monitorowanie subskrypcji i płatności
 - Dashboard wszystkich subskrypcji w systemie
 - Przegląd przychodów i metryk finansowych
 - Zarządzanie promocjami i kodami rabatowymi
@@ -290,7 +336,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - Analiza churn rate i conversion metrics
 - Export danych finansowych dla księgowości
 
-##### 3.4.5.4 Administracja systemowa
+##### 3.4.6.4 Administracja systemowa
 - Monitorowanie wydajności i uptime systemu
 - Przegląd logów systemowych i błędów
 - Zarządzanie backup'ami i disaster recovery
@@ -299,7 +345,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - Aktualizacje systemu i maintenance mode
 - Monitoring bezpieczeństwa i incident response
 
-##### 3.4.5.5 Analizy i metryki globalne
+##### 3.4.6.5 Analizy i metryki globalne
 - Dashboard z kluczowymi KPI całej platformy
 - Analizy wzrostu użytkowników i retention
 - Statystyki wykorzystania funkcji na poziomie systemu  
@@ -308,7 +354,7 @@ Widoki dostępne wyłącznie dla twórców oprogramowania i administratorów sys
 - Przewidywania trendu i capacity planning
 - Export danych dla business intelligence
 
-##### 3.4.5.6 Wsparcie techniczne
+##### 3.4.6.6 Wsparcie techniczne
 - System ticketów i obsługa użytkowników
 - Narzędzia diagnostyczne i troubleshooting
 - Impersonacja użytkowników (z audit trail)
@@ -639,30 +685,30 @@ Kryteria akceptacji:
 - Możliwość wysłania przypomnienia do nieaktywnych
 - Eksport danych aktywności
 
-US-050: Masowe zarządzanie urządzeniami
+US-050: Masowe zarządzanie zadaniami i wydarzeniami
 Jako administrator
-Chcę wykonywać operacje na wielu urządzeniach jednocześnie
+Chcę wykonywać operacje na wielu zadaniach lub wydarzeniach jednocześnie
 Aby efektywnie zarządzać dużym gospodarstwem
 
 Kryteria akceptacji:
-- Selekcja wielu urządzeń (checkbox)
-- Masowa zmiana osoby odpowiedzialnej
-- Masowa aktualizacja interwałów
-- Masowe dodanie etykiet/kategorii
+- Selekcja wielu zadań lub wydarzeń (checkbox)
+- Masowa zmiana osoby odpowiedzialnej (wydarzenia)
+- Masowa aktualizacja interwałów (zadania)
+- Masowa zmiana podkategorii
 - Masowe archiwizowanie/usuwanie
 - Potwierdzenie przed wykonaniem operacji masowej
 - Preview zmian przed aplikacją
 
-US-051: Zarządzanie konfliktami terminów
+US-051: Zarządzanie konfliktami wydarzeń
 Jako administrator
-Chcę identyfikować i rozwiązywać konflikty terminów
+Chcę identyfikować i rozwiązywać konflikty wydarzeń
 Aby zapewnić płynne funkcjonowanie gospodarstwa
 
 Kryteria akceptacji:
-- Widok wszystkich konfliktów terminów (ten sam dzień, ta sama osoba)
-- Automatyczne wykrywanie nakładających się terminów
+- Widok wszystkich konfliktów wydarzeń (ten sam dzień, ta sama osoba)
+- Automatyczne wykrywanie nakładających się wydarzeń
 - Sugestie rozwiązania (przesunięcie, zmiana odpowiedzialnego)
-- Możliwość ręcznej zmiany terminów w konflikcie
+- Możliwość ręcznej zmiany daty wydarzenia w konflikcie
 - Powiadomienia członków o zmianach
 - Historia rozwiązanych konfliktów
 
@@ -674,7 +720,7 @@ Chcę monitorować wykorzystanie limitów mojego planu
 Aby planować ewentualny upgrade
 
 Kryteria akceptacji:
-- Dashborad z wykorzystaniem: członkowie, urządzenia, storage
+- Dashboard z wykorzystaniem: członkowie, zadania, storage
 - Wykresy trendu wykorzystania w czasie
 - Prognozy osiągnięcia limitów
 - Porównanie planów (current vs available upgrades)
@@ -712,13 +758,13 @@ Kryteria akceptacji:
 US-055: Raporty efektywności gospodarstwa
 Jako administrator
 Chcę generować raporty efektywności mojego gospodarstwa
-Aby optymalizować zarządzanie terminami
+Aby optymalizować zarządzanie wydarzeniami
 
 Kryteria akceptacji:
-- Raport potwierdzanych vs przegapionych terminów
-- Analiza najbardziej problematycznych urządzeń
+- Raport potwierdzanych vs przegapionych wydarzeń
+- Analiza najczęściej niewykonywanych zadań
 - Statystyki aktywności członków
-- Średnie czasy reakcji na terminy
+- Średnie czasy reakcji na wydarzenia
 - Identyfikacja wzorców sezonowych
 - Rekomendacje optymalizacji
 
@@ -728,11 +774,11 @@ Chcę mieć szybki dostęp do kluczowych metryk
 Aby na bieżąco monitorować stan gospodarstwa
 
 Kryteria akceptacji:
-- Widget z nadchodzącymi terminami krytycznymi
-- Mierniki wykorzystania planu
-- Alerty o problemach (przekroczone terminy, konflikty)
+- Widget z nadchodzącymi wydarzeniami krytycznymi
+- Mierniki wykorzystania planu (liczba zadań, członków, storage)
+- Alerty o problemach (przekroczone wydarzenia, konflikty)
 - Statystyki aktywności w czasie rzeczywistym
-- Szybkie akcje (dodaj członka, wyślij przypomnienie)
+- Szybkie akcje (dodaj członka, dodaj zadanie, wyślij przypomnienie)
 - Personalizacja widżetów na dashboardzie
 
 ### 5.2.4 Panel System Developer - zarządzanie systemem
@@ -743,7 +789,7 @@ Chcę widzieć listę wszystkich gospodarstw w systemie
 Aby monitorować aktywność platformy i udzielać wsparcia
 
 Kryteria akceptacji:
-- Lista gospodarstw z podstawowymi statystykami (liczba członków, urządzeń, ostatnia aktywność)
+- Lista gospodarstw z podstawowymi statystykami (liczba członków, zadań, wydarzeń, ostatnia aktywność)
 - Wyszukiwanie po nazwie gospodarstwa lub email administratora
 - Filtrowanie po planie subskrypcji, dacie utworzenia, statusie aktywności
 - Sortowanie po różnych kryteriach
@@ -868,174 +914,225 @@ Kryteria akceptacji:
 - Powiadomienie o pomyślnym zapisaniu lub błędzie
 - Możliwość przeciągania kategorii między typami (drag & drop)
 
-### 5.3 Zarządzanie urządzeniami i wizytami
+### 5.3 Zarządzanie zadaniami i wydarzeniami
 
-US-009: Dodawanie urządzenia/wizyty
+#### 5.3.1 Zadania (Tasks)
+
+US-009: Dodawanie zadania
 Jako domownik
-Chcę dodać urządzenie lub wizytę do systemu
-Aby móc śledzić terminy związane z tym elementem
+Chcę dodać szablon zadania do systemu
+Aby móc tworzyć z niego konkretne wydarzenia
 
 Kryteria akceptacji:
-- Formularz zawiera: nazwę, kategorię (dropdown), osobę odpowiedzialną, interwał (liczba + jednostka), datę ostatniego serwisu, priorytet, notatki
+- Formularz zawiera: nazwę zadania, podkategorię (dropdown), interwał (opcjonalny: lata/miesiące/tygodnie/dni), priorytet, notatki
 - Walidacja wszystkich wymaganych pól
-- W wersji darmowej limit 5 pozycji łącznie
-- Komunikat o dodaniu z wyliczonym pierwszym terminem
-- Automatyczne przekierowanie do listy urządzeń
-- Możliwość natychmiastowego dodania kolejnego
+- W wersji darmowej limit 5 zadań łącznie
+- Komunikat o dodaniu zadania
+- Automatyczne przekierowanie do listy zadań
+- Możliwość natychmiastowego utworzenia wydarzenia dla tego zadania
 
-US-010: Edycja urządzenia/wizyty
+US-010: Edycja zadania
 Jako domownik
-Chcę edytować dane urządzenia/wizyty
-Aby aktualizować informacje w systemie
+Chcę edytować dane zadania
+Aby aktualizować szablon w systemie
 
 Kryteria akceptacji:
-- Dostęp do edycji tylko dla przypisanych pozycji (lub administrator)
+- Dostęp do edycji dla wszystkich członków gospodarstwa
 - Formularz z wypełnionymi aktualnymi danymi
 - Możliwość zmiany wszystkich pól
-- Zmiana interwału nie wpływa na historię, tylko przyszłe terminy
+- Zmiana interwału wpływa tylko na nowo tworzone wydarzenia
 - Potwierdzenie zapisania zmian
 - Opcja anulowania bez zapisywania
 
-US-011: Usuwanie urządzenia/wizyty
+US-011: Usuwanie zadania
 Jako domownik
-Chcę usunąć urządzenie/wizytę z systemu
-Aby pozbyć się nieaktualnych pozycji
+Chcę usunąć zadanie z systemu
+Aby pozbyć się nieaktualnych szablonów
 
 Kryteria akceptacji:
-- Przycisk usunięcia przy każdej pozycji
-- Dialog potwierdzenia z opcjami: "Usuń całkowicie" lub "Archiwizuj"
-- Usunięcie całkowite usuwa wszystkie terminy i dokumenty
+- Przycisk usunięcia przy każdym zadaniu
+- Dialog potwierdzenia z ostrzeżeniem o powiązanych wydarzeniach
+- Dialog z opcjami: "Usuń całkowicie" lub "Archiwizuj"
+- Usunięcie całkowite usuwa zadanie ale zachowuje powiązane wydarzenia (jako orphaned)
 - Archiwizacja zachowuje historię (funkcja premium)
 - Zwolnienie miejsca w limicie (wersja darmowa)
 - Komunikat potwierdzający
 
-US-012: Filtrowanie i sortowanie listy
+US-012: Filtrowanie i sortowanie listy zadań
 Jako użytkownik
-Chcę filtrować i sortować listę urządzeń/wizyt
+Chcę filtrować i sortować listę zadań
 Aby szybko znaleźć interesującą mnie pozycję
 
 Kryteria akceptacji:
-- Filtry: wszystkie/kategoria/osoba odpowiedzialna/priorytet
-- Sortowanie: po nazwie/dacie najbliższego terminu/priorytecie/dacie dodania
+- Filtry: wszystkie/podkategoria/priorytet/z interwałem/bez interwału
+- Sortowanie: po nazwie/podkategorii/priorytecie/dacie dodania
 - Możliwość łączenia filtrów
 - Licznik wyświetlonych pozycji
 - Resetowanie filtrów jednym przyciskiem
 - Zapisanie wybranych filtrów w sesji
 
-### 5.4 Zarządzanie terminami
+#### 5.3.2 Wydarzenia (Events)
 
-US-012a: Widok Zadań (lista terminów)
+US-013a: Tworzenie wydarzenia z zadania
+Jako domownik
+Chcę utworzyć konkretne wydarzenie z szablonu zadania
+Aby zaplanować termin wykonania
+
+Kryteria akceptacji:
+- Przycisk "Utwórz wydarzenie" przy każdym zadaniu
+- Formularz z polami: data terminu, osoba odpowiedzialna, priorytet (dziedziczony z zadania)
+- Walidacja daty (nie może być w przeszłości)
+- Przypisanie do członka gospodarstwa
+- Komunikat potwierdzający utworzenie
+- Przekierowanie do widoku wydarzeń lub kalendarza
+
+US-013b: Edycja wydarzenia
+Jako domownik
+Chcę edytować konkretne wydarzenie
+Aby dostosować termin lub osobę odpowiedzialną
+
+Kryteria akceptacji:
+- Dostęp do edycji tylko dla przypisanych wydarzeń (lub administrator)
+- Możliwość zmiany daty, osoby odpowiedzialnej, notatek
+- Nie można zmienić powiązanego zadania
+- Potwierdzenie zapisania zmian
+- Opcja anulowania bez zapisywania
+
+### 5.4 Widoki aplikacji
+
+US-012a: Widok Wydarzeń (lista konkretnych terminów)
 Jako użytkownik
-Chcę mieć dedykowany widok z listą nadchodzących zadań
+Chcę mieć dedykowany widok z listą nadchodzących wydarzeń
 Aby w jednym miejscu zarządzać wszystkimi terminami na najbliższe dni
 
 Kryteria akceptacji:
-- Dostęp przez sidebar (📋 Zadania) lub kafelek na dashboardzie
-- Lista terminów na najbliższe 7 dni
+- Dostęp przez sidebar (📅 Wydarzenia) lub kafelek na dashboardzie
+- Lista wydarzeń na najbliższe 7 dni
 - Sortowanie chronologiczne
 - Wyróżnienie kolorystyczne: przekroczony (czerwony), dzisiaj (pomarańczowy), nadchodzące (zielony)
-- Filtry: osoba odpowiedzialna, kategoria, priorytet
-- Licznik zadań według statusu (przekroczone/dzisiaj/nadchodzące)
-- Wyświetlanie: nazwa, kategoria, osoba odpowiedzialna, data
-- Szybkie akcje na każdym zadaniu: potwierdź, przełóż, edytuj
+- Filtry: osoba odpowiedzialna, kategoria, priorytet, status
+- Licznik wydarzeń według statusu (przekroczone/dzisiaj/nadchodzące)
+- Wyświetlanie: nazwa zadania, kategoria, osoba odpowiedzialna, data
+- Szybkie akcje na każdym wydarzeniu: potwierdź, przełóż, edytuj, anuluj
 - Możliwość zmiany widoku między listą a kalendarzem
 - Odświeżanie w czasie rzeczywistym
 
-US-012b: Widok Kategorii (urządzenia pogrupowane)
+US-012b: Widok Zadań (szablony)
 Jako użytkownik
-Chcę widzieć moje urządzenia i wizyty pogrupowane po kategoriach
+Chcę widzieć wszystkie moje szablony zadań
+Aby zarządzać powtarzalnymi aktywnościami
+
+Kryteria akceptacji:
+- Dostęp przez sidebar (📋 Zadania) lub kafelek na dashboardzie
+- Lista wszystkich zadań w gospodarstwie
+- Wyświetlanie podkategorii, interwału, priorytetu
+- Przycisk "Utwórz wydarzenie" przy każdym zadaniu
+- Filtry: podkategoria, priorytet, z/bez interwału
+- Sortowanie: nazwa, kategoria, priorytet, data utworzenia
+- Licznik zadań według podkategorii
+- Szybki dostęp do edycji zadań
+- Możliwość dodania nowego zadania
+
+US-012c: Widok Kategorii (struktura organizacyjna)
+Jako użytkownik
+Chcę widzieć hierarchię kategorii i podkategorii z przypisanymi zadaniami
 Aby łatwiej zarządzać podobnymi elementami razem
 
 Kryteria akceptacji:
 - Dostęp przez sidebar (🏷️ Kategorie) lub kafelek na dashboardzie
-- Grupy kategorii z możliwością collapse/expand
-- Licznik itemów w każdej kategorii
-- Najbliższy termin dla każdego urządzenia/wizyty
-- Wyróżnienie itemów z przekroczonym terminem
-- Możliwość dodania nowego itemu bezpośrednio do kategorii
-- Szybki dostęp do edycji itemów
-- Sortowanie wewnątrz kategorii (nazwa, najbliższy termin, priorytet)
-- Możliwość przeciągania itemów między kategoriami
+- Grupy typów kategorii z możliwością collapse/expand
+- Podkategorie w ramach każdego typu
+- Licznik zadań w każdej podkategorii
+- Możliwość dodania nowego zadania bezpośrednio do podkategorii
+- Szybki dostęp do edycji zadań
+- Sortowanie wewnątrz kategorii (nazwa, priorytet)
 - Accordion navigation z lazy loading dla dużych kategorii
 
-US-013: Wyświetlanie nadchodzących terminów na dashboardzie
+US-013: Wyświetlanie nadchodzących wydarzeń na dashboardzie
 Jako użytkownik
-Chcę widzieć nadchodzące terminy na dashboardzie
+Chcę widzieć nadchodzące wydarzenia na dashboardzie
 Aby być na bieżąco z obowiązkami
 
 Kryteria akceptacji:
-- Lista terminów na najbliższe 7 dni
+- Lista wydarzeń na najbliższe 7 dni
 - Sortowanie chronologiczne
 - Wyróżnienie kolorystyczne: przekroczony (czerwony), dzisiaj (pomarańczowy), nadchodzące (zielony)
-- Wyświetlanie: nazwa, kategoria, osoba odpowiedzialna, data
-- Szybkie akcje: potwierdź, przełóż, edytuj
+- Wyświetlanie: nazwa zadania, kategoria, osoba odpowiedzialna, data
+- Szybkie akcje: potwierdź, przełóż, edytuj, anuluj
 - Odświeżanie w czasie rzeczywistym
-- Link do pełnego widoku zadań
+- Link do pełnego widoku wydarzeń
 
-US-014: Potwierdzanie wykonania terminu
+US-014: Potwierdzanie wykonania wydarzenia
 Jako domownik
-Chcę potwierdzić wykonanie serwisu/wizyty
-Aby system wygenerował kolejny termin
+Chcę potwierdzić wykonanie wydarzenia
+Aby system automatycznie wygenerował kolejne (jeśli zadanie ma interwał)
 
 Kryteria akceptacji:
-- Przycisk "Potwierdź wykonanie" przy terminie
+- Przycisk "Potwierdź wykonanie" przy wydarzeniu
 - Opcjonalne pole na notatkę o wykonaniu
+- Pole na datę faktycznego wykonania (domyślnie dzisiaj)
 - Możliwość załączenia zdjęcia/dokumentu
-- Automatyczne wyliczenie kolejnego terminu na podstawie interwału
-- Przesunięcie terminu do historii (premium) lub oznaczenie jako wykonany
+- Jeśli zadanie ma interwał → automatyczne utworzenie następnego wydarzenia
+- Data następnego wydarzenia = completionDate + interwał zadania
+- Przesunięcie wydarzenia do historii (premium) lub oznaczenie jako completed
 - Powiadomienie innych członków gospodarstwa o wykonaniu
 
-US-015: Przełożenie terminu
+US-015: Przełożenie wydarzenia
 Jako domownik
-Chcę przełożyć termin na inny dzień
+Chcę przełożyć wydarzenie na inny dzień
 Aby dostosować harmonogram do sytuacji
 
 Kryteria akceptacji:
-- Przycisk "Przełóż" przy terminie
+- Przycisk "Przełóż" przy wydarzeniu
 - Kalendarz do wyboru nowej daty lub pole z liczbą dni przesunięcia
 - Wymagane pole z uzasadnieniem/notatką
 - Historia przełożeń widoczna w wersji premium
 - Potwierdzenie nowej daty
+- Nie wpływa na szablon zadania
 - Email do wszystkich członków o przesunięciu
 
-US-016: Edycja pojedynczego terminu
+US-016: Edycja wydarzenia
 Jako domownik
-Chcę edytować pojedynczy termin bez zmiany ustawień urządzenia
+Chcę edytować pojedyncze wydarzenie
 Aby dostosować konkretny termin
 
 Kryteria akceptacji:
 - Możliwość zmiany daty
 - Możliwość zmiany osoby odpowiedzialnej
+- Możliwość zmiany priorytetu
 - Możliwość dodania notatki
-- Nie wpływa na interwał ani przyszłe terminy
+- Nie można zmienić powiązanego zadania
+- Nie wpływa na inne wydarzenia tego samego zadania
 - Potwierdzenie zmian
 - Powiadomienie o zmianie
 
-US-017: Usuwanie pojedynczego terminu
+US-017: Anulowanie wydarzenia
 Jako domownik
-Chcę usunąć pojedynczy termin
-Aby pominąć jednorazowo serwis/wizytę
+Chcę anulować pojedyncze wydarzenie
+Aby pominąć jednorazowo wykonanie
 
 Kryteria akceptacji:
-- Przycisk "Usuń termin" przy terminie
-- Dialog potwierdzenia
-- Opcje: "Usuń i zachowaj harmonogram" lub "Usuń i wygeneruj nowy od dzisiaj"
-- Urządzenie pozostaje w systemie
-- Historia usunięcia (premium)
-- Email potwierdzający
+- Przycisk "Anuluj wydarzenie" przy wydarzeniu
+- Dialog potwierdzenia z polem na powód anulowania
+- Status wydarzenia zmieniony na "cancelled"
+- Zadanie pozostaje w systemie
+- Nie generuje automatycznie nowego wydarzenia
+- Historia anulowanych wydarzeń (premium)
+- Email potwierdzający do członków gospodarstwa
 
 US-018: Widok kalendarza miesięcznego
 Jako użytkownik
-Chcę widzieć terminy w formie kalendarza
+Chcę widzieć wydarzenia w formie kalendarza
 Aby mieć lepszy przegląd harmonogramu
 
 Kryteria akceptacji:
 - Standardowy widok kalendarzowy z dniami miesiąca
-- Oznaczenia kolorowe według kategorii
+- Oznaczenia kolorowe według kategorii zadań
 - Możliwość przejścia do poprzedniego/następnego miesiąca
-- Kliknięcie w termin otwiera szczegóły i akcje
-- Licznik terminów w danym dniu jeśli więcej niż 3
+- Kliknięcie w wydarzenie otwiera szczegóły i akcje
+- Licznik wydarzeń w danym dniu jeśli więcej niż 3
 - Legenda kolorów kategorii
+- Możliwość przeciągania wydarzeń między dniami (drag & drop)
 
 ### 5.5 Widoki specjalne
 
@@ -1062,39 +1159,40 @@ Aby szybko zacząć korzystać z aplikacji
 Kryteria akceptacji:
 - Powitalna wiadomość z krótkim wyjaśnieniem aplikacji
 - Krok 1: Stwórz gospodarstwo domowe
-- Krok 2: Dodaj pierwsze urządzenie/wizytę
+- Krok 2: Dodaj pierwsze zadanie (szablon)
+- Krok 3: Utwórz pierwsze wydarzenie
 - Możliwość pominięcia onboardingu
 - Wskazówki kontekstowe (tooltips) przy pierwszym użyciu funkcji
 - Checkbox "Nie pokazuj ponownie"
 
 ### 5.6 Funkcje premium
 
-US-029: Historia serwisów
+US-029: Historia wydarzeń
 Jako użytkownik premium
-Chcę przeglądać historię wszystkich wykonanych serwisów
+Chcę przeglądać historię wszystkich wykonanych wydarzeń
 Aby analizować częstotliwość i koszty
 
 Kryteria akceptacji:
 - Zakładka "Historia" w menu (tylko premium)
-- Lista wszystkich potwierdzonych terminów
-- Filtry: data, kategoria, urządzenie, osoba
-- Wyświetlanie: data wykonania, notatki, załączone dokumenty
+- Lista wszystkich zakończonych wydarzeń (completed/cancelled)
+- Filtry: data, kategoria, zadanie, osoba
+- Wyświetlanie: data wykonania, notatki, załączone dokumenty, status
 - Export do CSV lub PDF
-- Statystyki: liczba serwisów w okresie, średni interwał
-- Wykresy trendu częstotliwości
+- Statystyki: liczba wykonanych wydarzeń w okresie, średni czas realizacji
+- Wykresy trendu częstotliwości wykonania zadań
 
-US-030: Dodawanie kosztów do serwisów
+US-030: Dodawanie kosztów do wydarzeń
 Jako użytkownik premium
-Chcę dodawać koszty do wykonanych serwisów
+Chcę dodawać koszty do wykonanych wydarzeń
 Aby śledzić wydatki gospodarstwa
 
 Kryteria akceptacji:
-- Pole "Koszt" przy potwierdzaniu wykonania terminu
+- Pole "Koszt" przy potwierdzaniu wykonania wydarzenia
 - Waluta zgodna z ustawieniami użytkownika
 - Możliwość dodania kosztów później (edycja historii)
 - Kategoryzacja kosztów: części, robocizna, przejazd, inne
 - Załączanie faktury jako dokumentu
-- Suma kosztów widoczna przy urządzeniu
+- Suma kosztów widoczna przy zadaniu (zsumowane ze wszystkich wydarzeń)
 
 US-031: Raporty kosztów
 Jako użytkownik premium
@@ -1105,8 +1203,8 @@ Kryteria akceptacji:
 - Zakładka "Raporty" w menu (tylko premium)
 - Wybór okresu: miesiąc, kwartał, rok, własny zakres
 - Suma wszystkich kosztów w okresie
-- Rozbicie po kategoriach
-- Rozbicie po urządzeniach (TOP 5 najdroższe)
+- Rozbicie po kategoriach i podkategoriach
+- Rozbicie po zadaniach (TOP 5 najdroższe)
 - Wykres słupkowy wydatków miesięcznych
 - Porównanie rok do roku
 - Export raportu do PDF
@@ -1114,28 +1212,28 @@ Kryteria akceptacji:
 US-032: Zaawansowane analizy
 Jako użytkownik premium
 Chcę mieć dostęp do analiz predykcyjnych
-Aby planować przyszłe wydatki
+Aby planować przyszłe wydatki i obciążenie
 
 Kryteria akceptacji:
 - Zakładka "Analizy" w menu (tylko premium)
-- Prognoza wydatków na najbliższe 6 miesięcy
-- Identyfikacja najbardziej awaryjnych urządzeń
-- Sugestie optymalizacji kosztów
-- Heatmapa intensywności terminów
+- Prognoza wydatków na najbliższe 6 miesięcy na podstawie historii
+- Identyfikacja zadań najczęściej przekraczających termin
+- Sugestie optymalizacji kosztów i harmonogramu
+- Heatmapa intensywności wydarzeń w czasie
 - Analiza obciążenia poszczególnych domowników
 - Wykresy trendów długoterminowych
 
 US-033: Ulepszone wykresy
 Jako użytkownik premium
-Chcę wizualizować terminy na osi czasu
+Chcę wizualizować wydarzenia na osi czasu
 Aby lepiej planować harmonogram
 
 Kryteria akceptacji:
-- Wykres Gantta z terminami na najbliższe 3 miesiące
+- Wykres Gantta z wydarzeniami na najbliższe 3 miesiące
 - Timeline z możliwością przewijania
-- Grupowanie po kategoriach lub osobach
+- Grupowanie po kategoriach, zadaniach lub osobach
 - Zoom in/out dla różnego poziomu szczegółowości
-- Przeciąganie terminów na wykresie (drag and drop reschedule)
+- Przeciąganie wydarzeń na wykresie (drag and drop reschedule)
 - Export wykresu do obrazu
 
 ### 5.7 Subskrypcja i płatności
@@ -1248,11 +1346,11 @@ Chcę być jasno poinformowany o ograniczeniach
 Aby zdecydować czy chcę upgrade
 
 Kryteria akceptacji:
-- Komunikat przy próbie dodania 6. urządzenia
+- Komunikat przy próbie dodania 6. zadania
 - Komunikat przy próbie dodania 4. osoby
 - Komunikat przy przekroczeniu 100 MB storage
 - Każdy komunikat zawiera link do upgrade
-- Możliwość usunięcia istniejących pozycji aby zwolnić miejsce
+- Możliwość usunięcia istniejących zadań aby zwolnić miejsce
 - Licznik wykorzystania limitu widoczny w dashboardzie
 - Powiadomienie email przy 90% wykorzystania limitu
 
@@ -1321,10 +1419,10 @@ Częstotliwość: Tygodniowa
 
 ### 6.2 Metryki onboardingu
 
-6.2.1 Czas do dodania pierwszego urządzenia
-Definicja: Czas od rejestracji do dodania pierwszego urządzenia/wizyty
-Cel: 80% użytkowników dodaje pierwsze urządzenie w ciągu 10 minut od rejestracji
-Pomiar: Timestamp rejestracji vs timestamp dodania pierwszego urządzenia
+6.2.1 Czas do dodania pierwszego zadania
+Definicja: Czas od rejestracji do dodania pierwszego zadania (szablonu)
+Cel: 80% użytkowników dodaje pierwsze zadanie w ciągu 10 minut od rejestracji
+Pomiar: Timestamp rejestracji vs timestamp dodania pierwszego zadania
 Częstotliwość: Dzienna
 
 6.2.2 Completion rate onboardingu
@@ -1335,16 +1433,16 @@ Częstotliwość: Dzienna
 
 ### 6.3 Metryki zaangażowania
 
-6.3.1 Średnia liczba dodanych urządzeń/wizyt na użytkownika
-Definicja: Średnia liczba pozycji dodanych przez aktywnego użytkownika
-Cel: 3.5 pozycji w pierwszym miesiącu
-Pomiar: Suma urządzeń/wizyt podzielona przez liczbę użytkowników
+6.3.1 Średnia liczba dodanych zadań na użytkownika
+Definicja: Średnia liczba zadań (szablonów) dodanych przez aktywnego użytkownika
+Cel: 3.5 zadań w pierwszym miesiącu
+Pomiar: Suma zadań podzielona przez liczbę użytkowników
 Częstotliwość: Miesięczna
 
-6.3.2 Średnia liczba potwierdzeń terminów tygodniowo
-Definicja: Ile terminów jest potwierdzanych przez użytkownika w tygodniu
-Cel: 80% terminów potwierdzonych w czasie (przed lub w dniu terminu)
-Pomiar: Timestamp potwierdzenia vs data terminu
+6.3.2 Średnia liczba potwierdzeń wydarzeń tygodniowo
+Definicja: Ile wydarzeń jest potwierdzanych przez użytkownika w tygodniu
+Cel: 80% wydarzeń potwierdzonych w czasie (przed lub w dniu terminu)
+Pomiar: Timestamp potwierdzenia vs dueDate wydarzenia
 Częstotliwość: Tygodniowa
 
 6.3.3 Częstotliwość logowań
@@ -1392,9 +1490,10 @@ Częstotliwość: Miesięczna
 6.6.1 Adoption rate poszczególnych funkcji
 Definicja: Procent użytkowników korzystających z danej funkcji
 Cel: 
-- Dodawanie urządzeń: 90%
-- Potwierdzanie terminów: 75%
-- Edycja terminów: 50%
+- Dodawanie zadań: 90%
+- Tworzenie wydarzeń: 85%
+- Potwierdzanie wydarzeń: 75%
+- Edycja wydarzeń: 50%
 Pomiar: Liczba użytkowników używających funkcji / wszyscy użytkownicy
 Częstotliwość: Miesięczna
 
@@ -1443,14 +1542,14 @@ Pomiar: Tracking użycia funkcji w panelu administratora
 Częstotliwość: Miesięczna
 
 6.8.2 Efektywność zarządzania gospodarstwem
-Definicja: Średnia liczba członków i urządzeń zarządzanych przez administratora
+Definicja: Średnia liczba członków i zadań zarządzanych przez administratora
 Cel: 
-- Free plan: 3 członków, 5 urządzeń
-- Premium: 6 członków, 20 urządzeń
+- Free plan: 3 członków, 5 zadań
+- Premium: 6 członków, 20 zadań
 Pomiar: Średnie wartości na gospodarstwo z rolą administratora
 Częstotliwość: Miesięczna
 
-6.8.3 Czas rozwiązywania konfliktów terminów
+6.8.3 Czas rozwiązywania konfliktów wydarzeń
 Definicja: Średni czas od wykrycia konfliktu do jego rozwiązania
 Cel: < 24 godziny dla konfliktów krytycznych
 Pomiar: Timestamp wykrycia vs rozwiązania konfliktu
@@ -1458,7 +1557,7 @@ Częstotliwość: Tygodniowa
 
 6.8.4 Wykorzystanie funkcji masowych
 Definicja: Procent administratorów używających operacji masowych
-Cel: 50% administratorów z >10 urządzeniami używa funkcji masowych
+Cel: 50% administratorów z >10 zadaniami używa funkcji masowych
 Pomiar: Tracking użycia bulk operations
 Częstotliwość: Miesięczna
 
@@ -1572,7 +1671,8 @@ MVP zostanie uznane za sukces jeśli po 3 miesiącach od uruchomienia:
 - Minimum 3% conversion rate free → premium
 - NPS > 20
 - < 0.5% error rate
-- Średnio 3+ urządzeń/wizyt na aktywnego użytkownika
+- Średnio 3+ zadań na aktywnego użytkownika
+- Średnio 5+ wydarzeń utworzonych na aktywnego użytkownika
 
 Jeśli te cele zostaną osiągnięte, będziemy kontynuować rozwój produktu zgodnie z planem post-MVP.
 

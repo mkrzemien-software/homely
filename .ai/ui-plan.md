@@ -2,7 +2,7 @@
 
 ## 1. Przegląd struktury UI
 
-Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeNG, przeznaczona do zarządzania terminami serwisów urządzeń domowych i wizyt. Architektura UI opiera się na modelu freemium z role-based access control, obsługując trzy typy użytkowników: Administrator, Domownik i Dashboard (tylko odczyt).
+Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeNG, przeznaczona do zarządzania zadaniami domowymi i wydarzeniami. System opiera się na szablonach zadań (Tasks), z których użytkownicy tworzą konkretne wydarzenia (Events) w kalendarzu. Architektura UI opiera się na modelu freemium z role-based access control, obsługując trzy typy użytkowników: Administrator, Domownik i Dashboard (tylko odczyt).
 
 ### Kluczowe założenia architektoniczne:
 - **Stack technologiczny**: Angular 20 + PrimeNG + CSS Grid/Flexbox
@@ -53,53 +53,74 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 
 #### Dashboard Główny
 - **Ścieżka**: `/dashboard`
-- **Cel**: Centralny hub z nawigacją kafelkową i przeglądem terminów
+- **Cel**: Centralny hub z nawigacją kafelkową i przeglądem wydarzeń
 - **Kluczowe informacje**: 
-  - **Kafelki nawigacyjne** (duże przyciski z ikonami) do zmiany widoku:
-    - 📋 Zadania - widok listy nadchodzących terminów (7 dni)
-    - 🏷️ Kategorie - widok urządzeń/wizyt pogrupowanych po kategoriach
+  - **Kafelki nawigacyjne** (duże przyciski z ikonami) do głównych widoków:
+    - 📅 Wydarzenia - lista nadchodzących wydarzeń (7 dni)
+    - 📋 Zadania - zarządzanie szablonami zadań
+    - 🏷️ Kategorie - widok kategorii i podkategorii z zadaniami
     - ⚙️ Ustawienia - szybki dostęp do konfiguracji gospodarstwa
   - **Zintegrowany kalendarz** - dostępny jako widget/modal z poziomu dashboardu
-  - Terminy na najbliższe 7 dni z oznaczeniem pilności
-  - Statystyki wykorzystania limitu (wersja darmowa)
-  - Szybkie akcje (potwierdź, przełóż, edytuj)
+  - Wydarzenia na najbliższe 7 dni z oznaczeniem pilności
+  - Statystyki wykorzystania limitu zadań (wersja darmowa)
+  - Szybkie akcje (potwierdź, przełóż, edytuj, anuluj)
   - Przełącznik gospodarstw (jeśli dostęp do wielu)
 - **Komponenty**:
-  - NavigationTiles (kafelki do zmiany widoku - zadania/kategorie/ustawienia)
-  - CalendarWidget (zintegrowany mini kalendarz lub modal)
-  - UpcomingTasksList z color-coded urgency
-  - CategoryGroupedView (widok pogrupowany po kategoriach)
-  - QuickActionButtons (potwierdź, przełóż, szczegóły)
-  - UsageStatistics (progress bars dla limitów freemium)
+  - NavigationTiles (kafelki do widoków: wydarzenia/zadania/kategorie/ustawienia)
+  - CalendarWidget (zintegrowany mini kalendarz z wydarzeniami)
+  - UpcomingEventsList z color-coded urgency
+  - QuickActionButtons (potwierdź, przełóż, anuluj, szczegóły)
+  - UsageStatistics (progress bars dla limitów: zadania, członkowie, storage)
   - HouseholdSwitcher
 - **UX/Dostępność**: Auto-refresh co 5 minut, keyboard shortcuts, ARIA live regions, tile-based navigation
-- **Bezpieczeństwo**: Role-based task visibility, permission checks na akcjach
+- **Bezpieczeństwo**: Role-based event visibility, permission checks na akcjach
 
 **Uwaga**: Kalendarz jest zintegrowany z dashboardem jako widget/modal, nie posiada osobnego widoku.
 
-#### Widok Zadań
-- **Ścieżka**: `/tasks`
-- **Cel**: Lista nadchodzących terminów na najbliższe 7 dni z możliwością wykonywania akcji
+#### Widok Wydarzeń
+- **Ścieżka**: `/events`
+- **Cel**: Lista nadchodzących wydarzeń (konkretnych terminów) z możliwością wykonywania akcji
 - **Kluczowe informacje**:
-  - Lista terminów chronologicznie
+  - Lista wydarzeń chronologicznie (7 dni domyślnie)
   - Wyróżnienie kolorystyczne (przekroczony/dzisiaj/nadchodzący)
-  - Szybkie akcje na każdym zadaniu
-  - Filtry (osoba odpowiedzialna, kategoria, priorytet)
-  - Licznik zadań według statusu
+  - Informacja o powiązanym zadaniu
+  - Szybkie akcje na każdym wydarzeniu
+  - Filtry (osoba odpowiedzialna, kategoria, priorytet, status)
+  - Licznik wydarzeń według statusu
 - **Komponenty**:
-  - TasksList z filtering
-  - TaskCard z quick actions
-  - TaskFilters
-  - TaskActionButtons
+  - EventsList z filtering
+  - EventCard z quick actions
+  - EventFilters
+  - EventActionButtons (potwierdź, przełóż, edytuj, anuluj)
+  - RelatedTaskInfo
 - **UX/Dostępność**: Focus management, keyboard shortcuts dla akcji
-- **Bezpieczeństwo**: Permission checks per task based on assignment
+- **Bezpieczeństwo**: Permission checks per event based on assignment
+- **Dostęp przez**: Sidebar (📅 Wydarzenia) lub kafelek na dashboardzie
+
+#### Widok Zadań (Templates)
+- **Ścieżka**: `/tasks`
+- **Cel**: Zarządzanie szablonami zadań, z których tworzone są wydarzenia
+- **Kluczowe informacje**:
+  - Lista wszystkich zadań w gospodarstwie
+  - Wyświetlanie: nazwa, podkategoria, interwał, priorytet
+  - Przycisk "Utwórz wydarzenie" przy każdym zadaniu
+  - Filtry (podkategoria, priorytet, z/bez interwału)
+  - Sortowanie (nazwa, kategoria, priorytet)
+- **Komponenty**:
+  - TasksList (szablon Tasks)
+  - TaskCard z action "Utwórz wydarzenie"
+  - TaskFilters
+  - CreateEventFromTaskDialog
+  - TaskForm (dodawanie/edycja)
+- **UX/Dostępność**: Clear task-event relationship indicators
+- **Bezpieczeństwo**: Role-based task management
 - **Dostęp przez**: Sidebar (📋 Zadania) lub kafelek na dashboardzie
 
 #### Widok Kategorii
 - **Ścieżka**: `/categories`
-- **Cel**: Zarządzanie kategoriami i typami kategorii oraz podgląd urządzeń/wizyt pogrupowanych po kategoriach
+- **Cel**: Zarządzanie kategoriami (podkategoriami) i typami kategorii, z widokiem przypisanych zadań
 - **Kluczowe informacje**:
-  - Lista wszystkich kategorii pogrupowanych po typach
+  - Lista wszystkich kategorii (podkategorii) pogrupowanych po typach
   - **Zarządzanie kategoriami**:
     - Możliwość dodawania nowych kategorii (CreateCategoryDialogComponent)
     - Możliwość edycji istniejących kategorii (EditCategoryDialogComponent)
@@ -112,9 +133,10 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
     - Przycisk "Dodaj typ kategorii" w toolbar obok "Dodaj kategorię"
   - Filtrowanie kategorii po typie
   - Wyszukiwanie kategorii po nazwie
-  - Licznik itemów przypisanych do każdej kategorii
+  - Licznik zadań przypisanych do każdej kategorii (podkategorii)
   - Wyświetlanie w dwóch trybach: pogrupowane lub lista
   - Szybki dostęp do akcji (edytuj, usuń) dla każdej kategorii
+  - Możliwość dodawania zadań bezpośrednio do kategorii
 - **Komponenty**:
   - CategoriesListComponent (główny komponent widoku)
   - **Dialogi kategorii**:
@@ -123,10 +145,11 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
   - **Dialogi typów kategorii**:
     - CreateCategoryTypeDialogComponent (dialog dodawania typu kategorii)
     - EditCategoryTypeDialogComponent (dialog edycji typu kategorii)
-  - CategoryGroupedView (widok pogrupowany)
-  - CategoryAccordion (accordion dla grup z ikonami edycji)
-  - CategoryCard (karta pojedynczej kategorii)
+  - CategoryGroupedView (widok pogrupowany z zadaniami)
+  - CategoryAccordion (accordion dla typów kategorii z ikonami edycji)
+  - CategoryCard (karta pojedynczej podkategorii z licznikiem zadań)
   - Filters i search bar
+  - TasksPerCategoryList
 - **UX/Dostępność**:
   - Accordion navigation dla widoku pogrupowanego
   - Przełączanie między widokiem pogrupowanym a listą
@@ -140,53 +163,40 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
   - Permission checks dla operacji CRUD (kategorie i typy)
   - Input validation i sanitization w formularzach
   - Walidacja: maksymalna długość nazwy (100 znaków) i opisu (500 znaków)
-- **Dostęp przez**: Sidebar (🏷️ Kategorie)
+- **Dostęp przez**: Sidebar (🏷️ Kategorie) lub kafelek na dashboardzie
 
-#### Lista Urządzeń/Wizyt
-- **Ścieżka**: `/items`
-- **Cel**: Kompleksowe zarządzanie wszystkimi urządzeniami i wizytami w gospodarstwie
-- **Kluczowe informacje**:
-  - Lista wszystkich urządzeń/wizyt z możliwością inline editing
-  - Filtry (kategoria, osoba odpowiedzialna, priorytet)
-  - Sortowanie (nazwa, data następnego terminu, priorytet)
-  - Informacje o następnym terminie i statusie
-- **Komponenty**:
-  - EditableDataTable z role-based edit permissions
-  - ItemFilters (kategoria, osoba, priorytet, status)
-  - AddItemButton
-  - BulkActions (dla administratorów)
-- **UX/Dostępność**: Tabela z proper headers, sortable columns, paginacja
-- **Bezpieczeństwo**: Edit permissions per item, admin-only bulk operations
-
-#### Formularz Urządzenia/Wizyty
-- **Ścieżki**: `/items/add`, `/items/:id/edit`
-- **Cel**: Dodawanie nowych i edycja istniejących urządzeń/wizyt
+#### Formularz Zadania
+- **Ścieżki**: `/tasks/add`, `/tasks/:id/edit`
+- **Cel**: Dodawanie nowych i edycja istniejących szablonów zadań
 - **Kluczowe informacje**:
   - Formularz z wszystkimi wymaganymi polami
-  - Kalkulator następnego terminu
-  - Walidacja interwałów czasowych
+  - Wybór podkategorii
+  - Konfiguracja interwału (opcjonalny)
+  - Ustawienie priorytetu i notatek
 - **Komponenty**:
-  - ItemForm z progressive disclosure
-  - IntervalCalculator
-  - CategorySelector
-  - AssignmentSelector
-- **UX/Dostępność**: Form validation feedback, save/cancel actions
-- **Bezpieczeństwo**: Input validation, permission checks, freemium limits
+  - TaskForm z progressive disclosure
+  - IntervalConfiguratorComponent
+  - SubcategorySelector
+  - PrioritySelector
+- **UX/Dostępność**: Form validation feedback, save/cancel actions, preview kolejnego wydarzenia
+- **Bezpieczeństwo**: Input validation, permission checks, freemium limits (5 zadań)
 
-#### Szczegóły Zadania
-- **Ścieżka**: `/tasks/:id`
-- **Cel**: Wyświetlenie szczegółów zadania z możliwością wykonania akcji
+#### Szczegóły Wydarzenia
+- **Ścieżka**: `/events/:id`
+- **Cel**: Wyświetlenie szczegółów wydarzenia z możliwością wykonania akcji
 - **Kluczowe informacje**:
-  - Pełne informacje o zadaniu i związanym urządzeniu
-  - Historia poprzednich wykonań (premium)
-  - Akcje (potwierdź, przełóż, edytuj, usuń)
+  - Pełne informacje o wydarzeniu i powiązanym zadaniu
+  - Historia poprzednich wydarzeń tego zadania (premium)
+  - Akcje (potwierdź, przełóż, edytuj, anuluj)
+  - Informacje o automatycznym generowaniu następnego wydarzenia
 - **Komponenty**:
-  - TaskDetails
-  - TaskHistory (premium)
-  - TaskActionButtons
-  - RelatedItemInfo
+  - EventDetails
+  - EventHistory (premium - poprzednie wydarzenia tego zadania)
+  - EventActionButtons
+  - RelatedTaskInfo
+  - NextEventPreview (jeśli zadanie ma interwał)
 - **UX/Dostępność**: Clear action hierarchy, confirmation dialogs
-- **Bezpieczeństwo**: Task ownership validation, role-based actions
+- **Bezpieczeństwo**: Event ownership validation, role-based actions
 
 ### 2.3 Household Management Views
 
