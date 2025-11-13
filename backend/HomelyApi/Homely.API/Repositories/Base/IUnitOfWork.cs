@@ -9,8 +9,8 @@ public interface IUnitOfWork : IDisposable
     IHouseholdMemberRepository HouseholdMembers { get; }
     ICategoryTypeRepository CategoryTypes { get; }
     ICategoryRepository Categories { get; }
-    IItemRepository Items { get; }
     ITaskRepository Tasks { get; }
+    IEventRepository Events { get; }
     ITaskHistoryRepository TasksHistory { get; }
     IPlanUsageRepository PlanUsages { get; }
 

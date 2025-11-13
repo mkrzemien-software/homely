@@ -1,0 +1,294 @@
+<div class="tasks-list-container">
+  <!-- Header -->
+  <header class="tasks-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="page-title">
+          <i class="pi pi-list-check" aria-hidden="true"></i>
+          Zadania
+        </h1>
+        <p class="page-subtitle">
+          Zarządzaj szablonami zadań - twórz z nich wydarzenia w kalendarzu
+        </p>
+      </div>
+
+      <!-- Stats -->
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-label">Łącznie</span>
+          <span class="stat-value">{{ totalItems() }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Widoczne</span>
+          <span class="stat-value">{{ filteredTasksCount() }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <p-divider></p-divider>
+
+  <!-- Toolbar -->
+  <div class="tasks-toolbar">
+    <div class="toolbar-left">
+      <!-- Search -->
+      <span class="p-input-icon-left search-input">
+        <i class="pi pi-search"></i>
+        <input
+          pInputText
+          type="text"
+          placeholder="Szukaj zadań..."
+          [ngModel]="searchText()"
+          (ngModelChange)="onSearch($event)"
+        />
+      </span>
+
+      <!-- Category filter -->
+      <p-dropdown
+        [options]="categoryOptions()"
+        [ngModel]="selectedCategoryId()"
+        (ngModelChange)="onCategoryFilterChange($event)"
+        placeholder="Filtruj po kategorii"
+        [style]="{ minWidth: '200px' }"
+      ></p-dropdown>
+
+      <!-- Priority filter -->
+      <p-dropdown
+        [options]="priorityOptions"
+        [ngModel]="selectedPriority()"
+        (ngModelChange)="onPriorityFilterChange($event)"
+        placeholder="Filtruj po priorytecie"
+        [style]="{ minWidth: '180px' }"
+      ></p-dropdown>
+
+      <!-- Interval filter -->
+      <p-dropdown
+        [options]="intervalOptions"
+        [ngModel]="selectedIntervalFilter()"
+        (ngModelChange)="onIntervalFilterChange($event)"
+        [style]="{ minWidth: '180px' }"
+      ></p-dropdown>
+    </div>
+
+    <div class="toolbar-right">
+      <!-- Sort dropdown -->
+      <p-dropdown
+        [options]="sortOptions"
+        [ngModel]="sortBy()"
+        (ngModelChange)="onSortChange($event)"
+        placeholder="Sortuj"
+        [style]="{ minWidth: '160px' }"
+      ></p-dropdown>
+
+      <!-- Sort order toggle -->
+      <p-button
+        [icon]="sortOrder() === 'asc' ? 'pi pi-sort-amount-up' : 'pi pi-sort-amount-down'"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onSortChange(sortBy())"
+        [pTooltip]="sortOrder() === 'asc' ? 'Rosnąco' : 'Malejąco'"
+      ></p-button>
+
+      <!-- Reset filters button -->
+      <p-button
+        icon="pi pi-filter-slash"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="resetFilters()"
+        pTooltip="Resetuj filtry"
+      ></p-button>
+
+      <!-- Refresh button -->
+      <p-button
+        icon="pi pi-refresh"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="refresh()"
+        pTooltip="Odśwież listę"
+      ></p-button>
+
+      <!-- Add task button -->
+      <p-button
+        icon="pi pi-plus"
+        label="Dodaj zadanie"
+        (onClick)="addNewTask()"
+        pTooltip="Dodaj nowe zadanie"
+      ></p-button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <p-skeleton height="120px" styleClass="mb-3"></p-skeleton>
+      <p-skeleton height="120px" styleClass="mb-3"></p-skeleton>
+      <p-skeleton height="120px" styleClass="mb-3"></p-skeleton>
+    </div>
+  }
+
+  <!-- Error message -->
+  @if (errorMessage() && !isLoading()) {
+    <p-message severity="error" [text]="errorMessage()!" styleClass="mb-3"></p-message>
+  }
+
+  <!-- Empty state -->
+  @if (!isLoading() && !errorMessage() && filteredTasks().length === 0) {
+    <div class="empty-state">
+      <i class="pi pi-inbox empty-icon"></i>
+      <h3 class="empty-title">Brak zadań</h3>
+      @if (searchText() || selectedCategoryId() || selectedPriority() || selectedIntervalFilter() !== 'all') {
+        <p class="empty-text">
+          Nie znaleziono zadań spełniających wybrane kryteria.
+        </p>
+        <p-button
+          label="Resetuj filtry"
+          icon="pi pi-filter-slash"
+          severity="secondary"
+          (onClick)="resetFilters()"
+        ></p-button>
+      } @else {
+        <p class="empty-text">
+          Dodaj pierwsze zadanie, aby rozpocząć zarządzanie terminami.
+        </p>
+        <p-button
+          label="Dodaj zadanie"
+          icon="pi pi-plus"
+          (onClick)="addNewTask()"
+        ></p-button>
+      }
+    </div>
+  }
+
+  <!-- Tasks list -->
+  @if (!isLoading() && !errorMessage() && filteredTasks().length > 0) {
+    <div class="tasks-grid">
+      @for (task of filteredTasks(); track task.id) {
+        <p-card class="task-card">
+          <!-- Card header -->
+          <ng-template pTemplate="header">
+            <div class="task-card-header">
+              <div class="task-info">
+                <h3 class="task-name">{{ task.name }}</h3>
+                <p class="task-category">
+                  <i class="pi pi-tag"></i>
+                  {{ task.category.categoryType.name }} → {{ task.category.name }}
+                </p>
+              </div>
+              <div class="task-priority">
+                <p-tag
+                  [value]="getPriorityLabel(task.priority)"
+                  [severity]="getPrioritySeverity(task.priority)"
+                ></p-tag>
+              </div>
+            </div>
+          </ng-template>
+
+          <!-- Card content -->
+          <div class="task-card-content">
+            <!-- Description -->
+            @if (task.description) {
+              <p class="task-description">{{ task.description }}</p>
+            }
+
+            <!-- Interval -->
+            <div class="task-interval">
+              <i class="pi pi-clock"></i>
+              <span class="interval-text">{{ formatInterval(task.interval) }}</span>
+            </div>
+
+            <!-- Created info -->
+            <div class="task-created">
+              <i class="pi pi-user"></i>
+              <span class="created-text">
+                Utworzone przez {{ task.createdBy.firstName }} {{ task.createdBy.lastName }}
+              </span>
+            </div>
+
+            <!-- Notes -->
+            @if (task.notes) {
+              <div class="task-notes">
+                <i class="pi pi-info-circle"></i>
+                <span class="notes-text">{{ task.notes }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Card footer -->
+          <ng-template pTemplate="footer">
+            <div class="task-card-footer">
+              <!-- Left actions -->
+              <div class="footer-left">
+                <p-button
+                  label="Utwórz wydarzenie"
+                  icon="pi pi-calendar-plus"
+                  severity="success"
+                  [outlined]="true"
+                  (onClick)="createEventFromTask(task)"
+                  pTooltip="Zaplanuj termin dla tego zadania"
+                ></p-button>
+              </div>
+
+              <!-- Right actions -->
+              <div class="footer-right">
+                <p-button
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  [outlined]="true"
+                  [text]="true"
+                  (onClick)="editTask(task)"
+                  pTooltip="Edytuj zadanie"
+                ></p-button>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [outlined]="true"
+                  [text]="true"
+                  (onClick)="deleteTask(task)"
+                  pTooltip="Usuń zadanie"
+                ></p-button>
+              </div>
+            </div>
+          </ng-template>
+        </p-card>
+      }
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <p-paginator
+        [rows]="itemsPerPage()"
+        [totalRecords]="totalItems()"
+        [rowsPerPageOptions]="[10, 20, 50]"
+        [first]="(currentPage() - 1) * itemsPerPage()"
+        (onPageChange)="onPageChange($event)"
+      ></p-paginator>
+    </div>
+  }
+</div>
+
+<!-- Create Task Dialog -->
+<app-create-task-dialog
+  [visible]="createDialogVisible()"
+  [householdId]="householdId()"
+  [categories]="allCategories()"
+  (onClose)="hideCreateDialog()"
+  (onCreated)="onTaskCreated()"
+></app-create-task-dialog>
+
+<!-- Edit Task Dialog -->
+<app-edit-task-dialog
+  [visible]="editDialogVisible()"
+  [task]="taskToEdit()"
+  [categories]="allCategories()"
+  (onClose)="hideEditDialog()"
+  (onUpdated)="onTaskUpdated()"
+></app-edit-task-dialog>
+
+<!-- Create Event From Task Dialog -->
+<app-create-event-from-task-dialog
+  [visible]="createEventDialogVisible()"
+  [task]="taskForEvent()"
+  [householdId]="householdId()"
+  (onClose)="hideCreateEventDialog()"
+  (onCreated)="onEventCreated()"
+></app-create-event-from-task-dialog>

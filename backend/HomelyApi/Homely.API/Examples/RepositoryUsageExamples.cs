@@ -41,10 +41,10 @@ public class RepositoryUsageExamples
     }
 
 
-    public async Task<ItemEntity> CreateItemWithTaskExampleAsync(
+    public async Task<TaskEntity> CreateTaskTemplateWithEventExampleAsync(
         Guid householdId,
         Guid createdBy,
-        string itemName,
+        string taskName,
         int categoryId,
         int maintenanceIntervalDays)
     {
@@ -58,67 +58,67 @@ public class RepositoryUsageExamples
 
             if (!canAdd)
             {
-                throw new InvalidOperationException("Limit przedmiotów w planie został przekroczony");
+                throw new InvalidOperationException("Limit zadań w planie został przekroczony");
             }
         }
 
-        var item = new ItemEntity
+        var taskTemplate = new TaskEntity
         {
             HouseholdId = householdId,
             CategoryId = categoryId,
-            Name = itemName,
+            Name = taskName,
             DaysValue = maintenanceIntervalDays,
             CreatedBy = createdBy,
-            LastDate = DateOnly.FromDateTime(DateTime.UtcNow)
+            IsActive = true
         };
 
-        await _unitOfWork.Items.AddAsync(item);
+        await _unitOfWork.Tasks.AddAsync(taskTemplate);
 
-        var firstTask = new TaskEntity
+        var firstEvent = new EventEntity
         {
-            ItemId = item.Id,
+            TaskId = taskTemplate.Id,
             HouseholdId = householdId,
-            Title = $"Konserwacja: {itemName}",
+            Title = $"Konserwacja: {taskName}",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(maintenanceIntervalDays)),
             CreatedBy = createdBy,
             Priority = DatabaseConstants.PriorityLevels.Medium
         };
 
-        await _unitOfWork.Tasks.AddAsync(firstTask);
+        await _unitOfWork.Events.AddAsync(firstEvent);
 
         await _unitOfWork.SaveChangesAsync();
 
-        return item;
+        return taskTemplate;
     }
 
-    public async Task<bool> CompleteTaskExampleAsync(Guid taskId, Guid completedBy, string? notes = null)
+    public async Task<bool> CompleteEventExampleAsync(Guid eventId, Guid completedBy, string? notes = null)
     {
-        var task = await _unitOfWork.Tasks.GetByIdAsync(taskId);
-        if (task == null) return false;
+        var eventEntity = await _unitOfWork.Events.GetByIdAsync(eventId);
+        if (eventEntity == null) return false;
 
-        task.Status = DatabaseConstants.TaskStatuses.Completed;
-        task.CompletionDate = DateOnly.FromDateTime(DateTime.UtcNow);
-        task.CompletionNotes = notes;
-        task.UpdatedAt = DateTimeOffset.UtcNow;
+        eventEntity.Status = DatabaseConstants.TaskStatuses.Completed;
+        eventEntity.CompletionDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        eventEntity.CompletionNotes = notes;
+        eventEntity.UpdatedAt = DateTimeOffset.UtcNow;
 
-        await _unitOfWork.Tasks.UpdateAsync(task);
+        await _unitOfWork.Events.UpdateAsync(eventEntity);
         await _unitOfWork.SaveChangesAsync();
 
         return true;
     }
 
-    public async Task<bool> PostponeTaskExampleAsync(Guid taskId, DateOnly newDueDate, string? reason = null)
+    public async Task<bool> PostponeEventExampleAsync(Guid eventId, DateOnly newDueDate, string? reason = null)
     {
-        var task = await _unitOfWork.Tasks.GetByIdAsync(taskId);
-        if (task == null) return false;
+        var eventEntity = await _unitOfWork.Events.GetByIdAsync(eventId);
+        if (eventEntity == null) return false;
 
-        task.PostponedFromDate = task.DueDate;
-        task.DueDate = newDueDate;
-        task.PostponeReason = reason;
-        task.Status = DatabaseConstants.TaskStatuses.Postponed;
-        task.UpdatedAt = DateTimeOffset.UtcNow;
+        eventEntity.PostponedFromDate = eventEntity.DueDate;
+        eventEntity.DueDate = newDueDate;
+        eventEntity.PostponeReason = reason;
+        eventEntity.Status = DatabaseConstants.TaskStatuses.Postponed;
+        eventEntity.UpdatedAt = DateTimeOffset.UtcNow;
 
-        await _unitOfWork.Tasks.UpdateAsync(task);
+        await _unitOfWork.Events.UpdateAsync(eventEntity);
         await _unitOfWork.SaveChangesAsync();
 
         return true;
@@ -132,11 +132,11 @@ public class RepositoryUsageExamples
             throw new UnauthorizedAccessException("Brak dostępu do gospodarstwa domowego");
         }
 
-        var upcomingTasks = await _unitOfWork.Tasks.GetUpcomingTasksAsync(householdId, 30);
+        var upcomingEvents = await _unitOfWork.Events.GetUpcomingEventsAsync(householdId, 30);
 
-        var overdueTasks = await _unitOfWork.Tasks.GetOverdueTasksAsync(householdId);
+        var overdueEvents = await _unitOfWork.Events.GetOverdueEventsAsync(householdId);
 
-        var todayTasks = await _unitOfWork.Tasks.GetDueTasksAsync(
+        var todayEvents = await _unitOfWork.Events.GetDueEventsAsync(
             householdId,
             DateOnly.FromDateTime(DateTime.UtcNow),
             DateOnly.FromDateTime(DateTime.UtcNow));
@@ -144,15 +144,15 @@ public class RepositoryUsageExamples
         return new DashboardData
         {
             Household = household,
-            UpcomingTasks = upcomingTasks.ToList(),
-            OverdueTasks = overdueTasks.ToList(),
-            TodayTasks = todayTasks.ToList(),
-            TotalItems = household.Items.Count(i => i.IsActive && i.DeletedAt == null),
+            UpcomingEvents = upcomingEvents.ToList(),
+            OverdueEvents = overdueEvents.ToList(),
+            TodayEvents = todayEvents.ToList(),
+            TotalTasks = household.Tasks.Count(t => t.IsActive && t.DeletedAt == null),
             TotalMembers = household.HouseholdMembers.Count(hm => hm.DeletedAt == null)
         };
     }
 
-    public async Task<IEnumerable<TaskEntity>> SearchTasksExampleAsync(
+    public async Task<IEnumerable<EventEntity>> SearchEventsExampleAsync(
         Guid householdId,
         string? status = null,
         string? priority = null,
@@ -160,27 +160,27 @@ public class RepositoryUsageExamples
         DateOnly? fromDate = null,
         DateOnly? toDate = null)
     {
-        var query = _unitOfWork.Tasks.Query()
-            .Where(t => t.HouseholdId == householdId);
+        var query = _unitOfWork.Events.Query()
+            .Where(e => e.HouseholdId == householdId);
 
         if (!string.IsNullOrEmpty(status))
-            query = query.Where(t => t.Status == status);
+            query = query.Where(e => e.Status == status);
 
         if (!string.IsNullOrEmpty(priority))
-            query = query.Where(t => t.Priority == priority);
+            query = query.Where(e => e.Priority == priority);
 
         if (assignedTo.HasValue)
-            query = query.Where(t => t.AssignedTo == assignedTo.Value);
+            query = query.Where(e => e.AssignedTo == assignedTo.Value);
 
         if (fromDate.HasValue)
-            query = query.Where(t => t.DueDate >= fromDate.Value);
+            query = query.Where(e => e.DueDate >= fromDate.Value);
 
         if (toDate.HasValue)
-            query = query.Where(t => t.DueDate <= toDate.Value);
+            query = query.Where(e => e.DueDate <= toDate.Value);
 
         return await query
-            .OrderBy(t => t.DueDate)
-            .ThenBy(t => t.Priority)
+            .OrderBy(e => e.DueDate)
+            .ThenBy(e => e.Priority)
             .ToListAsync();
     }
 
@@ -229,26 +229,27 @@ public class RepositoryUsageExamples
         {
             await _unitOfWork.BeginTransactionAsync();
 
-            var item = new ItemEntity
+            var taskTemplate = new TaskEntity
             {
                 HouseholdId = householdId,
-                Name = "Test Item",
+                Name = "Test Task Template",
                 CategoryId = 1,
                 CreatedBy = userId,
-                LastDate = DateOnly.FromDateTime(DateTime.UtcNow)
+                IsActive = true,
+                DaysValue = 30
             };
-            await _unitOfWork.Items.AddAsync(item);
+            await _unitOfWork.Tasks.AddAsync(taskTemplate);
 
-            var task = new TaskEntity
+            var eventOccurrence = new EventEntity
             {
-                ItemId = item.Id,
+                TaskId = taskTemplate.Id,
                 HouseholdId = householdId,
-                Title = "Test Task",
+                Title = "Test Event",
                 DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
                 CreatedBy = userId,
                 Priority = DatabaseConstants.PriorityLevels.Medium
             };
-            await _unitOfWork.Tasks.AddAsync(task);
+            await _unitOfWork.Events.AddAsync(eventOccurrence);
 
             await _unitOfWork.CommitTransactionAsync();
 
@@ -265,9 +266,9 @@ public class RepositoryUsageExamples
 public class DashboardData
 {
     public HouseholdEntity Household { get; set; } = null!;
-    public List<Models.ViewModels.DashboardUpcomingTaskViewModel> UpcomingTasks { get; set; } = new();
-    public List<TaskEntity> OverdueTasks { get; set; } = new();
-    public List<TaskEntity> TodayTasks { get; set; } = new();
-    public int TotalItems { get; set; }
+    public List<EventEntity> UpcomingEvents { get; set; } = new();
+    public List<EventEntity> OverdueEvents { get; set; } = new();
+    public List<EventEntity> TodayEvents { get; set; } = new();
+    public int TotalTasks { get; set; }
     public int TotalMembers { get; set; }
 }

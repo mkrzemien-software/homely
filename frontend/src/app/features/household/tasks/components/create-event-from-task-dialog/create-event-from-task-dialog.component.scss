@@ -1,0 +1,89 @@
+// Task info section
+.task-info-section {
+  margin-bottom: 1.5rem;
+}
+
+.task-info-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+  margin: 0 0 1rem 0;
+
+  i {
+    color: var(--p-primary-color);
+  }
+}
+
+.task-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--p-surface-50);
+  border-radius: 0.5rem;
+  border: 1px solid var(--p-border-color);
+}
+
+.task-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+  font-weight: 600;
+}
+
+.info-value {
+  font-size: 0.95rem;
+  color: var(--p-text-color);
+}
+
+// Form styling
+.form-field {
+  margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+  font-size: 0.95rem;
+}
+
+.form-error {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--p-red-500);
+  font-size: 0.875rem;
+}
+
+.form-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  color: var(--p-text-muted-color);
+  font-size: 0.875rem;
+
+  i {
+    color: var(--p-primary-color);
+  }
+}
+
+// Dialog footer
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}

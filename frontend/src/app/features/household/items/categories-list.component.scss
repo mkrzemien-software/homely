@@ -363,11 +363,17 @@
   }
 
   .cdk-drag-animating {
-    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    transition: transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
   }
 
+  // Smooth animation for all cards during drag
   .items-grid.cdk-drop-list-dragging .item-card:not(.cdk-drag-placeholder) {
-    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    transition: transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  // Ensure dragged item doesn't animate
+  .cdk-drag.cdk-drag-dragging {
+    transition: none !important;
   }
 }
 

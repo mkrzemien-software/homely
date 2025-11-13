@@ -67,8 +67,10 @@ export const routes: Routes = [
       },
       {
         path: 'tasks',
-        redirectTo: 'dashboard', // TODO: Create TasksComponent
-        pathMatch: 'full'
+        loadComponent: () => import('./features/household/tasks/tasks-list.component').then(m => m.TasksListComponent),
+        title: 'Zadania - Homely',
+        // TODO: Uncomment when authentication is fully implemented
+        // canActivate: [authGuard, householdMemberGuard]
       },
       {
         path: 'categories',

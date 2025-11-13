@@ -1,24 +1,24 @@
 namespace Homely.API.Models.DTOs.Tasks;
 
 /// <summary>
-/// Task data transfer object
+/// Event data transfer object - represents a scheduled occurrence of a task
 /// </summary>
-public class TaskDto
+public class EventDto
 {
     /// <summary>
-    /// Task ID
+    /// Event ID
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Item ID (optional - task can exist without item)
+    /// Task template ID (optional - event can exist without template)
     /// </summary>
-    public Guid? ItemId { get; set; }
+    public Guid? TaskId { get; set; }
 
     /// <summary>
-    /// Item name
+    /// Task template name
     /// </summary>
-    public string? ItemName { get; set; }
+    public string? TaskName { get; set; }
 
     /// <summary>
     /// Household ID
@@ -31,32 +31,32 @@ public class TaskDto
     public string? HouseholdName { get; set; }
 
     /// <summary>
-    /// User ID assigned to this task
+    /// User ID assigned to this event
     /// </summary>
     public Guid? AssignedTo { get; set; }
 
     /// <summary>
-    /// Due date for the task
+    /// Due date for the event
     /// </summary>
     public DateOnly DueDate { get; set; }
 
     /// <summary>
-    /// Task title
+    /// Event title
     /// </summary>
     public string Title { get; set; } = string.Empty;
 
     /// <summary>
-    /// Task description
+    /// Event description
     /// </summary>
     public string? Description { get; set; }
 
     /// <summary>
-    /// Task status: pending, completed, postponed, cancelled
+    /// Event status: pending, completed, postponed, cancelled
     /// </summary>
     public string Status { get; set; } = "pending";
 
     /// <summary>
-    /// Task priority: low, medium, high
+    /// Event priority: low, medium, high
     /// </summary>
     public string Priority { get; set; } = "medium";
 
@@ -66,27 +66,27 @@ public class TaskDto
     public DateOnly? CompletionDate { get; set; }
 
     /// <summary>
-    /// Notes added when task was completed
+    /// Notes added when event was completed
     /// </summary>
     public string? CompletionNotes { get; set; }
 
     /// <summary>
-    /// Original due date if task was postponed
+    /// Original due date if event was postponed
     /// </summary>
     public DateOnly? PostponedFromDate { get; set; }
 
     /// <summary>
-    /// Reason for postponing the task
+    /// Reason for postponing the event
     /// </summary>
     public string? PostponeReason { get; set; }
 
     /// <summary>
-    /// Whether task should automatically regenerate when completed
+    /// Whether event should automatically regenerate when completed
     /// </summary>
     public bool IsRecurring { get; set; }
 
     /// <summary>
-    /// User ID who created the task
+    /// User ID who created the event
     /// </summary>
     public Guid CreatedBy { get; set; }
 
@@ -101,7 +101,7 @@ public class TaskDto
     public DateTimeOffset UpdatedAt { get; set; }
 
     /// <summary>
-    /// Indicates if task is overdue
+    /// Indicates if event is overdue
     /// </summary>
     public bool IsOverdue => Status == "pending" && DueDate < DateOnly.FromDateTime(DateTime.UtcNow);
 

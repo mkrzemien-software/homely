@@ -1,0 +1,66 @@
+// Form styling
+.form-field {
+  margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+  font-size: 0.95rem;
+}
+
+.form-error {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--p-red-500);
+  font-size: 0.875rem;
+}
+
+// Interval section
+.interval-section {
+  margin: 1rem 0;
+}
+
+.interval-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+  margin: 0 0 0.75rem 0;
+
+  i {
+    color: var(--p-primary-color);
+  }
+}
+
+.interval-description {
+  font-size: 0.9rem;
+  color: var(--p-text-muted-color);
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.interval-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+// Dialog footer
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}

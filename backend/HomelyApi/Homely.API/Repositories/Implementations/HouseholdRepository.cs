@@ -40,8 +40,8 @@ public class HouseholdRepository : BaseRepository<HouseholdEntity, Guid>, IHouse
             .Where(h => h.Id == householdId)
             .Include(h => h.PlanType)
             .Include(h => h.HouseholdMembers)
-            .Include(h => h.Items.Where(i => i.DeletedAt == null && i.IsActive))
-            .ThenInclude(i => i.Category)
+            .Include(h => h.Tasks.Where(t => t.DeletedAt == null && t.IsActive))
+            .ThenInclude(t => t.Category)
             .FirstOrDefaultAsync(cancellationToken);
     }
 
@@ -74,8 +74,8 @@ public class HouseholdRepository : BaseRepository<HouseholdEntity, Guid>, IHouse
         var query = Query()
             .Include(h => h.PlanType)
             .Include(h => h.HouseholdMembers.Where(hm => hm.DeletedAt == null))
-            .Include(h => h.Items.Where(i => i.DeletedAt == null))
             .Include(h => h.Tasks.Where(t => t.DeletedAt == null))
+            .Include(h => h.Events.Where(e => e.DeletedAt == null))
             .AsQueryable();
 
         // Apply search term filter
@@ -127,8 +127,8 @@ public class HouseholdRepository : BaseRepository<HouseholdEntity, Guid>, IHouse
     {
         var households = await Query()
             .Include(h => h.HouseholdMembers.Where(hm => hm.DeletedAt == null))
-            .Include(h => h.Items.Where(i => i.DeletedAt == null))
             .Include(h => h.Tasks.Where(t => t.DeletedAt == null))
+            .Include(h => h.Events.Where(e => e.DeletedAt == null))
             .ToListAsync(cancellationToken);
 
         return new HouseholdStatsResult
@@ -138,8 +138,8 @@ public class HouseholdRepository : BaseRepository<HouseholdEntity, Guid>, IHouse
             FreeHouseholds = households.Count(h => h.SubscriptionStatus == "free"),
             PremiumHouseholds = households.Count(h => h.SubscriptionStatus == "active"),
             TotalMembers = households.Sum(h => h.HouseholdMembers.Count(hm => hm.DeletedAt == null)),
-            TotalItems = households.Sum(h => h.Items.Count(i => i.DeletedAt == null)),
-            TotalTasks = households.Sum(h => h.Tasks.Count(t => t.DeletedAt == null))
+            TotalItems = households.Sum(h => h.Tasks.Count(t => t.DeletedAt == null)),
+            TotalTasks = households.Sum(h => h.Events.Count(e => e.DeletedAt == null))
         };
     }
 }

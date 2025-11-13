@@ -23,22 +23,22 @@ public class TaskHistoryRepository : BaseRepository<TaskHistoryEntity, Guid>, IT
         return await Query()
             .Where(th => th.HouseholdId == householdId)
             .OrderByDescending(th => th.CompletionDate)
-            .Include(th => th.Item)
-            .ThenInclude(i => i!.Category)
+            .Include(th => th.Task)
+            .ThenInclude(t => t!.Category)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<TaskHistoryEntity>> GetItemHistoryAsync(Guid itemId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TaskHistoryEntity>> GetTaskTemplateHistoryAsync(Guid taskId, CancellationToken cancellationToken = default)
     {
-        return await GetWhereAsync(th => th.ItemId == itemId,
-            th => th.Item,
-            th => th.Task);
+        return await GetWhereAsync(th => th.TaskId == taskId,
+            th => th.Task,
+            th => th.Event);
     }
 
     public async Task<IEnumerable<TaskHistoryEntity>> GetCompletedByUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await GetWhereAsync(th => th.CompletedBy == userId,
-            th => th.Item,
+            th => th.Task,
             th => th.Household);
     }
 
@@ -49,25 +49,25 @@ public class TaskHistoryRepository : BaseRepository<TaskHistoryEntity, Guid>, IT
                         th.CompletionDate >= fromDate &&
                         th.CompletionDate <= toDate)
             .OrderByDescending(th => th.CompletionDate)
-            .Include(th => th.Item)
-            .ThenInclude(i => i!.Category)
+            .Include(th => th.Task)
+            .ThenInclude(t => t!.Category)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Dictionary<string, int>> GetCompletionStatsAsync(Guid householdId, int lastDays = 30, CancellationToken cancellationToken = default)
     {
         var fromDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-lastDays));
-        
+
         var stats = await Query()
             .Where(th => th.HouseholdId == householdId && th.CompletionDate >= fromDate)
-            .Join(Context.Set<ItemEntity>(),
-                th => th.ItemId,
-                i => i.Id,
-                (th, i) => new { TaskHistory = th, Item = i })
+            .Join(Context.Set<TaskEntity>(),
+                th => th.TaskId,
+                t => t.Id,
+                (th, t) => new { TaskHistory = th, Task = t })
             .Join(Context.Set<CategoryEntity>(),
-                thi => thi.Item.CategoryId,
+                tht => tht.Task.CategoryId,
                 c => c.Id,
-                (thi, c) => new { thi.TaskHistory, Category = c })
+                (tht, c) => new { tht.TaskHistory, Category = c })
             .GroupBy(x => x.Category.Name)
             .Select(g => new { CategoryName = g.Key, Count = g.Count() })
             .ToListAsync(cancellationToken);

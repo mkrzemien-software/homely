@@ -3,12 +3,12 @@ using System.ComponentModel.DataAnnotations;
 namespace Homely.API.Models.DTOs.Tasks;
 
 /// <summary>
-/// DTO for marking a task as completed
+/// DTO for marking an event as completed
 /// </summary>
-public class CompleteTaskDto
+public class CompleteEventDto
 {
     /// <summary>
-    /// Date when the task was completed
+    /// Date when the event was completed
     /// </summary>
     [Required(ErrorMessage = "Completion date is required")]
     public DateOnly CompletionDate { get; set; }
@@ -20,7 +20,7 @@ public class CompleteTaskDto
     public string? CompletionNotes { get; set; }
 
     /// <summary>
-    /// User ID who completed the task (will be set from authentication context)
+    /// User ID who completed the event (will be set from authentication context)
     /// </summary>
     [Required(ErrorMessage = "Completed by user ID is required")]
     public Guid CompletedBy { get; set; }

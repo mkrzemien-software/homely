@@ -15,8 +15,8 @@ public class UnitOfWork : IUnitOfWork
     private IHouseholdMemberRepository? _householdMembers;
     private ICategoryTypeRepository? _categoryTypes;
     private ICategoryRepository? _categories;
-    private IItemRepository? _items;
     private ITaskRepository? _tasks;
+    private IEventRepository? _events;
     private ITaskHistoryRepository? _tasksHistory;
     private IPlanUsageRepository? _planUsages;
 
@@ -70,21 +70,21 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
-    public IItemRepository Items
-    {
-        get
-        {
-            _items ??= new ItemRepository(_context);
-            return _items;
-        }
-    }
-
     public ITaskRepository Tasks
     {
         get
         {
             _tasks ??= new TaskRepository(_context);
             return _tasks;
+        }
+    }
+
+    public IEventRepository Events
+    {
+        get
+        {
+            _events ??= new EventRepository(_context);
+            return _events;
         }
     }
 

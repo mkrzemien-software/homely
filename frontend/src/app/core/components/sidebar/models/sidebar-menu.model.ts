@@ -48,7 +48,7 @@ export function getHouseholdMenuItems(householdId: string): MenuItem[] {
       icon: 'pi pi-list-check',
       route: `/${householdId}/tasks`,
       roles: ['admin', 'member'],
-      tooltip: 'Lista nadchodzących terminów (7 dni)'
+      tooltip: 'Zarządzanie szablonami zadań'
     },
     {
       id: 'categories',

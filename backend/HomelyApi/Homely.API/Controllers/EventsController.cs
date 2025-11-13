@@ -5,36 +5,36 @@ using Microsoft.AspNetCore.Mvc;
 namespace Homely.API.Controllers;
 
 /// <summary>
-/// Tasks management controller
+/// Events management controller
 /// </summary>
 [ApiController]
-[Route("api/tasks")]
+[Route("api/events")]
 [Produces("application/json")]
-public class TasksController : ControllerBase
+public class EventsController : ControllerBase
 {
-    private readonly ITaskService _taskService;
-    private readonly ILogger<TasksController> _logger;
+    private readonly IEventService _eventService;
+    private readonly ILogger<EventsController> _logger;
 
-    public TasksController(
-        ITaskService taskService,
-        ILogger<TasksController> logger)
+    public EventsController(
+        IEventService eventService,
+        ILogger<EventsController> logger)
     {
-        _taskService = taskService;
+        _eventService = eventService;
         _logger = logger;
     }
 
     /// <summary>
-    /// Get all tasks for a household
+    /// Get all events for a household
     /// </summary>
     /// <param name="householdId">Household ID</param>
     /// <param name="status">Optional status filter</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of tasks</returns>
+    /// <returns>List of events</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<EventDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<TaskDto>>> GetTasks(
+    public async Task<ActionResult<IEnumerable<EventDto>>> GetEvents(
         [FromQuery] Guid householdId,
         [FromQuery] string? status = null,
         CancellationToken cancellationToken = default)
@@ -46,38 +46,38 @@ public class TasksController : ControllerBase
                 return BadRequest(new { error = "Household ID is required" });
             }
 
-            IEnumerable<TaskDto> tasks;
+            IEnumerable<EventDto> events;
 
             if (!string.IsNullOrEmpty(status))
             {
-                tasks = await _taskService.GetTasksByStatusAsync(householdId, status, cancellationToken);
+                events = await _eventService.GetEventsByStatusAsync(householdId, status, cancellationToken);
             }
             else
             {
-                tasks = await _taskService.GetHouseholdTasksAsync(householdId, cancellationToken);
+                events = await _eventService.GetHouseholdEventsAsync(householdId, cancellationToken);
             }
 
-            return Ok(tasks);
+            return Ok(events);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving tasks for household {HouseholdId}", householdId);
-            return StatusCode(500, new { error = "An error occurred while retrieving tasks" });
+            _logger.LogError(ex, "Error retrieving events for household {HouseholdId}", householdId);
+            return StatusCode(500, new { error = "An error occurred while retrieving events" });
         }
     }
 
     /// <summary>
-    /// Get upcoming tasks for a household
+    /// Get upcoming events for a household
     /// </summary>
     /// <param name="householdId">Household ID</param>
     /// <param name="days">Number of days to look ahead (default: 30)</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of upcoming tasks</returns>
+    /// <returns>List of upcoming events</returns>
     [HttpGet("upcoming")]
-    [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<EventDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<TaskDto>>> GetUpcomingTasks(
+    public async Task<ActionResult<IEnumerable<EventDto>>> GetUpcomingEvents(
         [FromQuery] Guid householdId,
         [FromQuery] int days = 30,
         CancellationToken cancellationToken = default)
@@ -94,27 +94,27 @@ public class TasksController : ControllerBase
                 return BadRequest(new { error = "Days must be between 1 and 365" });
             }
 
-            var tasks = await _taskService.GetUpcomingTasksAsync(householdId, days, cancellationToken);
-            return Ok(tasks);
+            var events = await _eventService.GetUpcomingEventsAsync(householdId, days, cancellationToken);
+            return Ok(events);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving upcoming tasks for household {HouseholdId}", householdId);
-            return StatusCode(500, new { error = "An error occurred while retrieving upcoming tasks" });
+            _logger.LogError(ex, "Error retrieving upcoming events for household {HouseholdId}", householdId);
+            return StatusCode(500, new { error = "An error occurred while retrieving upcoming events" });
         }
     }
 
     /// <summary>
-    /// Get overdue tasks for a household
+    /// Get overdue events for a household
     /// </summary>
     /// <param name="householdId">Household ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of overdue tasks</returns>
+    /// <returns>List of overdue events</returns>
     [HttpGet("overdue")]
-    [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<EventDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<TaskDto>>> GetOverdueTasks(
+    public async Task<ActionResult<IEnumerable<EventDto>>> GetOverdueEvents(
         [FromQuery] Guid householdId,
         CancellationToken cancellationToken = default)
     {
@@ -125,27 +125,27 @@ public class TasksController : ControllerBase
                 return BadRequest(new { error = "Household ID is required" });
             }
 
-            var tasks = await _taskService.GetOverdueTasksAsync(householdId, cancellationToken);
-            return Ok(tasks);
+            var events = await _eventService.GetOverdueEventsAsync(householdId, cancellationToken);
+            return Ok(events);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving overdue tasks for household {HouseholdId}", householdId);
-            return StatusCode(500, new { error = "An error occurred while retrieving overdue tasks" });
+            _logger.LogError(ex, "Error retrieving overdue events for household {HouseholdId}", householdId);
+            return StatusCode(500, new { error = "An error occurred while retrieving overdue events" });
         }
     }
 
     /// <summary>
-    /// Get tasks assigned to a specific user
+    /// Get events assigned to a specific user
     /// </summary>
     /// <param name="userId">User ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of assigned tasks</returns>
     [HttpGet("assigned")]
-    [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<EventDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<TaskDto>>> GetAssignedTasks(
+    public async Task<ActionResult<IEnumerable<EventDto>>> GetAssignedEvents(
         [FromQuery] Guid userId,
         CancellationToken cancellationToken = default)
     {
@@ -156,12 +156,12 @@ public class TasksController : ControllerBase
                 return BadRequest(new { error = "User ID is required" });
             }
 
-            var tasks = await _taskService.GetAssignedTasksAsync(userId, cancellationToken);
-            return Ok(tasks);
+            var events = await _eventService.GetAssignedEventsAsync(userId, cancellationToken);
+            return Ok(events);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving tasks for user {UserId}", userId);
+            _logger.LogError(ex, "Error retrieving events for user {UserId}", userId);
             return StatusCode(500, new { error = "An error occurred while retrieving assigned tasks" });
         }
     }
@@ -173,33 +173,33 @@ public class TasksController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task details</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(TaskDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<TaskDto>> GetTaskById(
+    public async Task<ActionResult<EventDto>> GetEventById(
         Guid id,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var task = await _taskService.GetTaskByIdAsync(id, cancellationToken);
+            var eventDto = await _eventService.GetEventByIdAsync(id, cancellationToken);
 
-            if (task == null)
+            if (@eventDto == null)
             {
-                return NotFound(new { error = $"Task with ID {id} not found" });
+                return NotFound(new { error = $"Event with ID {id} not found" });
             }
 
-            return Ok(task);
+            return Ok(eventDto);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving task {TaskId}", id);
-            return StatusCode(500, new { error = "An error occurred while retrieving task" });
+            _logger.LogError(ex, "Error retrieving event {EventId}", id);
+            return StatusCode(500, new { error = "An error occurred while retrieving event" });
         }
     }
 
     /// <summary>
-    /// Create new task
+    /// Create new event
     /// </summary>
     /// <param name="createDto">Task creation data</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -207,7 +207,7 @@ public class TasksController : ControllerBase
     /// <remarks>
     /// Sample request:
     ///
-    ///     POST /api/tasks
+    ///     POST /api/events
     ///     {
     ///         "itemId": "00000000-0000-0000-0000-000000000000",
     ///         "householdId": "00000000-0000-0000-0000-000000000000",
@@ -222,11 +222,11 @@ public class TasksController : ControllerBase
     ///
     /// </remarks>
     [HttpPost]
-    [ProducesResponseType(typeof(TaskDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(EventDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<TaskDto>> CreateTask(
-        [FromBody] CreateTaskDto createDto,
+    public async Task<ActionResult<EventDto>> CreateEvent(
+        [FromBody] CreateEventDto createDto,
         CancellationToken cancellationToken = default)
     {
         try
@@ -236,22 +236,22 @@ public class TasksController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var task = await _taskService.CreateTaskAsync(createDto, cancellationToken);
+            var eventDto = await _eventService.CreateEventAsync(createDto, cancellationToken);
 
             return CreatedAtAction(
-                nameof(GetTaskById),
-                new { id = task.Id },
-                task);
+                nameof(GetEventById),
+                new { id = eventDto.Id },
+                eventDto);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating task");
-            return StatusCode(500, new { error = "An error occurred while creating task" });
+            _logger.LogError(ex, "Error creating event");
+            return StatusCode(500, new { error = "An error occurred while creating event" });
         }
     }
 
     /// <summary>
-    /// Update existing task
+    /// Update existing event
     /// </summary>
     /// <param name="id">Task ID</param>
     /// <param name="updateDto">Updated task data</param>
@@ -260,7 +260,7 @@ public class TasksController : ControllerBase
     /// <remarks>
     /// Sample request:
     ///
-    ///     PUT /api/tasks/00000000-0000-0000-0000-000000000000
+    ///     PUT /api/events/00000000-0000-0000-0000-000000000000
     ///     {
     ///         "assignedTo": "00000000-0000-0000-0000-000000000000",
     ///         "dueDate": "2025-12-31",
@@ -273,13 +273,13 @@ public class TasksController : ControllerBase
     ///
     /// </remarks>
     [HttpPut("{id}")]
-    [ProducesResponseType(typeof(TaskDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<TaskDto>> UpdateTask(
+    public async Task<ActionResult<EventDto>> UpdateEvent(
         Guid id,
-        [FromBody] UpdateTaskDto updateDto,
+        [FromBody] UpdateEventDto updateDto,
         CancellationToken cancellationToken = default)
     {
         try
@@ -289,18 +289,18 @@ public class TasksController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var task = await _taskService.UpdateTaskAsync(id, updateDto, cancellationToken);
-            return Ok(task);
+            var eventDto = await _eventService.UpdateEventAsync(id, updateDto, cancellationToken);
+            return Ok(eventDto);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogWarning(ex, "Invalid operation while updating task");
+            _logger.LogWarning(ex, "Invalid operation while updating event");
             return NotFound(new { error = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating task {TaskId}", id);
-            return StatusCode(500, new { error = "An error occurred while updating task" });
+            _logger.LogError(ex, "Error updating event {EventId}", id);
+            return StatusCode(500, new { error = "An error occurred while updating event" });
         }
     }
 
@@ -314,17 +314,17 @@ public class TasksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> DeleteTask(
+    public async Task<ActionResult> DeleteEvent(
         Guid id,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var success = await _taskService.DeleteTaskAsync(id, cancellationToken);
+            var success = await _eventService.DeleteEventAsync(id, cancellationToken);
 
             if (!success)
             {
-                return NotFound(new { error = $"Task with ID {id} not found" });
+                return NotFound(new { error = $"Event with ID {id} not found" });
             }
 
             return Ok(new
@@ -335,13 +335,13 @@ public class TasksController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting task {TaskId}", id);
-            return StatusCode(500, new { error = "An error occurred while deleting task" });
+            _logger.LogError(ex, "Error deleting event {EventId}", id);
+            return StatusCode(500, new { error = "An error occurred while deleting event" });
         }
     }
 
     /// <summary>
-    /// Mark task as completed. If task is recurring and linked to an item,
+    /// Mark event as completed. If task is recurring and linked to an item,
     /// automatically creates next recurring task based on item's interval.
     /// </summary>
     /// <param name="id">Task ID</param>
@@ -351,24 +351,24 @@ public class TasksController : ControllerBase
     /// <remarks>
     /// Sample request:
     ///
-    ///     POST /api/tasks/00000000-0000-0000-0000-000000000000/complete
+    ///     POST /api/events/00000000-0000-0000-0000-000000000000/complete
     ///     {
     ///         "completionDate": "2025-11-15",
     ///         "completionNotes": "Boiler inspection completed successfully. All systems working properly.",
     ///         "completedBy": "00000000-0000-0000-0000-000000000000"
     ///     }
     ///
-    /// If task is recurring and has an associated item, a new task will be automatically
+    /// If task is recurring and has an associated item, a new event will be automatically
     /// created with due date calculated from item's interval (years/months/weeks/days).
     /// </remarks>
     [HttpPost("{id}/complete")]
-    [ProducesResponseType(typeof(TaskDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<TaskDto>> CompleteTask(
+    public async Task<ActionResult<EventDto>> CompleteEvent(
         Guid id,
-        [FromBody] CompleteTaskDto completeDto,
+        [FromBody] CompleteEventDto completeDto,
         CancellationToken cancellationToken = default)
     {
         try
@@ -378,23 +378,23 @@ public class TasksController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var task = await _taskService.CompleteTaskAsync(id, completeDto, cancellationToken);
-            return Ok(task);
+            var eventDto = await _eventService.CompleteEventAsync(id, completeDto, cancellationToken);
+            return Ok(eventDto);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogWarning(ex, "Invalid operation while completing task");
+            _logger.LogWarning(ex, "Invalid operation while completing event");
             return BadRequest(new { error = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error completing task {TaskId}", id);
-            return StatusCode(500, new { error = "An error occurred while completing task" });
+            _logger.LogError(ex, "Error completing event {EventId}", id);
+            return StatusCode(500, new { error = "An error occurred while completing event" });
         }
     }
 
     /// <summary>
-    /// Postpone task to a new due date with a reason
+    /// Postpone event to a new due date with a reason
     /// </summary>
     /// <param name="id">Task ID</param>
     /// <param name="postponeDto">Postpone data with new due date and reason</param>
@@ -403,7 +403,7 @@ public class TasksController : ControllerBase
     /// <remarks>
     /// Sample request:
     ///
-    ///     POST /api/tasks/00000000-0000-0000-0000-000000000000/postpone
+    ///     POST /api/events/00000000-0000-0000-0000-000000000000/postpone
     ///     {
     ///         "newDueDate": "2025-12-31",
     ///         "postponeReason": "Waiting for replacement parts to arrive"
@@ -413,13 +413,13 @@ public class TasksController : ControllerBase
     /// Task status will be changed to 'postponed'.
     /// </remarks>
     [HttpPost("{id}/postpone")]
-    [ProducesResponseType(typeof(TaskDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<TaskDto>> PostponeTask(
+    public async Task<ActionResult<EventDto>> PostponeEvent(
         Guid id,
-        [FromBody] PostponeTaskDto postponeDto,
+        [FromBody] PostponeEventDto postponeDto,
         CancellationToken cancellationToken = default)
     {
         try
@@ -429,18 +429,18 @@ public class TasksController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var task = await _taskService.PostponeTaskAsync(id, postponeDto, cancellationToken);
-            return Ok(task);
+            var eventDto = await _eventService.PostponeEventAsync(id, postponeDto, cancellationToken);
+            return Ok(eventDto);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogWarning(ex, "Invalid operation while postponing task");
+            _logger.LogWarning(ex, "Invalid operation while postponing event");
             return BadRequest(new { error = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error postponing task {TaskId}", id);
-            return StatusCode(500, new { error = "An error occurred while postponing task" });
+            _logger.LogError(ex, "Error postponing event {EventId}", id);
+            return StatusCode(500, new { error = "An error occurred while postponing event" });
         }
     }
 }

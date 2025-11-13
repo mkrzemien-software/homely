@@ -49,10 +49,10 @@ public class PlanTypeRepository : BaseRepository<PlanTypeEntity, int>, IPlanType
     {
         if (planType.MaxItems == null) return true; // Unlimited
 
-        var currentCount = await Context.Set<ItemEntity>()
-            .CountAsync(i => i.HouseholdId == householdId && 
-                           i.DeletedAt == null && 
-                           i.IsActive, cancellationToken);
+        var currentCount = await Context.Set<TaskEntity>()
+            .CountAsync(t => t.HouseholdId == householdId &&
+                           t.DeletedAt == null &&
+                           t.IsActive, cancellationToken);
 
         return currentCount < planType.MaxItems.Value;
     }

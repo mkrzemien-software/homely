@@ -1,0 +1,151 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '600px', maxWidth: '90vw' }"
+  header="Utwórz wydarzenie z zadania"
+  (onHide)="closeDialog()"
+>
+  @if (task) {
+    <!-- Task Information -->
+    <div class="task-info-section">
+      <h3 class="task-info-title">
+        <i class="pi pi-info-circle"></i>
+        Informacje o zadaniu
+      </h3>
+
+      <div class="task-info-grid">
+        <div class="task-info-item">
+          <span class="info-label">Nazwa:</span>
+          <span class="info-value">{{ task.name }}</span>
+        </div>
+
+        <div class="task-info-item">
+          <span class="info-label">Kategoria:</span>
+          <span class="info-value">
+            {{ task.category.categoryType.name }} → {{ task.category.name }}
+          </span>
+        </div>
+
+        <div class="task-info-item">
+          <span class="info-label">Priorytet:</span>
+          <p-tag
+            [value]="getPriorityLabel(task.priority)"
+            [severity]="getPrioritySeverity(task.priority)"
+          ></p-tag>
+        </div>
+
+        <div class="task-info-item">
+          <span class="info-label">Interwał:</span>
+          <span class="info-value">{{ formatInterval(task.interval) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Event Form -->
+    <form [formGroup]="createEventForm" (ngSubmit)="onSubmit()">
+      <!-- Assigned To -->
+      <div class="form-field">
+        <label for="assignedTo" class="form-label">
+          Przypisz do *
+        </label>
+        <p-dropdown
+          id="assignedTo"
+          formControlName="assignedTo"
+          [options]="memberOptions()"
+          placeholder="Wybierz osobę odpowiedzialną"
+          [style]="{ width: '100%' }"
+          [disabled]="memberOptions().length === 0"
+        ></p-dropdown>
+        @if (memberOptions().length === 0) {
+          <small class="form-info">
+            <i class="pi pi-info-circle"></i>
+            Funkcja zostanie dostępna po zaimplementowaniu zarządzania członkami gospodarstwa
+          </small>
+        }
+        @if (createEventForm.get('assignedTo')?.invalid && createEventForm.get('assignedTo')?.touched) {
+          <small class="form-error">Osoba odpowiedzialna jest wymagana</small>
+        }
+      </div>
+
+      <!-- Due Date -->
+      <div class="form-field">
+        <label for="dueDate" class="form-label">
+          Data terminu *
+        </label>
+        <p-calendar
+          id="dueDate"
+          formControlName="dueDate"
+          [minDate]="minDate"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          dateFormat="dd.mm.yy"
+          placeholder="Wybierz datę"
+          [style]="{ width: '100%' }"
+        ></p-calendar>
+        @if (createEventForm.get('dueDate')?.invalid && createEventForm.get('dueDate')?.touched) {
+          <small class="form-error">Data terminu jest wymagana</small>
+        }
+      </div>
+
+      <!-- Priority -->
+      <div class="form-field">
+        <label for="priority" class="form-label">
+          Priorytet *
+        </label>
+        <p-dropdown
+          id="priority"
+          formControlName="priority"
+          [options]="priorityOptions"
+          [style]="{ width: '100%' }"
+        ></p-dropdown>
+        <small class="form-info">
+          <i class="pi pi-info-circle"></i>
+          Priorytet dziedziczony z zadania ({{ getPriorityLabel(task.priority) }}). Możesz go zmienić.
+        </small>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-field">
+        <label for="notes" class="form-label">
+          Notatki
+        </label>
+        <textarea
+          pInputTextarea
+          id="notes"
+          formControlName="notes"
+          placeholder="Dodatkowe informacje o wydarzeniu..."
+          rows="3"
+          [style]="{ width: '100%' }"
+        ></textarea>
+      </div>
+    </form>
+  }
+
+  <!-- Footer buttons -->
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button
+        label="Anuluj"
+        icon="pi pi-times"
+        [outlined]="true"
+        severity="secondary"
+        (onClick)="closeDialog()"
+        [disabled]="isLoading()"
+      ></p-button>
+      <p-button
+        label="Utwórz wydarzenie"
+        icon="pi pi-calendar-plus"
+        (onClick)="onSubmit()"
+        [loading]="isLoading()"
+        [disabled]="createEventForm.invalid"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>

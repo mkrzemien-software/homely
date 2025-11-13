@@ -45,8 +45,8 @@ public class HouseholdEntity
     public virtual PlanTypeEntity PlanType { get; set; } = null!;
 
     public virtual ICollection<HouseholdMemberEntity> HouseholdMembers { get; set; } = new List<HouseholdMemberEntity>();
-    public virtual ICollection<ItemEntity> Items { get; set; } = new List<ItemEntity>();
     public virtual ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
+    public virtual ICollection<EventEntity> Events { get; set; } = new List<EventEntity>();
     public virtual ICollection<TaskHistoryEntity> TasksHistory { get; set; } = new List<TaskHistoryEntity>();
     public virtual ICollection<PlanUsageEntity> PlanUsages { get; set; } = new List<PlanUsageEntity>();
 }

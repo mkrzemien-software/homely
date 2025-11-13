@@ -1,0 +1,199 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '600px', maxWidth: '90vw' }"
+  header="Edytuj zadanie"
+  (onHide)="closeDialog()"
+>
+  <form [formGroup]="editTaskForm" (ngSubmit)="onSubmit()">
+    <!-- Category -->
+    <div class="form-field">
+      <label for="categoryId" class="form-label">
+        Kategoria *
+      </label>
+      <p-treeSelect
+        id="categoryId"
+        formControlName="categoryId"
+        [options]="categoryTreeNodes()"
+        placeholder="Wybierz kategorię"
+        [style]="{ width: '100%' }"
+        [filter]="true"
+        filterPlaceholder="Szukaj kategorii..."
+        display="chip"
+      ></p-treeSelect>
+      @if (editTaskForm.get('categoryId')?.invalid && editTaskForm.get('categoryId')?.touched) {
+        <small class="form-error">Kategoria jest wymagana</small>
+      }
+    </div>
+
+    <!-- Name -->
+    <div class="form-field">
+      <label for="name" class="form-label">
+        Nazwa zadania *
+      </label>
+      <input
+        pInputText
+        id="name"
+        formControlName="name"
+        placeholder="np. Przegląd roczny"
+        [style]="{ width: '100%' }"
+      />
+      @if (editTaskForm.get('name')?.invalid && editTaskForm.get('name')?.touched) {
+        <small class="form-error">
+          @if (editTaskForm.get('name')?.hasError('required')) {
+            Nazwa jest wymagana
+          }
+          @if (editTaskForm.get('name')?.hasError('maxlength')) {
+            Nazwa może mieć maksymalnie 100 znaków
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Description -->
+    <div class="form-field">
+      <label for="description" class="form-label">
+        Opis
+      </label>
+      <textarea
+        pInputTextarea
+        id="description"
+        formControlName="description"
+        placeholder="Opcjonalny opis zadania..."
+        rows="3"
+        [style]="{ width: '100%' }"
+      ></textarea>
+    </div>
+
+    <!-- Priority -->
+    <div class="form-field">
+      <label for="priority" class="form-label">
+        Priorytet *
+      </label>
+      <p-dropdown
+        id="priority"
+        formControlName="priority"
+        [options]="priorityOptions"
+        [style]="{ width: '100%' }"
+      ></p-dropdown>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Interval Section -->
+    <div class="interval-section">
+      <h3 class="interval-title">
+        <i class="pi pi-clock"></i>
+        Interwał powtarzania (opcjonalny)
+      </h3>
+      <p class="interval-description">
+        Zmiana interwału wpływa tylko na przyszłe wydarzenia. Istniejące wydarzenia pozostają bez zmian.
+      </p>
+
+      <div class="interval-grid">
+        <!-- Years -->
+        <div class="form-field">
+          <label for="yearsValue" class="form-label">
+            Lata
+          </label>
+          <p-inputNumber
+            id="yearsValue"
+            formControlName="yearsValue"
+            [min]="0"
+            [max]="99"
+            [showButtons]="true"
+            [style]="{ width: '100%' }"
+          ></p-inputNumber>
+        </div>
+
+        <!-- Months -->
+        <div class="form-field">
+          <label for="monthsValue" class="form-label">
+            Miesiące
+          </label>
+          <p-inputNumber
+            id="monthsValue"
+            formControlName="monthsValue"
+            [min]="0"
+            [max]="11"
+            [showButtons]="true"
+            [style]="{ width: '100%' }"
+          ></p-inputNumber>
+        </div>
+
+        <!-- Weeks -->
+        <div class="form-field">
+          <label for="weeksValue" class="form-label">
+            Tygodnie
+          </label>
+          <p-inputNumber
+            id="weeksValue"
+            formControlName="weeksValue"
+            [min]="0"
+            [max]="52"
+            [showButtons]="true"
+            [style]="{ width: '100%' }"
+          ></p-inputNumber>
+        </div>
+
+        <!-- Days -->
+        <div class="form-field">
+          <label for="daysValue" class="form-label">
+            Dni
+          </label>
+          <p-inputNumber
+            id="daysValue"
+            formControlName="daysValue"
+            [min]="0"
+            [max]="365"
+            [showButtons]="true"
+            [style]="{ width: '100%' }"
+          ></p-inputNumber>
+        </div>
+      </div>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Notes -->
+    <div class="form-field">
+      <label for="notes" class="form-label">
+        Notatki
+      </label>
+      <textarea
+        pInputTextarea
+        id="notes"
+        formControlName="notes"
+        placeholder="Dodatkowe informacje..."
+        rows="2"
+        [style]="{ width: '100%' }"
+      ></textarea>
+    </div>
+  </form>
+
+  <!-- Footer buttons -->
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button
+        label="Anuluj"
+        icon="pi pi-times"
+        [outlined]="true"
+        severity="secondary"
+        (onClick)="closeDialog()"
+        [disabled]="isLoading()"
+      ></p-button>
+      <p-button
+        label="Zapisz zmiany"
+        icon="pi pi-check"
+        (onClick)="onSubmit()"
+        [loading]="isLoading()"
+        [disabled]="editTaskForm.invalid"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>

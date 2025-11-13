@@ -3,6 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Homely.API.Entities;
 
+/// <summary>
+/// Task History Entity - archival record of completed events (premium feature).
+/// Maps to the 'tasks_history' table in the database.
+/// </summary>
 [Table("tasks_history")]
 public class TaskHistoryEntity
 {
@@ -10,11 +14,17 @@ public class TaskHistoryEntity
     [Column("id")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
+    /// <summary>
+    /// Reference to the event that was completed (maps to task_id column for backward compatibility)
+    /// </summary>
     [Column("task_id")]
-    public Guid? TaskId { get; set; }
+    public Guid? EventId { get; set; }
 
+    /// <summary>
+    /// Reference to the task template (maps to item_id column for backward compatibility)
+    /// </summary>
     [Column("item_id")]
-    public Guid? ItemId { get; set; }
+    public Guid? TaskId { get; set; }
 
     [Required]
     [Column("household_id")]
@@ -48,11 +58,12 @@ public class TaskHistoryEntity
     [Column("deleted_at")]
     public DateTimeOffset? DeletedAt { get; set; }
 
+    // Navigation properties
+    [ForeignKey("EventId")]
+    public virtual EventEntity? Event { get; set; }
+
     [ForeignKey("TaskId")]
     public virtual TaskEntity? Task { get; set; }
-
-    [ForeignKey("ItemId")]
-    public virtual ItemEntity? Item { get; set; }
 
     [ForeignKey("HouseholdId")]
     public virtual HouseholdEntity Household { get; set; } = null!;

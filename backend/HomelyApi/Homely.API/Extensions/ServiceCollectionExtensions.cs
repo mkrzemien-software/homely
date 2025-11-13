@@ -38,8 +38,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHouseholdMemberRepository, HouseholdMemberRepository>();
         services.AddScoped<ICategoryTypeRepository, CategoryTypeRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
-        services.AddScoped<IItemRepository, ItemRepository>();
         services.AddScoped<ITaskRepository, TaskRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<ITaskHistoryRepository, TaskHistoryRepository>();
         services.AddScoped<IPlanUsageRepository, PlanUsageRepository>();
 
@@ -52,9 +52,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISystemHouseholdsService, SystemHouseholdsService>();
         services.AddScoped<ICategoryTypeService, CategoryTypeService>();
         services.AddScoped<ICategoryService, CategoryService>();
-        services.AddScoped<ITaskService, TaskService>();
+        services.AddScoped<IEventService, EventService>();
         // services.AddScoped<IHouseholdService, HouseholdService>();
-        // services.AddScoped<IItemService, ItemService>();
 
         return services;
     }

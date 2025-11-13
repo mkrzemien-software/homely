@@ -16,8 +16,19 @@ public class HomelyDbContext : DbContext
     public DbSet<HouseholdMemberEntity> HouseholdMembers { get; set; }
     public DbSet<CategoryTypeEntity> CategoryTypes { get; set; }
     public DbSet<CategoryEntity> Categories { get; set; }
-    public DbSet<ItemEntity> Items { get; set; }
+
+    /// <summary>
+    /// Tasks DbSet - task templates that define "what" and "how often"
+    /// Maps to the 'tasks' table in the database
+    /// </summary>
     public DbSet<TaskEntity> Tasks { get; set; }
+
+    /// <summary>
+    /// Events DbSet - concrete scheduled occurrences created from task templates
+    /// Maps to the 'events' table in the database
+    /// </summary>
+    public DbSet<EventEntity> Events { get; set; }
+
     public DbSet<TaskHistoryEntity> TasksHistory { get; set; }
     public DbSet<PlanUsageEntity> PlanUsages { get; set; }
 
@@ -100,52 +111,52 @@ public class HomelyDbContext : DbContext
             .IsUnique()
             .HasDatabaseName("categories_unique_name");
 
-        // Items
-        modelBuilder.Entity<ItemEntity>()
-            .HasIndex(i => i.HouseholdId)
-            .HasFilter("deleted_at IS NULL")
-            .HasDatabaseName("idx_items_household");
-
-        modelBuilder.Entity<ItemEntity>()
-            .HasIndex(i => i.CategoryId)
-            .HasFilter("deleted_at IS NULL")
-            .HasDatabaseName("idx_items_category");
-
-        modelBuilder.Entity<ItemEntity>()
-            .HasIndex(i => i.CreatedBy)
-            .HasFilter("deleted_at IS NULL")
-            .HasDatabaseName("idx_items_created_by");
-
-        modelBuilder.Entity<ItemEntity>()
-            .HasIndex(i => i.IsActive)
-            .HasFilter("deleted_at IS NULL")
-            .HasDatabaseName("idx_items_active");
-
-        // Tasks
+        // Tasks (task templates)
         modelBuilder.Entity<TaskEntity>()
-            .HasIndex(t => t.DueDate)
+            .HasIndex(t => t.HouseholdId)
             .HasFilter("deleted_at IS NULL")
-            .HasDatabaseName("idx_tasks_due_date");
+            .HasDatabaseName("idx_tasks_household");
 
         modelBuilder.Entity<TaskEntity>()
-            .HasIndex(t => new { t.HouseholdId, t.Status })
+            .HasIndex(t => t.CategoryId)
             .HasFilter("deleted_at IS NULL")
-            .HasDatabaseName("idx_tasks_household_status");
+            .HasDatabaseName("idx_tasks_category");
 
         modelBuilder.Entity<TaskEntity>()
-            .HasIndex(t => t.AssignedTo)
+            .HasIndex(t => t.CreatedBy)
             .HasFilter("deleted_at IS NULL")
-            .HasDatabaseName("idx_tasks_assigned_to");
+            .HasDatabaseName("idx_tasks_created_by");
 
         modelBuilder.Entity<TaskEntity>()
-            .HasIndex(t => new { t.Status, t.DueDate })
+            .HasIndex(t => t.IsActive)
             .HasFilter("deleted_at IS NULL")
-            .HasDatabaseName("idx_tasks_status_due");
+            .HasDatabaseName("idx_tasks_active");
 
-        modelBuilder.Entity<TaskEntity>()
-            .HasIndex(t => t.ItemId)
+        // Events (concrete occurrences)
+        modelBuilder.Entity<EventEntity>()
+            .HasIndex(e => e.DueDate)
             .HasFilter("deleted_at IS NULL")
-            .HasDatabaseName("idx_tasks_item");
+            .HasDatabaseName("idx_events_due_date");
+
+        modelBuilder.Entity<EventEntity>()
+            .HasIndex(e => new { e.HouseholdId, e.Status })
+            .HasFilter("deleted_at IS NULL")
+            .HasDatabaseName("idx_events_household_status");
+
+        modelBuilder.Entity<EventEntity>()
+            .HasIndex(e => e.AssignedTo)
+            .HasFilter("deleted_at IS NULL")
+            .HasDatabaseName("idx_events_assigned_to");
+
+        modelBuilder.Entity<EventEntity>()
+            .HasIndex(e => new { e.Status, e.DueDate })
+            .HasFilter("deleted_at IS NULL")
+            .HasDatabaseName("idx_events_status_due");
+
+        modelBuilder.Entity<EventEntity>()
+            .HasIndex(e => e.TaskId)
+            .HasFilter("deleted_at IS NULL")
+            .HasDatabaseName("idx_events_task");
 
         // Task History
         modelBuilder.Entity<TaskHistoryEntity>()
@@ -157,8 +168,12 @@ public class HomelyDbContext : DbContext
             .HasDatabaseName("idx_tasks_history_completion_date");
 
         modelBuilder.Entity<TaskHistoryEntity>()
-            .HasIndex(th => th.ItemId)
-            .HasDatabaseName("idx_tasks_history_item");
+            .HasIndex(th => th.TaskId)
+            .HasDatabaseName("idx_tasks_history_task");
+
+        modelBuilder.Entity<TaskHistoryEntity>()
+            .HasIndex(th => th.EventId)
+            .HasDatabaseName("idx_tasks_history_event");
 
         // Plan Usage
         modelBuilder.Entity<PlanUsageEntity>()
@@ -198,27 +213,6 @@ public class HomelyDbContext : DbContext
             .HasForeignKey(c => c.CategoryTypeId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Item -> Household
-        modelBuilder.Entity<ItemEntity>()
-            .HasOne(i => i.Household)
-            .WithMany(h => h.Items)
-            .HasForeignKey(i => i.HouseholdId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // Item -> Category
-        modelBuilder.Entity<ItemEntity>()
-            .HasOne(i => i.Category)
-            .WithMany(c => c.Items)
-            .HasForeignKey(i => i.CategoryId)
-            .OnDelete(DeleteBehavior.SetNull);
-
-        // Task -> Item
-        modelBuilder.Entity<TaskEntity>()
-            .HasOne(t => t.Item)
-            .WithMany(i => i.Tasks)
-            .HasForeignKey(t => t.ItemId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         // Task -> Household
         modelBuilder.Entity<TaskEntity>()
             .HasOne(t => t.Household)
@@ -226,18 +220,63 @@ public class HomelyDbContext : DbContext
             .HasForeignKey(t => t.HouseholdId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // TaskHistory -> Task
-        modelBuilder.Entity<TaskHistoryEntity>()
-            .HasOne(th => th.Task)
-            .WithMany(t => t.TasksHistory)
-            .HasForeignKey(th => th.TaskId)
+        // Task -> Category
+        modelBuilder.Entity<TaskEntity>()
+            .HasOne(t => t.Category)
+            .WithMany(c => c.Tasks)
+            .HasForeignKey(t => t.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Task -> CreatedBy User
+        modelBuilder.Entity<TaskEntity>()
+            .HasOne(t => t.CreatedByUser)
+            .WithMany()
+            .HasForeignKey(t => t.CreatedBy)
+            .HasPrincipalKey(u => u.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Event -> Task (template)
+        modelBuilder.Entity<EventEntity>()
+            .HasOne(e => e.Task)
+            .WithMany(t => t.Events)
+            .HasForeignKey(e => e.TaskId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Event -> Household
+        modelBuilder.Entity<EventEntity>()
+            .HasOne(e => e.Household)
+            .WithMany(h => h.Events)
+            .HasForeignKey(e => e.HouseholdId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // TaskHistory -> Item
+        // Event -> AssignedTo User
+        modelBuilder.Entity<EventEntity>()
+            .HasOne(e => e.AssignedToUser)
+            .WithMany()
+            .HasForeignKey(e => e.AssignedTo)
+            .HasPrincipalKey(u => u.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Event -> CreatedBy User
+        modelBuilder.Entity<EventEntity>()
+            .HasOne(e => e.CreatedByUser)
+            .WithMany()
+            .HasForeignKey(e => e.CreatedBy)
+            .HasPrincipalKey(u => u.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // TaskHistory -> Event (completed event)
         modelBuilder.Entity<TaskHistoryEntity>()
-            .HasOne(th => th.Item)
-            .WithMany(i => i.TasksHistory)
-            .HasForeignKey(th => th.ItemId)
+            .HasOne(th => th.Event)
+            .WithMany()
+            .HasForeignKey(th => th.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // TaskHistory -> Task (task template)
+        modelBuilder.Entity<TaskHistoryEntity>()
+            .HasOne(th => th.Task)
+            .WithMany()
+            .HasForeignKey(th => th.TaskId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // TaskHistory -> Household
@@ -274,22 +313,22 @@ public class HomelyDbContext : DbContext
 
         // HouseholdMember role
         modelBuilder.Entity<HouseholdMemberEntity>()
-            .ToTable(t => t.HasCheckConstraint("CK_HouseholdMember_Role", 
+            .ToTable(t => t.HasCheckConstraint("CK_HouseholdMember_Role",
                 "role IN ('admin', 'member', 'dashboard')"));
 
-        // Item priority
-        modelBuilder.Entity<ItemEntity>()
-            .ToTable(t => t.HasCheckConstraint("CK_Item_Priority", 
+        // Task priority (task templates)
+        modelBuilder.Entity<TaskEntity>()
+            .ToTable(t => t.HasCheckConstraint("CK_Task_Priority",
                 "priority IN ('low', 'medium', 'high')"));
 
-        // Task status
-        modelBuilder.Entity<TaskEntity>()
-            .ToTable(t => t.HasCheckConstraint("CK_Task_Status", 
+        // Event status (concrete occurrences)
+        modelBuilder.Entity<EventEntity>()
+            .ToTable(t => t.HasCheckConstraint("CK_Event_Status",
                 "status IN ('pending', 'completed', 'postponed', 'cancelled')"));
 
-        // Task priority
-        modelBuilder.Entity<TaskEntity>()
-            .ToTable(t => t.HasCheckConstraint("CK_Task_Priority", 
+        // Event priority
+        modelBuilder.Entity<EventEntity>()
+            .ToTable(t => t.HasCheckConstraint("CK_Event_Priority",
                 "priority IN ('low', 'medium', 'high')"));
 
         // Dashboard view configuration (read-only)

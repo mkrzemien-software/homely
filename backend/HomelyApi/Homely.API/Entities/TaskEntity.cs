@@ -3,6 +3,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Homely.API.Entities;
 
+/// <summary>
+/// Task Entity - represents a task template that defines "what" and "how often".
+/// Maps to the 'tasks' table in the database.
+/// These are templates from which Events (concrete occurrences) are created.
+/// </summary>
 [Table("tasks")]
 public class TaskEntity
 {
@@ -10,50 +15,64 @@ public class TaskEntity
     [Column("id")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    [Column("item_id")]
-    public Guid? ItemId { get; set; }
-
     [Required]
     [Column("household_id")]
     public Guid HouseholdId { get; set; }
 
-    [Column("assigned_to")]
-    public Guid? AssignedTo { get; set; }
+    [Column("category_id")]
+    public int? CategoryId { get; set; }
 
     [Required]
-    [Column("due_date")]
-    public DateOnly DueDate { get; set; }
-
-    [Required]
-    [MaxLength(200)]
-    [Column("title")]
-    public string Title { get; set; } = string.Empty;
+    [MaxLength(100)]
+    [Column("name")]
+    public string Name { get; set; } = string.Empty;
 
     [Column("description")]
     public string? Description { get; set; }
 
-    [MaxLength(20)]
-    [Column("status")]
-    public string Status { get; set; } = "pending";
+    /// <summary>
+    /// Interval in years for recurring events
+    /// </summary>
+    [Column("years_value")]
+    public int? YearsValue { get; set; }
 
+    /// <summary>
+    /// Interval in months for recurring events
+    /// </summary>
+    [Column("months_value")]
+    public int? MonthsValue { get; set; }
+
+    /// <summary>
+    /// Interval in weeks for recurring events
+    /// </summary>
+    [Column("weeks_value")]
+    public int? WeeksValue { get; set; }
+
+    /// <summary>
+    /// Interval in days for recurring events
+    /// </summary>
+    [Column("days_value")]
+    public int? DaysValue { get; set; }
+
+    /// <summary>
+    /// Last date this task was completed (optional)
+    /// </summary>
+    [Column("last_date")]
+    public DateOnly? LastDate { get; set; }
+
+    /// <summary>
+    /// Priority level: low, medium, high
+    /// </summary>
+    [Required]
     [MaxLength(10)]
     [Column("priority")]
     public string Priority { get; set; } = "medium";
 
-    [Column("completion_date")]
-    public DateOnly? CompletionDate { get; set; }
+    [Column("notes")]
+    public string? Notes { get; set; }
 
-    [Column("completion_notes")]
-    public string? CompletionNotes { get; set; }
-
-    [Column("postponed_from_date")]
-    public DateOnly? PostponedFromDate { get; set; }
-
-    [Column("postpone_reason")]
-    public string? PostponeReason { get; set; }
-
-    [Column("is_recurring")]
-    public bool IsRecurring { get; set; } = true;
+    [Column("is_active")]
+    public bool IsActive { get; set; } = true;
 
     [Required]
     [Column("created_by")]
@@ -68,11 +87,18 @@ public class TaskEntity
     [Column("deleted_at")]
     public DateTimeOffset? DeletedAt { get; set; }
 
-    [ForeignKey("ItemId")]
-    public virtual ItemEntity? Item { get; set; }
-
+    // Navigation properties
     [ForeignKey("HouseholdId")]
     public virtual HouseholdEntity Household { get; set; } = null!;
 
-    public virtual ICollection<TaskHistoryEntity> TasksHistory { get; set; } = new List<TaskHistoryEntity>();
+    [ForeignKey("CategoryId")]
+    public virtual CategoryEntity? Category { get; set; }
+
+    [ForeignKey("CreatedBy")]
+    public virtual UserProfileEntity CreatedByUser { get; set; } = null!;
+
+    /// <summary>
+    /// Events (concrete occurrences) generated from this task template
+    /// </summary>
+    public virtual ICollection<EventEntity> Events { get; set; } = new List<EventEntity>();
 }

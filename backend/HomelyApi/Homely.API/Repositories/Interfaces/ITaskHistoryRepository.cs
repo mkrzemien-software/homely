@@ -7,7 +7,7 @@ public interface ITaskHistoryRepository : IBaseRepository<TaskHistoryEntity, Gui
 {
     Task<IEnumerable<TaskHistoryEntity>> GetHouseholdHistoryAsync(Guid householdId, CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<TaskHistoryEntity>> GetItemHistoryAsync(Guid itemId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TaskHistoryEntity>> GetTaskTemplateHistoryAsync(Guid taskId, CancellationToken cancellationToken = default);
 
     Task<IEnumerable<TaskHistoryEntity>> GetCompletedByUserAsync(Guid userId, CancellationToken cancellationToken = default);
 

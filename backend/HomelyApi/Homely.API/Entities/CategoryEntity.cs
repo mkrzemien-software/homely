@@ -39,5 +39,5 @@ public class CategoryEntity
     [ForeignKey("CategoryTypeId")]
     public virtual CategoryTypeEntity? CategoryType { get; set; }
 
-    public virtual ICollection<ItemEntity> Items { get; set; } = new List<ItemEntity>();
+    public virtual ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
 }

@@ -97,8 +97,8 @@ public class SystemHouseholdsService : ISystemHouseholdsService
             CreatedAt = household.CreatedAt,
             UpdatedAt = household.UpdatedAt,
             MemberCount = household.HouseholdMembers.Count(hm => hm.DeletedAt == null),
-            ItemCount = household.Items.Count(i => i.DeletedAt == null),
-            TaskCount = household.Tasks.Count(t => t.DeletedAt == null),
+            ItemCount = household.Tasks.Count(t => t.DeletedAt == null),
+            TaskCount = household.Events.Count(e => e.DeletedAt == null),
             CompletedTasksCount = household.TasksHistory.Count(th => th.DeletedAt == null),
             LastActivityAt = household.HouseholdMembers
                 .Where(hm => hm.DeletedAt == null)
@@ -303,8 +303,8 @@ public class SystemHouseholdsService : ISystemHouseholdsService
             SubscriptionStartDate = household.SubscriptionStartDate,
             SubscriptionEndDate = household.SubscriptionEndDate,
             MemberCount = household.HouseholdMembers.Count(hm => hm.DeletedAt == null),
-            ItemCount = household.Items.Count(i => i.DeletedAt == null),
-            TaskCount = household.Tasks.Count(t => t.DeletedAt == null),
+            ItemCount = household.Tasks.Count(t => t.DeletedAt == null),
+            TaskCount = household.Events.Count(e => e.DeletedAt == null),
             CreatedAt = household.CreatedAt,
             UpdatedAt = household.UpdatedAt,
             IsDeleted = household.DeletedAt.HasValue
