@@ -63,7 +63,13 @@ builder.Services.AddScoped<ISupabaseAuthService, SupabaseAuthService>();
 // ============================================================================
 // CORE SERVICES
 // ============================================================================
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Ensure camelCase property naming for JSON serialization
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
 // ============================================================================
 // AUTHENTICATION & AUTHORIZATION

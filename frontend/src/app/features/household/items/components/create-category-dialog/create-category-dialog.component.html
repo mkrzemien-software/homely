@@ -1,0 +1,122 @@
+<p-toast />
+
+<form [formGroup]="createCategoryForm" (ngSubmit)="onSubmit()">
+  <div class="dialog-content">
+    <!-- Category Type -->
+    <div class="form-field">
+      <label for="categoryTypeId">Typ kategorii *</label>
+      <p-dropdown
+        id="categoryTypeId"
+        formControlName="categoryTypeId"
+        [options]="categoryTypes()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Wybierz typ kategorii"
+        [style]="{ width: '100%' }"
+        [class.ng-invalid]="createCategoryForm.controls['categoryTypeId'].invalid && createCategoryForm.controls['categoryTypeId'].touched"
+        [class.ng-dirty]="createCategoryForm.controls['categoryTypeId'].dirty"
+      >
+        <ng-template pTemplate="selectedItem" let-selectedOption>
+          @if (selectedOption) {
+            <div class="flex align-items-center gap-2">
+              <span>{{ selectedOption.name }}</span>
+            </div>
+          }
+        </ng-template>
+        <ng-template pTemplate="item" let-categoryType>
+          <div class="flex align-items-center gap-2">
+            <span>{{ categoryType.name }}</span>
+          </div>
+        </ng-template>
+      </p-dropdown>
+      @if (createCategoryForm.controls['categoryTypeId'].invalid && createCategoryForm.controls['categoryTypeId'].touched) {
+        <small class="p-error">
+          @if (createCategoryForm.controls['categoryTypeId'].errors?.['required']) {
+            Typ kategorii jest wymagany.
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Name -->
+    <div class="form-field">
+      <label for="name">Nazwa kategorii *</label>
+      <input
+        id="name"
+        type="text"
+        pInputText
+        formControlName="name"
+        placeholder="np. Kocioł gazowy, Kompost, Dentysta"
+        [class.ng-invalid]="createCategoryForm.controls['name'].invalid && createCategoryForm.controls['name'].touched"
+        [class.ng-dirty]="createCategoryForm.controls['name'].dirty"
+      />
+      @if (createCategoryForm.controls['name'].invalid && createCategoryForm.controls['name'].touched) {
+        <small class="p-error">
+          @if (createCategoryForm.controls['name'].errors?.['required']) {
+            Nazwa kategorii jest wymagana.
+          }
+          @if (createCategoryForm.controls['name'].errors?.['maxlength']) {
+            Nazwa nie może przekroczyć 100 znaków.
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Description -->
+    <div class="form-field">
+      <label for="description">Opis (opcjonalnie)</label>
+      <textarea
+        id="description"
+        pInputTextarea
+        formControlName="description"
+        placeholder="Dodatkowe informacje o kategorii"
+        [rows]="3"
+        [class.ng-invalid]="createCategoryForm.controls['description'].invalid && createCategoryForm.controls['description'].touched"
+        [class.ng-dirty]="createCategoryForm.controls['description'].dirty"
+      ></textarea>
+      @if (createCategoryForm.controls['description'].invalid && createCategoryForm.controls['description'].touched) {
+        <small class="p-error">
+          @if (createCategoryForm.controls['description'].errors?.['maxlength']) {
+            Opis nie może przekroczyć 500 znaków.
+          }
+        </small>
+      }
+    </div>
+
+    <!-- Sort Order -->
+    <div class="form-field">
+      <label for="sortOrder">Kolejność sortowania</label>
+      <p-inputNumber
+        id="sortOrder"
+        formControlName="sortOrder"
+        [min]="0"
+        [showButtons]="true"
+        [style]="{ width: '100%' }"
+        [class.ng-invalid]="createCategoryForm.controls['sortOrder'].invalid && createCategoryForm.controls['sortOrder'].touched"
+        [class.ng-dirty]="createCategoryForm.controls['sortOrder'].dirty"
+      ></p-inputNumber>
+      @if (createCategoryForm.controls['sortOrder'].invalid && createCategoryForm.controls['sortOrder'].touched) {
+        <small class="p-error">
+          @if (createCategoryForm.controls['sortOrder'].errors?.['min']) {
+            Kolejność sortowania musi być większa lub równa 0.
+          }
+        </small>
+      }
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <p-button
+      label="Anuluj"
+      severity="secondary"
+      (onClick)="closeDialog()"
+      [disabled]="isLoading()"
+    />
+    <p-button
+      label="Utwórz kategorię"
+      type="submit"
+      [loading]="isLoading()"
+      [disabled]="createCategoryForm.invalid || isLoading()"
+    />
+  </div>
+</form>

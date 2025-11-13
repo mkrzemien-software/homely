@@ -15,6 +15,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { AccordionModule } from 'primeng/accordion';
+import { DialogModule } from 'primeng/dialog';
 
 // Models
 import {
@@ -28,8 +29,11 @@ import {
 // Services
 import { CategoryService } from './services/category.service';
 
+// Components
+import { CreateCategoryDialogComponent } from './components/create-category-dialog/create-category-dialog.component';
+
 /**
- * ItemsListComponent
+ * CategoriesListComponent
  *
  * Main component for displaying and managing categories.
  * Based on API plan - GET /categories and GET /category-types
@@ -48,11 +52,11 @@ import { CategoryService } from './services/category.service';
  * // Route configuration
  * {
  *   path: ':householdId/categories',
- *   loadComponent: () => import('./items-list.component').then(m => m.ItemsListComponent)
+ *   loadComponent: () => import('./categories-list.component').then(m => m.CategoriesListComponent)
  * }
  */
 @Component({
-  selector: 'app-items-list',
+  selector: 'app-categories-list',
   imports: [
     CommonModule,
     FormsModule,
@@ -66,12 +70,14 @@ import { CategoryService } from './services/category.service';
     SkeletonModule,
     TagModule,
     TooltipModule,
-    AccordionModule
+    AccordionModule,
+    DialogModule,
+    CreateCategoryDialogComponent
   ],
-  templateUrl: './items-list.component.html',
-  styleUrl: './items-list.component.scss'
+  templateUrl: './categories-list.component.html',
+  styleUrl: './categories-list.component.scss'
 })
-export class ItemsListComponent implements OnInit {
+export class CategoriesListComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private categoryService = inject(CategoryService);
@@ -115,6 +121,11 @@ export class ItemsListComponent implements OnInit {
    * Search text
    */
   searchText = signal<string>('');
+
+  /**
+   * Create category dialog visibility
+   */
+  createDialogVisible = signal<boolean>(false);
 
   /**
    * Filtered categories
@@ -285,11 +296,25 @@ export class ItemsListComponent implements OnInit {
   }
 
   /**
-   * Navigate to add new category
+   * Open add new category dialog
    */
   addNewCategory(): void {
-    // TODO: Open add category dialog
-    console.log('Add new category');
+    this.createDialogVisible.set(true);
+  }
+
+  /**
+   * Hide create category dialog
+   */
+  hideCreateDialog(): void {
+    this.createDialogVisible.set(false);
+  }
+
+  /**
+   * Handle category created event
+   */
+  onCategoryCreated(): void {
+    this.hideCreateDialog();
+    this.refresh();
   }
 
   /**

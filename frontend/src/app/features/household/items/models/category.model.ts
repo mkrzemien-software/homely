@@ -50,7 +50,13 @@ export interface Category {
   categoryTypeId: number;
 
   /**
+   * Category type name (returned from backend as flat field)
+   */
+  categoryTypeName?: string;
+
+  /**
    * Category type details (populated from backend)
+   * @deprecated Use categoryTypeName instead
    */
   categoryType?: CategoryType;
 
@@ -69,6 +75,21 @@ export interface Category {
    * Display order within type
    */
   sortOrder: number;
+
+  /**
+   * Whether category is active
+   */
+  isActive?: boolean;
+
+  /**
+   * Creation timestamp
+   */
+  createdAt?: string;
+
+  /**
+   * Last update timestamp
+   */
+  updatedAt?: string;
 }
 
 /**

@@ -72,8 +72,8 @@ export const routes: Routes = [
       },
       {
         path: 'categories',
-        loadComponent: () => import('./features/household/items/items-list.component').then(m => m.ItemsListComponent),
-        title: 'Urządzenia i Wizyty - Homely',
+        loadComponent: () => import('./features/household/items/categories-list.component').then(m => m.CategoriesListComponent),
+        title: 'Kategorie - Homely',
         // TODO: Uncomment when authentication is fully implemented
         // canActivate: [authGuard, householdMemberGuard]
       },
