@@ -9,48 +9,51 @@
   (onHide)="closeDialog()"
 >
   <form [formGroup]="createTaskForm" (ngSubmit)="onSubmit()">
-    <!-- Category -->
-    <div class="form-field">
-      <label for="categoryId" class="form-label">
-        Kategoria *
-      </label>
-      <p-treeSelect
-        id="categoryId"
-        formControlName="categoryId"
-        [options]="categoryTreeNodes()"
-        placeholder="Wybierz kategorię"
-        [style]="{ width: '100%' }"
-        [filter]="true"
-        filterPlaceholder="Szukaj kategorii..."
-        display="chip"
-      ></p-treeSelect>
-      @if (createTaskForm.get('categoryId')?.invalid && createTaskForm.get('categoryId')?.touched) {
-        <small class="form-error">Kategoria jest wymagana</small>
-      }
-    </div>
+    <!-- Category and Name in a row -->
+    <div class="form-row">
+      <!-- Category -->
+      <div class="form-field">
+        <label for="categoryId" class="form-label">
+          Kategoria *
+        </label>
+        <p-treeSelect
+          id="categoryId"
+          formControlName="categoryId"
+          [options]="categoryTreeNodes()"
+          placeholder="Wybierz kategorię"
+          [style]="{ width: '100%' }"
+          [filter]="true"
+          filterPlaceholder="Szukaj kategorii..."
+          selectionMode="single"
+        ></p-treeSelect>
+        @if (createTaskForm.get('categoryId')?.invalid && createTaskForm.get('categoryId')?.touched) {
+          <small class="form-error">Kategoria jest wymagana</small>
+        }
+      </div>
 
-    <!-- Name -->
-    <div class="form-field">
-      <label for="name" class="form-label">
-        Nazwa zadania *
-      </label>
-      <input
-        pInputText
-        id="name"
-        formControlName="name"
-        placeholder="np. Przegląd roczny"
-        [style]="{ width: '100%' }"
-      />
-      @if (createTaskForm.get('name')?.invalid && createTaskForm.get('name')?.touched) {
-        <small class="form-error">
-          @if (createTaskForm.get('name')?.hasError('required')) {
-            Nazwa jest wymagana
-          }
-          @if (createTaskForm.get('name')?.hasError('maxlength')) {
-            Nazwa może mieć maksymalnie 100 znaków
-          }
-        </small>
-      }
+      <!-- Name -->
+      <div class="form-field">
+        <label for="name" class="form-label">
+          Nazwa zadania *
+        </label>
+        <input
+          pInputText
+          id="name"
+          formControlName="name"
+          placeholder="np. Przegląd roczny"
+          [style]="{ width: '100%' }"
+        />
+        @if (createTaskForm.get('name')?.invalid && createTaskForm.get('name')?.touched) {
+          <small class="form-error">
+            @if (createTaskForm.get('name')?.hasError('required')) {
+              Nazwa jest wymagana
+            }
+            @if (createTaskForm.get('name')?.hasError('maxlength')) {
+              Nazwa może mieć maksymalnie 100 znaków
+            }
+          </small>
+        }
+      </div>
     </div>
 
     <!-- Description -->

@@ -133,6 +133,7 @@ export interface CreateCategoryDto {
 export interface UpdateCategoryDto {
   categoryTypeId?: number;
   name?: string;
+  isActive?: boolean;
   description?: string;
   sortOrder?: number;
 }

@@ -39,10 +39,11 @@
     <label for="password" class="login-form__label">
       Password
     </label>
-    
+
     <input
       pInputText
       id="password"
+      type="password"
       formControlName="password"
       placeholder="Enter your password"
       [class.ng-invalid]="hasError('password')"
@@ -60,7 +61,7 @@
   </div>
 
   <!-- Remember Me Checkbox -->
-  <div class="login-form__field login-form__field--checkbox">
+  <!-- <div class="login-form__field login-form__field--checkbox">
     <p-checkbox
       formControlName="rememberMe"
       [binary]="true"
@@ -68,7 +69,7 @@
       label="Remember me"
       styleClass="login-form__checkbox">
     </p-checkbox>
-  </div>
+  </div> -->
 
   <!-- Submit Button -->
   <div class="login-form__actions">

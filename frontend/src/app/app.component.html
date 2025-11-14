@@ -1,10 +1,12 @@
 <!-- Application Layout with Sidebar Navigation -->
 <div class="app-layout">
-  <!-- Sidebar Navigation -->
-  <app-sidebar></app-sidebar>
+  <!-- Sidebar Navigation - only shown when user is authenticated -->
+  @if (authService.isAuthenticated()) {
+    <app-sidebar></app-sidebar>
+  }
 
   <!-- Main Content Area -->
-  <div class="main-content">
+  <div class="main-content" [class.full-width]="!authService.isAuthenticated()">
     <router-outlet></router-outlet>
   </div>
 </div>

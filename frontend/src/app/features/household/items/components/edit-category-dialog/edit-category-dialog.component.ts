@@ -54,7 +54,8 @@ export class EditCategoryDialogComponent implements OnInit, OnChanges {
       categoryTypeId: [null, [Validators.required]],
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(500)]],
-      sortOrder: [0, [Validators.min(0)]]
+      sortOrder: [0, [Validators.min(0)]],
+      isActive: [true]
     });
   }
 
@@ -68,7 +69,8 @@ export class EditCategoryDialogComponent implements OnInit, OnChanges {
         categoryTypeId: this.category.categoryTypeId,
         name: this.category.name,
         description: this.category.description,
-        sortOrder: this.category.sortOrder
+        sortOrder: this.category.sortOrder,
+        isActive: this.category.isActive
       });
     }
   }
@@ -102,7 +104,8 @@ export class EditCategoryDialogComponent implements OnInit, OnChanges {
       categoryTypeId: formValue.categoryTypeId,
       name: formValue.name,
       description: formValue.description,
-      sortOrder: formValue.sortOrder
+      sortOrder: formValue.sortOrder,
+      isActive: formValue.isActive
     };
 
     this.categoryService.updateCategory(this.category.id, updateDto).subscribe({

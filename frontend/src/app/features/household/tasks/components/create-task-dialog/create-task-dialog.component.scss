@@ -1,4 +1,36 @@
 // Form styling
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .form-field {
+    margin-bottom: 0;
+
+    &:first-child {
+      flex: 1;
+    }
+
+    &:last-child {
+      flex: 3;
+    }
+
+    @media (max-width: 768px) {
+      flex: 1 !important;
+      margin-bottom: 1.5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
 .form-field {
   margin-bottom: 1.5rem;
 
@@ -63,4 +95,11 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+}
+
+
+::ng-deep {
+  .p-inputnumber-input {
+    width: 120px;
+  }
 }

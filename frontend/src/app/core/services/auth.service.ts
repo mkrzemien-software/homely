@@ -13,18 +13,42 @@ export interface LoginCredentials {
 }
 
 /**
- * Login response from API
+ * API Response wrapper
  */
-export interface LoginResponse {
-  token: string;
-  refreshToken?: string;
-  expiresIn?: number;
-  user: {
-    id: string;
-    email: string;
-    firstName?: string;
-    lastName?: string;
-  };
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  errorMessage?: string;
+  errors?: string[];
+  statusCode: number;
+}
+
+/**
+ * Login response data from API
+ */
+export interface LoginResponseData {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  user: UserDto;
+}
+
+/**
+ * Login response (wrapped in ApiResponse)
+ */
+export interface LoginResponse extends ApiResponse<LoginResponseData> {}
+
+/**
+ * User data from API
+ */
+export interface UserDto {
+  id: string;
+  email: string;
+  name: string;
+  emailConfirmed: boolean;
+  createdAt: string;
+  householdId: string;
+  role: string;
 }
 
 /**
@@ -33,8 +57,11 @@ export interface LoginResponse {
 export interface UserProfile {
   id: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
+  name: string;
+  emailConfirmed: boolean;
+  createdAt: string;
+  householdId: string;
+  role: string;
 }
 
 @Injectable({
@@ -67,15 +94,21 @@ export class AuthService {
 
     return this.http.post<LoginResponse>(`${this.API_URL}/login`, credentials).pipe(
       tap((response) => {
+        console.log(response);
+
+        if (!response.success || !response.data) {
+          throw new Error(response.errorMessage || 'Login failed');
+        }
+
         // Store tokens
-        this.storeTokens(response.token, response.refreshToken);
+        this.storeTokens(response.data.accessToken, response.data.refreshToken);
 
         // Store user data
-        this.storeUser(response.user);
+        this.storeUser(response.data.user);
 
         // Update authentication state
         this.isAuthenticated.set(true);
-        this.currentUser.set(response.user);
+        this.currentUser.set(response.data.user);
       }),
       catchError((error: HttpErrorResponse) => {
         this.isLoading.set(false);
@@ -199,28 +232,34 @@ export class AuthService {
       // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side error
-      switch (error.status) {
-        case 400:
-          errorMessage = 'Invalid email or password';
-          break;
-        case 401:
-          errorMessage = 'Invalid credentials';
-          break;
-        case 403:
-          errorMessage = 'Access forbidden';
-          break;
-        case 404:
-          errorMessage = 'Service not found';
-          break;
-        case 429:
-          errorMessage = 'Too many login attempts. Please try again later';
-          break;
-        case 500:
-          errorMessage = 'Server error. Please try again later';
-          break;
-        default:
-          errorMessage = error.error?.message || errorMessage;
+      // Server-side error - check for ApiResponse structure
+      if (error.error?.errorMessage) {
+        // Backend returned ApiResponse with errorMessage
+        errorMessage = error.error.errorMessage;
+      } else {
+        // Fallback to status code based messages
+        switch (error.status) {
+          case 400:
+            errorMessage = 'Invalid email or password';
+            break;
+          case 401:
+            errorMessage = 'Invalid credentials';
+            break;
+          case 403:
+            errorMessage = 'Access forbidden';
+            break;
+          case 404:
+            errorMessage = 'Service not found';
+            break;
+          case 429:
+            errorMessage = 'Too many login attempts. Please try again later';
+            break;
+          case 500:
+            errorMessage = 'Server error. Please try again later';
+            break;
+          default:
+            errorMessage = error.error?.message || errorMessage;
+        }
       }
     }
 
@@ -240,7 +279,9 @@ export class AuthService {
 
     return this.http.post<LoginResponse>(`${this.API_URL}/refresh`, { refreshToken }).pipe(
       tap((response) => {
-        this.storeTokens(response.token, response.refreshToken);
+        if (response.success && response.data) {
+          this.storeTokens(response.data.accessToken, response.data.refreshToken);
+        }
       }),
       catchError((error: HttpErrorResponse) => {
         this.logout();

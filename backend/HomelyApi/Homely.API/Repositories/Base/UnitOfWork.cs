@@ -10,6 +10,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly HomelyDbContext _context;
     private IDbContextTransaction? _transaction;
 
+    private IUserProfileRepository? _userProfiles;
     private IPlanTypeRepository? _planTypes;
     private IHouseholdRepository? _households;
     private IHouseholdMemberRepository? _householdMembers;
@@ -23,6 +24,15 @@ public class UnitOfWork : IUnitOfWork
     public UnitOfWork(HomelyDbContext context)
     {
         _context = context;
+    }
+
+    public IUserProfileRepository UserProfiles
+    {
+        get
+        {
+            _userProfiles ??= new UserProfileRepository(_context);
+            return _userProfiles;
+        }
     }
 
     public IPlanTypeRepository PlanTypes

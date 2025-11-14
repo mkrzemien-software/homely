@@ -58,52 +58,52 @@ export function getHouseholdMenuItems(householdId: string): MenuItem[] {
       roles: ['admin', 'member'],
       tooltip: 'Urządzenia i wizyty pogrupowane po kategoriach'
     },
-    {
-      id: 'history',
-      label: 'Historia',
-      icon: 'pi pi-history',
-      route: `/${householdId}/history`,
-      roles: ['admin', 'member'],
-      requiresPremium: true,
-      badge: 'PREMIUM',
-      tooltip: 'Archiwum wykonanych zadań'
-    },
-    {
-      id: 'reports',
-      label: 'Raporty',
-      icon: 'pi pi-chart-bar',
-      route: `/${householdId}/reports`,
-      roles: ['admin', 'member'],
-      requiresPremium: true,
-      badge: 'PREMIUM',
-      tooltip: 'Zestawienia kosztów'
-    },
-    {
-      id: 'analytics',
-      label: 'Analizy',
-      icon: 'pi pi-chart-line',
-      route: `/${householdId}/analytics`,
-      roles: ['admin', 'member'],
-      requiresPremium: true,
-      badge: 'PREMIUM',
-      tooltip: 'Zaawansowane analizy predykcyjne'
-    },
-    {
-      id: 'settings',
-      label: 'Ustawienia',
-      icon: 'pi pi-cog',
-      route: `/${householdId}/settings`,
-      roles: ['admin', 'member'],
-      tooltip: 'Konfiguracja profilu i preferencji'
-    },
-    {
-      id: 'help',
-      label: 'Pomoc',
-      icon: 'pi pi-question-circle',
-      route: `/${householdId}/help`,
-      roles: ['admin', 'member', 'dashboard'],
-      tooltip: 'FAQ i wsparcie'
-    }
+    // {
+    //   id: 'history',
+    //   label: 'Historia',
+    //   icon: 'pi pi-history',
+    //   route: `/${householdId}/history`,
+    //   roles: ['admin', 'member'],
+    //   requiresPremium: true,
+    //   badge: 'PREMIUM',
+    //   tooltip: 'Archiwum wykonanych zadań'
+    // },
+    // {
+    //   id: 'reports',
+    //   label: 'Raporty',
+    //   icon: 'pi pi-chart-bar',
+    //   route: `/${householdId}/reports`,
+    //   roles: ['admin', 'member'],
+    //   requiresPremium: true,
+    //   badge: 'PREMIUM',
+    //   tooltip: 'Zestawienia kosztów'
+    // },
+    // {
+    //   id: 'analytics',
+    //   label: 'Analizy',
+    //   icon: 'pi pi-chart-line',
+    //   route: `/${householdId}/analytics`,
+    //   roles: ['admin', 'member'],
+    //   requiresPremium: true,
+    //   badge: 'PREMIUM',
+    //   tooltip: 'Zaawansowane analizy predykcyjne'
+    // },
+    // {
+    //   id: 'settings',
+    //   label: 'Ustawienia',
+    //   icon: 'pi pi-cog',
+    //   route: `/${householdId}/settings`,
+    //   roles: ['admin', 'member'],
+    //   tooltip: 'Konfiguracja profilu i preferencji'
+    // },
+    // {
+    //   id: 'help',
+    //   label: 'Pomoc',
+    //   icon: 'pi pi-question-circle',
+    //   route: `/${householdId}/help`,
+    //   roles: ['admin', 'member', 'dashboard'],
+    //   tooltip: 'FAQ i wsparcie'
+    // }
   ];
 }
 
@@ -136,46 +136,46 @@ export function getSystemMenuItems(): MenuItem[] {
       roles: ['system_developer'],
       tooltip: 'Administracja wszystkich kont użytkowników'
     },
-    {
-      id: 'system-subscriptions',
-      label: 'Subskrypcje',
-      icon: 'pi pi-credit-card',
-      route: '/system/subscriptions',
-      roles: ['system_developer'],
-      tooltip: 'Monitoring płatności i metryk finansowych'
-    },
-    {
-      id: 'system-administration',
-      label: 'Administracja',
-      icon: 'pi pi-wrench',
-      route: '/system/administration',
-      roles: ['system_developer'],
-      tooltip: 'Zarządzanie infrastrukturą i konfiguracją'
-    },
-    {
-      id: 'system-support',
-      label: 'Wsparcie',
-      icon: 'pi pi-headphones',
-      route: '/system/support',
-      roles: ['system_developer'],
-      tooltip: 'Narzędzia do obsługi użytkowników i troubleshooting'
-    },
-    {
-      id: 'system-metrics',
-      label: 'Metryki Systemu',
-      icon: 'pi pi-chart-pie',
-      route: '/system/metrics',
-      roles: ['system_developer'],
-      tooltip: 'Globalne statystyki i KPI platformy'
-    },
-    {
-      id: 'system-configuration',
-      label: 'Konfiguracja Systemu',
-      icon: 'pi pi-sliders-h',
-      route: '/system/configuration',
-      roles: ['system_developer'],
-      tooltip: 'Ustawienia globalne platformy'
-    }
+    // {
+    //   id: 'system-subscriptions',
+    //   label: 'Subskrypcje',
+    //   icon: 'pi pi-credit-card',
+    //   route: '/system/subscriptions',
+    //   roles: ['system_developer'],
+    //   tooltip: 'Monitoring płatności i metryk finansowych'
+    // },
+    // {
+    //   id: 'system-administration',
+    //   label: 'Administracja',
+    //   icon: 'pi pi-wrench',
+    //   route: '/system/administration',
+    //   roles: ['system_developer'],
+    //   tooltip: 'Zarządzanie infrastrukturą i konfiguracją'
+    // },
+    // {
+    //   id: 'system-support',
+    //   label: 'Wsparcie',
+    //   icon: 'pi pi-headphones',
+    //   route: '/system/support',
+    //   roles: ['system_developer'],
+    //   tooltip: 'Narzędzia do obsługi użytkowników i troubleshooting'
+    // },
+    // {
+    //   id: 'system-metrics',
+    //   label: 'Metryki Systemu',
+    //   icon: 'pi pi-chart-pie',
+    //   route: '/system/metrics',
+    //   roles: ['system_developer'],
+    //   tooltip: 'Globalne statystyki i KPI platformy'
+    // },
+    // {
+    //   id: 'system-configuration',
+    //   label: 'Konfiguracja Systemu',
+    //   icon: 'pi pi-sliders-h',
+    //   route: '/system/configuration',
+    //   roles: ['system_developer'],
+    //   tooltip: 'Ustawienia globalne platformy'
+    // }
   ];
 }
 

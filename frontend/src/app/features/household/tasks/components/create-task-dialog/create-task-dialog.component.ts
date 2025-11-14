@@ -16,6 +16,7 @@ import { DividerModule } from 'primeng/divider';
 
 // Services
 import { TasksService } from '../../services/tasks.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 
 // Models
 import { Category } from '../../../items/models/category.model';
@@ -63,6 +64,7 @@ export class CreateTaskDialogComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private tasksService = inject(TasksService);
+  private authService = inject(AuthService);
   private messageService = inject(MessageService);
 
   createTaskForm: FormGroup;
@@ -160,6 +162,17 @@ export class CreateTaskDialogComponent implements OnInit {
       return;
     }
 
+    // Get current user ID from auth service
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser || !currentUser.id) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Błąd',
+        detail: 'Musisz być zalogowany aby utworzyć zadanie'
+      });
+      return;
+    }
+
     this.isLoading.set(true);
     const formValue = this.createTaskForm.value;
 
@@ -177,7 +190,8 @@ export class CreateTaskDialogComponent implements OnInit {
       monthsValue: formValue.monthsValue || undefined,
       weeksValue: formValue.weeksValue || undefined,
       daysValue: formValue.daysValue || undefined,
-      notes: formValue.notes?.trim() || undefined
+      notes: formValue.notes?.trim() || undefined,
+      createdBy: currentUser.id
     };
 
     this.tasksService.createTask(createDto).subscribe({

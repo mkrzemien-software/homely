@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ThemeService } from './core/services/theme.service';
+import { AuthService } from './core/services/auth.service';
 import { SidebarComponent } from './core/components/sidebar/sidebar.component';
 
 @Component({
@@ -12,6 +13,7 @@ import { SidebarComponent } from './core/components/sidebar/sidebar.component';
 })
 export class AppComponent implements OnInit {
   private themeService = inject(ThemeService);
+  authService = inject(AuthService);
 
   title = 'Homely';
 

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { SidebarModule } from 'primeng/sidebar';
@@ -8,6 +8,8 @@ import { BadgeModule } from 'primeng/badge';
 import { DividerModule } from 'primeng/divider';
 import { MenuModule } from 'primeng/menu';
 import { ThemeService } from '../../../core/services/theme.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { HouseholdService } from '../../../core/services/household.service';
 import {
   MenuSection,
   MenuItem,
@@ -50,6 +52,8 @@ import {
 export class SidebarComponent {
   private router = inject(Router);
   private themeService = inject(ThemeService);
+  authService = inject(AuthService);  // Public for template access
+  private householdService = inject(HouseholdService);
 
   // State signals
   isVisible = signal<boolean>(true);
@@ -59,11 +63,40 @@ export class SidebarComponent {
   // Theme signals
   currentTheme = this.themeService.appliedTheme;
 
-  // User context signals (TODO: Connect to actual auth service)
-  currentHouseholdId = signal<string | null>('test-household');
-  userRole = signal<UserRole>('admin');
-  hasPremium = signal<boolean>(false);
-  householdName = signal<string>('Moje Gospodarstwo');
+  // User context signals - derived from AuthService
+  currentHouseholdId = signal<string | null>(null);
+  userRole = signal<UserRole>('admin'); // TODO: Get from user profile when role is added
+  hasPremium = signal<boolean>(false); // TODO: Get from household subscription
+  householdName = signal<string>('Loading...');
+
+  constructor() {
+    // Effect to sync with auth service user data
+    effect(() => {
+      const user = this.authService.currentUser();
+      if (user) {
+        // Only set householdId if it's not empty
+        const householdId = user.householdId && user.householdId.trim() !== ''
+          ? user.householdId
+          : null;
+
+        this.currentHouseholdId.set(householdId);
+
+        // Set user role from auth service
+        this.userRole.set((user.role as UserRole) || 'member');
+
+        // Fetch household name
+        if (householdId) {
+          this.fetchHouseholdName(householdId);
+        } else {
+          this.householdName.set('No household assigned');
+        }
+      } else {
+        this.currentHouseholdId.set(null);
+        this.userRole.set('member');
+        this.householdName.set('Not logged in');
+      }
+    });
+  }
 
   // Computed menu sections based on user context
   menuSections = computed<MenuSection[]>(() => {
@@ -73,6 +106,33 @@ export class SidebarComponent {
       this.hasPremium()
     );
   });
+
+  // Fetch household name from API
+  private fetchHouseholdName(householdId: string): void {
+    if (!householdId || householdId.trim() === '') {
+      this.householdName.set('No household assigned');
+      return;
+    }
+
+    // Call the API to get household details
+    this.householdService.getById(householdId).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.householdName.set(response.data.name);
+        } else {
+          // Fallback to short ID if API call fails
+          const shortId = householdId.length > 8 ? householdId.substring(0, 8) : householdId;
+          this.householdName.set(`Household ${shortId}`);
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching household name:', error);
+        // Fallback to short ID on error
+        const shortId = householdId.length > 8 ? householdId.substring(0, 8) : householdId;
+        this.householdName.set(`Household ${shortId}`);
+      }
+    });
+  }
 
   // Check if current route is active
   isRouteActive(route: string): boolean {
@@ -105,6 +165,11 @@ export class SidebarComponent {
   // Toggle theme between light and dark
   toggleTheme(): void {
     this.themeService.toggleTheme();
+  }
+
+  // Logout user
+  logout(): void {
+    this.authService.logout();
   }
 
   // Handle window resize

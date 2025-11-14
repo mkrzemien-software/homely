@@ -1,5 +1,6 @@
 using Homely.API.Configuration;
 using Homely.API.Models.DTOs;
+using Homely.API.Repositories.Base;
 using Microsoft.Extensions.Options;
 using Supabase;
 using Supabase.Gotrue;
@@ -16,12 +17,18 @@ namespace Homely.API.Services
         private readonly Client _supabaseClient;
         private readonly ILogger<AuthService> _logger;
         private readonly JwtSettings _jwtSettings;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AuthService(Client supabaseClient, ILogger<AuthService> logger, IOptions<JwtSettings> jwtSettings)
+        public AuthService(
+            Client supabaseClient,
+            ILogger<AuthService> logger,
+            IOptions<JwtSettings> jwtSettings,
+            IUnitOfWork unitOfWork)
         {
             _supabaseClient = supabaseClient;
             _logger = logger;
             _jwtSettings = jwtSettings.Value;
+            _unitOfWork = unitOfWork;
         }
 
         /// <inheritdoc/>
@@ -49,7 +56,7 @@ namespace Homely.API.Services
                     AccessToken = session.AccessToken,
                     RefreshToken = session.RefreshToken ?? string.Empty,
                     ExpiresIn = session.ExpiresIn != 0 ? session.ExpiresIn : _jwtSettings.ExpirationInMinutes * 60,
-                    User = MapToUserDto(session.User)
+                    User = await MapToUserDtoAsync(session.User)
                 };
 
                 return ApiResponseDto<LoginResponseDto>.SuccessResponse(loginResponse);
@@ -105,7 +112,7 @@ namespace Homely.API.Services
                     AccessToken = session.AccessToken,
                     RefreshToken = session.RefreshToken ?? refreshToken,
                     ExpiresIn = session.ExpiresIn != 0 ? session.ExpiresIn : _jwtSettings.ExpirationInMinutes * 60,
-                    User = MapToUserDto(session.User)
+                    User = await MapToUserDtoAsync(session.User)
                 };
 
                 return ApiResponseDto<LoginResponseDto>.SuccessResponse(loginResponse);
@@ -183,7 +190,7 @@ namespace Homely.API.Services
                 }
 
                 _logger.LogInformation("Current user retrieved: {UserId}", user.Id);
-                return ApiResponseDto<UserDto>.SuccessResponse(MapToUserDto(user));
+                return ApiResponseDto<UserDto>.SuccessResponse(await MapToUserDtoAsync(user));
             }
             catch (GotrueException ex)
             {
@@ -200,18 +207,33 @@ namespace Homely.API.Services
         }
 
         /// <summary>
-        /// Map Supabase User to UserDto
+        /// Map Supabase User to UserDto with household membership data
         /// </summary>
-        private static UserDto MapToUserDto(User user)
+        private async Task<UserDto> MapToUserDtoAsync(User user)
         {
+            var userId = Guid.Parse(user.Id);
+
+            // Get user profile for first name and last name
+            var userProfile = await _unitOfWork.UserProfiles.GetByIdAsync(userId);
+
+            // Get user's primary household membership (first active membership)
+            var memberships = await _unitOfWork.HouseholdMembers.GetUserMembershipsAsync(userId);
+            var primaryMembership = memberships.FirstOrDefault(m => m.DeletedAt == null);
+
+            // Build full name from user profile, fallback to email username
+            var fullName = userProfile != null
+                ? $"{userProfile.FirstName} {userProfile.LastName}".Trim()
+                : user.Email?.Split('@')[0] ?? "Użytkownik";
+
             return new UserDto
             {
                 Id = user.Id,
                 Email = user.Email ?? string.Empty,
-                Name = user.UserMetadata?.GetValueOrDefault("name")?.ToString() ?? 
-                       user.Email?.Split('@')[0] ?? "Użytkownik",
+                Name = fullName,
                 EmailConfirmed = user.EmailConfirmedAt.HasValue,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                HouseholdId = primaryMembership?.HouseholdId.ToString() ?? string.Empty,
+                Role = primaryMembership?.Role ?? "member"
             };
         }
     }

@@ -29,7 +29,8 @@ public class TaskRepository : BaseRepository<TaskEntity, Guid>, ITaskRepository
         return await GetWhereAsync(
             t => t.HouseholdId == householdId,
             t => t.Category!,
-            t => t.Category!.CategoryType);
+            t => t.Category!.CategoryType,
+            t => t.CreatedByUser);
     }
 
     public async Task<IEnumerable<TaskEntity>> GetByCategoryAsync(
@@ -49,7 +50,8 @@ public class TaskRepository : BaseRepository<TaskEntity, Guid>, ITaskRepository
         return await GetWhereAsync(
             t => t.HouseholdId == householdId && t.CategoryId == categoryId,
             t => t.Category!,
-            t => t.Category!.CategoryType);
+            t => t.Category!.CategoryType,
+            t => t.CreatedByUser);
     }
 
     public async Task<IEnumerable<TaskEntity>> GetActiveTasksAsync(
@@ -59,7 +61,8 @@ public class TaskRepository : BaseRepository<TaskEntity, Guid>, ITaskRepository
         return await GetWhereAsync(
             t => t.HouseholdId == householdId && t.IsActive,
             t => t.Category!,
-            t => t.Category!.CategoryType);
+            t => t.Category!.CategoryType,
+            t => t.CreatedByUser);
     }
 
     public async Task<TaskEntity?> GetWithDetailsAsync(
@@ -70,7 +73,8 @@ public class TaskRepository : BaseRepository<TaskEntity, Guid>, ITaskRepository
             taskId,
             t => t.Category!,
             t => t.Category!.CategoryType,
-            t => t.Household);
+            t => t.Household,
+            t => t.CreatedByUser);
     }
 
     public async Task<bool> CanUserAccessTaskAsync(
@@ -102,7 +106,8 @@ public class TaskRepository : BaseRepository<TaskEntity, Guid>, ITaskRepository
                  t.IsActive &&
                  (t.YearsValue > 0 || t.MonthsValue > 0 || t.WeeksValue > 0 || t.DaysValue > 0),
             t => t.Category!,
-            t => t.Category!.CategoryType);
+            t => t.Category!.CategoryType,
+            t => t.CreatedByUser);
     }
 
     public async Task<IEnumerable<TaskEntity>> GetOneTimeTasksAsync(
@@ -117,6 +122,7 @@ public class TaskRepository : BaseRepository<TaskEntity, Guid>, ITaskRepository
                  (t.WeeksValue == null || t.WeeksValue == 0) &&
                  (t.DaysValue == null || t.DaysValue == 0),
             t => t.Category!,
-            t => t.Category!.CategoryType);
+            t => t.Category!.CategoryType,
+            t => t.CreatedByUser);
     }
 }

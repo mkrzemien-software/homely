@@ -55,5 +55,15 @@ namespace Homely.API.Models.DTOs
         /// User creation date
         /// </summary>
         public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        /// User's household ID (primary household)
+        /// </summary>
+        public string HouseholdId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// User's role in their primary household
+        /// </summary>
+        public string Role { get; set; } = "member";
     }
 }

@@ -4,6 +4,7 @@ namespace Homely.API.Repositories.Base;
 
 public interface IUnitOfWork : IDisposable
 {
+    IUserProfileRepository UserProfiles { get; }
     IPlanTypeRepository PlanTypes { get; }
     IHouseholdRepository Households { get; }
     IHouseholdMemberRepository HouseholdMembers { get; }

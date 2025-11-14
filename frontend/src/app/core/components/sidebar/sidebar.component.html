@@ -43,7 +43,6 @@
     }
   </div>
 
-  <p-divider></p-divider>
 
   <!-- Menu Sections -->
   <div class="sidebar-content">
@@ -103,6 +102,28 @@
 
   <!-- Sidebar Footer -->
   <div class="sidebar-footer">
+    <!-- User Info -->
+    @if (authService.currentUser()) {
+      <div
+        class="user-info"
+        [class.collapsed]="isCollapsed()"
+        [pTooltip]="isCollapsed() ? authService.currentUser()?.name : ''"
+        tooltipPosition="right"
+      >
+        <div class="user-avatar">
+          <i class="pi pi-user"></i>
+        </div>
+        @if (!isCollapsed()) {
+          <div class="user-details">
+            <span class="user-name">{{ authService.currentUser()?.name }}</span>
+            <span class="user-email">{{ authService.currentUser()?.email }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <p-divider></p-divider>
+
     <!-- Theme Toggle -->
     <button
       pButton
@@ -116,6 +137,23 @@
       @if (!isCollapsed()) {
         <span class="theme-toggle-text">
           {{ currentTheme() === 'dark' ? 'Tryb Jasny' : 'Tryb Ciemny' }}
+        </span>
+      }
+    </button>
+
+    <!-- Logout Button -->
+    <button
+      pButton
+      type="button"
+      class="p-button-outlined logout-btn"
+      icon="pi pi-sign-out"
+      (click)="logout()"
+      [pTooltip]="isCollapsed() ? 'Wyloguj się' : ''"
+      tooltipPosition="right"
+    >
+      @if (!isCollapsed()) {
+        <span class="logout-text">
+          Wyloguj się
         </span>
       }
     </button>

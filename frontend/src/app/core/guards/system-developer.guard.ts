@@ -60,12 +60,104 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
   if (!authService.isAuthenticated()) {
-    // router.navigate(['/auth/login'], {
-    //   queryParams: { returnUrl: state.url }
-    // });
-    // return false;
-    return true;
+    router.navigate(['/auth/login'], {
+      queryParams: { returnUrl: state.url }
+    });
+    return false;
   }
 
+  return true;
+};
+
+/**
+ * Guard to protect household routes
+ *
+ * This guard checks if the user is authenticated and is a member of the household
+ * specified in the route parameter.
+ *
+ * Usage in routes:
+ * ```typescript
+ * {
+ *   path: ':householdId/dashboard',
+ *   component: DashboardComponent,
+ *   canActivate: [authGuard, householdMemberGuard]
+ * }
+ * ```
+ */
+export const householdMemberGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  // First check authentication (redundant if used with authGuard, but safe)
+  if (!authService.isAuthenticated()) {
+    router.navigate(['/auth/login'], {
+      queryParams: { returnUrl: state.url }
+    });
+    return false;
+  }
+
+  // Get current user
+  const currentUser = authService.getCurrentUser();
+  if (!currentUser) {
+    router.navigate(['/auth/login']);
+    return false;
+  }
+
+  // Get household ID from route params
+  const householdIdParam = route.paramMap.get('householdId');
+
+  // Check if user has a household assigned
+  if (!currentUser.householdId || currentUser.householdId.trim() === '') {
+    console.warn('User has no household assigned');
+    router.navigate(['/error/403']);
+    return false;
+  }
+
+  // If householdId is in route params, verify it matches user's household
+  if (householdIdParam && householdIdParam !== currentUser.householdId) {
+    console.warn(`User ${currentUser.id} attempted to access household ${householdIdParam} but belongs to ${currentUser.householdId}`);
+    router.navigate(['/error/403']);
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Guard to prevent authenticated users from accessing auth routes (login, register)
+ *
+ * This guard redirects authenticated users to their household dashboard
+ * if they try to access authentication pages.
+ *
+ * Usage in routes:
+ * ```typescript
+ * {
+ *   path: 'auth/login',
+ *   component: LoginComponent,
+ *   canActivate: [guestOnlyGuard]
+ * }
+ * ```
+ */
+export const guestOnlyGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  // Check if user is already authenticated
+  if (authService.isAuthenticated()) {
+    // Get current user
+    const currentUser = authService.getCurrentUser();
+
+    // Redirect to user's household dashboard
+    if (currentUser?.householdId) {
+      router.navigate([`/${currentUser.householdId}/dashboard`]);
+    } else {
+      // User is authenticated but has no household - redirect to root
+      router.navigate(['/']);
+    }
+
+    return false;
+  }
+
+  // User is not authenticated, allow access to auth pages
   return true;
 };

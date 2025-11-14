@@ -76,8 +76,16 @@ export class LoginFormComponent {
         // Login successful
         this.loginSuccess.emit();
 
-        // Navigate to dashboard
-        this.router.navigate(['/dashboard']);
+        // Get current user to navigate to their household dashboard
+        const user = this.authService.getCurrentUser();
+        if (user?.householdId) {
+          this.router.navigate([`/${user.householdId}/dashboard`]);
+        } else {
+          // If user has no household, redirect to a no-household page or error
+          console.warn('User logged in but has no household assigned');
+          this.router.navigate(['/auth/login']);
+          this.errorMessage.set('Nie masz przypisanego gospodarstwa domowego. Skontaktuj się z administratorem.');
+        }
       },
       error: (error: Error) => {
         // Display error message

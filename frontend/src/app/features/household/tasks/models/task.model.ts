@@ -198,6 +198,11 @@ export interface CreateTaskDto {
    * Additional notes
    */
   notes?: string;
+
+  /**
+   * ID of user creating the task
+   */
+  createdBy: string;
 }
 
 /**
@@ -356,10 +361,10 @@ export function getPriorityLabel(priority: Priority): string {
 /**
  * Helper function to get priority severity for PrimeNG components
  */
-export function getPrioritySeverity(priority: Priority): 'success' | 'warning' | 'danger' {
-  const severities: Record<Priority, 'success' | 'warning' | 'danger'> = {
+export function getPrioritySeverity(priority: Priority): 'success' | 'warn' | 'danger' {
+  const severities: Record<Priority, 'success' | 'warn' | 'danger'> = {
     [Priority.LOW]: 'success',
-    [Priority.MEDIUM]: 'warning',
+    [Priority.MEDIUM]: 'warn',
     [Priority.HIGH]: 'danger'
   };
   return severities[priority];
