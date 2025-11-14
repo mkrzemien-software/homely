@@ -57,6 +57,8 @@
           id="assignedTo"
           formControlName="assignedTo"
           [options]="memberOptions()"
+          optionLabel="label"
+          optionValue="value"
           placeholder="Wybierz osobę odpowiedzialną"
           [style]="{ width: '100%' }"
           [disabled]="memberOptions().length === 0"
@@ -64,7 +66,7 @@
         @if (memberOptions().length === 0) {
           <small class="form-info">
             <i class="pi pi-info-circle"></i>
-            Funkcja zostanie dostępna po zaimplementowaniu zarządzania członkami gospodarstwa
+            Brak członków gospodarstwa. Upewnij się, że jesteś zalogowany i masz dostęp do gospodarstwa.
           </small>
         }
         @if (createEventForm.get('assignedTo')?.invalid && createEventForm.get('assignedTo')?.touched) {
@@ -77,7 +79,7 @@
         <label for="dueDate" class="form-label">
           Data terminu *
         </label>
-        <p-calendar
+        <p-datepicker
           id="dueDate"
           formControlName="dueDate"
           [minDate]="minDate"
@@ -86,7 +88,8 @@
           dateFormat="dd.mm.yy"
           placeholder="Wybierz datę"
           [style]="{ width: '100%' }"
-        ></p-calendar>
+          appendTo="body"
+        ></p-datepicker>
         @if (createEventForm.get('dueDate')?.invalid && createEventForm.get('dueDate')?.touched) {
           <small class="form-error">Data terminu jest wymagana</small>
         }

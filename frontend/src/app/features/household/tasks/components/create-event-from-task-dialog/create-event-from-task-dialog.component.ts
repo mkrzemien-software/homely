@@ -6,7 +6,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -15,6 +15,9 @@ import { TagModule } from 'primeng/tag';
 
 // Models
 import { Task, Priority, getPriorityLabel, getPrioritySeverity, formatInterval } from '../../models/task.model';
+
+// Services
+import { HouseholdService } from '../../../../../core/services/household.service';
 
 /**
  * CreateEventFromTaskDialogComponent
@@ -40,7 +43,7 @@ import { Task, Priority, getPriorityLabel, getPrioritySeverity, formatInterval }
     DialogModule,
     ButtonModule,
     DropdownModule,
-    CalendarModule,
+    DatePickerModule,
     InputTextarea,
     ToastModule,
     DividerModule,
@@ -60,14 +63,17 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
+  private householdService = inject(HouseholdService);
   // TODO: Inject EventsService when implemented
   // private eventsService = inject(EventsService);
 
   createEventForm: FormGroup;
   isLoading = signal<boolean>(false);
 
-  // TODO: Load household members from API
-  householdMembers = signal<any[]>([]);
+  /**
+   * Household members loaded from API
+   */
+  householdMembers = signal<Array<{ id: string; firstName: string; lastName: string; email: string; role: string }>>([]);
 
   /**
    * Priority options for dropdown
@@ -118,23 +124,34 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
       });
     }
 
-    // TODO: Load household members
-    // this.loadHouseholdMembers();
+    // Load household members
+    this.loadHouseholdMembers();
   }
 
   /**
-   * TODO: Load household members from API
+   * Load household members from API
    */
   private loadHouseholdMembers(): void {
-    // Placeholder for API call
-    // this.householdMembersService.getMembers(this.householdId).subscribe({
-    //   next: (members) => {
-    //     this.householdMembers.set(members);
-    //   },
-    //   error: (error) => {
-    //     console.error('Error loading household members:', error);
-    //   }
-    // });
+    if (!this.householdId) {
+      console.warn('Cannot load household members: householdId is null');
+      return;
+    }
+
+    this.householdService.getHouseholdMembers(this.householdId).subscribe({
+      next: (members) => {
+        this.householdMembers.set(members || []);
+        console.log('Loaded household members:', members);
+      },
+      error: (error) => {
+        console.error('Error loading household members:', error);
+        this.householdMembers.set([]); // Set empty array on error
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Błąd',
+          detail: 'Nie udało się załadować listy członków gospodarstwa'
+        });
+      }
+    });
   }
 
   /**

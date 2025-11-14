@@ -35,6 +35,38 @@
 .events-header {
   margin-bottom: 2rem;
 
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+
+  .header-text {
+    flex: 1;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    @media (max-width: 768px) {
+      width: 100%;
+
+      ::ng-deep .p-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
   h1 {
     margin: 0 0 0.5rem 0;
     font-size: 2rem;
@@ -390,6 +422,57 @@
     strong {
       font-weight: 600;
       margin-right: 0.5rem;
+    }
+  }
+}
+
+// Create Event Dialog
+.create-event-dialog {
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-color);
+
+      .required {
+        color: var(--red-500);
+        margin-right: 0.25rem;
+      }
+    }
+
+    &.full-width {
+      grid-column: span 2;
+
+      @media (max-width: 768px) {
+        grid-column: span 1;
+      }
+    }
+  }
+
+  .form-help-text {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+
+    .required {
+      color: var(--red-500);
+      margin-right: 0.25rem;
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, catchError, of } from 'rxjs';
+import { Observable, throwError, catchError, of, map } from 'rxjs';
 
 /**
  * API Response wrapper
@@ -82,42 +82,16 @@ export class HouseholdService {
 
   /**
    * Get household members
-   * TODO: Replace mock data with actual API call when backend is ready
    */
   getHouseholdMembers(householdId: string): Observable<HouseholdMember[]> {
-    // Mock data for development
-    const mockMembers: HouseholdMember[] = [
-      {
-        id: '1',
-        firstName: 'Jan',
-        lastName: 'Kowalski',
-        email: 'jan.kowalski@example.com',
-        role: 'admin'
-      },
-      {
-        id: '2',
-        firstName: 'Anna',
-        lastName: 'Kowalska',
-        email: 'anna.kowalska@example.com',
-        role: 'member'
-      },
-      {
-        id: '3',
-        firstName: 'Piotr',
-        lastName: 'Nowak',
-        email: 'piotr.nowak@example.com',
-        role: 'member'
-      }
-    ];
-
-    return of(mockMembers);
-
-    // TODO: Uncomment when backend is ready
-    // return this.http.get<HouseholdMember[]>(`${this.API_URL}/${householdId}/members`).pipe(
-    //   catchError((error: HttpErrorResponse) => {
-    //     return throwError(() => this.handleError(error));
-    //   })
-    // );
+    return this.http.get<ApiResponse<HouseholdMember[]>>(`${this.API_URL}/${householdId}/members`).pipe(
+      map(response => response.data || []),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error loading household members:', error);
+        // Return empty array on error to prevent application crash
+        return of([]);
+      })
+    );
   }
 
   /**

@@ -128,14 +128,14 @@ export interface CreateEventDto {
   householdId: string;
 
   /**
-   * Task ID (template)
+   * Task ID (template, optional)
    */
-  taskId: string;
+  taskId?: string;
 
   /**
    * Assigned user ID
    */
-  assignedToId: string;
+  assignedTo?: string;
 
   /**
    * Due date (ISO 8601 format)
@@ -143,14 +143,29 @@ export interface CreateEventDto {
   dueDate: string;
 
   /**
-   * Event priority (optional, defaults to task priority)
+   * Event title (required)
+   */
+  title: string;
+
+  /**
+   * Event description
+   */
+  description?: string;
+
+  /**
+   * Event notes
+   */
+  notes?: string;
+
+  /**
+   * Event priority (optional, defaults to medium)
    */
   priority?: Priority;
 
   /**
-   * Additional notes
+   * Whether event should automatically regenerate when completed
    */
-  notes?: string;
+  isRecurring?: boolean;
 
   /**
    * ID of user creating the event

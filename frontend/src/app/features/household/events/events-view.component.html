@@ -1,11 +1,23 @@
 <div class="events-view-container">
   <!-- Header -->
   <div class="events-header">
-    <h1 class="page-title">
-      <i class="pi pi-calendar" aria-hidden="true"></i>
-      Wydarzenia
-    </h1>
-    <p class="subtitle">Zarządzaj zaplanowanymi wydarzeniami i terminami</p>
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="page-title">
+          <i class="pi pi-calendar" aria-hidden="true"></i>
+          Wydarzenia
+        </h1>
+        <p class="subtitle">Zarządzaj zaplanowanymi wydarzeniami i terminami</p>
+      </div>
+      <div class="header-actions">
+        <p-button
+          label="Dodaj wydarzenie"
+          icon="pi pi-plus"
+          (onClick)="openCreateEventDialog()"
+          severity="success"
+        ></p-button>
+      </div>
+    </div>
   </div>
 
   <p-divider></p-divider>
@@ -40,12 +52,12 @@
       <!-- Search -->
       <div class="filter-item search-filter">
         <label>Wyszukiwanie</label>
-        <p-iconField iconPosition="left" styleClass="w-full">
-          <p-inputIcon styleClass="pi pi-search" />
+        <p-iconField iconPosition="left" [styleClass]="'w-full'">
+          <p-inputIcon [styleClass]="'pi pi-search'" />
           <input
             type="text"
             pInputText
-            [(ngModel)]="searchText"
+            [ngModel]="searchText()"
             (ngModelChange)="onSearch($event)"
             placeholder="Szukaj wydarzeń..."
             class="w-full"
@@ -58,12 +70,12 @@
         <label>Osoba odpowiedzialna</label>
         <p-dropdown
           [options]="assigneeOptions()"
-          [(ngModel)]="selectedAssigneeId"
+          [ngModel]="selectedAssigneeId()"
           (ngModelChange)="onAssigneeFilterChange($event)"
           optionLabel="label"
           optionValue="value"
           placeholder="Wybierz osobę"
-          styleClass="w-full"
+          [styleClass]="'w-full'"
           [showClear]="true"
         ></p-dropdown>
       </div>
@@ -73,12 +85,12 @@
         <label>Kategoria</label>
         <p-dropdown
           [options]="categoryOptions()"
-          [(ngModel)]="selectedCategoryId"
+          [ngModel]="selectedCategoryId()"
           (ngModelChange)="onCategoryFilterChange($event)"
           optionLabel="label"
           optionValue="value"
           placeholder="Wybierz kategorię"
-          styleClass="w-full"
+          [styleClass]="'w-full'"
           [showClear]="true"
         ></p-dropdown>
       </div>
@@ -88,12 +100,12 @@
         <label>Priorytet</label>
         <p-dropdown
           [options]="priorityOptions"
-          [(ngModel)]="selectedPriority"
+          [ngModel]="selectedPriority()"
           (ngModelChange)="onPriorityFilterChange($event)"
           optionLabel="label"
           optionValue="value"
           placeholder="Wybierz priorytet"
-          styleClass="w-full"
+          [styleClass]="'w-full'"
           [showClear]="true"
         ></p-dropdown>
       </div>
@@ -103,12 +115,12 @@
         <label>Status</label>
         <p-dropdown
           [options]="statusOptions"
-          [(ngModel)]="selectedStatus"
+          [ngModel]="selectedStatus()"
           (ngModelChange)="onStatusFilterChange($event)"
           optionLabel="label"
           optionValue="value"
           placeholder="Wybierz status"
-          styleClass="w-full"
+          [styleClass]="'w-full'"
           [showClear]="true"
         ></p-dropdown>
       </div>
@@ -117,23 +129,25 @@
       <div class="filter-item date-range">
         <label>Zakres dat</label>
         <div class="date-range-inputs">
-          <p-calendar
-            [(ngModel)]="startDate"
-            (ngModelChange)="onDateRangeChange()"
+          <p-datepicker
+            [ngModel]="startDate()"
+            (ngModelChange)="startDate.set($event); onDateRangeChange()"
             placeholder="Od"
-            dateFormat="dd.mm.yy"
+            [dateFormat]="'dd.mm.yy'"
             [showIcon]="true"
-            styleClass="w-full"
-          ></p-calendar>
+            [styleClass]="'w-full'"
+            [showOnFocus]="false"
+          ></p-datepicker>
           <span class="date-separator">-</span>
-          <p-calendar
-            [(ngModel)]="endDate"
-            (ngModelChange)="onDateRangeChange()"
+          <p-datepicker
+            [ngModel]="endDate()"
+            (ngModelChange)="endDate.set($event); onDateRangeChange()"
             placeholder="Do"
-            dateFormat="dd.mm.yy"
+            [dateFormat]="'dd.mm.yy'"
             [showIcon]="true"
-            styleClass="w-full"
-          ></p-calendar>
+            [styleClass]="'w-full'"
+            [showOnFocus]="false"
+          ></p-datepicker>
         </div>
       </div>
 
@@ -142,11 +156,11 @@
         <label>Sortowanie</label>
         <p-dropdown
           [options]="sortOptions"
-          [(ngModel)]="sortBy"
+          [ngModel]="sortBy()"
           (ngModelChange)="onSortChange($event)"
           optionLabel="label"
           optionValue="value"
-          styleClass="w-full"
+          [styleClass]="'w-full'"
         ></p-dropdown>
       </div>
 
@@ -198,8 +212,8 @@
       @for (i of [1, 2, 3, 4, 5]; track i) {
         <p-card class="event-card">
           <p-skeleton width="100%" height="2rem"></p-skeleton>
-          <p-skeleton width="80%" height="1.5rem" styleClass="mt-2"></p-skeleton>
-          <p-skeleton width="60%" height="1rem" styleClass="mt-2"></p-skeleton>
+          <p-skeleton width="80%" height="1.5rem" [styleClass]="'mt-2'"></p-skeleton>
+          <p-skeleton width="60%" height="1rem" [styleClass]="'mt-2'"></p-skeleton>
         </p-card>
       }
     </div>
@@ -338,7 +352,7 @@
       [first]="(currentPage() - 1) * itemsPerPage()"
       [rowsPerPageOptions]="[10, 20, 50, 100]"
       (onPageChange)="onPageChange($event)"
-      styleClass="mt-4"
+      [styleClass]="'mt-4'"
     ></p-paginator>
   }
 </div>
@@ -392,6 +406,118 @@
       icon="pi pi-times"
       (onClick)="hideEventDetailsDialog()"
       severity="secondary"
+    ></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Create Event Dialog -->
+<p-dialog
+  [(visible)]="createEventDialogVisible"
+  header="Dodaj nowe wydarzenie"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '50vw', maxWidth: '600px' }"
+  (onHide)="closeCreateEventDialog()"
+>
+  <div class="create-event-dialog">
+    <div class="form-grid">
+      <!-- Task Selection -->
+      <div class="form-field">
+        <label for="task-select"><span class="required">*</span> Zadanie</label>
+        <p-dropdown
+          id="task-select"
+          [options]="taskDropdownOptions()"
+          [ngModel]="newEventTaskId()"
+          (ngModelChange)="newEventTaskId.set($event)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Wybierz zadanie"
+          [styleClass]="'w-full'"
+          [showClear]="false"
+        ></p-dropdown>
+      </div>
+
+      <!-- Due Date -->
+      <div class="form-field">
+        <label for="due-date"><span class="required">*</span> Data wykonania</label>
+        <p-datepicker
+          id="due-date"
+          [ngModel]="newEventDueDate()"
+          (ngModelChange)="newEventDueDate.set($event)"
+          placeholder="Wybierz datę"
+          [dateFormat]="'dd.mm.yy'"
+          [showIcon]="true"
+          [styleClass]="'w-full'"
+          appendTo="body"
+          [showOnFocus]="false"
+        ></p-datepicker>
+      </div>
+
+      <!-- Priority -->
+      <div class="form-field">
+        <label for="priority-select">Priorytet</label>
+        <p-dropdown
+          id="priority-select"
+          [options]="priorityOptions"
+          [ngModel]="newEventPriority()"
+          (ngModelChange)="newEventPriority.set($event)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Wybierz priorytet (domyślnie z zadania)"
+          [styleClass]="'w-full'"
+          [showClear]="true"
+        ></p-dropdown>
+      </div>
+
+      <!-- Assigned Member -->
+      <div class="form-field">
+        <label for="assignee-select"><span class="required">*</span> Osoba odpowiedzialna</label>
+        <p-dropdown
+          id="assignee-select"
+          [options]="assigneeDropdownOptions()"
+          [ngModel]="newEventAssignedToId()"
+          (ngModelChange)="newEventAssignedToId.set($event)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Wybierz osobę"
+          [styleClass]="'w-full'"
+          [showClear]="false"
+        ></p-dropdown>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-field full-width">
+        <label for="notes-input">Notatki</label>
+        <textarea
+          id="notes-input"
+          pInputTextarea
+          [ngModel]="newEventNotes()"
+          (ngModelChange)="newEventNotes.set($event)"
+          placeholder="Dodatkowe informacje..."
+          rows="4"
+          class="w-full"
+        ></textarea>
+      </div>
+    </div>
+
+    <p class="form-help-text">
+      <span class="required">*</span> Pola wymagane
+    </p>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Anuluj"
+      icon="pi pi-times"
+      (onClick)="closeCreateEventDialog()"
+      severity="secondary"
+      [outlined]="true"
+    ></p-button>
+    <p-button
+      label="Utwórz wydarzenie"
+      icon="pi pi-check"
+      (onClick)="submitCreateEvent()"
+      severity="success"
     ></p-button>
   </ng-template>
 </p-dialog>

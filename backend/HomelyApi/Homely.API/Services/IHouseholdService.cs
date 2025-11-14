@@ -31,5 +31,13 @@ namespace Homely.API.Services
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>True if user is a member, false otherwise</returns>
         Task<bool> CanUserAccessHouseholdAsync(Guid householdId, Guid userId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get all members of a household
+        /// </summary>
+        /// <param name="householdId">Household ID</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>List of household member DTOs</returns>
+        Task<IEnumerable<HouseholdMemberDto>> GetHouseholdMembersAsync(Guid householdId, CancellationToken cancellationToken = default);
     }
 }

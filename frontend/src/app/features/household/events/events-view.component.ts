@@ -8,6 +8,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
+import { InputTextarea } from 'primeng/inputtextarea';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { DividerModule } from 'primeng/divider';
@@ -17,7 +18,7 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 
 // Models
 import {
@@ -31,12 +32,14 @@ import {
   isEventOverdue
 } from './models/event.model';
 
-import { Priority, getPriorityLabel, getPrioritySeverity } from '../tasks/models/task.model';
+import { Priority, getPriorityLabel, getPrioritySeverity, Task } from '../tasks/models/task.model';
+import { CreateEventDto } from './models/event.model';
 
 // Services
 import { EventsService } from './services/events.service';
 import { CategoryService } from '../items/services/category.service';
 import { HouseholdService } from '../../../core/services/household.service';
+import { TasksService } from '../tasks/services/tasks.service';
 import { Category } from '../items/models/category.model';
 
 // Components (to be created)
@@ -77,6 +80,7 @@ import { Category } from '../items/models/category.model';
     ButtonModule,
     DropdownModule,
     InputTextModule,
+    InputTextarea,
     IconFieldModule,
     InputIconModule,
     DividerModule,
@@ -86,7 +90,7 @@ import { Category } from '../items/models/category.model';
     TooltipModule,
     DialogModule,
     PaginatorModule,
-    CalendarModule
+    DatePickerModule
     // EventDetailsDialogComponent,
     // StatusCountersComponent
   ],
@@ -99,6 +103,7 @@ export class EventsViewComponent implements OnInit {
   private eventsService = inject(EventsService);
   private categoryService = inject(CategoryService);
   private householdService = inject(HouseholdService);
+  private tasksService = inject(TasksService);
 
   /**
    * Household ID from route
@@ -199,6 +204,57 @@ export class EventsViewComponent implements OnInit {
   selectedEvent = signal<Event | null>(null);
 
   /**
+   * Create event dialog visibility
+   */
+  createEventDialogVisible = signal<boolean>(false);
+
+  /**
+   * All tasks for task selection dropdown
+   */
+  allTasks = signal<Task[]>([]);
+
+  /**
+   * Create event form - selected task ID
+   */
+  newEventTaskId = signal<string | undefined>(undefined);
+
+  /**
+   * Create event form - title
+   */
+  newEventTitle = signal<string>('');
+
+  /**
+   * Create event form - due date
+   */
+  newEventDueDate = signal<Date | undefined>(undefined);
+
+  /**
+   * Create event form - priority (optional, defaults to task priority)
+   */
+  newEventPriority = signal<Priority | undefined>(undefined);
+
+  /**
+   * Create event form - assigned member ID
+   */
+  newEventAssignedToId = signal<string | undefined>(undefined);
+
+  /**
+   * Create event form - description
+   */
+  newEventDescription = signal<string>('');
+
+  /**
+   * Create event form - notes
+   */
+  newEventNotes = signal<string>('');
+
+  /**
+   * Current user ID (for createdBy field)
+   * TODO: Get from auth service when implemented
+   */
+  currentUserId = signal<string>('1'); // Mock value
+
+  /**
    * Filtered events (client-side filtering by search text)
    */
   filteredEvents = computed(() => {
@@ -253,6 +309,28 @@ export class EventsViewComponent implements OnInit {
         value: m.id
       }))
     ];
+  });
+
+  /**
+   * Assignee dropdown options (without "all users" option, for create form)
+   */
+  assigneeDropdownOptions = computed(() => {
+    const members = this.householdMembers();
+    return members.map(m => ({
+      label: `${m.firstName} ${m.lastName}`,
+      value: m.id
+    }));
+  });
+
+  /**
+   * Task dropdown options for create event form
+   */
+  taskDropdownOptions = computed(() => {
+    const tasks = this.allTasks();
+    return tasks.map(task => ({
+      label: task.name,
+      value: task.id
+    }));
   });
 
   /**
@@ -317,6 +395,7 @@ export class EventsViewComponent implements OnInit {
         this.householdId.set(id);
         this.loadCategories();
         this.loadHouseholdMembers();
+        this.loadTasks();
         this.loadEvents();
       }
     });
@@ -344,10 +423,32 @@ export class EventsViewComponent implements OnInit {
     this.householdService.getHouseholdMembers(this.householdId()).subscribe({
       next: (members) => {
         this.householdMembers.set(members || []);
+
+        // Set default assignee to current user (first member for now)
+        // TODO: Get from auth service when implemented
+        if (members && members.length > 0) {
+          this.currentUserId.set(members[0].id);
+          this.newEventAssignedToId.set(members[0].id);
+        }
       },
       error: (error) => {
         console.error('Error loading household members:', error);
         this.householdMembers.set([]); // Set empty array on error
+      }
+    });
+  }
+
+  /**
+   * Load tasks for task selection dropdown
+   */
+  private loadTasks(): void {
+    this.tasksService.getTasks({ householdId: this.householdId(), isActive: true }).subscribe({
+      next: (response) => {
+        this.allTasks.set(response?.data || []);
+      },
+      error: (error) => {
+        console.error('Error loading tasks:', error);
+        this.allTasks.set([]); // Set empty array on error
       }
     });
   }
@@ -631,5 +732,81 @@ export class EventsViewComponent implements OnInit {
     this.sortOrder.set('asc');
     this.currentPage.set(1);
     this.loadEvents();
+  }
+
+  /**
+   * Open create event dialog
+   */
+  openCreateEventDialog(): void {
+    // Reset form
+    this.newEventTaskId.set(undefined);
+    this.newEventTitle.set('');
+    this.newEventDueDate.set(undefined);
+    this.newEventPriority.set(undefined);
+    this.newEventDescription.set('');
+    this.newEventNotes.set('');
+
+    // Set default assignee to current user
+    this.newEventAssignedToId.set(this.currentUserId());
+
+    // Open dialog
+    this.createEventDialogVisible.set(true);
+  }
+
+  /**
+   * Close create event dialog
+   */
+  closeCreateEventDialog(): void {
+    this.createEventDialogVisible.set(false);
+  }
+
+  /**
+   * Submit create event form
+   */
+  submitCreateEvent(): void {
+    // Validate required fields
+    if (!this.newEventTitle() || this.newEventTitle().trim() === '') {
+      alert('Proszę podać tytuł wydarzenia.');
+      return;
+    }
+
+    if (!this.newEventDueDate()) {
+      alert('Proszę wybrać datę wykonania.');
+      return;
+    }
+
+    // Get selected task to determine priority if not set
+    const selectedTask = this.allTasks().find(t => t.id === this.newEventTaskId());
+    const priority = this.newEventPriority() || selectedTask?.priority || Priority.MEDIUM;
+
+    // Build CreateEventDto
+    const createDto: CreateEventDto = {
+      householdId: this.householdId(),
+      taskId: this.newEventTaskId() || undefined,
+      assignedTo: this.newEventAssignedToId() || undefined,
+      dueDate: this.newEventDueDate()!.toISOString(),
+      title: this.newEventTitle().trim(),
+      description: this.newEventDescription() || undefined,
+      notes: this.newEventNotes() || undefined,
+      priority: priority,
+      isRecurring: true,
+      createdBy: this.currentUserId()
+    };
+
+    // Call service to create event
+    this.eventsService.createEvent(createDto).subscribe({
+      next: (newEvent) => {
+        console.log('Event created:', newEvent);
+        // Close dialog
+        this.closeCreateEventDialog();
+        // Refresh events list
+        this.refresh();
+      },
+      error: (error) => {
+        console.error('Error creating event:', error);
+        const errorMessage = error.error?.error || 'Nie udało się utworzyć wydarzenia. Spróbuj ponownie.';
+        alert(errorMessage);
+      }
+    });
   }
 }

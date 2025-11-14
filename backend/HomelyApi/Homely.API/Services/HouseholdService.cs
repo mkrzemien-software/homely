@@ -1,3 +1,4 @@
+using Homely.API.Entities;
 using Homely.API.Models.DTOs.Households;
 using Homely.API.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
@@ -103,6 +104,60 @@ namespace Homely.API.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error checking user access for household: {HouseholdId}, User: {UserId}", householdId, userId);
+                throw;
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<HouseholdMemberDto>> GetHouseholdMembersAsync(Guid householdId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching members for household: {HouseholdId}", householdId);
+
+                // Get all household members
+                var householdMembers = await _unitOfWork.HouseholdMembers.GetHouseholdMembersAsync(householdId, cancellationToken);
+
+                // Get user IDs
+                var userIds = householdMembers.Select(hm => hm.UserId).Distinct().ToList();
+
+                // Fetch user profiles for all members
+                var userProfiles = new Dictionary<Guid, UserProfileEntity>();
+                foreach (var userId in userIds)
+                {
+                    var profile = await _unitOfWork.UserProfiles.GetByIdAsync(userId, cancellationToken);
+                    if (profile != null)
+                    {
+                        userProfiles[userId] = profile;
+                    }
+                }
+
+                // Map to DTOs
+                var dtos = householdMembers.Select(member =>
+                {
+                    var profile = userProfiles.GetValueOrDefault(member.UserId);
+
+                    return new HouseholdMemberDto
+                    {
+                        Id = member.Id.ToString(),
+                        UserId = member.UserId.ToString(),
+                        FirstName = profile?.FirstName ?? "Unknown",
+                        LastName = profile?.LastName ?? "User",
+                        // TODO: Email is stored in auth.users table (managed by Supabase)
+                        // For now using placeholder. In production, query auth.users or use Supabase client
+                        Email = $"{profile?.FirstName?.ToLower() ?? "user"}.{profile?.LastName?.ToLower() ?? "unknown"}@homely.local",
+                        Role = member.Role,
+                        AvatarUrl = profile?.AvatarUrl,
+                        JoinedAt = member.JoinedAt
+                    };
+                }).ToList();
+
+                _logger.LogInformation("Found {Count} members for household: {HouseholdId}", dtos.Count, householdId);
+                return dtos;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching household members: {HouseholdId}", householdId);
                 throw;
             }
         }

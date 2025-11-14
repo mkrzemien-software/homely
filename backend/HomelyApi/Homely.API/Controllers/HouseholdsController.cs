@@ -115,5 +115,57 @@ namespace Homely.API.Controllers
                     "Wystąpił błąd podczas pobierania listy gospodarstw", 500));
             }
         }
+
+        /// <summary>
+        /// Get all members of a household
+        /// </summary>
+        /// <param name="id">Household ID</param>
+        /// <returns>List of household members</returns>
+        [HttpGet("{id}/members")]
+        [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<HouseholdMemberDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<HouseholdMemberDto>>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<HouseholdMemberDto>>), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<HouseholdMemberDto>>), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<HouseholdMemberDto>>>> GetHouseholdMembers(string id)
+        {
+            try
+            {
+                // Parse household ID
+                if (!Guid.TryParse(id, out var householdId))
+                {
+                    return BadRequest(ApiResponseDto<IEnumerable<HouseholdMemberDto>>.ErrorResponse(
+                        "Nieprawidłowy format ID gospodarstwa", 400));
+                }
+
+                // Get current user ID from claims
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                {
+                    return Unauthorized(ApiResponseDto<IEnumerable<HouseholdMemberDto>>.ErrorResponse(
+                        "Brak lub nieprawidłowe ID użytkownika", 401));
+                }
+
+                // Check if user has access to this household
+                var hasAccess = await _householdService.CanUserAccessHouseholdAsync(householdId, userId);
+                if (!hasAccess)
+                {
+                    _logger.LogWarning("User {UserId} attempted to access household members for {HouseholdId} without permission",
+                        userId, householdId);
+                    return StatusCode(403, ApiResponseDto<IEnumerable<HouseholdMemberDto>>.ErrorResponse(
+                        "Brak dostępu do tego gospodarstwa", 403));
+                }
+
+                // Get household members
+                var members = await _householdService.GetHouseholdMembersAsync(householdId);
+
+                return Ok(ApiResponseDto<IEnumerable<HouseholdMemberDto>>.SuccessResponse(members));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving household members: {HouseholdId}", id);
+                return StatusCode(500, ApiResponseDto<IEnumerable<HouseholdMemberDto>>.ErrorResponse(
+                    "Wystąpił błąd podczas pobierania listy członków gospodarstwa", 500));
+            }
+        }
     }
 }
