@@ -12,6 +12,9 @@
 - **Events** - Scheduled appointments/occurrences (`events` table)
 - **EventsHistory** - Completed events archive (`events_history` table)
 - **Dashboard** - Aggregated dashboard data (multiple tables via views)
+  - Weekly calendar widget with events
+  - Event list with configurable date range (7/14/30 days)
+  - Monthly calendar view with event counts per day
 
 ## 2. Endpoints
 
@@ -610,13 +613,14 @@
 ### Dashboard
 
 #### GET /dashboard/upcoming-events
-- **Description**: Get upcoming events for dashboard
+- **Description**: Get upcoming events for dashboard (for weekly calendar widget and event list)
 - **Headers**: `Authorization: Bearer {token}`
-- **Query Parameters**: 
-  - `days` (optional, default: 7)
+- **Query Parameters**:
+  - `days` (optional, default: 7, max: 30) - number of days to fetch
   - `householdId` (optional)
-- **Response**: 
-  - **200**: 
+  - `startDate` (optional) - start date for range (defaults to today)
+- **Response**:
+  - **200**:
 ```json
 {
   "data": [
@@ -645,6 +649,53 @@
     "overdue": "integer",
     "today": "integer",
     "thisWeek": "integer"
+  }
+}
+```
+
+#### GET /dashboard/calendar-events
+- **Description**: Get events for calendar month view
+- **Headers**: `Authorization: Bearer {token}`
+- **Query Parameters**:
+  - `year` (required) - year to fetch (e.g., 2025)
+  - `month` (required) - month to fetch (1-12)
+  - `householdId` (optional)
+- **Response**:
+  - **200**:
+```json
+{
+  "year": "integer",
+  "month": "integer",
+  "data": [
+    {
+      "id": "uuid",
+      "dueDate": "date",
+      "urgencyStatus": "string",
+      "task": {
+        "name": "string",
+        "category": {
+          "name": "string",
+          "categoryType": {
+            "name": "string"
+          }
+        }
+      },
+      "assignedTo": {
+        "firstName": "string",
+        "lastName": "string"
+      },
+      "priority": "string",
+      "status": "string"
+    }
+  ],
+  "summary": {
+    "totalEvents": "integer",
+    "byDay": {
+      "1": "integer",
+      "2": "integer",
+      ...
+      "31": "integer"
+    }
   }
 }
 ```

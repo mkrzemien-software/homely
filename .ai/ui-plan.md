@@ -53,49 +53,102 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 
 #### Dashboard Główny
 - **Ścieżka**: `/dashboard`
-- **Cel**: Centralny hub z nawigacją kafelkową i przeglądem wydarzeń
+- **Cel**: Centralny hub z nawigacją kafelkową i interaktywnym kalendarzem tygodniowym
 - **Kluczowe informacje**: 
-  - **Kafelki nawigacyjne** (duże przyciski z ikonami) do głównych widoków:
-    - 📅 Wydarzenia - lista nadchodzących wydarzeń (7 dni)
-    - 📋 Zadania - zarządzanie szablonami zadań
-    - 🏷️ Kategorie - widok kategorii i podkategorii z zadaniami
-    - ⚙️ Ustawienia - szybki dostęp do konfiguracji gospodarstwa
-  - **Zintegrowany kalendarz** - dostępny jako widget/modal z poziomu dashboardu
-  - Wydarzenia na najbliższe 7 dni z oznaczeniem pilności
-  - Statystyki wykorzystania limitu zadań (wersja darmowa)
-  - Szybkie akcje (potwierdź, przełóż, edytuj, anuluj)
-  - Przełącznik gospodarstw (jeśli dostęp do wielu)
+  - **Kafelki nawigacyjne** (duże przyciski z ikonami) przekierowujące do głównych widoków:
+    - 📅 Kalendarz → `/calendar` - widok miesięczny kalendarz
+    - 📋 Wydarzenia → `/events` - lista wszystkich wydarzeń
+    - 📝 Zadania → `/tasks` - zarządzanie szablonami zadań
+    - 🏷️ Kategorie → `/categories` - widok kategorii i podkategorii z zadaniami
+  - **Interaktywny kalendarz tygodniowy** (PN-ND):
+    - Wydarzenia wyświetlane bezpośrednio w dniach tygodnia
+    - Całodniowe wydarzenia na górze każdego dnia
+    - Pozostałe wydarzenia jako bary uporządkowane według godzin
+    - Możliwość kliknięcia w dzień dla szczegółów
+    - Nawigacja poprzedni/następny tydzień
+    - Dzisiejszy dzień wyróżniony ramką
+  - **Lista wydarzeń** (pod kalendarzem):
+    - Scrollowalna lista kontynuująca wydarzenia
+    - Dropdown wyboru zakresu: 7 dni (domyślnie), 14 dni, miesiąc
+    - Color-coded urgency (primary/warning/danger)
+    - Przekroczone terminy ze specjalnym wyróżnieniem
+    - Kliknięcie w wydarzenie otwiera dialog ze szczegółami i akcjami
+  - **Toolbar (prawy górny róg)**:
+    - Przycisk dodawania nowego wydarzenia/zadania
+    - Filtry (osoba odpowiedzialna, kategoria, priorytet)
+    - **(Post-MVP)** Statystyki wykorzystania limitu (progress bars)
+  - **Przełącznik gospodarstw**: w menu nawigacyjnym (sidebar)
 - **Komponenty**:
-  - NavigationTiles (kafelki do widoków: wydarzenia/zadania/kategorie/ustawienia)
-  - CalendarWidget (zintegrowany mini kalendarz z wydarzeniami)
-  - UpcomingEventsList z color-coded urgency
-  - QuickActionButtons (potwierdź, przełóż, anuluj, szczegóły)
-  - UsageStatistics (progress bars dla limitów: zadania, członkowie, storage)
-  - HouseholdSwitcher
-- **UX/Dostępność**: Auto-refresh co 5 minut, keyboard shortcuts, ARIA live regions, tile-based navigation
-- **Bezpieczeństwo**: Role-based event visibility, permission checks na akcjach
+  - NavigationTiles (kafelki: Kalendarz, Wydarzenia, Zadania, Kategorie)
+  - WeekCalendarView (interaktywny kalendarz tygodniowy z barami wydarzeń)
+  - EventsListView (scrollowalna lista z filtrowaniem)
+  - EventDetailsDialog (dialog z akcjami: potwierdź, przełóż, edytuj, anuluj)
+  - DateRangeSelector (dropdown: 7/14/30 dni)
+  - EventFiltersToolbar (filtry w prawym górnym rogu)
+  - AddEventButton (quick action w toolbar)
+  - **(Post-MVP)** UsageStatistics (progress bars dla limitów)
+- **Responsywność**:
+  - Desktop: Kafelki 4 kolumny (2x2), kalendarz tygodniowy poziomy (7 dni obok siebie)
+  - Mobile/Tablet: Kafelki spadają pionowo, kalendarz pionowy (każdy dzień jako nowy rząd)
+- **UX/Dostępność**: Auto-refresh co 5 minut, keyboard shortcuts, ARIA live regions, touch gestures dla nawigacji tygodniowej
+- **Bezpieczeństwo**: Role-based event visibility, permission checks na akcjach w dialogu
 
-**Uwaga**: Kalendarz jest zintegrowany z dashboardem jako widget/modal, nie posiada osobnego widoku.
+**Uwaga**: Interaktywny kalendarz tygodniowy jest kluczowym elementem dashboardu. Pełny widok miesięczny dostępny jest pod `/calendar`, a lista wydarzeń pod `/events`.
+
+#### Widok Kalendarza Miesięcznego
+- **Ścieżka**: `/calendar`
+- **Cel**: Widok pełnego miesiąca z zaznaczonymi wydarzeniami (podobny do Google Calendar)
+- **Kluczowe informacje**:
+  - **Kalendarz miesięczny** w siatce (7x5/6 wierszy dla dni)
+  - Wydarzenia zaznaczone w dniach (kropki, ikony, kolory)
+  - Możliwość przeglądania poprzednich/następnych miesięcy
+  - Dzisiejszy dzień wyróżniony ramką
+  - **Po kliknięciu w dzień**:
+    - Pod kalendarzem pojawia się lista wydarzeń tego dnia
+    - Lista podobna jak w Dashboard (scrollowalna, color-coded)
+    - Kliknięcie w wydarzenie otwiera EventDetailsDialog
+  - **Po kliknięciu w pusty dzień**:
+    - Otwiera się formularz dodawania wydarzenia z pre-wypełnioną datą
+  - **Toolbar (prawy górny róg)**:
+    - Przycisk dodawania nowego wydarzenia
+    - Filtry (osoba odpowiedzialna, kategoria, priorytet)
+    - Przycisk powrotu do dzisiejszego dnia
+- **Komponenty**:
+  - MonthCalendarView (siatka miesięczna z zaznaczonymi wydarzeniami)
+  - DayEventsPanel (lista wydarzeń wybranego dnia pod kalendarzem)
+  - EventDetailsDialog (dialog z akcjami)
+  - AddEventButton
+  - EventFiltersToolbar
+  - MonthNavigationControls (poprzedni/następny miesiąc, "dzisiaj")
+- **Responsywność**:
+  - Desktop: Pełna siatka kalendarza, wydarzenia widoczne w dniach
+  - Mobile/Tablet: Kompaktowa siatka, wydarzenia jako licznik, kliknięcie pokazuje listę
+- **UX/Dostępność**: Keyboard navigation (strzałki między dniami), ARIA calendar role, touch gestures
+- **Bezpieczeństwo**: Role-based event visibility, permission checks
+- **Dostęp przez**: Sidebar (📅 Kalendarz), kafelek na dashboardzie, bottom navigation (mobile)
 
 #### Widok Wydarzeń
 - **Ścieżka**: `/events`
-- **Cel**: Lista nadchodzących wydarzeń (konkretnych terminów) z możliwością wykonywania akcji
+- **Cel**: Pełna lista wszystkich wydarzeń z filtrowaniem (podobna do `/tasks`)
 - **Kluczowe informacje**:
-  - Lista wydarzeń chronologicznie (7 dni domyślnie)
+  - Lista wydarzeń w formie tabeli/kart (podobnie jak widok zadań)
   - Wyróżnienie kolorystyczne (przekroczony/dzisiaj/nadchodzący)
   - Informacja o powiązanym zadaniu
-  - Szybkie akcje na każdym wydarzeniu
-  - Filtry (osoba odpowiedzialna, kategoria, priorytet, status)
+  - Kliknięcie w wydarzenie otwiera EventDetailsDialog z akcjami
+  - Filtry (osoba odpowiedzialna, kategoria, priorytet, status, zakres dat)
+  - Sortowanie (data, nazwa, priorytet, status)
   - Licznik wydarzeń według statusu
+  - Wyszukiwanie po nazwie/opisie
 - **Komponenty**:
-  - EventsList z filtering
-  - EventCard z quick actions
-  - EventFilters
-  - EventActionButtons (potwierdź, przełóż, edytuj, anuluj)
-  - RelatedTaskInfo
-- **UX/Dostępność**: Focus management, keyboard shortcuts dla akcji
+  - EventsList z filtering i sorting
+  - EventCard (kompaktowe karty lub wiersze tabeli)
+  - EventFilters (toolbar z filtrami)
+  - EventDetailsDialog (po kliknięciu w wydarzenie)
+  - SearchBar
+  - StatusCounters
+- **UX/Dostępność**: Focus management, keyboard shortcuts dla akcji, infinite scroll lub pagination
 - **Bezpieczeństwo**: Permission checks per event based on assignment
-- **Dostęp przez**: Sidebar (📅 Wydarzenia) lub kafelek na dashboardzie
+- **Dostęp przez**: Sidebar (📋 Wydarzenia) lub kafelek na dashboardzie
 
 #### Widok Zadań (Templates)
 - **Ścieżka**: `/tasks`
@@ -520,20 +573,26 @@ Add First Item → Dashboard → Explore Features
 ### 3.2 Codzienny Workflow (Daily Usage)
 
 ```
-Login → Dashboard (Review Upcoming Tasks) → 
-Quick Actions (Confirm/Postpone) → 
-[Optional: Sidebar Navigation to Tasks/Categories/Items] → 
-[Optional: Switch Tile Views (Tasks/Categories/Settings)] → 
-[Optional: Open Integrated Calendar] → 
-[Optional: Items Management] → Logout
+Login → Dashboard (4 kafelki: Kalendarz/Wydarzenia/Zadania/Kategorie) → 
+Interaktywny kalendarz tygodniowy (przegląd wydarzeń w barach) → 
+[Kliknięcie w wydarzenie → EventDetailsDialog z akcjami] →
+[Opcjonalnie: Kafelek Kalendarz → Widok miesięczny `/calendar`] →
+[Opcjonalnie: Kafelek Wydarzenia → Lista wszystkich `/events`] →
+[Opcjonalnie: Kafelki Zadania/Kategorie → Odpowiednie widoki] → 
+[Opcjonalnie: Sidebar → Inne widoki] → Logout
 ```
 
 **Kluczowe punkty**:
-- Fast access do najważniejszych informacji
-- One-click actions dla common tasks
-- Sidebar navigation dla szybkiego dostępu do wszystkich widoków
-- Tile-based navigation na dashboardzie dla alternatywnego sposobu nawigacji
-- Optional deeper management functions
+- Fast access do najważniejszych informacji na dashboardzie
+- Interaktywny kalendarz tygodniowy jako główny element (bary wydarzeń w dniach)
+- One-click actions przez dialog po kliknięciu wydarzenia
+- 4 kafelki nawigacyjne:
+  - Kalendarz → `/calendar` (widok miesięczny)
+  - Wydarzenia → `/events` (lista wszystkich)
+  - Zadania → `/tasks` (szablony zadań)
+  - Kategorie → `/categories` (organizacja)
+- Sidebar navigation dla dostępu do wszystkich funkcji
+- Dropdown wyboru zakresu (7/14/30 dni) dla lepszego planowania na dashboardzie
 
 ### 3.3 Administrator Workflow
 
@@ -600,11 +659,15 @@ Pierwsza sekcja menu zawiera widoki związane z aktualnie otwartym gospodarstwem
 === GOSPODARSTWO: [Nazwa gospodarstwa] ===
 
 📊 Dashboard (wszystkie role)
-   └─ z kafelkami nawigacyjnymi i zintegrowanym kalendarzem
-📋 Zadania (Admin, Domownik)
-   └─ lista nadchodzących terminów (7 dni)
+   └─ z kafelkami nawigacyjnymi (Kalendarz/Wydarzenia/Zadania/Kategorie) i interaktywnym kalendarzem tygodniowym
+📅 Kalendarz (Admin, Domownik)
+   └─ widok miesięczny z zaznaczonymi wydarzeniami
+📋 Wydarzenia (Admin, Domownik)
+   └─ pełna lista wszystkich wydarzeń
+📝 Zadania (Admin, Domownik)
+   └─ zarządzanie szablonami zadań
 🏷️ Kategorie (Admin, Domownik)
-   └─ widok urządzeń/wizyt pogrupowanych po kategoriach
+   └─ widok kategorii i podkategorii z zadaniami
 🏠 Urządzenia/Wizyty (Admin, Domownik)
    └─ pełna lista z możliwością zarządzania
 👥 Gospodarstwo (Admin only)
@@ -657,10 +720,12 @@ Druga sekcja menu (widoczna **tylko dla użytkowników z rolą System Developer*
 
 #### Bottom Navigation (Mobile)
 ```
-[Dashboard] [Zadania] [Kategorie] [Menu]
+[Dashboard] [Kalendarz] [Kategorie] [Menu]
 ```
 **Uwaga**: 
-- Kalendarz dostępny z poziomu Dashboard jako widget/modal
+- Dashboard zawiera interaktywny kalendarz tygodniowy + 4 kafelki nawigacyjne
+- Kalendarz przekierowuje do `/calendar` (widok miesięczny)
+- Kategorie przekierowują do `/categories`
 - Przycisk Menu otwiera pełny sidebar z obiema sekcjami (jeśli użytkownik ma uprawnienia)
 
 ### 4.2 Secondary Navigation
@@ -686,9 +751,11 @@ interface NavigationRules {
   // ===== SEKCJA 1: WIDOKI GOSPODARSTWA =====
   // Dostępne w kontekście aktualnie otwartego gospodarstwa
   
-  '/dashboard': ['admin', 'member', 'dashboard'], // includes integrated calendar
-  '/tasks': ['admin', 'member'], // lista zadań (7 dni)
-  '/categories': ['admin', 'member'], // widok pogrupowany po kategoriach
+  '/dashboard': ['admin', 'member', 'dashboard'], // z kafelkami i interaktywnym kalendarzem tygodniowym
+  '/calendar': ['admin', 'member'], // widok miesięczny kalendarz
+  '/events': ['admin', 'member'], // pełna lista wszystkich wydarzeń
+  '/tasks': ['admin', 'member'], // zarządzanie szablonami zadań
+  '/categories': ['admin', 'member'], // widok kategorii z podkategoriami
   '/items': ['admin', 'member'], // pełna lista urządzeń/wizyt
   '/households/:id/manage': ['admin'], // zarządzanie gospodarstwem
   
@@ -730,6 +797,8 @@ interface SidebarSectionRules {
     context: 'current_household_id_required',
     items: {
       dashboard: ['admin', 'member', 'dashboard'],
+      calendar: ['admin', 'member'], // widok miesięczny kalendarz
+      events: ['admin', 'member'], // pełna lista wszystkich wydarzeń
       tasks: ['admin', 'member'],
       categories: ['admin', 'member'],
       items: ['admin', 'member'],
@@ -808,26 +877,84 @@ interface SidebarSectionRules {
 ### 5.2 Data Display Components
 
 #### NavigationTiles (Dashboard)
-- **Cel**: Kafelki nawigacyjne do przełączania widoków na dashboardzie
+- **Cel**: Kafelki nawigacyjne przekierowujące do głównych widoków aplikacji
 - **Features**:
-  - Duże, klikalne kafelki z ikonami (Zadania/Kategorie/Ustawienia)
-  - Responsive grid layout (2-3 kolumny w zależności od rozmiaru ekranu)
-  - Active state indicator dla wybranego widoku
+  - Duże, klikalne kafelki z ikonami:
+    - Kalendarz → `/calendar` (widok miesięczny)
+    - Wydarzenia → `/events` (lista wszystkich)
+    - Zadania → `/tasks` (szablony zadań)
+    - Kategorie → `/categories` (organizacja)
+  - Responsive grid layout (4 kafelki 2x2 desktop, pionowo na mobile/tablet)
   - Hover effects z subtle animations
   - Keyboard navigation support (tab, enter)
+  - Przekierowanie na kliknięcie (nie są to taby)
 - **Reusability**: Dashboard główny
 - **Security**: Dynamic rendering based on user permissions
 
-#### CalendarWidget
-- **Cel**: Zintegrowany kalendarz w dashboardzie
+#### MonthCalendarView
+- **Cel**: Widok miesięczny kalendarz z zaznaczonymi wydarzeniami (podobny do Google Calendar)
 - **Features**:
-  - Kompaktowy widok miesięczny lub modal z pełnym widokiem
-  - Kolorowe oznaczenia kategorii
-  - Click na dzień pokazuje szczegóły terminów
-  - Nawigacja między miesiącami
-  - Responsive design (collapse na mobile)
-- **Reusability**: Dashboard główny, modals
+  - Siatka 7x5/6 (dni tygodnia x tygodnie miesiąca)
+  - Wydarzenia zaznaczone w dniach (kropki kolorowe, ikony, badges z liczbą)
+  - Dzisiejszy dzień wyróżniony ramką
+  - Kliknięcie w dzień pokazuje wydarzenia pod kalendarzem
+  - Kliknięcie w pusty dzień otwiera formularz dodawania wydarzenia z datą
+  - Nawigacja między miesiącami (strzałki, przycisk "dzisiaj")
+  - Color-coding wydarzeń (primary/warning/danger)
+  - Responsive: kompaktowa siatka na mobile z licznikami
+- **Reusability**: Widok `/calendar`
 - **Security**: Filtrowanie wydarzeń based on user permissions
+
+#### DayEventsPanel
+- **Cel**: Panel pokazujący wydarzenia wybranego dnia pod kalendarzem miesięcznym
+- **Features**:
+  - Lista wydarzeń wybranego dnia
+  - Podobny layout jak EventsListView w dashboardzie
+  - Color-coded events
+  - Kliknięcie otwiera EventDetailsDialog
+  - Scrollowalna lista (jeśli wiele wydarzeń)
+  - Empty state gdy brak wydarzeń
+- **Reusability**: Widok `/calendar`
+- **Security**: Permission checks per event
+
+#### WeekCalendarView
+- **Cel**: Interaktywny kalendarz tygodniowy z wydarzeniami jako barami
+- **Features**:
+  - Wyświetlanie 7 dni tygodnia (PN-ND) w układzie poziomym (desktop)
+  - Wydarzenia bezpośrednio w dniach:
+    - Całodniowe wydarzenia na górze
+    - Wydarzenia z godziną jako bary według godzin
+  - Dzisiejszy dzień wyróżniony ramką
+  - Możliwość kliknięcia w wydarzenie (otwiera EventDetailsDialog)
+  - Nawigacja poprzedni/następny tydzień (strzałki lub swipe)
+  - Responsive: dni spadają pionowo na mobile/tablet (każdy dzień jako nowy rząd)
+  - Color-coding wydarzeń (primary/warning/danger)
+- **Reusability**: Dashboard główny
+- **Security**: Filtrowanie wydarzeń based on user permissions
+
+#### EventsListView
+- **Cel**: Lista wydarzeń (w dashboardzie lub jako osobny widok `/events`)
+- **Features**:
+  - Chronologiczna lista wydarzeń w formie kart lub tabeli
+  - **W dashboardzie**: Dropdown wyboru zakresu (7/14/30 dni), scrollowalna lista pod kalendarzem
+  - **W `/events`**: Pełna lista z filtrowaniem, sortowaniem, wyszukiwaniem (bez dropdown zakresu)
+  - Color-coded urgency indicators
+  - Przekroczone terminy ze specjalnym wyróżnieniem
+  - Kliknięcie otwiera EventDetailsDialog
+  - Infinite scroll lub pagination
+- **Reusability**: Dashboard główny, widok wydarzeń `/events`
+- **Security**: Role-based event visibility
+
+#### EventDetailsDialog
+- **Cel**: Dialog ze szczegółami wydarzenia i akcjami
+- **Features**:
+  - Pełne informacje o wydarzeniu
+  - Action buttons (potwierdź, przełóż, edytuj, anuluj)
+  - Informacje o powiązanym zadaniu
+  - Historia poprzednich wystąpień (premium)
+  - Walidacja akcji based on permissions
+- **Reusability**: Dashboard, widok wydarzeń, kalendarz miesięczny
+- **Security**: Permission checks per action
 
 #### CategoryGroupedView
 - **Cel**: Widok urządzeń/wizyt pogrupowanych po kategoriach

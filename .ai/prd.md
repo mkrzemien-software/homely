@@ -177,9 +177,10 @@ Wydarzenie to konkretne zaplanowane wystąpienie zadania z przypisaną datą:
 Aplikacja wykorzystuje wysuwane menu z lewej strony, które zawiera:
 
 **Sekcja 1: Widoki Gospodarstwa** (dostępne dla wszystkich użytkowników w kontekście aktualnie otwartego gospodarstwa):
-- 📊 Dashboard - główny widok z kafelkami nawigacyjnymi (Wydarzenia, Zadania, Kategorie, Ustawienia)
-- 📅 Wydarzenia - lista nadchodzących wydarzeń (konkretne terminy)
-- 📋 Zadania - zarządzanie szablonami zadań
+- 📊 Dashboard - główny widok z kafelkami nawigacyjnymi (Kalendarz, Wydarzenia, Zadania, Kategorie) + interaktywny kalendarz tygodniowy + lista wydarzeń
+- 📅 Kalendarz - widok miesięczny kalendarz z zaznaczonymi wydarzeniami (Admin, Domownik)
+- 📋 Wydarzenia - lista wszystkich wydarzeń z filtrowaniem (Admin, Domownik)
+- 📝 Zadania - zarządzanie szablonami zadań (Admin, Domownik)
 - 🏷️ Kategorie - widok kategorii i podkategorii (Admin, Domownik)
 - 👥 Gospodarstwo - zarządzanie członkami i ustawieniami (tylko Administrator)
 - 📈 Historia - archiwum wykonanych wydarzeń (tylko Premium)
@@ -207,34 +208,80 @@ Aplikacja wykorzystuje wysuwane menu z lewej strony, które zawiera:
 - Active state indicator dla aktualnie wybranego widoku
 
 #### 3.4.1 Dashboard główny
-- **Kafelki nawigacyjne** (duże przyciski z ikonami) do głównych widoków:
-  - 📅 Wydarzenia - lista nadchodzących wydarzeń (7 dni) z szybkimi akcjami
-  - 📋 Zadania - zarządzanie szablonami zadań
-  - 🏷️ Kategorie - widok kategorii i podkategorii
-  - ⚙️ Ustawienia - szybki dostęp do konfiguracji gospodarstwa
-- **Zintegrowany kalendarz** - dostępny z poziomu dashboardu jako widget lub tryb widoku
-  - Miesięczny widok wydarzeń
-  - Kolorowe oznaczenia kategorii
-  - Możliwość kliknięcia w wydarzenie i wykonania akcji
-- Lista nadchodzących wydarzeń z wyróżnieniem przekroczonych terminów
-- Szybkie akcje: potwierdź, przełóż, edytuj
-- Statystyki: liczba zadań, wykorzystanie limitu
+- **Kafelki nawigacyjne** (duże przyciski z ikonami) przekierowujące do głównych widoków:
+  - 📅 Kalendarz → `/calendar` - widok miesięczny kalendarz
+  - 📋 Wydarzenia → `/events` - lista wszystkich wydarzeń z filtrowaniem
+  - 📝 Zadania → `/tasks` - zarządzanie szablonami zadań
+  - 🏷️ Kategorie → `/categories` - widok kategorii i podkategorii z zadaniami
+  - Layout: 2x2 kafelki desktop, pionowo na mobile
+- **Interaktywny kalendarz tygodniowy** (PN-ND):
+  - Wydarzenia wyświetlane bezpośrednio w dniach tygodnia
+  - Całodniowe wydarzenia na górze każdego dnia
+  - Pozostałe wydarzenia jako bary uporządkowane według godzin
+  - Możliwość kliknięcia w dzień dla szczegółów
+  - Nawigacja poprzedni/następny tydzień
+  - Dzisiejszy dzień wyróżniony ramką
+  - Responsive: dni spadają pionowo na mobile/tablet
+- **Lista wydarzeń** (pod kalendarzem):
+  - Scrollowalna lista kontynuująca wydarzenia
+  - Dropdown wyboru zakresu: 7 dni (domyślnie), 14 dni, miesiąc
+  - Color-coded urgency (primary/warning/danger)
+  - Przekroczone terminy ze specjalnym wyróżnieniem
+  - Kliknięcie w wydarzenie otwiera dialog ze szczegółami i akcjami
+- **Toolbar** (prawy górny róg):
+  - Przycisk dodawania nowego wydarzenia/zadania
+  - Filtry (osoba odpowiedzialna, kategoria, priorytet)
+  - Statystyki wykorzystania limitu (progress bars - Post-MVP)
+- **Przełącznik gospodarstw**: w menu nawigacyjnym (sidebar)
 
-#### 3.4.2 Widok Wydarzeń
-- Lista nadchodzących wydarzeń (konkretne terminy)
-- Sortowanie: chronologicznie, po priorytecie
-- Filtrowanie po kategorii, osobie odpowiedzialnej, statusie
-- Wyświetlanie informacji o powiązanym zadaniu
-- Szybkie akcje: potwierdź, przełóż, anuluj
+#### 3.4.2 Widok Kalendarza Miesięcznego
+- **Ścieżka**: `/calendar`
+- **Kalendarz miesięczny** w siatce (7x5/6 wierszy dla dni)
+  - Wydarzenia zaznaczone w dniach (kropki, ikony, kolory)
+  - Dzisiejszy dzień wyróżniony ramką
+  - Nawigacja między miesiącami (strzałki, przycisk "dzisiaj")
+  - Color-coding wydarzeń (primary/warning/danger)
+- **Po kliknięciu w dzień**:
+  - Pod kalendarzem pojawia się lista wydarzeń tego dnia
+  - Lista podobna jak w Dashboard (scrollowalna, color-coded)
+  - Kliknięcie w wydarzenie otwiera dialog ze szczegółami i akcjami (EventDetailsDialog)
+- **Po kliknięciu w pusty dzień**:
+  - Otwiera się formularz dodawania wydarzenia z pre-wypełnioną datą
+- **Toolbar** (prawy górny róg):
+  - Przycisk dodawania nowego wydarzenia
+  - Filtry (osoba odpowiedzialna, kategoria, priorytet)
+  - Przycisk powrotu do dzisiejszego dnia
+- **Responsywność**:
+  - Desktop: Pełna siatka kalendarza, wydarzenia widoczne w dniach
+  - Mobile/Tablet: Kompaktowa siatka, wydarzenia jako licznik, kliknięcie pokazuje listę
+- **Dostęp przez**: Sidebar (📅 Kalendarz), kafelek na dashboardzie, bottom navigation (mobile)
 
-#### 3.4.3 Widok Zadań
-- Lista wszystkich szablonów zadań
-- Sortowanie: po nazwie, kategorii, priorytecie
-- Filtrowanie po podkategorii, interwale
-- Możliwość tworzenia wydarzenia z zadania
-- Szybka edycja inline
+#### 3.4.3 Widok Wydarzeń
+- **Ścieżka**: `/events`
+- **Pełna lista wszystkich wydarzeń** z filtrowaniem (podobna do `/tasks`)
+- Lista wydarzeń w formie tabeli/kart (podobnie jak widok zadań)
+- Wyróżnienie kolorystyczne (przekroczony/dzisiaj/nadchodzący)
+- Informacja o powiązanym zadaniu
+- Kliknięcie w wydarzenie otwiera dialog ze szczegółami i akcjami (EventDetailsDialog)
+- Filtry (osoba odpowiedzialna, kategoria, priorytet, status, zakres dat)
+- Sortowanie (data, nazwa, priorytet, status)
+- Licznik wydarzeń według statusu
+- Wyszukiwanie po nazwie/opisie
+- Szybkie akcje na każdym wydarzeniu: potwierdź, przełóż, edytuj, anuluj
+- **Dostęp przez**: Sidebar (📋 Wydarzenia) lub kafelek na dashboardzie
 
-#### 3.4.4 Widok Dashboard (monitor)
+#### 3.4.4 Widok Zadań
+- **Ścieżka**: `/tasks`
+- Lista wszystkich szablonów zadań w gospodarstwie
+- Wyświetlanie: nazwa, podkategoria, interwał, priorytet
+- Przycisk "Utwórz wydarzenie" przy każdym zadaniu
+- Filtry (podkategoria, priorytet, z/bez interwału)
+- Sortowanie (nazwa, kategoria, priorytet)
+- Szybka edycja zadań
+- Możliwość dodania nowego zadania
+- **Dostęp przez**: Sidebar (📝 Zadania) lub kafelek na dashboardzie
+
+#### 3.4.5 Widok Dashboard (monitor)
 - Uproszczony, czytelny interfejs
 - Duża czcionka
 - Wyświetlanie tylko najbliższych 5 wydarzeń
@@ -495,7 +542,7 @@ Aby łatwo nawigować między funkcjami gospodarstwa
 
 Kryteria akceptacji:
 - Nagłówek sekcji z nazwą aktualnego gospodarstwa
-- Lista widoków: Dashboard, Zadania, Kategorie, Urządzenia/Wizyty, etc.
+- Lista widoków: Dashboard (z kafelkami + kalendarz tygodniowy), Kalendarz (miesięczny), Wydarzenia (lista), Zadania, Kategorie, etc.
 - Ukrycie pozycji "Gospodarstwo" dla użytkowników nie będących administratorami
 - Oznaczenie funkcji premium (badge/icon) dla użytkowników bez subskrypcji
 - Zmiana gospodarstwa odświeża zawartość sekcji
@@ -1000,30 +1047,70 @@ Kryteria akceptacji:
 
 ### 5.4 Widoki aplikacji
 
-US-012a: Widok Wydarzeń (lista konkretnych terminów)
+US-012a: Widok Dashboard główny (kafelki + kalendarz tygodniowy + lista wydarzeń)
 Jako użytkownik
-Chcę mieć dedykowany widok z listą nadchodzących wydarzeń
-Aby w jednym miejscu zarządzać wszystkimi terminami na najbliższe dni
+Chcę mieć centralny dashboard z nawigacją kafelkową i widokiem kalendarza tygodniowego
+Aby szybko przechodzić do głównych funkcji i widzieć nadchodzące wydarzenia
 
 Kryteria akceptacji:
-- Dostęp przez sidebar (📅 Wydarzenia) lub kafelek na dashboardzie
-- Lista wydarzeń na najbliższe 7 dni
-- Sortowanie chronologiczne
-- Wyróżnienie kolorystyczne: przekroczony (czerwony), dzisiaj (pomarańczowy), nadchodzące (zielony)
-- Filtry: osoba odpowiedzialna, kategoria, priorytet, status
-- Licznik wydarzeń według statusu (przekroczone/dzisiaj/nadchodzące)
-- Wyświetlanie: nazwa zadania, kategoria, osoba odpowiedzialna, data
-- Szybkie akcje na każdym wydarzeniu: potwierdź, przełóż, edytuj, anuluj
-- Możliwość zmiany widoku między listą a kalendarzem
-- Odświeżanie w czasie rzeczywistym
+- **Kafelki nawigacyjne** (2x2 na desktop, pionowo na mobile):
+  - 📅 Kalendarz → `/calendar` (widok miesięczny)
+  - 📋 Wydarzenia → `/events` (lista wszystkich)
+  - 📝 Zadania → `/tasks` (szablony zadań)
+  - 🏷️ Kategorie → `/categories` (organizacja)
+- **Interaktywny kalendarz tygodniowy** (PN-ND):
+  - Wydarzenia wyświetlane bezpośrednio w dniach jako bary
+  - Całodniowe wydarzenia na górze każdego dnia
+  - Nawigacja poprzedni/następny tydzień
+  - Dzisiejszy dzień wyróżniony ramką
+  - Responsive: dni spadają pionowo na mobile/tablet
+- **Lista wydarzeń** (pod kalendarzem):
+  - Dropdown wyboru zakresu: 7/14/30 dni
+  - Color-coded urgency (primary/warning/danger)
+  - Przekroczone terminy ze specjalnym wyróżnieniem
+  - Kliknięcie w wydarzenie otwiera EventDetailsDialog z akcjami
+- **Toolbar**: przycisk dodawania, filtry, statystyki wykorzystania limitu (Post-MVP)
 
-US-012b: Widok Zadań (szablony)
+US-012b: Widok Kalendarza Miesięcznego
+Jako użytkownik
+Chcę widzieć wydarzenia w widoku miesięcznym kalendarza
+Aby mieć lepszy przegląd harmonogramu
+
+Kryteria akceptacji:
+- Dostęp przez sidebar (📅 Kalendarz), kafelek na dashboardzie, bottom nav (mobile)
+- Siatka 7x5/6 (dni × tygodnie)
+- Wydarzenia zaznaczone w dniach (kropki, ikony, liczniki)
+- Dzisiejszy dzień wyróżniony ramką
+- Nawigacja między miesiącami (strzałki, przycisk "dzisiaj")
+- Kliknięcie w dzień → lista wydarzeń pod kalendarzem
+- Kliknięcie w pusty dzień → formularz dodawania wydarzenia z pre-wypełnioną datą
+- Toolbar: przycisk dodawania, filtry, przycisk powrotu do dzisiaj
+- Responsive: kompaktowa siatka na mobile z licznikami
+
+US-012c: Widok Wydarzeń (pełna lista wszystkich wydarzeń)
+Jako użytkownik
+Chcę mieć pełną listę wszystkich wydarzeń z filtrowaniem
+Aby zarządzać wszystkimi terminami w jednym miejscu
+
+Kryteria akceptacji:
+- Dostęp przez sidebar (📋 Wydarzenia) lub kafelek na dashboardzie
+- Lista wydarzeń w formie tabeli/kart
+- Wyróżnienie kolorystyczne: przekroczony (czerwony), dzisiaj (pomarańczowy), nadchodzące (zielony)
+- Informacja o powiązanym zadaniu
+- Kliknięcie w wydarzenie otwiera EventDetailsDialog z akcjami
+- Filtry: osoba odpowiedzialna, kategoria, priorytet, status, zakres dat
+- Sortowanie: data, nazwa, priorytet, status
+- Licznik wydarzeń według statusu
+- Wyszukiwanie po nazwie/opisie
+- Szybkie akcje: potwierdź, przełóż, edytuj, anuluj
+
+US-012d: Widok Zadań (szablony)
 Jako użytkownik
 Chcę widzieć wszystkie moje szablony zadań
 Aby zarządzać powtarzalnymi aktywnościami
 
 Kryteria akceptacji:
-- Dostęp przez sidebar (📋 Zadania) lub kafelek na dashboardzie
+- Dostęp przez sidebar (📝 Zadania) lub kafelek na dashboardzie
 - Lista wszystkich zadań w gospodarstwie
 - Wyświetlanie podkategorii, interwału, priorytetu
 - Przycisk "Utwórz wydarzenie" przy każdym zadaniu
@@ -1033,7 +1120,7 @@ Kryteria akceptacji:
 - Szybki dostęp do edycji zadań
 - Możliwość dodania nowego zadania
 
-US-012c: Widok Kategorii (struktura organizacyjna)
+US-012e: Widok Kategorii (struktura organizacyjna)
 Jako użytkownik
 Chcę widzieć hierarchię kategorii i podkategorii z przypisanymi zadaniami
 Aby łatwiej zarządzać podobnymi elementami razem
