@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, catchError } from 'rxjs';
+import { Observable, throwError, catchError, of } from 'rxjs';
 
 /**
  * API Response wrapper
@@ -39,6 +39,17 @@ export interface HouseholdResponse extends ApiResponse<HouseholdDto> {}
  */
 export interface HouseholdsResponse extends ApiResponse<HouseholdDto[]> {}
 
+/**
+ * Household member data
+ */
+export interface HouseholdMember {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: 'admin' | 'member' | 'dashboard';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -67,6 +78,46 @@ export class HouseholdService {
         return throwError(() => this.handleError(error));
       })
     );
+  }
+
+  /**
+   * Get household members
+   * TODO: Replace mock data with actual API call when backend is ready
+   */
+  getHouseholdMembers(householdId: string): Observable<HouseholdMember[]> {
+    // Mock data for development
+    const mockMembers: HouseholdMember[] = [
+      {
+        id: '1',
+        firstName: 'Jan',
+        lastName: 'Kowalski',
+        email: 'jan.kowalski@example.com',
+        role: 'admin'
+      },
+      {
+        id: '2',
+        firstName: 'Anna',
+        lastName: 'Kowalska',
+        email: 'anna.kowalska@example.com',
+        role: 'member'
+      },
+      {
+        id: '3',
+        firstName: 'Piotr',
+        lastName: 'Nowak',
+        email: 'piotr.nowak@example.com',
+        role: 'member'
+      }
+    ];
+
+    return of(mockMembers);
+
+    // TODO: Uncomment when backend is ready
+    // return this.http.get<HouseholdMember[]>(`${this.API_URL}/${householdId}/members`).pipe(
+    //   catchError((error: HttpErrorResponse) => {
+    //     return throwError(() => this.handleError(error));
+    //   })
+    // );
   }
 
   /**

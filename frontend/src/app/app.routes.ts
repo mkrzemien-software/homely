@@ -93,6 +93,12 @@ export const routes: Routes = [
         // canActivate: [authGuard, householdMemberGuard]
       },
       {
+        path: 'events',
+        loadComponent: () => import('./features/household/events/events-view.component').then(m => m.EventsViewComponent),
+        title: 'Wydarzenia - Homely',
+        // canActivate: [authGuard, householdMemberGuard]
+      },
+      {
         path: 'categories',
         loadComponent: () => import('./features/household/items/categories-list.component').then(m => m.CategoriesListComponent),
         title: 'Kategorie - Homely',

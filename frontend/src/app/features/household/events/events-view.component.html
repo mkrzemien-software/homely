@@ -1,0 +1,394 @@
+<div class="events-view-container">
+  <!-- Header -->
+  <div class="events-header">
+    <h1><i class="pi pi-calendar"></i> Wydarzenia</h1>
+    <p class="subtitle">Zarządzaj zaplanowanymi wydarzeniami i terminami</p>
+  </div>
+
+  <p-divider></p-divider>
+
+  <!-- Status Counters -->
+  <div class="status-counters">
+    <div class="counter-card">
+      <div class="counter-value">{{ statusCounters().total }}</div>
+      <div class="counter-label">Wszystkie</div>
+    </div>
+    <div class="counter-card pending">
+      <div class="counter-value">{{ statusCounters().pending }}</div>
+      <div class="counter-label">Oczekujące</div>
+    </div>
+    <div class="counter-card completed">
+      <div class="counter-value">{{ statusCounters().completed }}</div>
+      <div class="counter-label">Wykonane</div>
+    </div>
+    <div class="counter-card postponed">
+      <div class="counter-value">{{ statusCounters().postponed }}</div>
+      <div class="counter-label">Przełożone</div>
+    </div>
+    <div class="counter-card overdue">
+      <div class="counter-value">{{ statusCounters().overdue }}</div>
+      <div class="counter-label">Przekroczone</div>
+    </div>
+  </div>
+
+  <!-- Filters Toolbar -->
+  <p-card class="filters-card">
+    <div class="filters-toolbar">
+      <!-- Search -->
+      <div class="filter-item search-filter">
+        <label>Wyszukiwanie</label>
+        <p-iconField iconPosition="left" styleClass="w-full">
+          <p-inputIcon styleClass="pi pi-search" />
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="searchText"
+            (ngModelChange)="onSearch($event)"
+            placeholder="Szukaj wydarzeń..."
+            class="w-full"
+          />
+        </p-iconField>
+      </div>
+
+      <!-- Assignee Filter -->
+      <div class="filter-item">
+        <label>Osoba odpowiedzialna</label>
+        <p-dropdown
+          [options]="assigneeOptions()"
+          [(ngModel)]="selectedAssigneeId"
+          (ngModelChange)="onAssigneeFilterChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Wybierz osobę"
+          styleClass="w-full"
+          [showClear]="true"
+        ></p-dropdown>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="filter-item">
+        <label>Kategoria</label>
+        <p-dropdown
+          [options]="categoryOptions()"
+          [(ngModel)]="selectedCategoryId"
+          (ngModelChange)="onCategoryFilterChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Wybierz kategorię"
+          styleClass="w-full"
+          [showClear]="true"
+        ></p-dropdown>
+      </div>
+
+      <!-- Priority Filter -->
+      <div class="filter-item">
+        <label>Priorytet</label>
+        <p-dropdown
+          [options]="priorityOptions"
+          [(ngModel)]="selectedPriority"
+          (ngModelChange)="onPriorityFilterChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Wybierz priorytet"
+          styleClass="w-full"
+          [showClear]="true"
+        ></p-dropdown>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-item">
+        <label>Status</label>
+        <p-dropdown
+          [options]="statusOptions"
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="onStatusFilterChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Wybierz status"
+          styleClass="w-full"
+          [showClear]="true"
+        ></p-dropdown>
+      </div>
+
+      <!-- Date Range Filter -->
+      <div class="filter-item date-range">
+        <label>Zakres dat</label>
+        <div class="date-range-inputs">
+          <p-calendar
+            [(ngModel)]="startDate"
+            (ngModelChange)="onDateRangeChange()"
+            placeholder="Od"
+            dateFormat="dd.mm.yy"
+            [showIcon]="true"
+            styleClass="w-full"
+          ></p-calendar>
+          <span class="date-separator">-</span>
+          <p-calendar
+            [(ngModel)]="endDate"
+            (ngModelChange)="onDateRangeChange()"
+            placeholder="Do"
+            dateFormat="dd.mm.yy"
+            [showIcon]="true"
+            styleClass="w-full"
+          ></p-calendar>
+        </div>
+      </div>
+
+      <!-- Sort -->
+      <div class="filter-item">
+        <label>Sortowanie</label>
+        <p-dropdown
+          [options]="sortOptions"
+          [(ngModel)]="sortBy"
+          (ngModelChange)="onSortChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+        ></p-dropdown>
+      </div>
+
+      <!-- Actions -->
+      <div class="filter-actions">
+        <p-button
+          label="Przekroczone"
+          [icon]="showOverdueOnly() ? 'pi pi-check-square' : 'pi pi-square'"
+          (onClick)="toggleOverdueFilter()"
+          [outlined]="!showOverdueOnly()"
+          severity="danger"
+          size="small"
+        ></p-button>
+        <p-button
+          label="Resetuj filtry"
+          icon="pi pi-filter-slash"
+          (onClick)="resetFilters()"
+          [outlined]="true"
+          severity="secondary"
+          size="small"
+        ></p-button>
+        <p-button
+          label="Odśwież"
+          icon="pi pi-refresh"
+          (onClick)="refresh()"
+          [outlined]="true"
+          severity="secondary"
+          size="small"
+        ></p-button>
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Results Info -->
+  <div class="results-info">
+    <p>
+      @if (searchText()) {
+        Znaleziono <strong>{{ filteredEventsCount() }}</strong> z <strong>{{ totalItems() }}</strong> wydarzeń
+      } @else {
+        Wyświetlam <strong>{{ filteredEventsCount() }}</strong> z <strong>{{ totalItems() }}</strong> wydarzeń
+      }
+    </p>
+  </div>
+
+  <!-- Events List -->
+  @if (isLoading()) {
+    <!-- Loading Skeletons -->
+    <div class="events-list">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <p-card class="event-card">
+          <p-skeleton width="100%" height="2rem"></p-skeleton>
+          <p-skeleton width="80%" height="1.5rem" styleClass="mt-2"></p-skeleton>
+          <p-skeleton width="60%" height="1rem" styleClass="mt-2"></p-skeleton>
+        </p-card>
+      }
+    </div>
+  } @else if (errorMessage()) {
+    <!-- Error Message -->
+    <p-message severity="error" [text]="errorMessage()!"></p-message>
+  } @else if (filteredEvents().length === 0) {
+    <!-- No Events -->
+    <p-card class="empty-state">
+      <div class="empty-content">
+        <i class="pi pi-calendar-times empty-icon"></i>
+        <h3>Brak wydarzeń</h3>
+        <p>
+          @if (searchText() || selectedAssigneeId() || selectedCategoryId() || selectedPriority() || selectedStatus()) {
+            Nie znaleziono wydarzeń spełniających kryteria wyszukiwania.
+            <br>
+            Spróbuj zmienić filtry.
+          } @else {
+            Nie masz jeszcze żadnych zaplanowanych wydarzeń.
+            <br>
+            Utwórz wydarzenia z widoku Zadania.
+          }
+        </p>
+      </div>
+    </p-card>
+  } @else {
+    <!-- Events Cards -->
+    <div class="events-list">
+      @for (event of filteredEvents(); track event.id) {
+        <p-card class="event-card" [ngClass]="'urgency-' + getEventUrgency(event)">
+          <div class="event-header">
+            <div class="event-title-section">
+              <h3 class="event-title">{{ event.task.name }}</h3>
+              <p class="event-category">{{ event.task.category.name }}</p>
+            </div>
+            <div class="event-badges">
+              <p-tag
+                [value]="formatEventDate(event.dueDate)"
+                [severity]="getUrgencySeverity(getEventUrgency(event))"
+                icon="pi pi-calendar"
+              ></p-tag>
+              <p-tag
+                [value]="getEventStatusLabel(event.status)"
+                [severity]="getEventStatusSeverity(event.status)"
+              ></p-tag>
+              <p-tag
+                [value]="getPriorityLabel(event.priority)"
+                [severity]="getPrioritySeverity(event.priority)"
+              ></p-tag>
+            </div>
+          </div>
+
+          <p-divider></p-divider>
+
+          <div class="event-details">
+            @if (event.task.description) {
+              <p class="event-description">{{ event.task.description }}</p>
+            }
+
+            <div class="event-meta">
+              <div class="meta-item">
+                <i class="pi pi-user"></i>
+                <span>{{ event.assignedTo.firstName }} {{ event.assignedTo.lastName }}</span>
+              </div>
+              @if (isEventOverdue(event)) {
+                <div class="meta-item overdue-warning">
+                  <i class="pi pi-exclamation-triangle"></i>
+                  <span>Przekroczony termin</span>
+                </div>
+              }
+            </div>
+
+            @if (event.notes) {
+              <div class="event-notes">
+                <i class="pi pi-comment"></i>
+                <span>{{ event.notes }}</span>
+              </div>
+            }
+          </div>
+
+          <p-divider></p-divider>
+
+          <div class="event-actions">
+            @if (event.status === 'pending' || event.status === 'postponed') {
+              <p-button
+                label="Potwierdź"
+                icon="pi pi-check"
+                (onClick)="completeEvent(event)"
+                severity="success"
+                size="small"
+                [outlined]="true"
+              ></p-button>
+              <p-button
+                label="Przełóż"
+                icon="pi pi-clock"
+                (onClick)="postponeEvent(event)"
+                severity="warn"
+                size="small"
+                [outlined]="true"
+              ></p-button>
+              <p-button
+                label="Anuluj"
+                icon="pi pi-times"
+                (onClick)="cancelEvent(event)"
+                severity="danger"
+                size="small"
+                [outlined]="true"
+              ></p-button>
+            }
+            <p-button
+              label="Szczegóły"
+              icon="pi pi-info-circle"
+              (onClick)="openEventDetails(event)"
+              severity="info"
+              size="small"
+              [outlined]="true"
+            ></p-button>
+            <p-button
+              icon="pi pi-trash"
+              (onClick)="deleteEvent(event)"
+              severity="danger"
+              size="small"
+              [outlined]="true"
+              [text]="true"
+              pTooltip="Usuń wydarzenie"
+            ></p-button>
+          </div>
+        </p-card>
+      }
+    </div>
+
+    <!-- Pagination -->
+    <p-paginator
+      [rows]="itemsPerPage()"
+      [totalRecords]="totalItems()"
+      [first]="(currentPage() - 1) * itemsPerPage()"
+      [rowsPerPageOptions]="[10, 20, 50, 100]"
+      (onPageChange)="onPageChange($event)"
+      styleClass="mt-4"
+    ></p-paginator>
+  }
+</div>
+
+<!-- Event Details Dialog (Placeholder) -->
+<p-dialog
+  [(visible)]="eventDetailsDialogVisible"
+  [header]="selectedEvent() ? selectedEvent()!.task.name : 'Szczegóły wydarzenia'"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '50vw', maxWidth: '600px' }"
+  (onHide)="hideEventDetailsDialog()"
+>
+  @if (selectedEvent()) {
+    <div class="event-details-dialog">
+      <p><strong>Kategoria:</strong> {{ selectedEvent()!.task.category.name }}</p>
+      <p><strong>Termin:</strong> {{ formatEventDate(selectedEvent()!.dueDate) }}</p>
+      <p><strong>Status:</strong> {{ getEventStatusLabel(selectedEvent()!.status) }}</p>
+      <p><strong>Priorytet:</strong> {{ getPriorityLabel(selectedEvent()!.priority) }}</p>
+      <p><strong>Osoba odpowiedzialna:</strong> {{ selectedEvent()!.assignedTo.firstName }} {{ selectedEvent()!.assignedTo.lastName }}</p>
+
+      @if (selectedEvent()!.task.description) {
+        <p><strong>Opis:</strong> {{ selectedEvent()!.task.description }}</p>
+      }
+
+      @if (selectedEvent()!.notes) {
+        <p><strong>Notatki:</strong> {{ selectedEvent()!.notes }}</p>
+      }
+
+      @if (selectedEvent()!.completionDate) {
+        <p><strong>Data wykonania:</strong> {{ formatEventDate(selectedEvent()!.completionDate!) }}</p>
+      }
+
+      @if (selectedEvent()!.postponementReason) {
+        <p><strong>Powód przełożenia:</strong> {{ selectedEvent()!.postponementReason }}</p>
+      }
+
+      @if (selectedEvent()!.cancellationReason) {
+        <p><strong>Powód anulowania:</strong> {{ selectedEvent()!.cancellationReason }}</p>
+      }
+
+      <p class="text-sm text-gray-500 mt-4">
+        Utworzone: {{ formatEventDate(selectedEvent()!.createdAt) }} przez {{ selectedEvent()!.createdBy.firstName }} {{ selectedEvent()!.createdBy.lastName }}
+      </p>
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Zamknij"
+      icon="pi pi-times"
+      (onClick)="hideEventDetailsDialog()"
+      severity="secondary"
+    ></p-button>
+  </ng-template>
+</p-dialog>

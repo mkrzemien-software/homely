@@ -43,6 +43,14 @@ export function getHouseholdMenuItems(householdId: string): MenuItem[] {
       tooltip: 'Główny widok z kafelkami i kalendarzem'
     },
     {
+      id: 'events',
+      label: 'Wydarzenia',
+      icon: 'pi pi-calendar',
+      route: `/${householdId}/events`,
+      roles: ['admin', 'member'],
+      tooltip: 'Pełna lista wszystkich wydarzeń'
+    },
+    {
       id: 'tasks',
       label: 'Zadania',
       icon: 'pi pi-list-check',
