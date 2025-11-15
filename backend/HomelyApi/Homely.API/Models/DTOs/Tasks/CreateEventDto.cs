@@ -4,13 +4,17 @@ namespace Homely.API.Models.DTOs.Tasks;
 
 /// <summary>
 /// DTO for creating a new event
+/// Events MUST be based on a task template - they don't have their own title.
+/// The event's display name comes from the associated task's name.
 /// </summary>
 public class CreateEventDto
 {
     /// <summary>
-    /// Task template ID (optional - event can exist without template)
+    /// Task template ID (REQUIRED - events must be based on a task template)
+    /// The event will display the task's name as its title
     /// </summary>
-    public Guid? TaskId { get; set; }
+    [Required(ErrorMessage = "Task ID is required - events must be based on a task template")]
+    public Guid TaskId { get; set; }
 
     /// <summary>
     /// Household ID
@@ -30,28 +34,16 @@ public class CreateEventDto
     public DateOnly DueDate { get; set; }
 
     /// <summary>
-    /// Event title
-    /// </summary>
-    [Required(ErrorMessage = "Event title is required")]
-    [MaxLength(200, ErrorMessage = "Title cannot exceed 200 characters")]
-    public string Title { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Event description
-    /// </summary>
-    [MaxLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]
-    public string? Description { get; set; }
-
-    /// <summary>
-    /// Event priority: low, medium, high
+    /// Event priority: low, medium, high (optional - defaults to task's priority if not specified)
     /// </summary>
     [RegularExpression("^(low|medium|high)$", ErrorMessage = "Priority must be 'low', 'medium', or 'high'")]
-    public string Priority { get; set; } = "medium";
+    public string? Priority { get; set; }
 
     /// <summary>
-    /// Whether event should automatically regenerate when completed
+    /// Optional notes for this specific event occurrence
     /// </summary>
-    public bool IsRecurring { get; set; } = true;
+    [MaxLength(1000, ErrorMessage = "Notes cannot exceed 1000 characters")]
+    public string? Notes { get; set; }
 
     /// <summary>
     /// User ID creating the event (will be set from authentication context)

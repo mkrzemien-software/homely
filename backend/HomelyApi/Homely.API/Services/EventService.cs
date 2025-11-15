@@ -135,17 +135,22 @@ public class EventService : IEventService
     {
         try
         {
+            // Get the task to inherit priority if not specified
+            var task = await _unitOfWork.Tasks.GetByIdAsync(createDto.TaskId, cancellationToken);
+            if (task == null || task.DeletedAt != null)
+            {
+                throw new InvalidOperationException($"Task template with ID {createDto.TaskId} not found");
+            }
+
             var eventEntity = new EventEntity
             {
                 TaskId = createDto.TaskId,
                 HouseholdId = createDto.HouseholdId,
                 AssignedTo = createDto.AssignedTo,
                 DueDate = createDto.DueDate,
-                Title = createDto.Title,
-                Description = createDto.Description,
                 Status = "pending",
-                Priority = createDto.Priority,
-                IsRecurring = createDto.IsRecurring,
+                Priority = createDto.Priority ?? task.Priority,
+                Notes = createDto.Notes,
                 CreatedBy = createDto.CreatedBy,
                 CreatedAt = DateTimeOffset.UtcNow,
                 UpdatedAt = DateTimeOffset.UtcNow
@@ -154,7 +159,11 @@ public class EventService : IEventService
             await _unitOfWork.Events.AddAsync(eventEntity, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Event created with ID {EventId} for household {HouseholdId}", eventEntity.Id, eventEntity.HouseholdId);
+            _logger.LogInformation("Event created with ID {EventId} for task {TaskId} in household {HouseholdId}",
+                eventEntity.Id, task.Id, eventEntity.HouseholdId);
+
+            // Load task navigation property for DTO mapping
+            eventEntity.Task = task;
 
             return MapToDto(eventEntity);
         }
@@ -170,7 +179,7 @@ public class EventService : IEventService
     {
         try
         {
-            var eventEntity = await _unitOfWork.Events.GetByIdAsync(eventId, cancellationToken);
+            var eventEntity = await _unitOfWork.Events.GetWithDetailsAsync(eventId, cancellationToken);
 
             if (eventEntity == null || eventEntity.DeletedAt != null)
             {
@@ -179,11 +188,9 @@ public class EventService : IEventService
 
             eventEntity.AssignedTo = updateDto.AssignedTo;
             eventEntity.DueDate = updateDto.DueDate;
-            eventEntity.Title = updateDto.Title;
-            eventEntity.Description = updateDto.Description;
             eventEntity.Status = updateDto.Status;
             eventEntity.Priority = updateDto.Priority;
-            eventEntity.IsRecurring = updateDto.IsRecurring;
+            eventEntity.Notes = updateDto.Notes;
             eventEntity.UpdatedAt = DateTimeOffset.UtcNow;
 
             await _unitOfWork.Events.UpdateAsync(eventEntity, cancellationToken);
@@ -262,10 +269,23 @@ public class EventService : IEventService
 
             _logger.LogInformation("Event {EventId} marked as completed", eventId);
 
-            // If event is recurring and has an associated task template, create next recurring event
-            if (eventEntity.IsRecurring && eventEntity.TaskId.HasValue)
+            // If task template has an interval, create next recurring event
+            if (eventEntity.TaskId.HasValue)
             {
-                await CreateNextRecurringEventAsync(eventEntity, completeDto.CompletionDate, cancellationToken);
+                var task = await _unitOfWork.Tasks.GetByIdAsync(eventEntity.TaskId.Value, cancellationToken);
+                if (task != null && task.DeletedAt == null)
+                {
+                    // Check if task has any interval values set
+                    bool hasInterval = (task.YearsValue.HasValue && task.YearsValue.Value > 0) ||
+                                     (task.MonthsValue.HasValue && task.MonthsValue.Value > 0) ||
+                                     (task.WeeksValue.HasValue && task.WeeksValue.Value > 0) ||
+                                     (task.DaysValue.HasValue && task.DaysValue.Value > 0);
+
+                    if (hasInterval)
+                    {
+                        await CreateNextRecurringEventAsync(eventEntity, completeDto.CompletionDate, cancellationToken);
+                    }
+                }
             }
 
             // TODO: Archive to task_history if household has premium plan
@@ -364,11 +384,9 @@ public class EventService : IEventService
                 HouseholdId = completedEvent.HouseholdId,
                 AssignedTo = completedEvent.AssignedTo,
                 DueDate = nextDueDate,
-                Title = completedEvent.Title,
-                Description = completedEvent.Description,
                 Status = "pending",
                 Priority = taskTemplate.Priority, // Use task template's priority
-                IsRecurring = true,
+                Notes = null, // New event starts with no notes
                 CreatedBy = completedEvent.CreatedBy,
                 CreatedAt = DateTimeOffset.UtcNow,
                 UpdatedAt = DateTimeOffset.UtcNow
@@ -430,21 +448,19 @@ public class EventService : IEventService
         return new EventDto
         {
             Id = entity.Id,
-            TaskId = entity.TaskId,
-            TaskName = entity.Task?.Name,
+            TaskId = entity.TaskId ?? Guid.Empty,
+            TaskName = entity.Task?.Name ?? string.Empty,
             HouseholdId = entity.HouseholdId,
             HouseholdName = entity.Household?.Name,
             AssignedTo = entity.AssignedTo,
             DueDate = entity.DueDate,
-            Title = entity.Title,
-            Description = entity.Description,
             Status = entity.Status,
             Priority = entity.Priority,
             CompletionDate = entity.CompletionDate,
             CompletionNotes = entity.CompletionNotes,
             PostponedFromDate = entity.PostponedFromDate,
             PostponeReason = entity.PostponeReason,
-            IsRecurring = entity.IsRecurring,
+            Notes = entity.Notes,
             CreatedBy = entity.CreatedBy,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt

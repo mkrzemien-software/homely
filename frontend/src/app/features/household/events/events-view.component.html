@@ -246,8 +246,8 @@
         <p-card class="event-card" [ngClass]="'urgency-' + getEventUrgency(event)">
           <div class="event-header">
             <div class="event-title-section">
-              <h3 class="event-title">{{ event.task.name }}</h3>
-              <p class="event-category">{{ event.task.category.name }}</p>
+              <h3 class="event-title">{{ event.taskName }}</h3>
+              <p class="event-category">{{ getCategoryNameForEvent(event) }}</p>
             </div>
             <div class="event-badges">
               <p-tag
@@ -269,16 +269,16 @@
           <p-divider></p-divider>
 
           <div class="event-details">
-            @if (event.task.description) {
-              <p class="event-description">{{ event.task.description }}</p>
+            @if (getTaskDescriptionForEvent(event)) {
+              <p class="event-description">{{ getTaskDescriptionForEvent(event) }}</p>
             }
 
             <div class="event-meta">
               <div class="meta-item">
                 <i class="pi pi-user"></i>
-                <span>{{ event.assignedTo.firstName }} {{ event.assignedTo.lastName }}</span>
+                <span>{{ getUserNameForEvent(event) }}</span>
               </div>
-              @if (isEventOverdue(event)) {
+              @if (event.isOverdue) {
                 <div class="meta-item overdue-warning">
                   <i class="pi pi-exclamation-triangle"></i>
                   <span>Przekroczony termin</span>
@@ -306,14 +306,14 @@
                 size="small"
                 [outlined]="true"
               ></p-button>
-              <p-button
+              <!-- <p-button
                 label="Przełóż"
                 icon="pi pi-clock"
                 (onClick)="postponeEvent(event)"
                 severity="warn"
                 size="small"
                 [outlined]="true"
-              ></p-button>
+              ></p-button> -->
               <p-button
                 label="Anuluj"
                 icon="pi pi-times"
@@ -360,7 +360,7 @@
 <!-- Event Details Dialog (Placeholder) -->
 <p-dialog
   [(visible)]="eventDetailsDialogVisible"
-  [header]="selectedEvent() ? selectedEvent()!.task.name : 'Szczegóły wydarzenia'"
+  [header]="selectedEvent() ? selectedEvent()!.taskName : 'Szczegóły wydarzenia'"
   [modal]="true"
   [closable]="true"
   [style]="{ width: '50vw', maxWidth: '600px' }"
@@ -368,14 +368,14 @@
 >
   @if (selectedEvent()) {
     <div class="event-details-dialog">
-      <p><strong>Kategoria:</strong> {{ selectedEvent()!.task.category.name }}</p>
+      <p><strong>Kategoria:</strong> {{ getCategoryNameForEvent(selectedEvent()!) }}</p>
       <p><strong>Termin:</strong> {{ formatEventDate(selectedEvent()!.dueDate) }}</p>
       <p><strong>Status:</strong> {{ getEventStatusLabel(selectedEvent()!.status) }}</p>
       <p><strong>Priorytet:</strong> {{ getPriorityLabel(selectedEvent()!.priority) }}</p>
-      <p><strong>Osoba odpowiedzialna:</strong> {{ selectedEvent()!.assignedTo.firstName }} {{ selectedEvent()!.assignedTo.lastName }}</p>
+      <p><strong>Osoba odpowiedzialna:</strong> {{ getUserNameForEvent(selectedEvent()!) }}</p>
 
-      @if (selectedEvent()!.task.description) {
-        <p><strong>Opis:</strong> {{ selectedEvent()!.task.description }}</p>
+      @if (getTaskDescriptionForEvent(selectedEvent()!)) {
+        <p><strong>Opis:</strong> {{ getTaskDescriptionForEvent(selectedEvent()!) }}</p>
       }
 
       @if (selectedEvent()!.notes) {
@@ -386,16 +386,20 @@
         <p><strong>Data wykonania:</strong> {{ formatEventDate(selectedEvent()!.completionDate!) }}</p>
       }
 
-      @if (selectedEvent()!.postponementReason) {
-        <p><strong>Powód przełożenia:</strong> {{ selectedEvent()!.postponementReason }}</p>
+      @if (selectedEvent()!.completionNotes) {
+        <p><strong>Notatki o wykonaniu:</strong> {{ selectedEvent()!.completionNotes }}</p>
       }
 
-      @if (selectedEvent()!.cancellationReason) {
-        <p><strong>Powód anulowania:</strong> {{ selectedEvent()!.cancellationReason }}</p>
+      @if (selectedEvent()!.postponeReason) {
+        <p><strong>Powód przełożenia:</strong> {{ selectedEvent()!.postponeReason }}</p>
+      }
+
+      @if (selectedEvent()!.postponedFromDate) {
+        <p><strong>Oryginalna data:</strong> {{ formatEventDate(selectedEvent()!.postponedFromDate!) }}</p>
       }
 
       <p class="text-sm text-gray-500 mt-4">
-        Utworzone: {{ formatEventDate(selectedEvent()!.createdAt) }} przez {{ selectedEvent()!.createdBy.firstName }} {{ selectedEvent()!.createdBy.lastName }}
+        Utworzone: {{ formatEventDate(selectedEvent()!.createdAt) }} przez {{ getCreatorNameForEvent(selectedEvent()!) }}
       </p>
     </div>
   }

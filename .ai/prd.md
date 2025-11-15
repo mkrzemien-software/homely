@@ -108,12 +108,15 @@ Zadanie to szablon definiujący powtarzalną aktywność powiązaną z podkatego
 
 #### 3.2.2 Wydarzenia (Events) - Konkretne wystąpienia
 Wydarzenie to konkretne zaplanowane wystąpienie zadania z przypisaną datą:
-- Referencja do zadania (taskId)
+- Referencja do zadania (taskId) - **WYMAGANA**
+- Nazwa wydarzenia pochodzi z przypisanego zadania (event.task.name)
+- Wydarzenie **NIE** ma własnego pola tytułu - wyświetla nazwę zadania
 - Przypisanie do członka gospodarstwa (odpowiedzialny)
 - Data terminu (dueDate)
 - Status (pending/completed/postponed/cancelled)
 - Notatki o wykonaniu
 - Data wykonania (completionDate)
+- Priorytet (dziedziczony z zadania, może być nadpisany)
 
 **Workflow Wydarzeń:**
 - Wydarzenia tworzone są **ręcznie** przez użytkownika dla konkretnego zadania
@@ -143,9 +146,11 @@ Wydarzenie to konkretne zaplanowane wystąpienie zadania z przypisaną datą:
 
 #### 3.3.1 Tworzenie wydarzeń
 - Użytkownik ręcznie tworzy pierwsze wydarzenie dla zadania
+- **WYMAGANE:** Wybór zadania (taskId) - wydarzenie dziedziczy nazwę z zadania
 - Wybór daty terminu (dueDate)
 - Przypisanie do członka gospodarstwa
 - Dziedziczenie priorytetu z zadania (możliwość zmiany)
+- **UWAGA:** Wydarzenie nie ma własnego tytułu - wyświetla nazwę zadania
 
 #### 3.3.2 Automatyczne generowanie kolejnych wydarzeń
 - Gdy wydarzenie jest oznaczone jako "completed" i zadanie ma interwał
@@ -1027,8 +1032,10 @@ Aby zaplanować termin wykonania
 
 Kryteria akceptacji:
 - Przycisk "Utwórz wydarzenie" przy każdym zadaniu
-- Formularz z polami: data terminu, osoba odpowiedzialna, priorytet (dziedziczony z zadania)
+- Formularz z polami: wybór zadania (wymagane), data terminu, osoba odpowiedzialna, priorytet (dziedziczony z zadania), notatki
+- Wydarzenie automatycznie dziedziczy nazwę z wybranego zadania (nie ma pola tytułu)
 - Walidacja daty (nie może być w przeszłości)
+- Walidacja: zadanie jest wymagane
 - Przypisanie do członka gospodarstwa
 - Komunikat potwierdzający utworzenie
 - Przekierowanie do widoku wydarzeń lub kalendarza

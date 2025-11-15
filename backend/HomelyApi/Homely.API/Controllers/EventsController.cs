@@ -1,3 +1,4 @@
+using Homely.API.Models.DTOs;
 using Homely.API.Models.DTOs.Tasks;
 using Homely.API.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -31,10 +32,10 @@ public class EventsController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of events</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<EventDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<EventDto>>> GetEvents(
+    [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<EventDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<IEnumerable<EventDto>>>> GetEvents(
         [FromQuery] Guid householdId,
         [FromQuery] string? status = null,
         CancellationToken cancellationToken = default)
@@ -43,7 +44,9 @@ public class EventsController : ControllerBase
         {
             if (householdId == Guid.Empty)
             {
-                return BadRequest(new { error = "Household ID is required" });
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "Household ID is required",
+                    StatusCodes.Status400BadRequest));
             }
 
             IEnumerable<EventDto> events;
@@ -57,12 +60,14 @@ public class EventsController : ControllerBase
                 events = await _eventService.GetHouseholdEventsAsync(householdId, cancellationToken);
             }
 
-            return Ok(events);
+            return Ok(ApiResponseDto<IEnumerable<EventDto>>.SuccessResponse(events));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving events for household {HouseholdId}", householdId);
-            return StatusCode(500, new { error = "An error occurred while retrieving events" });
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while retrieving events",
+                StatusCodes.Status500InternalServerError));
         }
     }
 
@@ -74,10 +79,10 @@ public class EventsController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of upcoming events</returns>
     [HttpGet("upcoming")]
-    [ProducesResponseType(typeof(IEnumerable<EventDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<EventDto>>> GetUpcomingEvents(
+    [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<EventDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<IEnumerable<EventDto>>>> GetUpcomingEvents(
         [FromQuery] Guid householdId,
         [FromQuery] int days = 30,
         CancellationToken cancellationToken = default)
@@ -86,21 +91,27 @@ public class EventsController : ControllerBase
         {
             if (householdId == Guid.Empty)
             {
-                return BadRequest(new { error = "Household ID is required" });
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "Household ID is required",
+                    StatusCodes.Status400BadRequest));
             }
 
             if (days < 1 || days > 365)
             {
-                return BadRequest(new { error = "Days must be between 1 and 365" });
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "Days must be between 1 and 365",
+                    StatusCodes.Status400BadRequest));
             }
 
             var events = await _eventService.GetUpcomingEventsAsync(householdId, days, cancellationToken);
-            return Ok(events);
+            return Ok(ApiResponseDto<IEnumerable<EventDto>>.SuccessResponse(events));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving upcoming events for household {HouseholdId}", householdId);
-            return StatusCode(500, new { error = "An error occurred while retrieving upcoming events" });
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while retrieving upcoming events",
+                StatusCodes.Status500InternalServerError));
         }
     }
 
@@ -111,10 +122,10 @@ public class EventsController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of overdue events</returns>
     [HttpGet("overdue")]
-    [ProducesResponseType(typeof(IEnumerable<EventDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<EventDto>>> GetOverdueEvents(
+    [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<EventDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<IEnumerable<EventDto>>>> GetOverdueEvents(
         [FromQuery] Guid householdId,
         CancellationToken cancellationToken = default)
     {
@@ -122,16 +133,20 @@ public class EventsController : ControllerBase
         {
             if (householdId == Guid.Empty)
             {
-                return BadRequest(new { error = "Household ID is required" });
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "Household ID is required",
+                    StatusCodes.Status400BadRequest));
             }
 
             var events = await _eventService.GetOverdueEventsAsync(householdId, cancellationToken);
-            return Ok(events);
+            return Ok(ApiResponseDto<IEnumerable<EventDto>>.SuccessResponse(events));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving overdue events for household {HouseholdId}", householdId);
-            return StatusCode(500, new { error = "An error occurred while retrieving overdue events" });
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while retrieving overdue events",
+                StatusCodes.Status500InternalServerError));
         }
     }
 
@@ -142,10 +157,10 @@ public class EventsController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of assigned tasks</returns>
     [HttpGet("assigned")]
-    [ProducesResponseType(typeof(IEnumerable<EventDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<EventDto>>> GetAssignedEvents(
+    [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<EventDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<IEnumerable<EventDto>>>> GetAssignedEvents(
         [FromQuery] Guid userId,
         CancellationToken cancellationToken = default)
     {
@@ -153,16 +168,20 @@ public class EventsController : ControllerBase
         {
             if (userId == Guid.Empty)
             {
-                return BadRequest(new { error = "User ID is required" });
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "User ID is required",
+                    StatusCodes.Status400BadRequest));
             }
 
             var events = await _eventService.GetAssignedEventsAsync(userId, cancellationToken);
-            return Ok(events);
+            return Ok(ApiResponseDto<IEnumerable<EventDto>>.SuccessResponse(events));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving events for user {UserId}", userId);
-            return StatusCode(500, new { error = "An error occurred while retrieving assigned tasks" });
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while retrieving assigned tasks",
+                StatusCodes.Status500InternalServerError));
         }
     }
 
@@ -173,10 +192,10 @@ public class EventsController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task details</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<EventDto>> GetEventById(
+    [ProducesResponseType(typeof(ApiResponseDto<EventDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<EventDto>>> GetEventById(
         Guid id,
         CancellationToken cancellationToken = default)
     {
@@ -186,15 +205,19 @@ public class EventsController : ControllerBase
 
             if (@eventDto == null)
             {
-                return NotFound(new { error = $"Event with ID {id} not found" });
+                return NotFound(ApiResponseDto<object>.ErrorResponse(
+                    $"Event with ID {id} not found",
+                    StatusCodes.Status404NotFound));
             }
 
-            return Ok(eventDto);
+            return Ok(ApiResponseDto<EventDto>.SuccessResponse(eventDto));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving event {EventId}", id);
-            return StatusCode(500, new { error = "An error occurred while retrieving event" });
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while retrieving event",
+                StatusCodes.Status500InternalServerError));
         }
     }
 
@@ -209,23 +232,23 @@ public class EventsController : ControllerBase
     ///
     ///     POST /api/events
     ///     {
-    ///         "itemId": "00000000-0000-0000-0000-000000000000",
+    ///         "taskId": "00000000-0000-0000-0000-000000000000",
     ///         "householdId": "00000000-0000-0000-0000-000000000000",
     ///         "assignedTo": "00000000-0000-0000-0000-000000000000",
     ///         "dueDate": "2025-12-31",
-    ///         "title": "Annual Boiler Inspection",
-    ///         "description": "Schedule yearly maintenance check",
     ///         "priority": "high",
-    ///         "isRecurring": true,
+    ///         "notes": "Optional notes for this event",
     ///         "createdBy": "00000000-0000-0000-0000-000000000000"
     ///     }
     ///
+    /// NOTE: Events do NOT have their own title - they display the task's name.
+    /// taskId is REQUIRED - events must be based on a task template.
     /// </remarks>
     [HttpPost]
-    [ProducesResponseType(typeof(EventDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<EventDto>> CreateEvent(
+    [ProducesResponseType(typeof(ApiResponseDto<EventDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<EventDto>>> CreateEvent(
         [FromBody] CreateEventDto createDto,
         CancellationToken cancellationToken = default)
     {
@@ -233,20 +256,31 @@ public class EventsController : ControllerBase
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "Validation failed",
+                    StatusCodes.Status400BadRequest,
+                    errors));
             }
 
             var eventDto = await _eventService.CreateEventAsync(createDto, cancellationToken);
+            var response = ApiResponseDto<EventDto>.SuccessResponse(eventDto, StatusCodes.Status201Created);
 
             return CreatedAtAction(
                 nameof(GetEventById),
                 new { id = eventDto.Id },
-                eventDto);
+                response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating event");
-            return StatusCode(500, new { error = "An error occurred while creating event" });
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while creating event",
+                StatusCodes.Status500InternalServerError));
         }
     }
 
@@ -264,20 +298,19 @@ public class EventsController : ControllerBase
     ///     {
     ///         "assignedTo": "00000000-0000-0000-0000-000000000000",
     ///         "dueDate": "2025-12-31",
-    ///         "title": "Updated Task Title",
-    ///         "description": "Updated description",
     ///         "status": "pending",
     ///         "priority": "high",
-    ///         "isRecurring": true
+    ///         "notes": "Updated notes"
     ///     }
     ///
+    /// NOTE: Events cannot change their task association - title comes from the task.
     /// </remarks>
     [HttpPut("{id}")]
-    [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<EventDto>> UpdateEvent(
+    [ProducesResponseType(typeof(ApiResponseDto<EventDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<EventDto>>> UpdateEvent(
         Guid id,
         [FromBody] UpdateEventDto updateDto,
         CancellationToken cancellationToken = default)
@@ -286,21 +319,33 @@ public class EventsController : ControllerBase
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "Validation failed",
+                    StatusCodes.Status400BadRequest,
+                    errors));
             }
 
             var eventDto = await _eventService.UpdateEventAsync(id, updateDto, cancellationToken);
-            return Ok(eventDto);
+            return Ok(ApiResponseDto<EventDto>.SuccessResponse(eventDto));
         }
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning(ex, "Invalid operation while updating event");
-            return NotFound(new { error = ex.Message });
+            return NotFound(ApiResponseDto<object>.ErrorResponse(
+                ex.Message,
+                StatusCodes.Status404NotFound));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating event {EventId}", id);
-            return StatusCode(500, new { error = "An error occurred while updating event" });
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while updating event",
+                StatusCodes.Status500InternalServerError));
         }
     }
 
@@ -311,10 +356,10 @@ public class EventsController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
     [HttpDelete("{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> DeleteEvent(
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<object>>> DeleteEvent(
         Guid id,
         CancellationToken cancellationToken = default)
     {
@@ -324,19 +369,22 @@ public class EventsController : ControllerBase
 
             if (!success)
             {
-                return NotFound(new { error = $"Event with ID {id} not found" });
+                return NotFound(ApiResponseDto<object>.ErrorResponse(
+                    $"Event with ID {id} not found",
+                    StatusCodes.Status404NotFound));
             }
 
-            return Ok(new
+            return Ok(ApiResponseDto<object>.SuccessResponse(new
             {
-                success = true,
                 message = "Task deleted successfully"
-            });
+            }));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting event {EventId}", id);
-            return StatusCode(500, new { error = "An error occurred while deleting event" });
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while deleting event",
+                StatusCodes.Status500InternalServerError));
         }
     }
 
@@ -362,11 +410,11 @@ public class EventsController : ControllerBase
     /// created with due date calculated from item's interval (years/months/weeks/days).
     /// </remarks>
     [HttpPost("{id}/complete")]
-    [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<EventDto>> CompleteEvent(
+    [ProducesResponseType(typeof(ApiResponseDto<EventDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<EventDto>>> CompleteEvent(
         Guid id,
         [FromBody] CompleteEventDto completeDto,
         CancellationToken cancellationToken = default)
@@ -375,21 +423,33 @@ public class EventsController : ControllerBase
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "Validation failed",
+                    StatusCodes.Status400BadRequest,
+                    errors));
             }
 
             var eventDto = await _eventService.CompleteEventAsync(id, completeDto, cancellationToken);
-            return Ok(eventDto);
+            return Ok(ApiResponseDto<EventDto>.SuccessResponse(eventDto));
         }
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning(ex, "Invalid operation while completing event");
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                ex.Message,
+                StatusCodes.Status400BadRequest));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error completing event {EventId}", id);
-            return StatusCode(500, new { error = "An error occurred while completing event" });
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while completing event",
+                StatusCodes.Status500InternalServerError));
         }
     }
 
@@ -413,11 +473,11 @@ public class EventsController : ControllerBase
     /// Task status will be changed to 'postponed'.
     /// </remarks>
     [HttpPost("{id}/postpone")]
-    [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<EventDto>> PostponeEvent(
+    [ProducesResponseType(typeof(ApiResponseDto<EventDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<EventDto>>> PostponeEvent(
         Guid id,
         [FromBody] PostponeEventDto postponeDto,
         CancellationToken cancellationToken = default)
@@ -426,21 +486,33 @@ public class EventsController : ControllerBase
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "Validation failed",
+                    StatusCodes.Status400BadRequest,
+                    errors));
             }
 
             var eventDto = await _eventService.PostponeEventAsync(id, postponeDto, cancellationToken);
-            return Ok(eventDto);
+            return Ok(ApiResponseDto<EventDto>.SuccessResponse(eventDto));
         }
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning(ex, "Invalid operation while postponing event");
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                ex.Message,
+                StatusCodes.Status400BadRequest));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error postponing event {EventId}", id);
-            return StatusCode(500, new { error = "An error occurred while postponing event" });
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while postponing event",
+                StatusCodes.Status500InternalServerError));
         }
     }
 }

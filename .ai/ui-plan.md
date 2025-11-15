@@ -238,15 +238,17 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 - **Ścieżka**: `/events/:id`
 - **Cel**: Wyświetlenie szczegółów wydarzenia z możliwością wykonania akcji
 - **Kluczowe informacje**:
+  - **Nazwa wydarzenia**: Wyświetlana jako `event.task.name` (wydarzenie NIE ma własnego tytułu)
   - Pełne informacje o wydarzeniu i powiązanym zadaniu
   - Historia poprzednich wydarzeń tego zadania (premium)
   - Akcje (potwierdź, przełóż, edytuj, anuluj)
   - Informacje o automatycznym generowaniu następnego wydarzenia
+  - **UWAGA**: Wydarzenie dziedziczy nazwę z przypisanego zadania - nie ma oddzielnego pola tytułu
 - **Komponenty**:
-  - EventDetails
+  - EventDetails (wyświetla task.name jako tytuł)
   - EventHistory (premium - poprzednie wydarzenia tego zadania)
   - EventActionButtons
-  - RelatedTaskInfo
+  - RelatedTaskInfo (pokazuje szczegóły zadania z którego pochodzi wydarzenie)
   - NextEventPreview (jeśli zadanie ma interwał)
 - **UX/Dostępność**: Clear action hierarchy, confirmation dialogs
 - **Bezpieczeństwo**: Event ownership validation, role-based actions
@@ -948,11 +950,13 @@ interface SidebarSectionRules {
 #### EventDetailsDialog
 - **Cel**: Dialog ze szczegółami wydarzenia i akcjami
 - **Features**:
-  - Pełne informacje o wydarzeniu
+  - **Tytuł dialogu**: Wyświetla `event.task.name` (wydarzenie nie ma własnego tytułu)
+  - Pełne informacje o wydarzeniu (data, osoba odpowiedzialna, status, priorytet, notatki)
   - Action buttons (potwierdź, przełóż, edytuj, anuluj)
-  - Informacje o powiązanym zadaniu
+  - Informacje o powiązanym zadaniu (nazwa, kategoria, interwał)
   - Historia poprzednich wystąpień (premium)
   - Walidacja akcji based on permissions
+  - **UWAGA**: Wydarzenie dziedziczy nazwę z przypisanego zadania - nie ma pola do edycji tytułu
 - **Reusability**: Dashboard, widok wydarzeń, kalendarz miesięczny
 - **Security**: Permission checks per action
 

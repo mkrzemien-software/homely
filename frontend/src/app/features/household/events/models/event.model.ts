@@ -40,19 +40,29 @@ export interface Event {
   id: string;
 
   /**
+   * Task ID
+   */
+  taskId: string;
+
+  /**
+   * Task name
+   */
+  taskName: string;
+
+  /**
    * Household ID
    */
   householdId: string;
 
   /**
-   * Task reference (template)
+   * Household name
    */
-  task: EventTask;
+  householdName: string | null;
 
   /**
-   * User assigned to this event
+   * User ID assigned to this event
    */
-  assignedTo: TaskUser;
+  assignedTo: string;
 
   /**
    * Due date
@@ -70,29 +80,34 @@ export interface Event {
   priority: Priority;
 
   /**
-   * Notes about execution
-   */
-  notes: string | null;
-
-  /**
    * Completion date (when status is completed)
    */
   completionDate: string | null;
 
   /**
+   * Notes about completion
+   */
+  completionNotes: string | null;
+
+  /**
+   * Original date before postponement
+   */
+  postponedFromDate: string | null;
+
+  /**
    * Postponement reason (when status is postponed)
    */
-  postponementReason: string | null;
+  postponeReason: string | null;
 
   /**
-   * Cancellation reason (when status is cancelled)
+   * General notes
    */
-  cancellationReason: string | null;
+  notes: string | null;
 
   /**
-   * User who created the event
+   * User ID who created the event
    */
-  createdBy: TaskUser;
+  createdBy: string;
 
   /**
    * Creation timestamp
@@ -102,7 +117,17 @@ export interface Event {
   /**
    * Last update timestamp
    */
-  updatedAt?: string;
+  updatedAt: string;
+
+  /**
+   * Whether the event is overdue
+   */
+  isOverdue: boolean;
+
+  /**
+   * Days until due (negative if overdue)
+   */
+  daysUntilDue: number;
 }
 
 /**
@@ -120,6 +145,7 @@ export interface EventsResponse {
 
 /**
  * DTO for creating a new event
+ * Note: Events don't have their own title - they display the associated Task's name
  */
 export interface CreateEventDto {
   /**
@@ -128,9 +154,10 @@ export interface CreateEventDto {
   householdId: string;
 
   /**
-   * Task ID (template, optional)
+   * Task ID (template, required)
+   * The event will display the task's name as its title
    */
-  taskId?: string;
+  taskId: string;
 
   /**
    * Assigned user ID
@@ -143,29 +170,14 @@ export interface CreateEventDto {
   dueDate: string;
 
   /**
-   * Event title (required)
-   */
-  title: string;
-
-  /**
-   * Event description
-   */
-  description?: string;
-
-  /**
    * Event notes
    */
   notes?: string;
 
   /**
-   * Event priority (optional, defaults to medium)
+   * Event priority (optional, defaults to task's priority)
    */
   priority?: Priority;
-
-  /**
-   * Whether event should automatically regenerate when completed
-   */
-  isRecurring?: boolean;
 
   /**
    * ID of user creating the event

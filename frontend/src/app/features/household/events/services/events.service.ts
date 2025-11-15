@@ -173,7 +173,7 @@ export class EventsService {
       .pipe(
         tap(event => {
           // Update cache - add new event
-          const current = this.eventsCache$.value;
+          const current = this.eventsCache$.value || [];
           this.eventsCache$.next([event, ...current]);
         }),
         catchError(error => {

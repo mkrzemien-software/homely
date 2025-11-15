@@ -123,7 +123,7 @@ export class EventsViewComponent implements OnInit {
   /**
    * Household members for assignee filter
    */
-  householdMembers = signal<Array<{ id: string; firstName: string; lastName: string }>>([]);
+  householdMembers = signal<Array<{ id: string; userId: string; firstName: string; lastName: string }>>([]);
 
   /**
    * Selected assignee filter
@@ -214,14 +214,9 @@ export class EventsViewComponent implements OnInit {
   allTasks = signal<Task[]>([]);
 
   /**
-   * Create event form - selected task ID
+   * Create event form - selected task ID (required)
    */
   newEventTaskId = signal<string | undefined>(undefined);
-
-  /**
-   * Create event form - title
-   */
-  newEventTitle = signal<string>('');
 
   /**
    * Create event form - due date
@@ -237,11 +232,6 @@ export class EventsViewComponent implements OnInit {
    * Create event form - assigned member ID
    */
   newEventAssignedToId = signal<string | undefined>(undefined);
-
-  /**
-   * Create event form - description
-   */
-  newEventDescription = signal<string>('');
 
   /**
    * Create event form - notes
@@ -265,13 +255,31 @@ export class EventsViewComponent implements OnInit {
       return events;
     }
 
-    return events.filter(event =>
-      event.task.name.toLowerCase().includes(searchText) ||
-      event.task.description?.toLowerCase().includes(searchText) ||
-      event.task.category.name.toLowerCase().includes(searchText) ||
-      event.assignedTo.firstName.toLowerCase().includes(searchText) ||
-      event.assignedTo.lastName.toLowerCase().includes(searchText)
-    );
+    return events.filter(event => {
+      // Search in task name
+      if (event.taskName?.toLowerCase().includes(searchText)) {
+        return true;
+      }
+
+      // Search in notes
+      if (event.notes?.toLowerCase().includes(searchText)) {
+        return true;
+      }
+
+      // Search in user name
+      const userName = this.getUserNameForEvent(event).toLowerCase();
+      if (userName.includes(searchText)) {
+        return true;
+      }
+
+      // Search in category name
+      const categoryName = this.getCategoryNameForEvent(event).toLowerCase();
+      if (categoryName.includes(searchText)) {
+        return true;
+      }
+
+      return false;
+    });
   });
 
   /**
@@ -318,7 +326,7 @@ export class EventsViewComponent implements OnInit {
     const members = this.householdMembers();
     return members.map(m => ({
       label: `${m.firstName} ${m.lastName}`,
-      value: m.id
+      value: m.userId
     }));
   });
 
@@ -387,6 +395,39 @@ export class EventsViewComponent implements OnInit {
   readonly formatEventDate = formatEventDate;
   readonly isEventOverdue = isEventOverdue;
 
+  /**
+   * Get user name for event (by assignedTo ID)
+   */
+  getUserNameForEvent(event: Event): string {
+    const member = this.householdMembers().find(m => m.userId === event.assignedTo);
+    return member ? `${member.firstName} ${member.lastName}` : 'Nieznany użytkownik';
+  }
+
+  /**
+   * Get creator name for event (by createdBy ID)
+   */
+  getCreatorNameForEvent(event: Event): string {
+    const member = this.householdMembers().find(m => m.userId === event.createdBy);
+    return member ? `${member.firstName} ${member.lastName}` : 'Nieznany użytkownik';
+  }
+
+  /**
+   * Get category name for event (from task)
+   * Note: API doesn't return category info in event, so we need to get it from tasks
+   */
+  getCategoryNameForEvent(event: Event): string {
+    const task = this.allTasks().find(t => t.id === event.taskId);
+    return task?.category?.name || 'Brak kategorii';
+  }
+
+  /**
+   * Get task description for event (from task)
+   */
+  getTaskDescriptionForEvent(event: Event): string | null {
+    const task = this.allTasks().find(t => t.id === event.taskId);
+    return task?.description || null;
+  }
+
   ngOnInit(): void {
     // Get household ID from route
     this.route.params.subscribe(params => {
@@ -427,8 +468,8 @@ export class EventsViewComponent implements OnInit {
         // Set default assignee to current user (first member for now)
         // TODO: Get from auth service when implemented
         if (members && members.length > 0) {
-          this.currentUserId.set(members[0].id);
-          this.newEventAssignedToId.set(members[0].id);
+          this.currentUserId.set(members[0].userId);
+          this.newEventAssignedToId.set(members[0].userId);
         }
       },
       error: (error) => {
@@ -611,7 +652,7 @@ export class EventsViewComponent implements OnInit {
    * Complete event
    */
   completeEvent(event: Event): void {
-    if (confirm(`Czy na pewno chcesz oznaczyć wydarzenie "${event.task.name}" jako wykonane?`)) {
+    if (confirm(`Czy na pewno chcesz oznaczyć wydarzenie "${event.taskName}" jako wykonane?`)) {
       this.eventsService.completeEvent(event.id, {
         completionDate: new Date().toISOString()
       }).subscribe({
@@ -692,7 +733,7 @@ export class EventsViewComponent implements OnInit {
    * Delete event
    */
   deleteEvent(event: Event): void {
-    if (confirm(`Czy na pewno chcesz usunąć wydarzenie "${event.task.name}"?`)) {
+    if (confirm(`Czy na pewno chcesz usunąć wydarzenie "${event.taskName}"?`)) {
       this.eventsService.deleteEvent(event.id).subscribe({
         next: () => {
           // Remove from local state
@@ -740,10 +781,8 @@ export class EventsViewComponent implements OnInit {
   openCreateEventDialog(): void {
     // Reset form
     this.newEventTaskId.set(undefined);
-    this.newEventTitle.set('');
     this.newEventDueDate.set(undefined);
     this.newEventPriority.set(undefined);
-    this.newEventDescription.set('');
     this.newEventNotes.set('');
 
     // Set default assignee to current user
@@ -765,8 +804,8 @@ export class EventsViewComponent implements OnInit {
    */
   submitCreateEvent(): void {
     // Validate required fields
-    if (!this.newEventTitle() || this.newEventTitle().trim() === '') {
-      alert('Proszę podać tytuł wydarzenia.');
+    if (!this.newEventTaskId()) {
+      alert('Proszę wybrać zadanie.');
       return;
     }
 
@@ -780,16 +819,17 @@ export class EventsViewComponent implements OnInit {
     const priority = this.newEventPriority() || selectedTask?.priority || Priority.MEDIUM;
 
     // Build CreateEventDto
+    // Format dueDate as YYYY-MM-DD (DateOnly format for backend)
+    const dueDate = this.newEventDueDate()!;
+    const dueDateString = `${dueDate.getFullYear()}-${String(dueDate.getMonth() + 1).padStart(2, '0')}-${String(dueDate.getDate()).padStart(2, '0')}`;
+
     const createDto: CreateEventDto = {
       householdId: this.householdId(),
-      taskId: this.newEventTaskId() || undefined,
+      taskId: this.newEventTaskId()!,
       assignedTo: this.newEventAssignedToId() || undefined,
-      dueDate: this.newEventDueDate()!.toISOString(),
-      title: this.newEventTitle().trim(),
-      description: this.newEventDescription() || undefined,
+      dueDate: dueDateString,
       notes: this.newEventNotes() || undefined,
       priority: priority,
-      isRecurring: true,
       createdBy: this.currentUserId()
     };
 

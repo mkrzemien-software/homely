@@ -40,20 +40,6 @@ public class EventEntity
     public DateOnly DueDate { get; set; }
 
     /// <summary>
-    /// Event title/name (usually inherited from task template)
-    /// </summary>
-    [Required]
-    [MaxLength(200)]
-    [Column("title")]
-    public string Title { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Additional description or notes for this specific event
-    /// </summary>
-    [Column("description")]
-    public string? Description { get; set; }
-
-    /// <summary>
     /// Event status: pending, completed, postponed, cancelled
     /// </summary>
     [Required]
@@ -94,10 +80,10 @@ public class EventEntity
     public string? PostponeReason { get; set; }
 
     /// <summary>
-    /// Whether this event should auto-generate the next occurrence when completed
+    /// Notes for this event (optional)
     /// </summary>
-    [Column("is_recurring")]
-    public bool IsRecurring { get; set; } = true;
+    [Column("notes")]
+    public string? Notes { get; set; }
 
     [Required]
     [Column("created_by")]

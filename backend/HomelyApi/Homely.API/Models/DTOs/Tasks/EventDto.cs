@@ -2,6 +2,7 @@ namespace Homely.API.Models.DTOs.Tasks;
 
 /// <summary>
 /// Event data transfer object - represents a scheduled occurrence of a task
+/// NOTE: Events do NOT have their own title - they display the associated task's name
 /// </summary>
 public class EventDto
 {
@@ -11,14 +12,15 @@ public class EventDto
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Task template ID (optional - event can exist without template)
+    /// Task template ID (required - events must be based on a task)
     /// </summary>
-    public Guid? TaskId { get; set; }
+    public Guid TaskId { get; set; }
 
     /// <summary>
-    /// Task template name
+    /// Task template name - this is displayed as the event's title
+    /// Events do NOT have their own title field
     /// </summary>
-    public string? TaskName { get; set; }
+    public string TaskName { get; set; } = string.Empty;
 
     /// <summary>
     /// Household ID
@@ -39,16 +41,6 @@ public class EventDto
     /// Due date for the event
     /// </summary>
     public DateOnly DueDate { get; set; }
-
-    /// <summary>
-    /// Event title
-    /// </summary>
-    public string Title { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Event description
-    /// </summary>
-    public string? Description { get; set; }
 
     /// <summary>
     /// Event status: pending, completed, postponed, cancelled
@@ -81,9 +73,9 @@ public class EventDto
     public string? PostponeReason { get; set; }
 
     /// <summary>
-    /// Whether event should automatically regenerate when completed
+    /// Optional notes for this event
     /// </summary>
-    public bool IsRecurring { get; set; }
+    public string? Notes { get; set; }
 
     /// <summary>
     /// User ID who created the event

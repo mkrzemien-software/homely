@@ -180,11 +180,9 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
                 HouseholdId = eventEntity.HouseholdId,
                 AssignedTo = eventEntity.AssignedTo, // Keep same assignee (can be changed later)
                 DueDate = nextDueDate,
-                Title = eventEntity.Task.Name, // Use task template name
-                Description = null, // New event starts without description
                 Status = DatabaseConstants.TaskStatuses.Pending,
                 Priority = eventEntity.Task.Priority, // Inherit priority from task template
-                IsRecurring = true,
+                Notes = null, // New event starts with no notes
                 CreatedBy = eventEntity.CreatedBy,
                 CreatedAt = DateTimeOffset.UtcNow,
                 UpdatedAt = DateTimeOffset.UtcNow

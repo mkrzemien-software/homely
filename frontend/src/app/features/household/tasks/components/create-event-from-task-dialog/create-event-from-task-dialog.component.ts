@@ -73,7 +73,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
   /**
    * Household members loaded from API
    */
-  householdMembers = signal<Array<{ id: string; firstName: string; lastName: string; email: string; role: string }>>([]);
+  householdMembers = signal<Array<{ id: string; userId: string; firstName: string; lastName: string; email: string; role: string }>>([]);
 
   /**
    * Priority options for dropdown
@@ -91,7 +91,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
     // TODO: Replace with actual household members
     return this.householdMembers().map(member => ({
       label: `${member.firstName} ${member.lastName}`,
-      value: member.id
+      value: member.userId
     }));
   });
 
@@ -136,6 +136,8 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
       console.warn('Cannot load household members: householdId is null');
       return;
     }
+
+    console.log('loadHouseholdMembers');
 
     this.householdService.getHouseholdMembers(this.householdId).subscribe({
       next: (members) => {

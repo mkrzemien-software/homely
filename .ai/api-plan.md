@@ -430,6 +430,7 @@
 
 #### GET /events
 - **Description**: Get events (scheduled occurrences) for user's households
+- **Important**: Events do NOT have their own title field - the event title is `task.name` from the associated task template
 - **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**: 
   - `householdId` (optional)
@@ -502,9 +503,14 @@
   "notes": "string"
 }
 ```
-- **Response**: 
-  - **201**: Created event object
-  - **400**: `{ "error": "Validation failed" }`
+- **Important Notes**:
+  - `taskId` is **REQUIRED** - events MUST be based on a task template
+  - Events do NOT have their own `title` field - they display the task's name
+  - Event name/title is derived from `task.name` when retrieved
+  - Priority is optional and defaults to the task's priority if not specified
+- **Response**:
+  - **201**: Created event object (with nested task details including task.name)
+  - **400**: `{ "error": "Validation failed" }` or `{ "error": "taskId is required" }`
   - **404**: `{ "error": "Task template not found" }`
 
 #### GET /events/{id}

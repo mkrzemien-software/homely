@@ -44,6 +44,7 @@ export interface HouseholdsResponse extends ApiResponse<HouseholdDto[]> {}
  */
 export interface HouseholdMember {
   id: string;
+  userId: string;
   firstName: string;
   lastName: string;
   email: string;

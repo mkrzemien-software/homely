@@ -78,7 +78,6 @@ public class RepositoryUsageExamples
         {
             TaskId = taskTemplate.Id,
             HouseholdId = householdId,
-            Title = $"Konserwacja: {taskName}",
             DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(maintenanceIntervalDays)),
             CreatedBy = createdBy,
             Priority = DatabaseConstants.PriorityLevels.Medium
@@ -244,7 +243,6 @@ public class RepositoryUsageExamples
             {
                 TaskId = taskTemplate.Id,
                 HouseholdId = householdId,
-                Title = "Test Event",
                 DueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
                 CreatedBy = userId,
                 Priority = DatabaseConstants.PriorityLevels.Medium
