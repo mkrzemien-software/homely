@@ -1,0 +1,181 @@
+// Filters Toolbar
+::ng-deep .filters-toolbar {
+  background: var(--p-surface-0);
+  border: 1px solid var(--p-border-color);
+  border-radius: 0.5rem;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  // Override default toolbar styles
+  .p-toolbar-group-start,
+  .p-toolbar-group-center,
+  .p-toolbar-group-end {
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      gap: 0.75rem;
+    }
+  }
+}
+
+// Toolbar Start
+.toolbar-start {
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+  white-space: nowrap;
+
+  i {
+    font-size: 1rem;
+    color: var(--p-primary-color);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+
+    span {
+      display: none;
+    }
+  }
+}
+
+// Toolbar Filters (Center)
+.toolbar-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    width: 100%;
+  }
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 180px;
+
+  @media (max-width: 1024px) {
+    min-width: unset;
+    width: 100%;
+  }
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--p-text-muted-color);
+  white-space: nowrap;
+}
+
+::ng-deep .filter-dropdown {
+  width: 100%;
+  min-width: 180px;
+
+  @media (max-width: 1024px) {
+    min-width: unset;
+  }
+
+  .p-dropdown-label {
+    font-size: 0.9rem;
+  }
+}
+
+// Toolbar End
+.toolbar-end {
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+// Responsive layout
+@media (max-width: 1024px) {
+  ::ng-deep .filters-toolbar {
+    .p-toolbar-group-start,
+    .p-toolbar-group-center,
+    .p-toolbar-group-end {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .p-toolbar-group-center {
+      margin: 1rem 0;
+    }
+  }
+}
+
+// Dark mode adjustments
+:global(.p-dark) {
+  ::ng-deep .filters-toolbar {
+    background: var(--p-surface-100);
+  }
+}
+
+// Print styles
+@media print {
+  ::ng-deep .filters-toolbar {
+    display: none;
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  ::ng-deep .filters-toolbar {
+    border-width: 2px;
+  }
+
+  .filter-label {
+    font-weight: 700;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  ::ng-deep .filter-dropdown {
+    .p-dropdown-panel {
+      transition: none !important;
+    }
+  }
+}
+
+// Tablet optimizations
+@media (min-width: 769px) and (max-width: 1024px) {
+  .toolbar-filters {
+    grid-template-columns: repeat(2, 1fr);
+    display: grid;
+  }
+}
+
+// Large screen optimizations
+@media (min-width: 1441px) {
+  .filter-item {
+    min-width: 200px;
+  }
+
+  ::ng-deep .filter-dropdown {
+    min-width: 200px;
+  }
+}

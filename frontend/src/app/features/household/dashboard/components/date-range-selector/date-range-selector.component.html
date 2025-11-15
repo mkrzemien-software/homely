@@ -1,0 +1,39 @@
+<div class="date-range-selector-container">
+  <label for="date-range-dropdown" class="selector-label">
+    <i class="pi pi-calendar-clock" aria-hidden="true"></i>
+    <span>Zakres dat:</span>
+  </label>
+
+  <p-dropdown
+    id="date-range-dropdown"
+    [options]="dateRangeOptions"
+    [(ngModel)]="selectedOption"
+    (onChange)="onRangeChange($event)"
+    optionLabel="label"
+    [placeholder]="'Wybierz zakres'"
+    [showClear]="false"
+    styleClass="date-range-dropdown"
+    [attr.aria-label]="'Wybierz zakres dat. Aktualnie: ' + getCurrentLabel()">
+
+    <!-- Custom option template with icon -->
+    <ng-template pTemplate="selectedItem">
+      @if (selectedOption(); as option) {
+        <div class="selected-option">
+          @if (option.icon) {
+            <i [class]="option.icon" aria-hidden="true"></i>
+          }
+          <span>{{ option.label }}</span>
+        </div>
+      }
+    </ng-template>
+
+    <ng-template pTemplate="item" let-option>
+      <div class="dropdown-option">
+        @if (option.icon) {
+          <i [class]="option.icon" aria-hidden="true"></i>
+        }
+        <span>{{ option.label }}</span>
+      </div>
+    </ng-template>
+  </p-dropdown>
+</div>

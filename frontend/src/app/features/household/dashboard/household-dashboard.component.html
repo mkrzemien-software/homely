@@ -38,18 +38,53 @@
       </app-navigation-tiles>
     </section>
 
-    <!-- TODO: Future sections will be added here -->
-    <!-- - Integrated calendar widget -->
-    <!-- - Upcoming tasks list (7 days) with quick actions -->
-    <!-- - Statistics: number of devices, usage limits -->
+    <!-- Dashboard Widgets Section -->
+    <section class="dashboard-widgets">
+      <!-- Date Range Selector -->
+      <div class="widget-header">
+        <h2 class="section-title">Nadchodzące wydarzenia</h2>
+        <app-date-range-selector
+          [selectedDays]="selectedDays()"
+          (rangeChange)="onDateRangeChange($event)">
+        </app-date-range-selector>
+      </div>
 
-    <!-- Footer Info -->
-    <footer class="dashboard-footer">
-      <p class="footer-text">
-        <i class="pi pi-info-circle" aria-hidden="true"></i>
-        Dodatkowe widoki (kalendarz, statystyki) zostaną zaimplementowane w kolejnych iteracjach.
-      </p>
-    </footer>
+      <!-- Week Calendar View -->
+      <div class="widget-calendar">
+        <app-week-calendar-view
+          [events]="filteredEvents()"
+          (eventClick)="onEventClick($event)"
+          (weekChange)="onWeekChange($event)">
+        </app-week-calendar-view>
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- Event Filters Toolbar -->
+      <app-event-filters-toolbar
+        [users]="[]"
+        [categories]="[]"
+        (filtersChange)="onFiltersChange($event)">
+      </app-event-filters-toolbar>
+
+      <!-- Events List -->
+      <div class="widget-events-list">
+        <app-dashboard-events-list
+          [events]="filteredEvents()"
+          [loading]="eventsLoading()"
+          (eventClick)="onEventClick($event)"
+          (actionClick)="onActionClick($event)">
+        </app-dashboard-events-list>
+      </div>
+    </section>
+
+    <!-- Event Details Dialog -->
+    <app-event-details-dialog
+      [visible]="eventDialogVisible()"
+      (visibleChange)="eventDialogVisible.set($event)"
+      [event]="selectedEvent()"
+      (action)="onEventAction($event)">
+    </app-event-details-dialog>
   } @else {
     <!-- Loading state -->
     <div class="loading-container">

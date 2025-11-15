@@ -1,0 +1,136 @@
+<div class="week-calendar-container">
+  <!-- Calendar Header with Navigation -->
+  <div class="calendar-header">
+    <div class="header-info">
+      <h3 class="calendar-title">
+        <i class="pi pi-calendar" aria-hidden="true"></i>
+        <span>{{ currentMonthLabel() }}</span>
+      </h3>
+      <p class="week-range">{{ weekRangeLabel() }}</p>
+    </div>
+
+    <div class="header-actions">
+      <p-button
+        icon="pi pi-chevron-left"
+        (onClick)="previousWeek()"
+        [text]="true"
+        [rounded]="true"
+        severity="secondary"
+        aria-label="Poprzedni tydzień"
+        pTooltip="Poprzedni tydzień"
+        tooltipPosition="bottom">
+      </p-button>
+
+      <p-button
+        label="Dzisiaj"
+        (onClick)="goToToday()"
+        [text]="true"
+        severity="secondary"
+        [disabled]="isCurrentWeek()"
+        aria-label="Przejdź do bieżącego tygodnia"
+        pTooltip="Przejdź do bieżącego tygodnia"
+        tooltipPosition="bottom">
+      </p-button>
+
+      <p-button
+        icon="pi pi-chevron-right"
+        (onClick)="nextWeek()"
+        [text]="true"
+        [rounded]="true"
+        severity="secondary"
+        aria-label="Następny tydzień"
+        pTooltip="Następny tydzień"
+        tooltipPosition="bottom">
+      </p-button>
+    </div>
+  </div>
+
+  <!-- Week Days Grid -->
+  <div class="week-grid">
+    @for (day of weekDays(); track day.date.getTime()) {
+      <div
+        class="day-column"
+        [class.is-today]="day.isToday"
+        [attr.aria-label]="day.dayName + ', ' + day.dayNumber">
+
+        <!-- Day Header -->
+        <div class="day-header">
+          <div class="day-name">
+            <span class="day-name-full">{{ day.dayName }}</span>
+            <span class="day-name-short">{{ day.dayNameShort }}</span>
+          </div>
+          <div class="day-number" [class.today-indicator]="day.isToday">
+            {{ day.dayNumber }}
+          </div>
+          @if (day.events.length > 0) {
+            <p-badge
+              [value]="day.events.length.toString()"
+              severity="info"
+              [attr.aria-label]="day.events.length + ' wydarzeń'">
+            </p-badge>
+          }
+        </div>
+
+        <!-- Day Events -->
+        <div class="day-events">
+          @if (day.events.length === 0) {
+            <div class="no-events">
+              <i class="pi pi-check-circle" aria-hidden="true"></i>
+              <span>Brak wydarzeń</span>
+            </div>
+          } @else {
+            @for (event of day.events; track event.id) {
+              <div
+                class="event-item"
+                [class]="'event-' + getEventSeverity(event)"
+                (click)="onEventClick(event)"
+                (keydown.enter)="onEventClick(event)"
+                (keydown.space)="onEventClick(event)"
+                tabindex="0"
+                role="button"
+                [pTooltip]="getEventTooltip(event)"
+                tooltipPosition="top"
+                [attr.aria-label]="'Wydarzenie: ' + event.task.name">
+
+                <div class="event-content">
+                  <div class="event-time">
+                    <i class="pi pi-clock" aria-hidden="true"></i>
+                    <span>{{ getEventTimeDisplay(event) }}</span>
+                  </div>
+
+                  <div class="event-title">
+                    {{ event.task.name }}
+                  </div>
+
+                  <div class="event-meta">
+                    <span class="event-category">
+                      <i class="pi pi-tag" aria-hidden="true"></i>
+                      {{ event.task.category.name }}
+                    </span>
+                  </div>
+
+                  <div class="event-assigned">
+                    <i class="pi pi-user" aria-hidden="true"></i>
+                    <span>{{ event.assignedTo.firstName }} {{ event.assignedTo.lastName }}</span>
+                  </div>
+                </div>
+
+                <!-- Event status indicator -->
+                <div class="event-indicator" [class]="'indicator-' + getEventSeverity(event)"></div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Empty state when no events at all -->
+  @if (events().length === 0) {
+    <div class="empty-state">
+      <i class="pi pi-calendar-plus" aria-hidden="true"></i>
+      <h4>Brak wydarzeń w tym tygodniu</h4>
+      <p>Nie masz zaplanowanych żadnych wydarzeń na wybrany tydzień.</p>
+    </div>
+  }
+</div>

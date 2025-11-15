@@ -1,0 +1,109 @@
+<p-toolbar styleClass="filters-toolbar">
+  <ng-template pTemplate="start">
+    <div class="toolbar-start">
+      <div class="toolbar-title">
+        <i class="pi pi-filter" aria-hidden="true"></i>
+        <span>Filtry</span>
+        @if (hasActiveFilters()) {
+          <p-badge
+            [value]="activeFiltersCount().toString()"
+            severity="info"
+            [attr.aria-label]="activeFiltersCount() + ' aktywnych filtrów'">
+          </p-badge>
+        }
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="center">
+    <div class="toolbar-filters">
+      <!-- User Filter -->
+      @if (users().length > 0) {
+        <div class="filter-item">
+          <label for="user-filter" class="filter-label">Osoba</label>
+          <p-dropdown
+            id="user-filter"
+            [options]="users()"
+            [(ngModel)]="selectedUser"
+            (onChange)="onUserChange($event)"
+            optionLabel="label"
+            optionValue="value"
+            [placeholder]="'Wszyscy'"
+            [showClear]="true"
+            styleClass="filter-dropdown"
+            [attr.aria-label]="'Filtruj po osobie odpowiedzialnej'">
+          </p-dropdown>
+        </div>
+      }
+
+      <!-- Category Filter -->
+      @if (categories().length > 0) {
+        <div class="filter-item">
+          <label for="category-filter" class="filter-label">Kategoria</label>
+          <p-dropdown
+            id="category-filter"
+            [options]="categories()"
+            [(ngModel)]="selectedCategory"
+            (onChange)="onCategoryChange($event)"
+            optionLabel="label"
+            optionValue="value"
+            [placeholder]="'Wszystkie'"
+            [showClear]="true"
+            styleClass="filter-dropdown"
+            [attr.aria-label]="'Filtruj po kategorii'">
+          </p-dropdown>
+        </div>
+      }
+
+      <!-- Priority Filter -->
+      <div class="filter-item">
+        <label for="priority-filter" class="filter-label">Priorytet</label>
+        <p-dropdown
+          id="priority-filter"
+          [options]="priorityOptions"
+          [(ngModel)]="selectedPriority"
+          (onChange)="onPriorityChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          [placeholder]="'Wszystkie'"
+          [showClear]="true"
+          styleClass="filter-dropdown"
+          [attr.aria-label]="'Filtruj po priorytecie'">
+        </p-dropdown>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-item">
+        <label for="status-filter" class="filter-label">Status</label>
+        <p-dropdown
+          id="status-filter"
+          [options]="statusOptions"
+          [(ngModel)]="selectedStatus"
+          (onChange)="onStatusChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          [placeholder]="'Wszystkie'"
+          [showClear]="true"
+          styleClass="filter-dropdown"
+          [attr.aria-label]="'Filtruj po statusie'">
+        </p-dropdown>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="end">
+    <div class="toolbar-end">
+      <p-button
+        label="Resetuj"
+        icon="pi pi-filter-slash"
+        (onClick)="resetFilters()"
+        [text]="true"
+        severity="secondary"
+        [disabled]="!hasActiveFilters()"
+        pTooltip="Wyczyść wszystkie filtry"
+        tooltipPosition="left"
+        aria-label="Resetuj wszystkie filtry">
+      </p-button>
+    </div>
+  </ng-template>
+</p-toolbar>

@@ -7,6 +7,9 @@
 
 import { Priority, TaskInterval, TaskCategory, TaskUser } from '../../tasks/models/task.model';
 
+// Re-export types for convenience
+export type { Priority, TaskInterval, TaskCategory, TaskUser };
+
 /**
  * Event status
  */

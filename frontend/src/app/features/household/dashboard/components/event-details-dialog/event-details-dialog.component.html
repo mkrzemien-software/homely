@@ -1,0 +1,204 @@
+<p-dialog
+  [(visible)]="dialogVisible"
+  (visibleChange)="onVisibleChange($event)"
+  [header]="dialogTitle()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closeOnEscape]="true"
+  [dismissableMask]="true"
+  styleClass="event-details-dialog"
+  [style]="{ width: '600px', maxWidth: '95vw' }"
+  [breakpoints]="{ '768px': '95vw', '576px': '100vw' }">
+
+  @if (event(); as ev) {
+    <div class="dialog-content">
+      <!-- Event Header Info -->
+      <div class="event-header">
+        <div class="event-tags">
+          <p-tag
+            [value]="getStatusLabel(ev)"
+            [severity]="getStatusSeverity(ev)"
+            styleClass="status-tag">
+          </p-tag>
+
+          <p-tag
+            [value]="getUrgencyLabel(ev)"
+            [severity]="getUrgencySeverity(ev)"
+            styleClass="urgency-tag">
+          </p-tag>
+
+          @if (ev.priority) {
+            <p-tag
+              [value]="'Priorytet: ' + getPriorityLabel(ev.priority)"
+              [severity]="getPrioritySeverity(ev.priority)"
+              styleClass="priority-tag">
+            </p-tag>
+          }
+        </div>
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- Event Details Grid -->
+      <div class="event-details-grid">
+        <!-- Category -->
+        <div class="detail-item">
+          <div class="detail-label">
+            <i class="pi pi-tag" aria-hidden="true"></i>
+            <span>Kategoria</span>
+          </div>
+          <div class="detail-value">{{ getCategoryPath(ev) }}</div>
+        </div>
+
+        <!-- Due Date -->
+        <div class="detail-item">
+          <div class="detail-label">
+            <i class="pi pi-calendar" aria-hidden="true"></i>
+            <span>Termin</span>
+          </div>
+          <div class="detail-value date-value">{{ formatDate(ev.dueDate) }}</div>
+        </div>
+
+        <!-- Assigned User -->
+        <div class="detail-item">
+          <div class="detail-label">
+            <i class="pi pi-user" aria-hidden="true"></i>
+            <span>Odpowiedzialny</span>
+          </div>
+          <div class="detail-value user-value">
+            <p-avatar
+              [label]="getUserInitials(ev)"
+              shape="circle"
+              size="normal"
+              styleClass="user-avatar">
+            </p-avatar>
+            <span>{{ getUserFullName(ev) }}</span>
+          </div>
+        </div>
+
+        <!-- Task ID (optional, for debugging) -->
+        <!-- <div class="detail-item">
+          <div class="detail-label">
+            <i class="pi pi-id-card" aria-hidden="true"></i>
+            <span>ID Zadania</span>
+          </div>
+          <div class="detail-value">{{ ev.task.id }}</div>
+        </div> -->
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- Postpone Form (if in postpone mode) -->
+      @if (postponeMode()) {
+        <div class="postpone-form">
+          <h4 class="form-title">
+            <i class="pi pi-clock" aria-hidden="true"></i>
+            <span>Przełóż wydarzenie</span>
+          </h4>
+
+          <div class="form-field">
+            <label for="new-due-date" class="field-label">Nowy termin</label>
+            <p-calendar
+              id="new-due-date"
+              [(ngModel)]="newDueDate"
+              [showIcon]="true"
+              [showButtonBar]="true"
+              [minDate]="minDate"
+              dateFormat="dd.mm.yy"
+              placeholder="Wybierz nowy termin"
+              [style]="{ width: '100%' }"
+              aria-label="Wybierz nowy termin wykonania">
+            </p-calendar>
+          </div>
+
+          <div class="form-field">
+            <label for="postpone-reason" class="field-label">Powód przełożenia (wymagany)</label>
+            <textarea
+              pInputTextarea
+              id="postpone-reason"
+              [(ngModel)]="postponeReason"
+              rows="3"
+              placeholder="Podaj powód przełożenia wydarzenia..."
+              [style]="{ width: '100%' }"
+              aria-label="Podaj powód przełożenia">
+            </textarea>
+          </div>
+
+          <div class="form-actions">
+            <p-button
+              label="Anuluj"
+              icon="pi pi-times"
+              (onClick)="cancelPostpone()"
+              [text]="true"
+              severity="secondary">
+            </p-button>
+
+            <p-button
+              label="Potwierdź przełożenie"
+              icon="pi pi-check"
+              (onClick)="confirmPostpone()"
+              [disabled]="!isPostponeFormValid()"
+              severity="warn">
+            </p-button>
+          </div>
+        </div>
+      } @else {
+        <!-- Action Buttons (when not in postpone mode) -->
+        <div class="action-buttons">
+          @if (canComplete()) {
+            <p-button
+              label="Oznacz jako wykonane"
+              icon="pi pi-check"
+              (onClick)="onComplete()"
+              severity="success"
+              styleClass="action-button">
+            </p-button>
+          }
+
+          @if (canPostpone()) {
+            <p-button
+              label="Przełóż termin"
+              icon="pi pi-clock"
+              (onClick)="showPostponeForm()"
+              severity="warn"
+              [text]="true"
+              styleClass="action-button">
+            </p-button>
+          }
+
+          <p-button
+            label="Edytuj"
+            icon="pi pi-pencil"
+            (onClick)="onEdit()"
+            severity="secondary"
+            [text]="true"
+            styleClass="action-button">
+          </p-button>
+
+          @if (canPostpone()) {
+            <p-button
+              label="Anuluj wydarzenie"
+              icon="pi pi-times-circle"
+              (onClick)="onCancelEvent()"
+              severity="danger"
+              [text]="true"
+              styleClass="action-button">
+            </p-button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Dialog Footer -->
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Zamknij"
+      icon="pi pi-times"
+      (onClick)="closeDialog()"
+      [text]="true"
+      severity="secondary">
+    </p-button>
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,173 @@
+<div class="events-list-container">
+  <!-- List Header -->
+  <div class="list-header">
+    <h3 class="list-title">
+      <i class="pi pi-list" aria-hidden="true"></i>
+      <span>Nadchodzące wydarzenia</span>
+      @if (eventsCount() > 0) {
+        <p-badge [value]="eventsCount().toString()" severity="info"></p-badge>
+      }
+    </h3>
+  </div>
+
+  <!-- Events Table -->
+  <p-table
+    [value]="sortedEvents()"
+    [loading]="loading()"
+    [scrollable]="true"
+    scrollHeight="500px"
+    styleClass="events-table"
+    [rowHover]="true"
+    responsiveLayout="scroll"
+    [attr.aria-label]="'Lista ' + eventsCount() + ' wydarzeń'">
+
+    <!-- Empty state -->
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="empty-message-cell">
+          <div class="empty-state">
+            <i class="pi pi-calendar-times" aria-hidden="true"></i>
+            <h4>Brak wydarzeń</h4>
+            <p>Nie masz zaplanowanych żadnych wydarzeń w wybranym zakresie dat.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Table header -->
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 3rem"></th>
+        <th>Zadanie</th>
+        <th>Kategoria</th>
+        <th>Termin</th>
+        <th>Pilność</th>
+        <th>Odpowiedzialny</th>
+        <th style="width: 8rem">Akcje</th>
+      </tr>
+    </ng-template>
+
+    <!-- Table body -->
+    <ng-template pTemplate="body" let-event>
+      <tr
+        (click)="onEventClick(event)"
+        (keydown.enter)="onEventClick(event)"
+        (keydown.space)="onEventClick(event)"
+        tabindex="0"
+        class="event-row"
+        [class]="'event-urgency-' + getUrgencySeverity(event)"
+        [attr.aria-label]="'Wydarzenie: ' + event.task.name">
+
+        <!-- Status indicator -->
+        <td class="status-cell">
+          <div
+            class="status-indicator"
+            [class]="'status-' + event.status"
+            [pTooltip]="getStatusLabel(event)"
+            tooltipPosition="right">
+          </div>
+        </td>
+
+        <!-- Task name -->
+        <td class="task-name-cell">
+          <div class="task-info">
+            <div class="task-name">{{ event.task.name }}</div>
+            @if (event.priority) {
+              <p-tag
+                [value]="getPriorityLabel(event.priority)"
+                [severity]="getPrioritySeverity(event.priority)"
+                styleClass="priority-tag">
+              </p-tag>
+            }
+          </div>
+        </td>
+
+        <!-- Category -->
+        <td class="category-cell">
+          <div class="category-info">
+            <i class="pi pi-tag" aria-hidden="true"></i>
+            <span class="category-path">{{ getCategoryPath(event) }}</span>
+          </div>
+        </td>
+
+        <!-- Due date -->
+        <td class="date-cell">
+          <div
+            class="date-display"
+            [pTooltip]="getFullDate(event.dueDate)"
+            tooltipPosition="top">
+            <i class="pi pi-calendar" aria-hidden="true"></i>
+            <span class="date-text">{{ formatDate(event.dueDate) }}</span>
+          </div>
+        </td>
+
+        <!-- Urgency -->
+        <td class="urgency-cell">
+          <p-tag
+            [value]="getUrgencyLabel(event)"
+            [severity]="getUrgencySeverity(event)"
+            styleClass="urgency-tag">
+          </p-tag>
+        </td>
+
+        <!-- Assigned user -->
+        <td class="user-cell">
+          <div class="user-info">
+            <p-avatar
+              [label]="getUserInitials(event)"
+              shape="circle"
+              size="normal"
+              styleClass="user-avatar"
+              [pTooltip]="getUserFullName(event)"
+              tooltipPosition="top">
+            </p-avatar>
+            <span class="user-name">{{ getUserFullName(event) }}</span>
+          </div>
+        </td>
+
+        <!-- Actions -->
+        <td class="actions-cell">
+          <div class="action-buttons">
+            <p-button
+              icon="pi pi-eye"
+              [text]="true"
+              [rounded]="true"
+              size="small"
+              severity="secondary"
+              (onClick)="onEventClick(event)"
+              pTooltip="Zobacz szczegóły"
+              tooltipPosition="left"
+              aria-label="Zobacz szczegóły wydarzenia">
+            </p-button>
+
+            @if (event.status === 'pending') {
+              <p-button
+                icon="pi pi-check"
+                [text]="true"
+                [rounded]="true"
+                size="small"
+                severity="success"
+                (onClick)="onActionClick(event, 'complete', $event)"
+                pTooltip="Oznacz jako wykonane"
+                tooltipPosition="left"
+                aria-label="Oznacz wydarzenie jako wykonane">
+              </p-button>
+            }
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Loading template -->
+    <ng-template pTemplate="loadingbody">
+      <tr>
+        <td colspan="6" class="loading-cell">
+          <div class="loading-spinner">
+            <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+            <span>Ładowanie wydarzeń...</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

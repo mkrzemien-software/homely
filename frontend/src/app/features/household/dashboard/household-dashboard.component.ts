@@ -6,9 +6,18 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
 import { MessageModule } from 'primeng/message';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 // Custom Components
 import { NavigationTilesComponent } from '../../system/dashboard/components/navigation-tiles/navigation-tiles.component';
+import { DateRangeSelectorComponent } from './components/date-range-selector/date-range-selector.component';
+import { WeekCalendarViewComponent } from './components/week-calendar-view/week-calendar-view.component';
+import { DashboardEventsListComponent } from './components/dashboard-events-list/dashboard-events-list.component';
+import { EventDetailsDialogComponent, EventAction } from './components/event-details-dialog/event-details-dialog.component';
+import { EventFiltersToolbarComponent, EventFilters } from './components/event-filters-toolbar/event-filters-toolbar.component';
+
+// Services
+import { DashboardService } from './services/dashboard.service';
 
 // Models
 import { NavigationTile } from '../../system/dashboard/models/navigation-tile.model';
@@ -18,6 +27,7 @@ import {
   getMemberNavigationTiles,
   getDashboardRoleNavigationTiles
 } from './models/household-navigation-tile.model';
+import { DashboardEvent, DashboardUpcomingEventsResponse } from './models/dashboard.model';
 
 /**
  * HouseholdDashboardComponent
@@ -57,7 +67,13 @@ import {
     CardModule,
     DividerModule,
     MessageModule,
-    NavigationTilesComponent
+    ProgressSpinnerModule,
+    NavigationTilesComponent,
+    DateRangeSelectorComponent,
+    WeekCalendarViewComponent,
+    DashboardEventsListComponent,
+    EventDetailsDialogComponent,
+    EventFiltersToolbarComponent
   ],
   templateUrl: './household-dashboard.component.html',
   styleUrl: './household-dashboard.component.scss'
@@ -65,6 +81,7 @@ import {
 export class HouseholdDashboardComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private dashboardService = inject(DashboardService);
 
   /**
    * Household ID from route parameter
@@ -119,6 +136,67 @@ export class HouseholdDashboardComponent implements OnInit {
    */
   readonly isLoaded = computed(() => this.householdId() !== '');
 
+  /**
+   * Selected date range (days)
+   */
+  selectedDays = signal<7 | 14 | 30>(7);
+
+  /**
+   * Upcoming events data
+   */
+  upcomingEvents = signal<DashboardEvent[]>([]);
+
+  /**
+   * Events summary
+   */
+  eventsSummary = signal<{ overdue: number; today: number; thisWeek: number } | null>(null);
+
+  /**
+   * Loading state for events
+   */
+  eventsLoading = signal<boolean>(false);
+
+  /**
+   * Selected event for details dialog
+   */
+  selectedEvent = signal<DashboardEvent | null>(null);
+
+  /**
+   * Event details dialog visibility
+   */
+  eventDialogVisible = signal<boolean>(false);
+
+  /**
+   * Current filters
+   */
+  currentFilters = signal<EventFilters>({});
+
+  /**
+   * Filtered events based on current filters
+   */
+  filteredEvents = computed(() => {
+    const events = this.upcomingEvents();
+    const filters = this.currentFilters();
+
+    return events.filter(event => {
+      if (filters.assignedUserId && event.assignedTo.firstName !== filters.assignedUserId) {
+        return false;
+      }
+      // Note: event.task.category is an object, need to compare category ID
+      // For now, skipping category filter until we have category ID in the event model
+      // if (filters.categoryId && event.task.category.id !== filters.categoryId) {
+      //   return false;
+      // }
+      if (filters.priority && event.priority !== filters.priority) {
+        return false;
+      }
+      if (filters.status && event.status !== filters.status) {
+        return false;
+      }
+      return true;
+    });
+  });
+
   ngOnInit(): void {
     // Get household ID from route
     this.route.params.subscribe(params => {
@@ -126,6 +204,7 @@ export class HouseholdDashboardComponent implements OnInit {
       if (id) {
         this.householdId.set(id);
         this.loadHouseholdData(id);
+        this.loadUpcomingEvents(id);
       }
     });
 
@@ -185,5 +264,145 @@ export class HouseholdDashboardComponent implements OnInit {
    */
   getTotalTilesCount(): number {
     return this.navigationTiles().length;
+  }
+
+  /**
+   * Load upcoming events from API
+   */
+  private loadUpcomingEvents(householdId: string): void {
+    this.eventsLoading.set(true);
+
+    this.dashboardService
+      .getUpcomingEvents({
+        days: this.selectedDays(),
+        householdId
+      })
+      .subscribe({
+        next: (response: DashboardUpcomingEventsResponse) => {
+          this.upcomingEvents.set(response.data);
+          this.eventsSummary.set(response.summary);
+          this.eventsLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Error loading upcoming events:', error);
+          this.eventsLoading.set(false);
+        }
+      });
+  }
+
+  /**
+   * Handle date range change
+   */
+  onDateRangeChange(days: 7 | 14 | 30): void {
+    this.selectedDays.set(days);
+    const id = this.householdId();
+    if (id) {
+      this.loadUpcomingEvents(id);
+    }
+  }
+
+  /**
+   * Handle week change in calendar
+   */
+  onWeekChange(startDate: Date): void {
+    console.log('Week changed to:', startDate);
+    // Optionally reload events for new week
+  }
+
+  /**
+   * Handle event click
+   */
+  onEventClick(event: DashboardEvent): void {
+    this.selectedEvent.set(event);
+    this.eventDialogVisible.set(true);
+  }
+
+  /**
+   * Handle event action from dialog
+   */
+  onEventAction(action: { action: EventAction; event: DashboardEvent; data?: any }): void {
+    console.log('Event action:', action);
+
+    switch (action.action) {
+      case 'complete':
+        this.completeEvent(action.event);
+        break;
+      case 'postpone':
+        this.postponeEvent(action.event, action.data);
+        break;
+      case 'edit':
+        this.editEvent(action.event);
+        break;
+      case 'cancel':
+        this.cancelEvent(action.event);
+        break;
+      case 'close':
+        // Dialog closed
+        break;
+    }
+  }
+
+  /**
+   * Complete event
+   */
+  private completeEvent(event: DashboardEvent): void {
+    console.log('Completing event:', event);
+    // TODO: Implement API call to complete event
+    // For now, just reload events
+    const id = this.householdId();
+    if (id) {
+      this.loadUpcomingEvents(id);
+    }
+  }
+
+  /**
+   * Postpone event
+   */
+  private postponeEvent(event: DashboardEvent, data: { newDueDate: string; reason: string }): void {
+    console.log('Postponing event:', event, data);
+    // TODO: Implement API call to postpone event
+    const id = this.householdId();
+    if (id) {
+      this.loadUpcomingEvents(id);
+    }
+  }
+
+  /**
+   * Edit event
+   */
+  private editEvent(event: DashboardEvent): void {
+    console.log('Editing event:', event);
+    // TODO: Navigate to edit event page or open edit dialog
+    this.router.navigate([`/${this.householdId()}/events/${event.id}/edit`]);
+  }
+
+  /**
+   * Cancel event
+   */
+  private cancelEvent(event: DashboardEvent): void {
+    console.log('Cancelling event:', event);
+    // TODO: Implement API call to cancel event
+    const id = this.householdId();
+    if (id) {
+      this.loadUpcomingEvents(id);
+    }
+  }
+
+  /**
+   * Handle filters change
+   */
+  onFiltersChange(filters: EventFilters): void {
+    this.currentFilters.set(filters);
+  }
+
+  /**
+   * Handle action click from events list
+   */
+  onActionClick(action: { event: DashboardEvent; action: string }): void {
+    console.log('Action click:', action);
+
+    if (action.action === 'complete') {
+      this.completeEvent(action.event);
+    }
   }
 }

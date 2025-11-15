@@ -5,18 +5,22 @@
 
   .tiles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: 1fr; // Mobile: 1 kolumna (pionowo)
     gap: 1.5rem;
     max-width: 1400px;
     margin: 0 auto;
 
     // Responsive breakpoints
     @media (min-width: 768px) {
+      // Tablet/Desktop: 2 kolumny (layout 2x2 dla 4 kafelków)
       grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
     }
 
     @media (min-width: 1200px) {
-      grid-template-columns: repeat(3, 1fr);
+      // Desktop large: 2 kolumny (zachowanie 2x2)
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2.5rem;
     }
   }
 }

@@ -136,10 +136,49 @@
 
 // Dashboard Content
 .dashboard-content {
+  margin-bottom: 3rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 2rem;
+  }
+}
+
+// Dashboard Widgets Section
+.dashboard-widgets {
+  margin-top: 3rem;
+
+  @media (max-width: 768px) {
+    margin-top: 2rem;
+  }
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+
+.widget-calendar {
   margin-bottom: 2rem;
 
   @media (max-width: 768px) {
     margin-bottom: 1.5rem;
+  }
+}
+
+.widget-events-list {
+  margin-top: 1.5rem;
+
+  @media (max-width: 768px) {
+    margin-top: 1rem;
   }
 }
 

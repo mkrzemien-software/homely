@@ -1,0 +1,160 @@
+// Date Range Selector Container
+.date-range-selector-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+  }
+}
+
+// Label
+.selector-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+  white-space: nowrap;
+
+  i {
+    font-size: 1.1rem;
+    color: var(--p-primary-color);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+}
+
+// Dropdown styling
+::ng-deep {
+  .date-range-dropdown {
+    min-width: 180px;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      min-width: unset;
+    }
+
+    // Selected item styling
+    .p-dropdown-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    // Dropdown panel
+    .p-dropdown-panel {
+      .p-dropdown-items {
+        .p-dropdown-item {
+          padding: 0.75rem 1rem;
+
+          &:hover {
+            background: var(--p-highlight-bg);
+          }
+
+          &.p-highlight {
+            background: var(--p-primary-color);
+            color: var(--p-primary-contrast-color);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Selected option template
+.selected-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  i {
+    font-size: 1rem;
+    color: var(--p-primary-color);
+  }
+
+  span {
+    font-weight: 500;
+  }
+}
+
+// Dropdown option template
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+
+  i {
+    font-size: 1.1rem;
+    color: var(--p-text-muted-color);
+  }
+
+  span {
+    flex: 1;
+  }
+}
+
+// Focus state
+.date-range-selector-container {
+  ::ng-deep {
+    .p-dropdown:focus-visible {
+      outline: 2px solid var(--p-primary-color);
+      outline-offset: 2px;
+    }
+  }
+}
+
+// Dark mode adjustments
+:global(.p-dark) {
+  .selector-label {
+    i {
+      color: var(--p-primary-400);
+    }
+  }
+
+  .selected-option i {
+    color: var(--p-primary-400);
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .selector-label {
+    font-weight: 700;
+  }
+
+  ::ng-deep {
+    .date-range-dropdown {
+      border-width: 2px;
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  ::ng-deep {
+    .p-dropdown {
+      transition: none !important;
+    }
+
+    .p-dropdown-panel {
+      transition: none !important;
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .date-range-selector-container {
+    display: none;
+  }
+}
