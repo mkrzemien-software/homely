@@ -62,7 +62,7 @@
         Opis
       </label>
       <textarea
-        pInputTextarea
+        pTextarea
         id="description"
         formControlName="description"
         placeholder="Opcjonalny opis zadania..."
@@ -76,12 +76,12 @@
       <label for="priority" class="form-label">
         Priorytet *
       </label>
-      <p-dropdown
+      <p-select
         id="priority"
         formControlName="priority"
         [options]="priorityOptions"
         [style]="{ width: '100%' }"
-      ></p-dropdown>
+      ></p-select>
     </div>
 
     <p-divider></p-divider>
@@ -168,7 +168,7 @@
         Notatki
       </label>
       <textarea
-        pInputTextarea
+        pTextarea
         id="notes"
         formControlName="notes"
         placeholder="Dodatkowe informacje..."

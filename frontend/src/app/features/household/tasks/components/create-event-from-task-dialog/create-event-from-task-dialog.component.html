@@ -53,7 +53,7 @@
         <label for="assignedTo" class="form-label">
           Przypisz do *
         </label>
-        <p-dropdown
+        <p-select
           id="assignedTo"
           formControlName="assignedTo"
           [options]="memberOptions()"
@@ -62,7 +62,7 @@
           placeholder="Wybierz osobę odpowiedzialną"
           [style]="{ width: '100%' }"
           [disabled]="memberOptions().length === 0"
-        ></p-dropdown>
+        ></p-select>
         @if (memberOptions().length === 0) {
           <small class="form-info">
             <i class="pi pi-info-circle"></i>
@@ -100,12 +100,12 @@
         <label for="priority" class="form-label">
           Priorytet *
         </label>
-        <p-dropdown
+        <p-select
           id="priority"
           formControlName="priority"
           [options]="priorityOptions"
           [style]="{ width: '100%' }"
-        ></p-dropdown>
+        ></p-select>
         <small class="form-info">
           <i class="pi pi-info-circle"></i>
           Priorytet dziedziczony z zadania ({{ getPriorityLabel(task.priority) }}). Możesz go zmienić.
@@ -118,7 +118,7 @@
           Notatki
         </label>
         <textarea
-          pInputTextarea
+          pTextarea
           id="notes"
           formControlName="notes"
           placeholder="Dodatkowe informacje o wydarzeniu..."

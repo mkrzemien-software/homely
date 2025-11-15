@@ -6,9 +6,9 @@ import { FormsModule } from '@angular/forms';
 // PrimeNG Components
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputTextarea } from 'primeng/inputtextarea';
+import { TextareaModule } from 'primeng/textarea';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { DividerModule } from 'primeng/divider';
@@ -78,9 +78,9 @@ import { Category } from '../items/models/category.model';
     FormsModule,
     CardModule,
     ButtonModule,
-    DropdownModule,
+    SelectModule,
     InputTextModule,
-    InputTextarea,
+    TextareaModule,
     IconFieldModule,
     InputIconModule,
     DividerModule,

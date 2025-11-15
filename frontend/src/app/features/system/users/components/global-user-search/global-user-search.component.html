@@ -17,7 +17,7 @@
 
     <!-- Role Filter -->
     <div class="filter-field">
-      <p-dropdown
+      <p-select
         formControlName="role"
         [options]="roleOptions()"
         optionLabel="label"
@@ -26,12 +26,12 @@
         [showClear]="true"
         styleClass="w-full"
         aria-label="Filtruj po roli"
-      ></p-dropdown>
+      ></p-select>
     </div>
 
     <!-- Status Filter -->
     <div class="filter-field">
-      <p-dropdown
+      <p-select
         formControlName="status"
         [options]="statusOptions()"
         optionLabel="label"
@@ -40,7 +40,7 @@
         [showClear]="true"
         styleClass="w-full"
         aria-label="Filtruj po statusie"
-      ></p-dropdown>
+      ></p-select>
     </div>
 
     <!-- Actions -->

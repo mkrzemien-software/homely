@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 // PrimeNG Components
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
 import { MessageModule } from 'primeng/message';
@@ -68,7 +68,7 @@ import { CreateEventFromTaskDialogComponent } from './components/create-event-fr
     FormsModule,
     CardModule,
     ButtonModule,
-    DropdownModule,
+    SelectModule,
     InputTextModule,
     DividerModule,
     MessageModule,

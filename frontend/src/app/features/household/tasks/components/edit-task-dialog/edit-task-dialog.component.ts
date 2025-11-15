@@ -6,8 +6,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputTextarea } from 'primeng/inputtextarea';
-import { DropdownModule } from 'primeng/dropdown';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
@@ -43,8 +43,8 @@ import { Task, Priority, UpdateTaskDto, getPriorityLabel } from '../../models/ta
     DialogModule,
     ButtonModule,
     InputTextModule,
-    InputTextarea,
-    DropdownModule,
+    TextareaModule,
+    SelectModule,
     TreeSelectModule,
     InputNumberModule,
     ToastModule,

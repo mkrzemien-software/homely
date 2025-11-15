@@ -68,7 +68,7 @@
       <!-- Assignee Filter -->
       <div class="filter-item">
         <label>Osoba odpowiedzialna</label>
-        <p-dropdown
+        <p-select
           [options]="assigneeOptions()"
           [ngModel]="selectedAssigneeId()"
           (ngModelChange)="onAssigneeFilterChange($event)"
@@ -77,13 +77,13 @@
           placeholder="Wybierz osobę"
           [styleClass]="'w-full'"
           [showClear]="true"
-        ></p-dropdown>
+        ></p-select>
       </div>
 
       <!-- Category Filter -->
       <div class="filter-item">
         <label>Kategoria</label>
-        <p-dropdown
+        <p-select
           [options]="categoryOptions()"
           [ngModel]="selectedCategoryId()"
           (ngModelChange)="onCategoryFilterChange($event)"
@@ -92,13 +92,13 @@
           placeholder="Wybierz kategorię"
           [styleClass]="'w-full'"
           [showClear]="true"
-        ></p-dropdown>
+        ></p-select>
       </div>
 
       <!-- Priority Filter -->
       <div class="filter-item">
         <label>Priorytet</label>
-        <p-dropdown
+        <p-select
           [options]="priorityOptions"
           [ngModel]="selectedPriority()"
           (ngModelChange)="onPriorityFilterChange($event)"
@@ -107,13 +107,13 @@
           placeholder="Wybierz priorytet"
           [styleClass]="'w-full'"
           [showClear]="true"
-        ></p-dropdown>
+        ></p-select>
       </div>
 
       <!-- Status Filter -->
       <div class="filter-item">
         <label>Status</label>
-        <p-dropdown
+        <p-select
           [options]="statusOptions"
           [ngModel]="selectedStatus()"
           (ngModelChange)="onStatusFilterChange($event)"
@@ -122,7 +122,7 @@
           placeholder="Wybierz status"
           [styleClass]="'w-full'"
           [showClear]="true"
-        ></p-dropdown>
+        ></p-select>
       </div>
 
       <!-- Date Range Filter -->
@@ -154,14 +154,14 @@
       <!-- Sort -->
       <div class="filter-item">
         <label>Sortowanie</label>
-        <p-dropdown
+        <p-select
           [options]="sortOptions"
           [ngModel]="sortBy()"
           (ngModelChange)="onSortChange($event)"
           optionLabel="label"
           optionValue="value"
           [styleClass]="'w-full'"
-        ></p-dropdown>
+        ></p-select>
       </div>
 
       <!-- Actions -->
@@ -424,7 +424,7 @@
       <!-- Task Selection -->
       <div class="form-field">
         <label for="task-select"><span class="required">*</span> Zadanie</label>
-        <p-dropdown
+        <p-select
           id="task-select"
           [options]="taskDropdownOptions()"
           [ngModel]="newEventTaskId()"
@@ -434,7 +434,7 @@
           placeholder="Wybierz zadanie"
           [styleClass]="'w-full'"
           [showClear]="false"
-        ></p-dropdown>
+        ></p-select>
       </div>
 
       <!-- Due Date -->
@@ -456,7 +456,7 @@
       <!-- Priority -->
       <div class="form-field">
         <label for="priority-select">Priorytet</label>
-        <p-dropdown
+        <p-select
           id="priority-select"
           [options]="priorityOptions"
           [ngModel]="newEventPriority()"
@@ -466,13 +466,13 @@
           placeholder="Wybierz priorytet (domyślnie z zadania)"
           [styleClass]="'w-full'"
           [showClear]="true"
-        ></p-dropdown>
+        ></p-select>
       </div>
 
       <!-- Assigned Member -->
       <div class="form-field">
         <label for="assignee-select"><span class="required">*</span> Osoba odpowiedzialna</label>
-        <p-dropdown
+        <p-select
           id="assignee-select"
           [options]="assigneeDropdownOptions()"
           [ngModel]="newEventAssignedToId()"
@@ -482,7 +482,7 @@
           placeholder="Wybierz osobę"
           [styleClass]="'w-full'"
           [showClear]="false"
-        ></p-dropdown>
+        ></p-select>
       </div>
 
       <!-- Notes -->
@@ -490,7 +490,7 @@
         <label for="notes-input">Notatki</label>
         <textarea
           id="notes-input"
-          pInputTextarea
+          pTextarea
           [ngModel]="newEventNotes()"
           (ngModelChange)="newEventNotes.set($event)"
           placeholder="Dodatkowe informacje..."

@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 // PrimeNG Components
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { DividerModule } from 'primeng/divider';
@@ -67,7 +67,7 @@ import { EditCategoryTypeDialogComponent } from './components/edit-category-type
     FormsModule,
     CardModule,
     ButtonModule,
-    DropdownModule,
+    SelectModule,
     InputTextModule,
     MultiSelectModule,
     DividerModule,

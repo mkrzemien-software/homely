@@ -6,7 +6,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 // PrimeNG Components
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 
@@ -25,7 +25,7 @@ interface DropdownOption {
     ReactiveFormsModule,
     InputTextModule,
     ButtonModule,
-    DropdownModule,
+    SelectModule,
     IconFieldModule,
     InputIconModule
   ],

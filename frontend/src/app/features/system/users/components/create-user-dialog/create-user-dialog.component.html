@@ -129,7 +129,7 @@
     <!-- Household Field (Optional) -->
     <div class="form-field">
       <label for="householdId">Gospodarstwo (opcjonalnie)</label>
-      <p-dropdown
+      <p-select
         inputId="householdId"
         formControlName="householdId"
         [options]="householdOptions()"
@@ -139,7 +139,7 @@
         [showClear]="true"
         appendTo="body"
         styleClass="w-full">
-      </p-dropdown>
+      </p-select>
       <small class="help-text">
         Użytkownik może być przypisany do gospodarstwa później.
       </small>
@@ -148,7 +148,7 @@
     <!-- Role Field -->
     <div class="form-field">
       <label for="role">Rola *</label>
-      <p-dropdown
+      <p-select
         inputId="role"
         formControlName="role"
         [options]="roleOptions()"
@@ -157,7 +157,7 @@
         placeholder="Wybierz rolę"
         appendTo="body"
         styleClass="w-full">
-      </p-dropdown>
+      </p-select>
       <small class="help-text">
         Domyślna rola: Członek. Może być zmieniona później.
       </small>

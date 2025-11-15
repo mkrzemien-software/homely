@@ -5,7 +5,7 @@
     <!-- Category Type -->
     <div class="form-field">
       <label for="categoryTypeId">Kategoria *</label>
-      <p-dropdown
+      <p-select
         id="categoryTypeId"
         formControlName="categoryTypeId"
         [options]="categoryTypes()"
@@ -28,7 +28,7 @@
             <span>{{ categoryType.name }}</span>
           </div>
         </ng-template>
-      </p-dropdown>
+      </p-select>
       @if (createCategoryForm.controls['categoryTypeId'].invalid && createCategoryForm.controls['categoryTypeId'].touched) {
         <small class="p-error">
           @if (createCategoryForm.controls['categoryTypeId'].errors?.['required']) {
@@ -67,7 +67,7 @@
       <label for="description">Opis (opcjonalnie)</label>
       <textarea
         id="description"
-        pInputTextarea
+        pTextarea
         formControlName="description"
         placeholder="Dodatkowe informacje o podkategorii"
         [rows]="3"

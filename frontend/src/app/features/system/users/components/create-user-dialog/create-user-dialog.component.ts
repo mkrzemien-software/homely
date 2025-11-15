@@ -6,7 +6,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { MessageModule } from 'primeng/message';
 
 // Services
@@ -42,7 +42,7 @@ import { SystemHouseholdsService } from '../../../../../core/services/system-hou
     ButtonModule,
     InputTextModule,
     PasswordModule,
-    DropdownModule,
+    SelectModule,
     MessageModule
   ],
   templateUrl: './create-user-dialog.component.html',

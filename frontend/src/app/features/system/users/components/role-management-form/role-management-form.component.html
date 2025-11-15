@@ -28,7 +28,7 @@
       <!-- Role Dropdown -->
       <div class="form-field">
         <label for="role">Rola użytkownika</label>
-        <p-dropdown
+        <p-select
           inputId="role"
           formControlName="role"
           [options]="roleOptions()"
@@ -44,7 +44,7 @@
               <div class="role-description">{{ option.description }}</div>
             </div>
           </ng-template>
-        </p-dropdown>
+        </p-select>
 
         @if (hasRoleChanged()) {
           <small class="help-text">

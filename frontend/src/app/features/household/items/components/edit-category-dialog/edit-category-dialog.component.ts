@@ -6,8 +6,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputTextarea } from 'primeng/inputtextarea';
-import { DropdownModule } from 'primeng/dropdown';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -27,8 +27,8 @@ import { Category, CategoryType, UpdateCategoryDto } from '../../models/category
     DialogModule,
     ButtonModule,
     InputTextModule,
-    InputTextarea,
-    DropdownModule,
+    TextareaModule,
+    SelectModule,
     InputNumberModule,
     ToastModule,
   ],

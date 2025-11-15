@@ -24,7 +24,7 @@
 
     input,
     textarea,
-    p-dropdown,
+    p-select,
     p-inputNumber {
       width: 100%;
     }
@@ -46,7 +46,7 @@
   }
 
   input[pInputText],
-  textarea[pInputTextarea] {
+  textarea[pTextarea] {
     width: 100%;
     font-size: 0.95rem;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -78,7 +78,7 @@
     }
   }
 
-  textarea[pInputTextarea] {
+  textarea[pTextarea] {
     resize: vertical;
     min-height: 80px;
     font-family: inherit;

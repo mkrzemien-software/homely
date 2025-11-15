@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 
 // PrimeNG Components
 import { CardModule } from 'primeng/card';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 
@@ -23,7 +23,7 @@ interface RoleOption {
     CommonModule,
     ReactiveFormsModule,
     CardModule,
-    DropdownModule,
+    SelectModule,
     ButtonModule,
     MessageModule
   ],

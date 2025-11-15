@@ -6,7 +6,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputTextarea } from 'primeng/inputtextarea';
+import { TextareaModule } from 'primeng/textarea';
 import { MessageService } from 'primeng/api';
 
 // Services
@@ -21,7 +21,7 @@ import { SystemHouseholdsService } from '../../../../../core/services/system-hou
     DialogModule,
     ButtonModule,
     InputTextModule,
-    InputTextarea,
+    TextareaModule,
   ],
   templateUrl: './create-household-dialog.component.html',
   styleUrls: ['./create-household-dialog.component.scss']

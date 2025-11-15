@@ -5,9 +5,9 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 // PrimeNG Components
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
-import { InputTextarea } from 'primeng/inputtextarea';
+import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { DividerModule } from 'primeng/divider';
@@ -42,9 +42,9 @@ import { HouseholdService } from '../../../../../core/services/household.service
     ReactiveFormsModule,
     DialogModule,
     ButtonModule,
-    DropdownModule,
+    SelectModule,
     DatePickerModule,
-    InputTextarea,
+    TextareaModule,
     ToastModule,
     DividerModule,
     TagModule
