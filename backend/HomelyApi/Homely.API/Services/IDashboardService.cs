@@ -20,4 +20,15 @@ public interface IDashboardService
         Guid householdId,
         int days = 7,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get dashboard statistics for household
+    /// Includes events, tasks, and plan usage statistics
+    /// </summary>
+    /// <param name="householdId">Household ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Dashboard statistics response</returns>
+    Task<DashboardStatisticsResponseDto> GetStatisticsAsync(
+        Guid householdId,
+        CancellationToken cancellationToken = default);
 }

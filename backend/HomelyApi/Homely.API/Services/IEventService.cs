@@ -62,4 +62,9 @@ public interface IEventService
     /// Postpone event to a new due date with a reason
     /// </summary>
     Task<EventDto> PostponeEventAsync(Guid eventId, PostponeEventDto postponeDto, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Cancel event with a reason (changes status to 'cancelled')
+    /// </summary>
+    Task<EventDto> CancelEventAsync(Guid eventId, CancelEventDto cancelDto, CancellationToken cancellationToken = default);
 }

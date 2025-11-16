@@ -85,6 +85,93 @@ public class DashboardService : IDashboardService
         }
     }
 
+    /// <inheritdoc/>
+    public async Task<DashboardStatisticsResponseDto> GetStatisticsAsync(
+        Guid householdId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation("Fetching dashboard statistics for household {HouseholdId}", householdId);
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var firstDayOfMonth = new DateOnly(today.Year, today.Month, 1);
+
+            // Get events statistics
+            var allEvents = await _context.Set<EventEntity>()
+                .Where(e => e.HouseholdId == householdId && e.DeletedAt == null)
+                .ToListAsync(cancellationToken);
+
+            var pendingEvents = allEvents.Where(e => e.Status == "pending").ToList();
+            var overdueEvents = pendingEvents.Where(e => e.DueDate < today).Count();
+            var completedThisMonth = allEvents
+                .Where(e => e.Status == "completed" && e.CompletionDate.HasValue &&
+                       e.CompletionDate.Value >= firstDayOfMonth)
+                .Count();
+
+            // Get tasks statistics
+            var tasks = await _context.Set<TaskEntity>()
+                .Where(t => t.HouseholdId == householdId && t.DeletedAt == null)
+                .Include(t => t.Category)
+                .ToListAsync(cancellationToken);
+
+            var tasksByCategory = tasks
+                .GroupBy(t => t.Category?.Name ?? "Uncategorized")
+                .Select(g => new DashboardCategoryStatDto
+                {
+                    CategoryName = g.Key,
+                    Count = g.Count()
+                })
+                .ToList();
+
+            // Get household and plan limits
+            var household = await _context.Set<HouseholdEntity>()
+                .Include(h => h.PlanType)
+                .FirstOrDefaultAsync(h => h.Id == householdId && h.DeletedAt == null, cancellationToken);
+
+            var membersCount = await _context.Set<HouseholdMemberEntity>()
+                .Where(hm => hm.HouseholdId == householdId && hm.DeletedAt == null)
+                .CountAsync(cancellationToken);
+
+            var tasksLimit = household?.PlanType?.MaxItems ?? 5; // Default free plan limit
+            var membersLimit = household?.PlanType?.MaxHouseholdMembers ?? 3; // Default free plan limit
+
+            var statistics = new DashboardStatisticsResponseDto
+            {
+                Events = new DashboardEventsStatisticsDto
+                {
+                    Pending = pendingEvents.Count,
+                    Overdue = overdueEvents,
+                    CompletedThisMonth = completedThisMonth
+                },
+                Tasks = new DashboardTasksStatisticsDto
+                {
+                    Total = tasks.Count,
+                    ByCategory = tasksByCategory
+                },
+                PlanUsage = new DashboardPlanUsageDto
+                {
+                    TasksUsed = tasks.Count,
+                    TasksLimit = tasksLimit,
+                    MembersUsed = membersCount,
+                    MembersLimit = membersLimit
+                }
+            };
+
+            _logger.LogInformation(
+                "Dashboard statistics - Pending: {Pending}, Overdue: {Overdue}, Completed: {Completed}, Tasks: {Tasks}, Members: {Members}",
+                statistics.Events.Pending, statistics.Events.Overdue, statistics.Events.CompletedThisMonth,
+                statistics.Tasks.Total, statistics.PlanUsage.MembersUsed);
+
+            return statistics;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching dashboard statistics for household {HouseholdId}", householdId);
+            throw;
+        }
+    }
+
     /// <summary>
     /// Maps EventEntity to DashboardEventDto with all nested data
     /// </summary>

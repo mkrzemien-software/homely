@@ -8,15 +8,15 @@ namespace Homely.API.Models.DTOs.Tasks;
 public class PostponeEventDto
 {
     /// <summary>
-    /// New due date for the event
+    /// New due date for the event (ISO 8601 format)
     /// </summary>
     [Required(ErrorMessage = "New due date is required")]
-    public DateOnly NewDueDate { get; set; }
+    public string NewDueDate { get; set; } = string.Empty;
 
     /// <summary>
-    /// Reason for postponing the event
+    /// Reason for postponing the event (required)
     /// </summary>
-    [Required(ErrorMessage = "Postpone reason is required")]
-    [MaxLength(500, ErrorMessage = "Postpone reason cannot exceed 500 characters")]
-    public string PostponeReason { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Postponement reason is required")]
+    [MaxLength(500, ErrorMessage = "Reason cannot exceed 500 characters")]
+    public string Reason { get; set; } = string.Empty;
 }

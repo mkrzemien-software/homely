@@ -89,8 +89,101 @@
 
       <p-divider></p-divider>
 
-      <!-- Postpone Form (if in postpone mode) -->
-      @if (postponeMode()) {
+      <!-- Complete Form (if in complete mode) -->
+      @if (completeMode()) {
+        <div class="complete-form">
+          <h4 class="form-title">
+            <i class="pi pi-check-circle" aria-hidden="true"></i>
+            <span>Oznacz jako wykonane</span>
+          </h4>
+
+          <div class="form-field">
+            <label for="completion-date" class="field-label">Data wykonania</label>
+            <p-calendar
+              id="completion-date"
+              [(ngModel)]="completionDate"
+              [showIcon]="true"
+              [showButtonBar]="true"
+              [maxDate]="minDate"
+              dateFormat="dd.mm.yy"
+              placeholder="Wybierz datę wykonania"
+              [style]="{ width: '100%' }"
+              aria-label="Wybierz datę wykonania">
+            </p-calendar>
+          </div>
+
+          <div class="form-field">
+            <label for="completion-notes" class="field-label">Notatki (opcjonalne)</label>
+            <textarea
+              pInputTextarea
+              id="completion-notes"
+              [(ngModel)]="completionNotes"
+              rows="4"
+              placeholder="Dodaj notatki dotyczące wykonania zadania..."
+              [style]="{ width: '100%' }"
+              aria-label="Notatki dotyczące wykonania">
+            </textarea>
+          </div>
+
+          <div class="form-actions">
+            <p-button
+              label="Anuluj"
+              icon="pi pi-times"
+              (onClick)="cancelComplete()"
+              [text]="true"
+              severity="secondary">
+            </p-button>
+
+            <p-button
+              label="Potwierdź wykonanie"
+              icon="pi pi-check"
+              (onClick)="confirmComplete()"
+              [disabled]="!isCompleteFormValid()"
+              severity="success">
+            </p-button>
+          </div>
+        </div>
+      } @else if (cancelMode()) {
+        <!-- Cancel Form (if in cancel mode) -->
+        <div class="cancel-form">
+          <h4 class="form-title">
+            <i class="pi pi-times-circle" aria-hidden="true"></i>
+            <span>Anuluj wydarzenie</span>
+          </h4>
+
+          <div class="form-field">
+            <label for="cancel-reason" class="field-label">Powód anulowania (wymagany)</label>
+            <textarea
+              pInputTextarea
+              id="cancel-reason"
+              [(ngModel)]="cancelReason"
+              rows="3"
+              placeholder="Podaj powód anulowania wydarzenia..."
+              [style]="{ width: '100%' }"
+              aria-label="Podaj powód anulowania">
+            </textarea>
+          </div>
+
+          <div class="form-actions">
+            <p-button
+              label="Anuluj"
+              icon="pi pi-times"
+              (onClick)="cancelCancelEvent()"
+              [text]="true"
+              severity="secondary">
+            </p-button>
+
+            <p-button
+              label="Potwierdź anulowanie"
+              icon="pi pi-check"
+              (onClick)="confirmCancelEvent()"
+              [disabled]="!isCancelFormValid()"
+              severity="danger">
+            </p-button>
+          </div>
+        </div>
+      } @else if (postponeMode()) {
+        <!-- Postpone Form (if in postpone mode) -->
         <div class="postpone-form">
           <h4 class="form-title">
             <i class="pi pi-clock" aria-hidden="true"></i>
@@ -144,13 +237,13 @@
           </div>
         </div>
       } @else {
-        <!-- Action Buttons (when not in postpone mode) -->
+        <!-- Action Buttons (when not in any form mode) -->
         <div class="action-buttons">
           @if (canComplete()) {
             <p-button
               label="Oznacz jako wykonane"
               icon="pi pi-check"
-              (onClick)="onComplete()"
+              (onClick)="showCompleteForm()"
               severity="success"
               styleClass="action-button">
             </p-button>
@@ -180,7 +273,7 @@
             <p-button
               label="Anuluj wydarzenie"
               icon="pi pi-times-circle"
-              (onClick)="onCancelEvent()"
+              (onClick)="showCancelForm()"
               severity="danger"
               [text]="true"
               styleClass="action-button">

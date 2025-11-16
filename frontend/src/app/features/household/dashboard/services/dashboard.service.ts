@@ -170,10 +170,11 @@ export class DashboardService {
     this.loadingStatistics$.next(true);
 
     return this.http
-      .get<DashboardStatisticsResponse>(`${this.API_URL}/dashboard/statistics`, {
+      .get<{ success: boolean; data: DashboardStatisticsResponse }>(`${this.API_URL}/dashboard/statistics`, {
         params: httpParams
       })
       .pipe(
+        map(apiResponse => apiResponse.data), // Unwrap ApiResponseDto
         tap(response => {
           // Update cache
           const cache = this.statisticsCache$.value;

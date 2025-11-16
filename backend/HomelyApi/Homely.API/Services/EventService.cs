@@ -259,10 +259,15 @@ public class EventService : IEventService
                 throw new InvalidOperationException($"Event {eventId} is already completed");
             }
 
+            // Parse completion date or use today
+            var completionDate = !string.IsNullOrEmpty(completeDto.CompletionDate)
+                ? DateOnly.Parse(completeDto.CompletionDate)
+                : DateOnly.FromDateTime(DateTime.UtcNow);
+
             // Mark event as completed
             eventEntity.Status = "completed";
-            eventEntity.CompletionDate = completeDto.CompletionDate;
-            eventEntity.CompletionNotes = completeDto.CompletionNotes;
+            eventEntity.CompletionDate = completionDate;
+            eventEntity.CompletionNotes = completeDto.Notes;
             eventEntity.UpdatedAt = DateTimeOffset.UtcNow;
 
             await _unitOfWork.Events.UpdateAsync(eventEntity, cancellationToken);
@@ -283,7 +288,7 @@ public class EventService : IEventService
 
                     if (hasInterval)
                     {
-                        await CreateNextRecurringEventAsync(eventEntity, completeDto.CompletionDate, cancellationToken);
+                        await CreateNextRecurringEventAsync(eventEntity, completionDate, cancellationToken);
                     }
                 }
             }
@@ -320,8 +325,11 @@ public class EventService : IEventService
                 throw new InvalidOperationException($"Cannot postpone completed event {eventId}");
             }
 
+            // Parse new due date
+            var newDueDate = DateOnly.Parse(postponeDto.NewDueDate);
+
             // Validate new due date is in the future
-            if (postponeDto.NewDueDate <= DateOnly.FromDateTime(DateTime.UtcNow))
+            if (newDueDate <= DateOnly.FromDateTime(DateTime.UtcNow))
             {
                 throw new InvalidOperationException("New due date must be in the future");
             }
@@ -333,21 +341,58 @@ public class EventService : IEventService
             }
 
             // Update event with new due date and reason
-            eventEntity.DueDate = postponeDto.NewDueDate;
-            eventEntity.PostponeReason = postponeDto.PostponeReason;
+            eventEntity.DueDate = newDueDate;
+            eventEntity.PostponeReason = postponeDto.Reason;
             eventEntity.Status = "postponed";
             eventEntity.UpdatedAt = DateTimeOffset.UtcNow;
 
             await _unitOfWork.Events.UpdateAsync(eventEntity, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Event {EventId} postponed to {NewDueDate}", eventId, postponeDto.NewDueDate);
+            _logger.LogInformation("Event {EventId} postponed to {NewDueDate}", eventId, newDueDate);
 
             return MapToDto(eventEntity);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error postponing event {EventId}", eventId);
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<EventDto> CancelEventAsync(Guid eventId, CancelEventDto cancelDto, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var eventEntity = await _unitOfWork.Events.GetWithDetailsAsync(eventId, cancellationToken);
+
+            if (eventEntity == null || eventEntity.DeletedAt != null)
+            {
+                throw new InvalidOperationException($"Event with ID {eventId} not found");
+            }
+
+            if (eventEntity.Status == "completed")
+            {
+                throw new InvalidOperationException($"Cannot cancel completed event {eventId}");
+            }
+
+            // Update event status to cancelled and store reason in Notes
+            eventEntity.Status = "cancelled";
+            eventEntity.Notes = $"[CANCELLED] {cancelDto.Reason}" +
+                               (string.IsNullOrEmpty(eventEntity.Notes) ? "" : $"\n\nPrevious notes:\n{eventEntity.Notes}");
+            eventEntity.UpdatedAt = DateTimeOffset.UtcNow;
+
+            await _unitOfWork.Events.UpdateAsync(eventEntity, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Event {EventId} cancelled with reason: {Reason}", eventId, cancelDto.Reason);
+
+            return MapToDto(eventEntity);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error cancelling event {EventId}", eventId);
             throw;
         }
     }

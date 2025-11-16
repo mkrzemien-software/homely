@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, catchError, of } from 'rxjs';
+import { Observable, BehaviorSubject, tap, catchError, of, map } from 'rxjs';
 import {
   Event,
   EventsResponse,
@@ -237,29 +237,21 @@ export class EventsService {
    *
    * @param eventId - The event ID
    * @param completeDto - Completion data
-   * @returns Observable of completed event and optionally next generated event
+   * @returns Observable of completed event
    */
-  completeEvent(eventId: string, completeDto: CompleteEventDto): Observable<{
-    completedEvent: Event;
-    nextEvent?: Event
-  }> {
-    return this.http.post<{ completedEvent: Event; nextEvent?: Event }>(
+  completeEvent(eventId: string, completeDto: CompleteEventDto): Observable<Event> {
+    return this.http.post<{ success: boolean; data: Event }>(
       `${this.API_URL}/events/${eventId}/complete`,
       completeDto
     ).pipe(
-      tap(response => {
+      map(apiResponse => apiResponse.data), // Unwrap ApiResponseDto
+      tap(event => {
         // Update cache - update completed event
         const current = this.eventsCache$.value;
         const index = current.findIndex(e => e.id === eventId);
         if (index !== -1) {
           const updated = [...current];
-          updated[index] = response.completedEvent;
-
-          // Add next event if generated
-          if (response.nextEvent) {
-            updated.push(response.nextEvent);
-          }
-
+          updated[index] = event;
           this.eventsCache$.next(updated);
         }
       }),
@@ -278,10 +270,11 @@ export class EventsService {
    * @returns Observable of postponed event
    */
   postponeEvent(eventId: string, postponeDto: PostponeEventDto): Observable<Event> {
-    return this.http.post<Event>(
+    return this.http.post<{ success: boolean; data: Event }>(
       `${this.API_URL}/events/${eventId}/postpone`,
       postponeDto
     ).pipe(
+      map(apiResponse => apiResponse.data), // Unwrap ApiResponseDto
       tap(event => {
         // Update cache
         const current = this.eventsCache$.value;
@@ -300,17 +293,20 @@ export class EventsService {
   }
 
   /**
-   * Cancel an event
+   * Cancel an event (changes status to 'cancelled')
+   * Note: This is different from deleteEvent which does soft delete.
+   * Cancel keeps the event but marks it as cancelled with a reason.
    *
    * @param eventId - The event ID
-   * @param cancelDto - Cancellation data (reason)
+   * @param cancelDto - Cancellation data with reason
    * @returns Observable of cancelled event
    */
   cancelEvent(eventId: string, cancelDto: CancelEventDto): Observable<Event> {
-    return this.http.post<Event>(
+    return this.http.post<{ success: boolean; data: Event }>(
       `${this.API_URL}/events/${eventId}/cancel`,
       cancelDto
     ).pipe(
+      map(apiResponse => apiResponse.data), // Unwrap ApiResponseDto
       tap(event => {
         // Update cache
         const current = this.eventsCache$.value;

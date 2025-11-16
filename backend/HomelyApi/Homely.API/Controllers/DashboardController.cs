@@ -77,4 +77,49 @@ public class DashboardController : ControllerBase
                 StatusCodes.Status500InternalServerError));
         }
     }
+
+    /// <summary>
+    /// Get dashboard statistics for household
+    /// </summary>
+    /// <param name="householdId">Household ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Dashboard statistics response</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     GET /api/dashboard/statistics?householdId=00000000-0000-0000-0000-000000000000
+    ///
+    /// Response includes:
+    /// - Events statistics (pending, overdue, completed this month)
+    /// - Tasks statistics (total, by category)
+    /// - Plan usage (tasks used/limit, members used/limit)
+    /// </remarks>
+    [HttpGet("statistics")]
+    [ProducesResponseType(typeof(ApiResponseDto<DashboardStatisticsResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<DashboardStatisticsResponseDto>>> GetStatistics(
+        [FromQuery] Guid householdId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (householdId == Guid.Empty)
+            {
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "Household ID is required",
+                    StatusCodes.Status400BadRequest));
+            }
+
+            var response = await _dashboardService.GetStatisticsAsync(householdId, cancellationToken);
+            return Ok(ApiResponseDto<DashboardStatisticsResponseDto>.SuccessResponse(response));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving dashboard statistics for household {HouseholdId}", householdId);
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while retrieving dashboard statistics",
+                StatusCodes.Status500InternalServerError));
+        }
+    }
 }

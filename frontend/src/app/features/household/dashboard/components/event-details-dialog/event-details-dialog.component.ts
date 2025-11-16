@@ -90,6 +90,16 @@ export class EventDetailsDialogComponent {
   postponeMode = signal<boolean>(false);
 
   /**
+   * Complete mode (show completion notes form)
+   */
+  completeMode = signal<boolean>(false);
+
+  /**
+   * Cancel mode (show cancel reason form)
+   */
+  cancelMode = signal<boolean>(false);
+
+  /**
    * New due date for postponement
    */
   newDueDate = signal<Date | null>(null);
@@ -98,6 +108,21 @@ export class EventDetailsDialogComponent {
    * Postpone reason
    */
   postponeReason = signal<string>('');
+
+  /**
+   * Completion notes
+   */
+  completionNotes = signal<string>('');
+
+  /**
+   * Completion date
+   */
+  completionDate = signal<Date>(new Date());
+
+  /**
+   * Cancel reason
+   */
+  cancelReason = signal<string>('');
 
   /**
    * Minimum date for postpone (today)
@@ -134,12 +159,17 @@ export class EventDetailsDialogComponent {
       this.dialogVisible.set(this.visible());
     });
 
-    // Reset postpone mode when dialog closes
+    // Reset all modes and forms when dialog closes
     effect(() => {
       if (!this.dialogVisible()) {
         this.postponeMode.set(false);
+        this.completeMode.set(false);
+        this.cancelMode.set(false);
         this.newDueDate.set(null);
         this.postponeReason.set('');
+        this.completionNotes.set('');
+        this.completionDate.set(new Date());
+        this.cancelReason.set('');
       }
     });
   }
@@ -161,12 +191,39 @@ export class EventDetailsDialogComponent {
   }
 
   /**
-   * Handle complete action
+   * Show complete form
    */
-  onComplete(): void {
+  showCompleteForm(): void {
+    this.completeMode.set(true);
+    this.completionDate.set(new Date()); // Default to today
+  }
+
+  /**
+   * Cancel complete
+   */
+  cancelComplete(): void {
+    this.completeMode.set(false);
+    this.completionNotes.set('');
+    this.completionDate.set(new Date());
+  }
+
+  /**
+   * Confirm complete
+   */
+  confirmComplete(): void {
     const ev = this.event();
-    if (ev) {
-      this.action.emit({ action: 'complete', event: ev });
+    const notes = this.completionNotes();
+    const date = this.completionDate();
+
+    if (ev && date) {
+      this.action.emit({
+        action: 'complete',
+        event: ev,
+        data: {
+          completionNotes: notes,
+          completionDate: date.toISOString().split('T')[0] // YYYY-MM-DD format
+        }
+      });
       this.closeDialog();
     }
   }
@@ -224,12 +281,37 @@ export class EventDetailsDialogComponent {
   }
 
   /**
-   * Handle cancel event action
+   * Show cancel event form
    */
-  onCancelEvent(): void {
+  showCancelForm(): void {
+    this.cancelMode.set(true);
+  }
+
+  /**
+   * Cancel cancel event
+   */
+  cancelCancelEvent(): void {
+    this.cancelMode.set(false);
+    this.cancelReason.set('');
+  }
+
+  /**
+   * Confirm cancel event
+   */
+  confirmCancelEvent(): void {
     const ev = this.event();
-    if (ev) {
-      this.action.emit({ action: 'cancel', event: ev });
+    const reason = this.cancelReason();
+
+    console.log('confirmCancelEvent - reason:', reason, 'trimmed:', reason.trim());
+
+    if (ev && reason.trim()) {
+      this.action.emit({
+        action: 'cancel',
+        event: ev,
+        data: {
+          cancelReason: reason.trim() // Send trimmed version
+        }
+      });
       this.closeDialog();
     }
   }
@@ -327,5 +409,19 @@ export class EventDetailsDialogComponent {
    */
   isPostponeFormValid(): boolean {
     return this.newDueDate() !== null && this.postponeReason().trim().length > 0;
+  }
+
+  /**
+   * Check if complete form is valid
+   */
+  isCompleteFormValid(): boolean {
+    return this.completionDate() !== null;
+  }
+
+  /**
+   * Check if cancel form is valid
+   */
+  isCancelFormValid(): boolean {
+    return this.cancelReason().trim().length > 0;
   }
 }

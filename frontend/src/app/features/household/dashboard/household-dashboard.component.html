@@ -28,10 +28,20 @@
       <div class="stats-grid">
         <p-card class="stat-card">
           <div class="stat-content">
-            <i class="pi pi-calendar stat-icon"></i>
+            <i class="pi pi-clock stat-icon info"></i>
             <div class="stat-details">
-              <div class="stat-value">{{ dashboardStats()!.totalEvents }}</div>
-              <div class="stat-label">Wszystkie Wydarzenia</div>
+              <div class="stat-value">{{ dashboardStats()!.pending }}</div>
+              <div class="stat-label">Oczekujące</div>
+            </div>
+          </div>
+        </p-card>
+
+        <p-card class="stat-card">
+          <div class="stat-content">
+            <i class="pi pi-exclamation-triangle stat-icon warning"></i>
+            <div class="stat-details">
+              <div class="stat-value">{{ dashboardStats()!.overdue }}</div>
+              <div class="stat-label">Przekroczone</div>
             </div>
           </div>
         </p-card>
@@ -40,28 +50,8 @@
           <div class="stat-content">
             <i class="pi pi-check-circle stat-icon success"></i>
             <div class="stat-details">
-              <div class="stat-value">{{ dashboardStats()!.completedEvents }}</div>
-              <div class="stat-label">Ukończone</div>
-            </div>
-          </div>
-        </p-card>
-
-        <p-card class="stat-card">
-          <div class="stat-content">
-            <i class="pi pi-box stat-icon info"></i>
-            <div class="stat-details">
-              <div class="stat-value">{{ dashboardStats()!.totalItems }}</div>
-              <div class="stat-label">Wszystkie Elementy</div>
-            </div>
-          </div>
-        </p-card>
-
-        <p-card class="stat-card">
-          <div class="stat-content">
-            <i class="pi pi-users stat-icon warning"></i>
-            <div class="stat-details">
-              <div class="stat-value">{{ dashboardStats()!.totalMembers }}</div>
-              <div class="stat-label">Członkowie</div>
+              <div class="stat-value">{{ dashboardStats()!.completedThisMonth }}</div>
+              <div class="stat-label">Wykonane w tym miesiącu</div>
             </div>
           </div>
         </p-card>

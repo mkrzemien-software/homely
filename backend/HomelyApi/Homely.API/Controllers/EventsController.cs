@@ -490,7 +490,7 @@ public class EventsController : ControllerBase
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                
+
                 return BadRequest(ApiResponseDto<object>.ErrorResponse(
                     "Validation failed",
                     StatusCodes.Status400BadRequest,
@@ -512,6 +512,68 @@ public class EventsController : ControllerBase
             _logger.LogError(ex, "Error postponing event {EventId}", id);
             return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
                 "An error occurred while postponing event",
+                StatusCodes.Status500InternalServerError));
+        }
+    }
+
+    /// <summary>
+    /// Cancel an event with a reason
+    /// </summary>
+    /// <param name="id">Event ID</param>
+    /// <param name="cancelDto">Cancellation data with reason</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Cancelled event</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /api/events/00000000-0000-0000-0000-000000000000/cancel
+    ///     {
+    ///         "cancelReason": "Appointment no longer needed"
+    ///     }
+    ///
+    /// Event status will be changed to 'cancelled'.
+    /// Cancel reason will be stored in the notes field with [CANCELLED] prefix.
+    /// </remarks>
+    [HttpPost("{id}/cancel")]
+    [ProducesResponseType(typeof(ApiResponseDto<EventDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponseDto<EventDto>>> CancelEvent(
+        Guid id,
+        [FromBody] CancelEventDto cancelDto,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                    "Validation failed",
+                    StatusCodes.Status400BadRequest,
+                    errors));
+            }
+
+            var eventDto = await _eventService.CancelEventAsync(id, cancelDto, cancellationToken);
+            return Ok(ApiResponseDto<EventDto>.SuccessResponse(eventDto));
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation while cancelling event");
+            return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                ex.Message,
+                StatusCodes.Status400BadRequest));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error cancelling event {EventId}", id);
+            return StatusCode(500, ApiResponseDto<object>.ErrorResponse(
+                "An error occurred while cancelling event",
                 StatusCodes.Status500InternalServerError));
         }
     }

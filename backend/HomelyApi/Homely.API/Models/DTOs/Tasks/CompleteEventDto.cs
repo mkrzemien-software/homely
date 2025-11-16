@@ -8,20 +8,18 @@ namespace Homely.API.Models.DTOs.Tasks;
 public class CompleteEventDto
 {
     /// <summary>
-    /// Date when the event was completed
+    /// Date when the event was completed (optional, defaults to today)
     /// </summary>
-    [Required(ErrorMessage = "Completion date is required")]
-    public DateOnly CompletionDate { get; set; }
+    public string? CompletionDate { get; set; }
 
     /// <summary>
     /// Optional notes about the completion
     /// </summary>
-    [MaxLength(1000, ErrorMessage = "Completion notes cannot exceed 1000 characters")]
-    public string? CompletionNotes { get; set; }
+    [MaxLength(1000, ErrorMessage = "Notes cannot exceed 1000 characters")]
+    public string? Notes { get; set; }
 
     /// <summary>
-    /// User ID who completed the event (will be set from authentication context)
+    /// Attachment URL (optional)
     /// </summary>
-    [Required(ErrorMessage = "Completed by user ID is required")]
-    public Guid CompletedBy { get; set; }
+    public string? AttachmentUrl { get; set; }
 }

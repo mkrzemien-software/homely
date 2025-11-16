@@ -9,7 +9,6 @@ import { MessageModule } from 'primeng/message';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 // Custom Components
-import { NavigationTilesComponent } from '../../system/dashboard/components/navigation-tiles/navigation-tiles.component';
 import { WeekCalendarViewComponent } from './components/week-calendar-view/week-calendar-view.component';
 import { DashboardEventsListComponent } from './components/dashboard-events-list/dashboard-events-list.component';
 import { EventDetailsDialogComponent, EventAction } from './components/event-details-dialog/event-details-dialog.component';
@@ -17,6 +16,7 @@ import { EventFiltersToolbarComponent, EventFilters } from './components/event-f
 
 // Services
 import { DashboardService } from './services/dashboard.service';
+import { EventsService } from '../events/services/events.service';
 
 // Models
 import { NavigationTile } from '../../system/dashboard/models/navigation-tile.model';
@@ -67,7 +67,6 @@ import { DashboardEvent, DashboardUpcomingEventsResponse } from './models/dashbo
     DividerModule,
     MessageModule,
     ProgressSpinnerModule,
-    NavigationTilesComponent,
     WeekCalendarViewComponent,
     DashboardEventsListComponent,
     EventDetailsDialogComponent,
@@ -80,6 +79,7 @@ export class HouseholdDashboardComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private dashboardService = inject(DashboardService);
+  private eventsService = inject(EventsService);
 
   /**
    * Household ID from route parameter
@@ -150,13 +150,12 @@ export class HouseholdDashboardComponent implements OnInit {
   eventsSummary = signal<{ overdue: number; today: number; thisWeek: number } | null>(null);
 
   /**
-   * Dashboard statistics
+   * Dashboard statistics from API
    */
   dashboardStats = signal<{
-    totalEvents: number;
-    completedEvents: number;
-    totalItems: number;
-    totalMembers: number;
+    pending: number;
+    overdue: number;
+    completedThisMonth: number;
   } | null>(null);
 
   /**
@@ -222,28 +221,36 @@ export class HouseholdDashboardComponent implements OnInit {
 
   /**
    * Load household data and statistics
-   * TODO: Implement API call to fetch household data
+   * Fetches real statistics from API
    *
    * @param householdId - The household ID
    */
   private loadHouseholdData(householdId: string): void {
-    // TODO: Implement API call
-    // this.householdService.getHousehold(householdId).subscribe(...)
-    // For now, just log the household ID
-    console.log('Loading household data for:', householdId);
+    console.log('Loading household statistics for:', householdId);
 
-    // TODO: Load statistics for tiles (upcoming tasks count, etc.)
-    // this.loadTaskStatistics(householdId);
-    // this.loadCategoryStatistics(householdId);
-
-    // TODO: Replace with real data from API
-    // For now, setting mock statistics
-    this.dashboardStats.set({
-      totalEvents: 24,
-      completedEvents: 18,
-      totalItems: 12,
-      totalMembers: 4
-    });
+    // Fetch statistics from API
+    this.dashboardService
+      .getStatistics(householdId)
+      .subscribe({
+        next: (response) => {
+          // Set statistics from events data
+          this.dashboardStats.set({
+            pending: response.events.pending,
+            overdue: response.events.overdue,
+            completedThisMonth: response.events.completedThisMonth
+          });
+          console.log('Loaded statistics:', this.dashboardStats());
+        },
+        error: (error) => {
+          console.error('Error loading statistics:', error);
+          // Set default values on error
+          this.dashboardStats.set({
+            pending: 0,
+            overdue: 0,
+            completedThisMonth: 0
+          });
+        }
+      });
   }
 
   /**
@@ -342,7 +349,7 @@ export class HouseholdDashboardComponent implements OnInit {
 
     switch (action.action) {
       case 'complete':
-        this.completeEvent(action.event);
+        this.completeEvent(action.event, action.data);
         break;
       case 'postpone':
         this.postponeEvent(action.event, action.data);
@@ -351,7 +358,7 @@ export class HouseholdDashboardComponent implements OnInit {
         this.editEvent(action.event);
         break;
       case 'cancel':
-        this.cancelEvent(action.event);
+        this.cancelEvent(action.event, action.data);
         break;
       case 'close':
         // Dialog closed
@@ -362,14 +369,27 @@ export class HouseholdDashboardComponent implements OnInit {
   /**
    * Complete event
    */
-  private completeEvent(event: DashboardEvent): void {
-    console.log('Completing event:', event);
-    // TODO: Implement API call to complete event
-    // For now, just reload events
-    const id = this.householdId();
-    if (id) {
-      this.loadUpcomingEvents(id);
-    }
+  private completeEvent(event: DashboardEvent, data?: { completionNotes: string; completionDate: string }): void {
+    console.log('Completing event:', event, data);
+
+    this.eventsService.completeEvent(event.id, {
+      completionDate: data?.completionDate || new Date().toISOString().split('T')[0],
+      notes: data?.completionNotes || ''
+    }).subscribe({
+      next: (completedEvent) => {
+        console.log('Event completed successfully:', completedEvent);
+        // Reload events to show updated list
+        const id = this.householdId();
+        if (id) {
+          this.loadUpcomingEvents(id);
+          this.loadHouseholdData(id); // Reload statistics
+        }
+      },
+      error: (error) => {
+        console.error('Error completing event:', error);
+        // TODO: Show error message to user
+      }
+    });
   }
 
   /**
@@ -377,11 +397,25 @@ export class HouseholdDashboardComponent implements OnInit {
    */
   private postponeEvent(event: DashboardEvent, data: { newDueDate: string; reason: string }): void {
     console.log('Postponing event:', event, data);
-    // TODO: Implement API call to postpone event
-    const id = this.householdId();
-    if (id) {
-      this.loadUpcomingEvents(id);
-    }
+
+    this.eventsService.postponeEvent(event.id, {
+      newDueDate: data.newDueDate,
+      reason: data.reason
+    }).subscribe({
+      next: (postponedEvent) => {
+        console.log('Event postponed successfully:', postponedEvent);
+        // Reload events to show updated list
+        const id = this.householdId();
+        if (id) {
+          this.loadUpcomingEvents(id);
+          this.loadHouseholdData(id); // Reload statistics
+        }
+      },
+      error: (error) => {
+        console.error('Error postponing event:', error);
+        // TODO: Show error message to user
+      }
+    });
   }
 
   /**
@@ -394,15 +428,32 @@ export class HouseholdDashboardComponent implements OnInit {
   }
 
   /**
-   * Cancel event
+   * Cancel event (changes status to 'cancelled')
    */
-  private cancelEvent(event: DashboardEvent): void {
-    console.log('Cancelling event:', event);
-    // TODO: Implement API call to cancel event
-    const id = this.householdId();
-    if (id) {
-      this.loadUpcomingEvents(id);
+  private cancelEvent(event: DashboardEvent, data?: { cancelReason: string }): void {
+    console.log('Cancelling event:', event, data);
+
+    if (!data?.cancelReason) {
+      console.error('Cancel reason is required');
+      return;
     }
+
+    this.eventsService.cancelEvent(event.id, {
+      reason: data.cancelReason
+    }).subscribe({
+      next: (cancelledEvent) => {
+        console.log('Event cancelled successfully:', cancelledEvent);
+        // Reload events to show updated list
+        const id = this.householdId();
+        if (id) {
+          this.loadUpcomingEvents(id);
+        }
+      },
+      error: (error) => {
+        console.error('Error cancelling event:', error);
+        // TODO: Show error message to user
+      }
+    });
   }
 
   /**

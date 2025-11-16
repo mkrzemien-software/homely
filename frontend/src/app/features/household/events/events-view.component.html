@@ -277,6 +277,7 @@
             <div class="event-title-section">
               <h3 class="event-title">{{ event.taskName }}</h3>
               <p class="event-category">{{ getCategoryNameForEvent(event) }}</p>
+              <p>{{formatEventDate(event.dueDate)}} ({{event.dueDate | date:'dd.MM.yyyy' }})</p>
             </div>
             <div class="event-badges">
               <p-tag
