@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, catchError, of } from 'rxjs';
+import { Observable, BehaviorSubject, tap, catchError, of, map } from 'rxjs';
 import {
   DashboardUpcomingEventsResponse,
   DashboardUpcomingEventsParams,
@@ -109,10 +109,11 @@ export class DashboardService {
     this.loadingUpcomingEvents$.next(true);
 
     return this.http
-      .get<DashboardUpcomingEventsResponse>(`${this.API_URL}/dashboard/upcoming-events`, {
+      .get<{ success: boolean; data: DashboardUpcomingEventsResponse }>(`${this.API_URL}/dashboard/upcoming-events`, {
         params: httpParams
       })
       .pipe(
+        map(apiResponse => apiResponse.data), // Unwrap ApiResponseDto
         tap(response => {
           // Update cache
           const cache = this.upcomingEventsCache$.value;

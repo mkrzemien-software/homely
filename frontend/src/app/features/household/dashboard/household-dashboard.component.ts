@@ -10,7 +10,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 // Custom Components
 import { NavigationTilesComponent } from '../../system/dashboard/components/navigation-tiles/navigation-tiles.component';
-import { DateRangeSelectorComponent } from './components/date-range-selector/date-range-selector.component';
 import { WeekCalendarViewComponent } from './components/week-calendar-view/week-calendar-view.component';
 import { DashboardEventsListComponent } from './components/dashboard-events-list/dashboard-events-list.component';
 import { EventDetailsDialogComponent, EventAction } from './components/event-details-dialog/event-details-dialog.component';
@@ -69,7 +68,6 @@ import { DashboardEvent, DashboardUpcomingEventsResponse } from './models/dashbo
     MessageModule,
     ProgressSpinnerModule,
     NavigationTilesComponent,
-    DateRangeSelectorComponent,
     WeekCalendarViewComponent,
     DashboardEventsListComponent,
     EventDetailsDialogComponent,
@@ -152,6 +150,16 @@ export class HouseholdDashboardComponent implements OnInit {
   eventsSummary = signal<{ overdue: number; today: number; thisWeek: number } | null>(null);
 
   /**
+   * Dashboard statistics
+   */
+  dashboardStats = signal<{
+    totalEvents: number;
+    completedEvents: number;
+    totalItems: number;
+    totalMembers: number;
+  } | null>(null);
+
+  /**
    * Loading state for events
    */
   eventsLoading = signal<boolean>(false);
@@ -227,6 +235,15 @@ export class HouseholdDashboardComponent implements OnInit {
     // TODO: Load statistics for tiles (upcoming tasks count, etc.)
     // this.loadTaskStatistics(householdId);
     // this.loadCategoryStatistics(householdId);
+
+    // TODO: Replace with real data from API
+    // For now, setting mock statistics
+    this.dashboardStats.set({
+      totalEvents: 24,
+      completedEvents: 18,
+      totalItems: 12,
+      totalMembers: 4
+    });
   }
 
   /**

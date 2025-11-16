@@ -22,28 +22,57 @@
 
   <p-divider></p-divider>
 
-  <!-- Status Counters -->
-  <div class="status-counters">
-    <div class="counter-card">
-      <div class="counter-value">{{ statusCounters().total }}</div>
-      <div class="counter-label">Wszystkie</div>
-    </div>
-    <div class="counter-card pending">
-      <div class="counter-value">{{ statusCounters().pending }}</div>
-      <div class="counter-label">Oczekujące</div>
-    </div>
-    <div class="counter-card completed">
-      <div class="counter-value">{{ statusCounters().completed }}</div>
-      <div class="counter-label">Wykonane</div>
-    </div>
-    <div class="counter-card postponed">
-      <div class="counter-value">{{ statusCounters().postponed }}</div>
-      <div class="counter-label">Przełożone</div>
-    </div>
-    <div class="counter-card overdue">
-      <div class="counter-value">{{ statusCounters().overdue }}</div>
-      <div class="counter-label">Przekroczone</div>
-    </div>
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <!-- <p-card class="stat-card">
+      <div class="stat-content">
+        <i class="pi pi-calendar stat-icon"></i>
+        <div class="stat-details">
+          <div class="stat-value">{{ statusCounters().total }}</div>
+          <div class="stat-label">Wszystkie</div>
+        </div>
+      </div>
+    </p-card> -->
+
+    <p-card class="stat-card">
+      <div class="stat-content">
+        <i class="pi pi-clock stat-icon info"></i>
+        <div class="stat-details">
+          <div class="stat-value">{{ statusCounters().pending }}</div>
+          <div class="stat-label">Oczekujące</div>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card class="stat-card">
+      <div class="stat-content">
+        <i class="pi pi-check-circle stat-icon success"></i>
+        <div class="stat-details">
+          <div class="stat-value">{{ statusCounters().completed }}</div>
+          <div class="stat-label">Wykonane</div>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card class="stat-card">
+      <div class="stat-content">
+        <i class="pi pi-history stat-icon warning"></i>
+        <div class="stat-details">
+          <div class="stat-value">{{ statusCounters().postponed }}</div>
+          <div class="stat-label">Przełożone</div>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card class="stat-card">
+      <div class="stat-content">
+        <i class="pi pi-exclamation-triangle stat-icon danger"></i>
+        <div class="stat-details">
+          <div class="stat-value">{{ statusCounters().overdue }}</div>
+          <div class="stat-label">Przekroczone</div>
+        </div>
+      </div>
+    </p-card>
   </div>
 
   <!-- Filters Toolbar -->

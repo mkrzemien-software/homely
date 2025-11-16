@@ -23,32 +23,53 @@
 
     <p-divider></p-divider>
 
-    <!-- Navigation Tiles Section -->
-    <section class="dashboard-content">
-      <div class="content-header">
-        <h2 class="section-title">Szybka nawigacja</h2>
-        <p class="section-description">
-          Wybierz jedną z poniższych sekcji, aby zarządzać gospodarstwem
-        </p>
-      </div>
+    <!-- Statistics Cards -->
+    @if (dashboardStats()) {
+      <div class="stats-grid">
+        <p-card class="stat-card">
+          <div class="stat-content">
+            <i class="pi pi-calendar stat-icon"></i>
+            <div class="stat-details">
+              <div class="stat-value">{{ dashboardStats()!.totalEvents }}</div>
+              <div class="stat-label">Wszystkie Wydarzenia</div>
+            </div>
+          </div>
+        </p-card>
 
-      <app-navigation-tiles
-        [tiles]="navigationTiles()"
-        (tileClick)="onTileClick($event)">
-      </app-navigation-tiles>
-    </section>
+        <p-card class="stat-card">
+          <div class="stat-content">
+            <i class="pi pi-check-circle stat-icon success"></i>
+            <div class="stat-details">
+              <div class="stat-value">{{ dashboardStats()!.completedEvents }}</div>
+              <div class="stat-label">Ukończone</div>
+            </div>
+          </div>
+        </p-card>
+
+        <p-card class="stat-card">
+          <div class="stat-content">
+            <i class="pi pi-box stat-icon info"></i>
+            <div class="stat-details">
+              <div class="stat-value">{{ dashboardStats()!.totalItems }}</div>
+              <div class="stat-label">Wszystkie Elementy</div>
+            </div>
+          </div>
+        </p-card>
+
+        <p-card class="stat-card">
+          <div class="stat-content">
+            <i class="pi pi-users stat-icon warning"></i>
+            <div class="stat-details">
+              <div class="stat-value">{{ dashboardStats()!.totalMembers }}</div>
+              <div class="stat-label">Członkowie</div>
+            </div>
+          </div>
+        </p-card>
+      </div>
+    }
 
     <!-- Dashboard Widgets Section -->
     <section class="dashboard-widgets">
-      <!-- Date Range Selector -->
-      <div class="widget-header">
-        <h2 class="section-title">Nadchodzące wydarzenia</h2>
-        <app-date-range-selector
-          [selectedDays]="selectedDays()"
-          (rangeChange)="onDateRangeChange($event)">
-        </app-date-range-selector>
-      </div>
-
       <!-- Week Calendar View -->
       <div class="widget-calendar">
         <app-week-calendar-view
@@ -61,10 +82,16 @@
       <p-divider></p-divider>
 
       <!-- Event Filters Toolbar -->
+      <div class="widget-header">
+        <h2 class="section-title">Nadchodzące wydarzenia</h2>
+      </div>
+
       <app-event-filters-toolbar
         [users]="[]"
         [categories]="[]"
-        (filtersChange)="onFiltersChange($event)">
+        [selectedDays]="selectedDays()"
+        (filtersChange)="onFiltersChange($event)"
+        (rangeChange)="onDateRangeChange($event)">
       </app-event-filters-toolbar>
 
       <!-- Events List -->

@@ -85,63 +85,64 @@
   }
 }
 
-// Status Counters
-.status-counters {
+// Statistics Cards
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
   margin-bottom: 2rem;
 
   @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (max-width: 480px) {
     grid-template-columns: 1fr;
-  }
-}
-
-.counter-card {
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-  text-align: center;
-  transition: all 0.3s;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    gap: 1rem;
   }
 
-  .counter-value {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
-  }
+  .stat-card {
+    ::ng-deep .p-card-body {
+      padding: 1.5rem;
+    }
 
-  .counter-label {
-    font-size: 0.875rem;
-    color: var(--text-color-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
+    .stat-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
 
-  &.pending .counter-value {
-    color: var(--blue-500);
-  }
+      .stat-icon {
+        font-size: 2.5rem;
+        color: var(--p-primary-color);
 
-  &.completed .counter-value {
-    color: var(--green-500);
-  }
+        &.success {
+          color: var(--p-green-500);
+        }
 
-  &.postponed .counter-value {
-    color: var(--orange-500);
-  }
+        &.info {
+          color: var(--p-blue-500);
+        }
 
-  &.overdue .counter-value {
-    color: var(--red-500);
+        &.warning {
+          color: var(--p-orange-500);
+        }
+
+        &.danger {
+          color: var(--p-red-500);
+        }
+      }
+
+      .stat-details {
+        .stat-value {
+          font-size: 2rem;
+          font-weight: 600;
+          color: var(--p-text-color);
+          line-height: 1;
+        }
+
+        .stat-label {
+          margin-top: 0.5rem;
+          color: var(--p-text-muted-color);
+          font-size: 0.875rem;
+        }
+      }
+    }
   }
 }
 

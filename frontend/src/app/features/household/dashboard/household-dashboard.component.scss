@@ -134,6 +134,63 @@
   }
 }
 
+// Statistics Cards
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    ::ng-deep .p-card-body {
+      padding: 1.5rem;
+    }
+
+    .stat-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .stat-icon {
+        font-size: 2.5rem;
+        color: var(--p-primary-color);
+
+        &.success {
+          color: var(--p-green-500);
+        }
+
+        &.info {
+          color: var(--p-blue-500);
+        }
+
+        &.warning {
+          color: var(--p-orange-500);
+        }
+      }
+
+      .stat-details {
+        .stat-value {
+          font-size: 2rem;
+          font-weight: 600;
+          color: var(--p-text-color);
+          line-height: 1;
+        }
+
+        .stat-label {
+          margin-top: 0.5rem;
+          color: var(--p-text-muted-color);
+          font-size: 0.875rem;
+        }
+      }
+    }
+  }
+}
+
 // Dashboard Content
 .dashboard-content {
   margin-bottom: 3rem;

@@ -17,6 +17,14 @@
 
   <ng-template pTemplate="center">
     <div class="toolbar-filters">
+      <!-- Date Range Selector -->
+      <div class="filter-item filter-item-date-range">
+        <app-date-range-selector
+          [selectedDays]="selectedDays()"
+          (rangeChange)="onDateRangeChange($event)">
+        </app-date-range-selector>
+      </div>
+
       <!-- User Filter -->
       @if (users().length > 0) {
         <div class="filter-item">

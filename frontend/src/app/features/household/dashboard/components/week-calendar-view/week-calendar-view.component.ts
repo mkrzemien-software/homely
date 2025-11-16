@@ -1,5 +1,6 @@
 import { Component, signal, computed, output, input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 // PrimeNG Components
 import { ButtonModule } from 'primeng/button';
@@ -79,7 +80,7 @@ export interface WeekDay {
  */
 @Component({
   selector: 'app-week-calendar-view',
-  imports: [CommonModule, ButtonModule, CardModule, TooltipModule, BadgeModule],
+  imports: [CommonModule, RouterLink, ButtonModule, CardModule, TooltipModule, BadgeModule],
   templateUrl: './week-calendar-view.component.html',
   styleUrl: './week-calendar-view.component.scss'
 })

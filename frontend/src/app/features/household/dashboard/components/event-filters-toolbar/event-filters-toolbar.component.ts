@@ -8,6 +8,9 @@ import { DropdownModule } from 'primeng/dropdown';
 import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 
+// Custom Components
+import { DateRangeSelectorComponent } from '../date-range-selector/date-range-selector.component';
+
 /**
  * Event filters interface
  */
@@ -75,7 +78,8 @@ export interface FilterOption {
     ToolbarModule,
     DropdownModule,
     ButtonModule,
-    BadgeModule
+    BadgeModule,
+    DateRangeSelectorComponent
   ],
   templateUrl: './event-filters-toolbar.component.html',
   styleUrl: './event-filters-toolbar.component.scss'
@@ -92,9 +96,19 @@ export class EventFiltersToolbarComponent implements OnInit {
   categories = input<FilterOption[]>([]);
 
   /**
+   * Selected date range (days)
+   */
+  selectedDays = input<7 | 14 | 30>(7);
+
+  /**
    * Output event when filters change
    */
   filtersChange = output<EventFilters>();
+
+  /**
+   * Output event when date range changes
+   */
+  rangeChange = output<7 | 14 | 30>();
 
   /**
    * Selected assigned user
@@ -174,6 +188,13 @@ export class EventFiltersToolbarComponent implements OnInit {
   onStatusChange(event: any): void {
     this.selectedStatus.set(event.value);
     this.emitFiltersChange();
+  }
+
+  /**
+   * Handle date range change
+   */
+  onDateRangeChange(days: 7 | 14 | 30): void {
+    this.rangeChange.emit(days);
   }
 
   /**
