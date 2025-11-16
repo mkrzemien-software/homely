@@ -9,7 +9,6 @@ import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
 import { SkeletonModule } from 'primeng/skeleton';
 import { PaginatorModule } from 'primeng/paginator';
-import { SidebarModule } from 'primeng/sidebar';
 import { DialogModule } from 'primeng/dialog';
 
 // Custom Components
@@ -33,7 +32,6 @@ import { SystemUsersService, SystemUser, UserSearchFilters, UserRole, UserAccoun
     CardModule,
     SkeletonModule,
     PaginatorModule,
-    SidebarModule,
     DialogModule,
     GlobalUserSearchComponent,
     UserDetailsPanelComponent,
@@ -57,7 +55,7 @@ export class SystemUsersComponent implements OnInit {
   currentPage = signal<number>(1);
   pageSize = signal<number>(20);
   currentFilters = signal<UserSearchFilters>({});
-  sidebarVisible = signal<boolean>(false);
+  detailsDialogVisible = signal<boolean>(false);
   createDialogVisible = signal<boolean>(false);
 
   // Computed values
@@ -104,18 +102,18 @@ export class SystemUsersComponent implements OnInit {
   }
 
   /**
-   * Select user and show details sidebar
+   * Select user and show details dialog
    */
   selectUser(user: SystemUser): void {
     this.systemUsersService.selectedUser.set(user);
-    this.sidebarVisible.set(true);
+    this.detailsDialogVisible.set(true);
   }
 
   /**
-   * Close details sidebar
+   * Close details dialog
    */
-  closeSidebar(): void {
-    this.sidebarVisible.set(false);
+  closeDetailsDialog(): void {
+    this.detailsDialogVisible.set(false);
     this.systemUsersService.clearSelectedUser();
   }
 

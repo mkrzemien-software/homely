@@ -203,124 +203,133 @@
     }
   </p-card>
 
-  <!-- Details Sidebar -->
-  <p-sidebar
-    [visible]="detailsSidebarVisible()"
-    position="right"
-    [style]="{ width: '40rem' }"
-    (onHide)="closeDetailsSidebar()"
+  <!-- Details Dialog -->
+  <p-dialog
+    [(visible)]="detailsDialogVisible"
+    [modal]="true"
+    [style]="{ width: '50rem' }"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    header="Szczegóły gospodarstwa"
+    (onHide)="closeDetailsDialog()"
+    styleClass="household-details-dialog"
   >
-    <ng-template pTemplate="header">
-      <h3>Szczegóły gospodarstwa</h3>
-    </ng-template>
-
     @if (selectedHousehold()) {
-      <div class="household-details">
-        <!-- Basic Information -->
-        <div class="detail-section">
-          <h4>Podstawowe informacje</h4>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>Nazwa</label>
-              <div class="detail-value">{{ selectedHousehold()!.name }}</div>
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="household-header">
+            <div class="household-icon">
+              <i class="pi pi-home"></i>
             </div>
-            <div class="detail-item">
-              <label>Adres</label>
-              <div class="detail-value">{{ selectedHousehold()!.address || 'Brak' }}</div>
-            </div>
-            <div class="detail-item">
-              <label>Plan</label>
-              <div class="detail-value">{{ selectedHousehold()!.planName }}</div>
-            </div>
-            <div class="detail-item">
-              <label>Status</label>
-              <div class="detail-value">
-                <p-tag
-                  [value]="getStatusLabel(selectedHousehold()!.subscriptionStatus)"
-                  [severity]="getStatusSeverity(selectedHousehold()!.subscriptionStatus)"
-                />
-              </div>
+            <div class="household-info">
+              <h2>{{ selectedHousehold()!.name }}</h2>
+              <p class="household-address">{{ selectedHousehold()!.address || 'Brak adresu' }}</p>
             </div>
           </div>
+        </ng-template>
+
+        <!-- Basic Information -->
+        <div class="details-section">
+          <h3>Informacje o gospodarstwie</h3>
+
+          <div class="detail-row">
+            <span class="detail-label">Plan:</span>
+            <span class="detail-value">{{ selectedHousehold()!.planName }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Status:</span>
+            <span class="detail-value">
+              <p-tag
+                [value]="getStatusLabel(selectedHousehold()!.subscriptionStatus)"
+                [severity]="getStatusSeverity(selectedHousehold()!.subscriptionStatus)"
+              />
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Utworzono:</span>
+            <span class="detail-value">{{ formatDate(selectedHousehold()!.createdAt) }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Zaktualizowano:</span>
+            <span class="detail-value">{{ formatDate(selectedHousehold()!.updatedAt) }}</span>
+          </div>
+
+          @if (selectedHousehold()!.lastActivityAt) {
+            <div class="detail-row">
+              <span class="detail-label">Ostatnia aktywność:</span>
+              <span class="detail-value">{{ formatDate(selectedHousehold()!.lastActivityAt) }}</span>
+            </div>
+          }
         </div>
+
+        <p-divider></p-divider>
 
         <!-- Statistics -->
-        <div class="detail-section">
-          <h4>Statystyki</h4>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>Członkowie</label>
-              <div class="detail-value">
-                {{ selectedHousehold()!.memberCount }}
-                @if (selectedHousehold()!.maxMembers) {
-                  / {{ selectedHousehold()!.maxMembers }}
-                }
-              </div>
-            </div>
-            <div class="detail-item">
-              <label>Elementy</label>
-              <div class="detail-value">
-                {{ selectedHousehold()!.itemCount }}
-                @if (selectedHousehold()!.maxItems) {
-                  / {{ selectedHousehold()!.maxItems }}
-                }
-              </div>
-            </div>
-            <div class="detail-item">
-              <label>Aktywne zadania</label>
-              <div class="detail-value">{{ selectedHousehold()!.taskCount }}</div>
-            </div>
-            <div class="detail-item">
-              <label>Ukończone zadania</label>
-              <div class="detail-value">{{ selectedHousehold()!.completedTasksCount }}</div>
-            </div>
+        <div class="details-section">
+          <h3>Statystyki</h3>
+
+          <div class="detail-row">
+            <span class="detail-label">Członkowie:</span>
+            <span class="detail-value">
+              {{ selectedHousehold()!.memberCount }}
+              @if (selectedHousehold()!.maxMembers) {
+                / {{ selectedHousehold()!.maxMembers }}
+              }
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Elementy:</span>
+            <span class="detail-value">
+              {{ selectedHousehold()!.itemCount }}
+              @if (selectedHousehold()!.maxItems) {
+                / {{ selectedHousehold()!.maxItems }}
+              }
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Aktywne zadania:</span>
+            <span class="detail-value">{{ selectedHousehold()!.taskCount }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Ukończone zadania:</span>
+            <span class="detail-value">{{ selectedHousehold()!.completedTasksCount }}</span>
           </div>
         </div>
+
+        <p-divider></p-divider>
 
         <!-- Members List -->
-        <div class="detail-section">
-          <h4>Członkowie ({{ selectedHousehold()!.members.length }})</h4>
-          <div class="members-list">
-            @for (member of selectedHousehold()!.members; track member.id) {
-              <div class="member-item">
-                <div class="member-info">
-                  <div class="member-name">
-                    {{ member.firstName }} {{ member.lastName }}
-                  </div>
-                  <div class="member-email">{{ member.email }}</div>
-                </div>
-                <p-tag [value]="member.role" />
-              </div>
-            }
-            @if (selectedHousehold()!.members.length === 0) {
-              <div class="empty-members">Nie znaleziono członków</div>
-            }
-          </div>
-        </div>
+        <div class="members-section">
+          <h3>Członkowie ({{ selectedHousehold()!.members.length }})</h3>
 
-        <!-- Dates -->
-        <div class="detail-section">
-          <h4>Daty</h4>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>Utworzono</label>
-              <div class="detail-value">{{ formatDate(selectedHousehold()!.createdAt) }}</div>
+          @if (selectedHousehold()!.members.length > 0) {
+            <div class="members-list">
+              @for (member of selectedHousehold()!.members; track member.id) {
+                <div class="member-item">
+                  <div class="member-info">
+                    <div class="member-name">
+                      {{ member.firstName }} {{ member.lastName }}
+                    </div>
+                    <div class="member-email">{{ member.email }}</div>
+                  </div>
+                  <p-tag [value]="member.role" />
+                </div>
+              }
             </div>
-            <div class="detail-item">
-              <label>Zaktualizowano</label>
-              <div class="detail-value">{{ formatDate(selectedHousehold()!.updatedAt) }}</div>
-            </div>
-            @if (selectedHousehold()!.lastActivityAt) {
-              <div class="detail-item">
-                <label>Ostatnia aktywność</label>
-                <div class="detail-value">{{ formatDate(selectedHousehold()!.lastActivityAt) }}</div>
-              </div>
-            }
-          </div>
+          } @else {
+            <p class="no-members">Nie znaleziono członków</p>
+          }
         </div>
-      </div>
+      </p-card>
     }
-  </p-sidebar>
+  </p-dialog>
 
   <!-- Create Dialog -->
     <p-dialog

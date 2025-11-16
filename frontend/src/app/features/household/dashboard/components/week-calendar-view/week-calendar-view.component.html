@@ -10,7 +10,7 @@
         <p-button
         label="Kalendarz"
         icon="pi pi-calendar"
-        [routerLink]="['calendar']"
+        [routerLink]="['/', householdId(), 'calendar']"
         [outlined]="true"
         severity="success"
         size="large"
@@ -35,7 +35,7 @@
       </p-button>
 
       <p-button
-        label="Dzisiaj"
+        label="Biężący tydzień"
         (onClick)="goToToday()"
         [text]="true"
         severity="secondary"

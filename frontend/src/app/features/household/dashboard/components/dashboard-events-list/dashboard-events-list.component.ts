@@ -73,12 +73,6 @@ export class DashboardEventsListComponent {
   eventClick = output<DashboardEvent>();
 
   /**
-   * Output event when action button is clicked
-   * (e.g., complete, postpone)
-   */
-  actionClick = output<{ event: DashboardEvent; action: string }>();
-
-  /**
    * Sorted events by due date
    */
   sortedEvents = computed(() => {
@@ -100,14 +94,6 @@ export class DashboardEventsListComponent {
    */
   onEventClick(event: DashboardEvent): void {
     this.eventClick.emit(event);
-  }
-
-  /**
-   * Handle action button click
-   */
-  onActionClick(event: DashboardEvent, action: string, $event: Event): void {
-    $event.stopPropagation(); // Prevent row click
-    this.actionClick.emit({ event, action });
   }
 
   /**

@@ -128,41 +128,38 @@
     }
   </p-card>
 
-  <!-- User Details Sidebar -->
-  <p-sidebar
-    [(visible)]="sidebarVisible"
-    position="right"
-    [style]="{ width: '50rem' }"
+  <!-- User Details Dialog -->
+  <p-dialog
+    [(visible)]="detailsDialogVisible"
     [modal]="true"
-    (onHide)="closeSidebar()"
+    [style]="{ width: '50rem' }"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    header="Szczegóły użytkownika"
+    (onHide)="closeDetailsDialog()"
   >
     @if (selectedUser()) {
-      <ng-template pTemplate="header">
-        <h2>Szczegóły użytkownika</h2>
-      </ng-template>
+      <div class="dialog-content">
+        <!-- Account Actions Toolbar -->
+        <app-account-actions-toolbar
+          [user]="selectedUser()!"
+          (actionCompleted)="onActionCompleted()"
+        ></app-account-actions-toolbar>
 
-      <ng-template pTemplate="content">
-        <div class="sidebar-content">
-          <!-- Account Actions Toolbar -->
-          <app-account-actions-toolbar
+        <!-- User Details -->
+        <app-user-details-panel [user]="selectedUser()!"></app-user-details-panel>
+
+        <!-- Role Management -->
+        <div class="role-management-section">
+          <app-role-management-form
             [user]="selectedUser()!"
-            (actionCompleted)="onActionCompleted()"
-          ></app-account-actions-toolbar>
-
-          <!-- User Details -->
-          <app-user-details-panel [user]="selectedUser()!"></app-user-details-panel>
-
-          <!-- Role Management -->
-          <div class="role-management-section">
-            <app-role-management-form
-              [user]="selectedUser()!"
-              (roleUpdated)="onRoleUpdated($event)"
-            ></app-role-management-form>
-          </div>
+            (roleUpdated)="onRoleUpdated($event)"
+          ></app-role-management-form>
         </div>
-      </ng-template>
+      </div>
     }
-  </p-sidebar>
+  </p-dialog>
 
   <!-- Create User Dialog -->
   <p-dialog

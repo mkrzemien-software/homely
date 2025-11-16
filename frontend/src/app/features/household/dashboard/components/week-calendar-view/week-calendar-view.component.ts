@@ -91,6 +91,11 @@ export class WeekCalendarViewComponent implements OnInit {
   events = input<DashboardEvent[]>([]);
 
   /**
+   * Household ID (input)
+   */
+  householdId = input<string>('');
+
+  /**
    * Output event when event is clicked
    */
   eventClick = output<DashboardEvent>();

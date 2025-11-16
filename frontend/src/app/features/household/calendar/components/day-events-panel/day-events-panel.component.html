@@ -1,0 +1,85 @@
+<p-panel class="day-events-panel" [toggleable]="false">
+  <ng-template pTemplate="header">
+    <div class="panel-header">
+      <div class="header-content">
+        <i class="pi pi-calendar"></i>
+        <span class="header-title">Wydarzenia - {{ formattedDate() }}</span>
+      </div>
+      <p-button
+        icon="pi pi-times"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (onClick)="onClose()"
+        aria-label="Zamknij panel"
+      />
+    </div>
+  </ng-template>
+
+  <div class="panel-content">
+    @if (hasEvents()) {
+      <div class="events-list">
+        @for (event of events(); track event.id) {
+          <div
+            class="event-card"
+            [class.overdue]="event.isOverdue"
+            (click)="onEventClick(event)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Wydarzenie: ' + event.taskName"
+            (keydown.enter)="onEventClick(event)"
+            (keydown.space)="onEventClick(event)"
+          >
+            <div class="event-main">
+              <div class="event-header">
+                <h4 class="event-title">{{ event.taskName }}</h4>
+                <div class="event-badges">
+                  <p-tag
+                    [value]="getUrgencyLabel(event)"
+                    [severity]="getUrgencySeverity(event)"
+                    [rounded]="true"
+                  />
+                  <p-tag
+                    [value]="getPriorityLabel(event.priority)"
+                    [severity]="getPrioritySeverity(event.priority)"
+                    [rounded]="true"
+                  />
+                </div>
+              </div>
+
+              <div class="event-details">
+                <div class="event-detail-item">
+                  <i class="pi pi-clock"></i>
+                  <span>{{ formatDate(event.dueDate) }}</span>
+                </div>
+
+                @if (event.notes) {
+                  <div class="event-detail-item">
+                    <i class="pi pi-comment"></i>
+                    <span class="event-notes">{{ event.notes }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="event-action">
+              <i class="pi pi-chevron-right"></i>
+            </div>
+          </div>
+
+          @if (!$last) {
+            <p-divider />
+          }
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <i class="pi pi-calendar-times"></i>
+        <p class="empty-title">Brak wydarzeń</p>
+        <p class="empty-description">
+          Nie zaplanowano żadnych wydarzeń na ten dzień
+        </p>
+      </div>
+    }
+  </div>
+</p-panel>

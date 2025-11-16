@@ -22,7 +22,7 @@
     <!-- Empty state -->
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="6" class="empty-message-cell">
+        <td colspan="5" class="empty-message-cell">
           <div class="empty-state">
             <i class="pi pi-calendar-times" aria-hidden="true"></i>
             <h4>Brak wydarzeń</h4>
@@ -41,7 +41,6 @@
         <th>Termin</th>
         <th>Pilność</th>
         <th>Odpowiedzialny</th>
-        <th style="width: 8rem">Akcje</th>
       </tr>
     </ng-template>
 
@@ -122,44 +121,13 @@
             <span class="user-name">{{ getUserFullName(event) }}</span>
           </div>
         </td>
-
-        <!-- Actions -->
-        <td class="actions-cell">
-          <div class="action-buttons">
-            <p-button
-              icon="pi pi-eye"
-              [text]="true"
-              [rounded]="true"
-              size="small"
-              severity="secondary"
-              (onClick)="onEventClick(event)"
-              pTooltip="Zobacz szczegóły"
-              tooltipPosition="left"
-              aria-label="Zobacz szczegóły wydarzenia">
-            </p-button>
-
-            @if (event.status === 'pending') {
-              <p-button
-                icon="pi pi-check"
-                [text]="true"
-                [rounded]="true"
-                size="small"
-                severity="success"
-                (onClick)="onActionClick(event, 'complete', $event)"
-                pTooltip="Oznacz jako wykonane"
-                tooltipPosition="left"
-                aria-label="Oznacz wydarzenie jako wykonane">
-              </p-button>
-            }
-          </div>
-        </td>
       </tr>
     </ng-template>
 
     <!-- Loading template -->
     <ng-template pTemplate="loadingbody">
       <tr>
-        <td colspan="6" class="loading-cell">
+        <td colspan="5" class="loading-cell">
           <div class="loading-spinner">
             <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
             <span>Ładowanie wydarzeń...</span>

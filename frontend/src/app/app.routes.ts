@@ -99,6 +99,12 @@ export const routes: Routes = [
         // canActivate: [authGuard, householdMemberGuard]
       },
       {
+        path: 'calendar',
+        loadComponent: () => import('./features/household/calendar/month-calendar-view.component').then(m => m.MonthCalendarViewComponent),
+        title: 'Kalendarz - Homely',
+        // canActivate: [authGuard, householdMemberGuard]
+      },
+      {
         path: 'categories',
         loadComponent: () => import('./features/household/items/categories-list.component').then(m => m.CategoriesListComponent),
         title: 'Kategorie - Homely',

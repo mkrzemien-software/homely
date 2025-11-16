@@ -10,12 +10,12 @@ import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
 import { SkeletonModule } from 'primeng/skeleton';
 import { PaginatorModule } from 'primeng/paginator';
-import { SidebarModule } from 'primeng/sidebar';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
+import { DividerModule } from 'primeng/divider';
 
 // PrimeNG Services
 import { MessageService } from 'primeng/api';
@@ -46,12 +46,12 @@ import {
     CardModule,
     SkeletonModule,
     PaginatorModule,
-    SidebarModule,
     DialogModule,
     InputTextModule,
     ToastModule,
     ConfirmDialogModule,
     TooltipModule,
+    DividerModule,
     CreateHouseholdDialogComponent
   ],
   providers: [MessageService, ConfirmationService],
@@ -74,7 +74,7 @@ export class SystemHouseholdsComponent implements OnInit {
   currentPage = signal<number>(1);
   pageSize = signal<number>(20);
   currentFilters = signal<HouseholdSearchFilters>({});
-  detailsSidebarVisible = signal<boolean>(false);
+  detailsDialogVisible = signal<boolean>(false);
   createDialogVisible = signal<boolean>(false);
   searchTerm = '';
 
@@ -154,12 +154,12 @@ export class SystemHouseholdsComponent implements OnInit {
   }
 
   /**
-   * Select household and show details sidebar
+   * Select household and show details dialog
    */
   viewHouseholdDetails(household: SystemHousehold): void {
     this.systemHouseholdsService.getHouseholdDetails(household.id).subscribe({
       next: () => {
-        this.detailsSidebarVisible.set(true);
+        this.detailsDialogVisible.set(true);
       },
       error: (error) => {
         this.messageService.add({
@@ -172,10 +172,10 @@ export class SystemHouseholdsComponent implements OnInit {
   }
 
   /**
-   * Close details sidebar
+   * Close details dialog
    */
-  closeDetailsSidebar(): void {
-    this.detailsSidebarVisible.set(false);
+  closeDetailsDialog(): void {
+    this.detailsDialogVisible.set(false);
     this.systemHouseholdsService.clearSelectedHousehold();
   }
 

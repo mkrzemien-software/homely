@@ -1,0 +1,87 @@
+<div class="calendar-view">
+  <!-- Toolbar -->
+  <p-toolbar class="calendar-toolbar">
+    <div class="toolbar-start">
+      <!-- Month navigation -->
+      <div class="month-navigation">
+        <p-button
+          icon="pi pi-chevron-left"
+          [rounded]="true"
+          [text]="true"
+          (onClick)="goToPreviousMonth()"
+          aria-label="Poprzedni miesiąc"
+        />
+        <h2 class="current-month">{{ getCurrentMonthDisplay() }}</h2>
+        <p-button
+          icon="pi pi-chevron-right"
+          [rounded]="true"
+          [text]="true"
+          (onClick)="goToNextMonth()"
+          aria-label="Następny miesiąc"
+        />
+      </div>
+    </div>
+
+    <div class="toolbar-end">
+      <!-- Today button -->
+      <p-button
+        label="Bieżący miesiąc"
+        icon="pi pi-calendar"
+        [outlined]="true"
+        (onClick)="goToToday()"
+        severity="secondary"
+      />
+
+      <!-- Add event button -->
+      <p-button
+        label="Dodaj wydarzenie"
+        icon="pi pi-plus"
+        (onClick)="showCreateEventDialog.set(true)"
+        severity="primary"
+      />
+    </div>
+  </p-toolbar>
+
+  <!-- Calendar -->
+  <div class="calendar-container" [class.loading]="loading()">
+    @if (loading()) {
+      <div class="calendar-loading">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+        <p>Ładowanie wydarzeń...</p>
+      </div>
+    }
+
+    <full-calendar
+      [options]="calendarOptions()"
+      class="calendar-component"
+    />
+  </div>
+
+  <!-- Day Events Panel (shown when a day is selected) -->
+  @if (selectedDate()) {
+    <app-day-events-panel
+      [date]="selectedDate()!"
+      [events]="selectedDayEvents()"
+      (eventClick)="onDayPanelEventClick($event)"
+      (close)="closeDayEventsPanel()"
+    />
+  }
+
+  <!-- Event Details Dialog -->
+  <app-event-details-dialog
+    [(visible)]="showEventDetailsDialog"
+    [event]="selectedEvent()"
+    (action)="onEventAction($event)"
+  />
+
+  <!-- Create Event Dialog -->
+  @if (showCreateEventDialog()) {
+    <app-create-event-from-task-dialog
+      [visible]="showCreateEventDialog()"
+      [householdId]="householdId()"
+      [task]="null"
+      (onClose)="showCreateEventDialog.set(false)"
+      (onCreated)="onEventCreated()"
+    />
+  }
+</div>

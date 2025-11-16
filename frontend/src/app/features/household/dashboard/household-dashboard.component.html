@@ -64,6 +64,7 @@
       <div class="widget-calendar">
         <app-week-calendar-view
           [events]="filteredEvents()"
+          [householdId]="householdId()"
           (eventClick)="onEventClick($event)"
           (weekChange)="onWeekChange($event)">
         </app-week-calendar-view>
