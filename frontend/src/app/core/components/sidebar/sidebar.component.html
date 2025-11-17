@@ -52,14 +52,6 @@
         <div class="section-header">
           @if (!isCollapsed()) {
             <h3 class="section-title">{{ section.title }}</h3>
-
-            <!-- Household Name (Section 1 only) -->
-            @if (section.id === 'household-section' && currentHouseholdId()) {
-              <div class="household-name">
-                <i class="pi pi-building"></i>
-                <span>{{ householdName() }}</span>
-              </div>
-            }
           } @else {
             <div class="section-divider"></div>
           }
@@ -102,6 +94,30 @@
 
   <!-- Sidebar Footer -->
   <div class="sidebar-footer">
+    <!-- Household Info -->
+    @if (currentHouseholdId()) {
+      <div
+        class="household-info"
+        [class.collapsed]="isCollapsed()"
+        [pTooltip]="isCollapsed() ? householdName() : ''"
+        tooltipPosition="right"
+      >
+        <div class="household-icon">
+          <i class="pi pi-building"></i>
+        </div>
+        @if (!isCollapsed()) {
+          <div class="household-details">
+            <span class="household-label">Gospodarstwo</span>
+            <span class="household-name">{{ householdName() }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    @if (currentHouseholdId()) {
+      <p-divider></p-divider>
+    }
+
     <!-- User Info -->
     @if (authService.currentUser()) {
       <div

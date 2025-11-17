@@ -1,7 +1,6 @@
 .calendar-view {
   display: flex;
   flex-direction: column;
-  height: 100%;
   gap: 1rem;
   padding: 1rem;
 
@@ -30,6 +29,11 @@
       align-items: center;
       gap: 0.75rem;
     }
+  }
+
+  // Day events panel styling
+  app-day-events-panel {
+    max-width: 1200px;
   }
 
   .calendar-container {
@@ -69,6 +73,10 @@
         .fc {
           // Calendar height
           height: 100%;
+
+          .fc-scrollgrid-section-sticky {
+            background-color: var(--surface-card);
+          }
 
           // Header (hide default, we have custom toolbar)
           .fc-header-toolbar {
