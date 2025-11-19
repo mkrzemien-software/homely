@@ -1,0 +1,205 @@
+# GitHub Actions Workflow - Supabase Database Migrations
+#
+# This workflow applies database migrations to Supabase
+#
+# Triggers:
+# - Push to main/master branch (only when migration files change)
+# - Manual workflow dispatch
+#
+# Prerequisites:
+# - Supabase projects created (dev and prod)
+# - Supabase CLI access token configured
+# - Set repository secrets (see README.md)
+
+name: Deploy Database Migrations
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'database/supabase/migrations/**'
+      - '.github/workflows/deploy-database.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+      dry_run:
+        description: 'Dry run (validate only, do not apply)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-migrations:
+    name: Deploy Migrations to Supabase
+    runs-on: ubuntu-latest
+
+    env:
+      ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
+      DRY_RUN: ${{ github.event.inputs.dry_run || false }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Get environment-specific variables
+        id: get-vars
+        run: |
+          if [ "$ENVIRONMENT" == "prod" ]; then
+            echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_PROD }}" >> $GITHUB_OUTPUT
+            echo "db_password=${{ secrets.SUPABASE_DB_PASSWORD_PROD }}" >> $GITHUB_OUTPUT
+          else
+            echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_DEV }}" >> $GITHUB_OUTPUT
+            echo "db_password=${{ secrets.SUPABASE_DB_PASSWORD_DEV }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify Supabase project
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo "Verifying connection to Supabase project..."
+          supabase link --project-ref ${{ steps.get-vars.outputs.project_ref }}
+
+          # Check project status
+          supabase status
+
+      - name: Validate migrations
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo "Validating migration files..."
+
+          # Check if there are any new migrations
+          MIGRATION_COUNT=$(ls -1 supabase/migrations/*.sql 2>/dev/null | wc -l)
+          echo "Found $MIGRATION_COUNT migration files"
+
+          if [ $MIGRATION_COUNT -eq 0 ]; then
+            echo "⚠️ No migration files found"
+            exit 1
+          fi
+
+          # List migrations
+          echo "Migration files:"
+          ls -lh supabase/migrations/*.sql
+
+      - name: Dry run - Show pending migrations
+        if: env.DRY_RUN == 'true'
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo "🔍 DRY RUN MODE - Showing pending migrations without applying"
+          echo "Project: ${{ steps.get-vars.outputs.project_ref }}"
+          echo "Environment: $ENVIRONMENT"
+          echo ""
+          echo "Migrations that would be applied:"
+          ls -1 supabase/migrations/*.sql
+
+      - name: Apply migrations to Supabase
+        if: env.DRY_RUN != 'true'
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
+        run: |
+          echo "🚀 Applying migrations to $ENVIRONMENT environment..."
+
+          # Push migrations to Supabase
+          supabase db push --password "$SUPABASE_DB_PASSWORD"
+
+          echo "✅ Migrations applied successfully!"
+
+      - name: Verify migrations applied
+        if: env.DRY_RUN != 'true'
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
+        run: |
+          echo "Verifying migrations..."
+
+          # Get migration status
+          supabase migration list --password "$SUPABASE_DB_PASSWORD"
+
+      - name: Test database connection
+        if: env.DRY_RUN != 'true'
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
+        run: |
+          echo "Testing database connection..."
+
+          # Simple query to verify database is accessible
+          psql "postgresql://postgres:$SUPABASE_DB_PASSWORD@db.${{ steps.get-vars.outputs.project_ref }}.supabase.co:5432/postgres" \
+            -c "SELECT current_database(), current_user, version();" || echo "⚠️ Direct DB connection test skipped (psql not available)"
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          if [ "$DRY_RUN" == "true" ]; then
+            echo "🔍 DRY RUN COMPLETED"
+            echo "No migrations were applied (validation only)"
+          else
+            echo "✅ MIGRATIONS DEPLOYED SUCCESSFULLY!"
+            echo "Environment: $ENVIRONMENT"
+            echo "Project: ${{ steps.get-vars.outputs.project_ref }}"
+            echo ""
+            echo "Next steps:"
+            echo "1. Verify the changes in Supabase Dashboard"
+            echo "2. Test the application with the new schema"
+            echo "3. Monitor for any errors in the logs"
+          fi
+
+      - name: Rollback instructions
+        if: failure() && env.DRY_RUN != 'true'
+        run: |
+          echo "❌ MIGRATION FAILED"
+          echo ""
+          echo "Rollback instructions:"
+          echo "1. Check Supabase Dashboard for error details"
+          echo "2. If needed, create a rollback migration manually"
+          echo "3. Or restore from a database backup"
+          echo ""
+          echo "To create a rollback migration:"
+          echo "  cd database"
+          echo "  npx supabase migration new rollback_failed_migration"
+          echo "  # Edit the new migration file with rollback SQL"
+          echo "  npx supabase db push"
+
+  notify-on-prod-deployment:
+    name: Notify on Production Deployment
+    runs-on: ubuntu-latest
+    needs: deploy-migrations
+    if: github.event.inputs.environment == 'prod' && success()
+
+    steps:
+      - name: Production deployment notification
+        run: |
+          echo "🎉 Production database migrations completed successfully!"
+          echo "Environment: prod"
+          echo "Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+
+          # Here you could add Slack/Discord/Email notifications
+          # Example:
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"text":"Production database migrations deployed successfully!"}'

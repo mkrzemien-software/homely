@@ -1,0 +1,32 @@
+# Production Environment Variables
+#
+# Copy this file to terraform.tfvars and customize with your values
+# NEVER commit terraform.tfvars to version control!
+#
+# Usage:
+#   cp terraform.tfvars.example terraform.tfvars
+#   # Edit terraform.tfvars with your values
+#   terraform -chdir=environments/prod init
+#   terraform -chdir=environments/prod plan
+#   terraform -chdir=environments/prod apply
+
+# Required Variables
+domain_name = "yourdomain.com"      # REPLACE with your actual domain
+github_repo = "yourusername/homely" # REPLACE with your GitHub repo
+
+# Optional Variables (uncomment to override defaults)
+# frontend_subdomain = "app"
+# backend_subdomain  = "api"
+
+# Additional optional overrides (defaults are already set in variables.tf):
+# docker_image_tag = "latest"
+# backend_cpu = 256
+# backend_memory = 512
+# backend_port = 5000
+# use_fargate_spot = true
+# use_single_az = false  # ALB requires minimum 2 AZs
+# cloudwatch_log_retention_days = 7
+
+# For production, consider increasing resources if needed:
+# backend_cpu = 512     # 0.5 vCPU
+# backend_memory = 1024 # 1 GB

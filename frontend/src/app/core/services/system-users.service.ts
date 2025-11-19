@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError, tap, catchError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 /**
  * User role types in the system
@@ -108,7 +109,7 @@ export interface CreateUserRequest {
   providedIn: 'root'
 })
 export class SystemUsersService {
-  private readonly API_URL = 'http://localhost:5000/api/system/users';
+  private readonly API_URL = `${environment.apiUrl}/system/users`;
 
   private http = inject(HttpClient);
 

@@ -1,0 +1,192 @@
+# GitHub Actions Workflow - Backend Deployment
+#
+# This workflow builds the .NET Docker image, pushes to ECR, and updates ECS
+#
+# Triggers:
+# - Push to main/master branch (only when backend files change)
+# - Manual workflow dispatch
+#
+# Prerequisites:
+# - Configure AWS credentials (OIDC recommended)
+# - Set repository secrets/variables (see README.md)
+# - Ensure Dockerfile exists in backend/
+
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - dev
+          - prod
+
+permissions:
+  id-token: write   # Required for OIDC authentication
+  contents: read
+
+jobs:
+  deploy:
+    name: Build and Deploy Backend
+    runs-on: ubuntu-latest
+
+    env:
+      ENVIRONMENT: ${{ github.event.inputs.environment || 'prod' }}
+      AWS_REGION: us-east-1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Alternative: Use AWS access keys (not recommended)
+      # - name: Configure AWS credentials (Access Keys)
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get environment-specific variables
+        id: get-vars
+        run: |
+          if [ "$ENVIRONMENT" == "prod" ]; then
+            echo "ecr_repository=${{ secrets.ECR_REPOSITORY_URL_PROD }}" >> $GITHUB_OUTPUT
+            echo "ecs_cluster=${{ secrets.ECS_CLUSTER_NAME_PROD }}" >> $GITHUB_OUTPUT
+            echo "ecs_service=${{ secrets.ECS_SERVICE_NAME_PROD }}" >> $GITHUB_OUTPUT
+            echo "image_tag=prod-${{ github.sha }}" >> $GITHUB_OUTPUT
+          else
+            echo "ecr_repository=${{ secrets.ECR_REPOSITORY_URL_DEV }}" >> $GITHUB_OUTPUT
+            echo "ecs_cluster=${{ secrets.ECS_CLUSTER_NAME_DEV }}" >> $GITHUB_OUTPUT
+            echo "ecs_service=${{ secrets.ECS_SERVICE_NAME_DEV }}" >> $GITHUB_OUTPUT
+            echo "image_tag=dev-${{ github.sha }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        working-directory: backend
+        run: |
+          docker build \
+            -t ${{ steps.get-vars.outputs.ecr_repository }}:${{ steps.get-vars.outputs.image_tag }} \
+            -t ${{ steps.get-vars.outputs.ecr_repository }}:latest \
+            --build-arg BUILD_ENV=${{ env.ENVIRONMENT == 'prod' && 'Production' || 'Dev' }} \
+            -f Dockerfile \
+            .
+
+      - name: Push Docker image to ECR
+        run: |
+          docker push ${{ steps.get-vars.outputs.ecr_repository }}:${{ steps.get-vars.outputs.image_tag }}
+          docker push ${{ steps.get-vars.outputs.ecr_repository }}:latest
+
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition $(aws ecs describe-services \
+              --cluster ${{ steps.get-vars.outputs.ecs_cluster }} \
+              --services ${{ steps.get-vars.outputs.ecs_service }} \
+              --query 'services[0].taskDefinition' \
+              --output text | cut -d'/' -f2 | cut -d':' -f1) \
+            --query 'taskDefinition' > task-definition.json
+
+      - name: Inject environment variables from AWS Parameter Store
+        id: load-secrets
+        run: |
+          # Determine environment prefix for Parameter Store
+          if [ "$ENVIRONMENT" == "prod" ]; then
+            PREFIX="/homely/prod"
+            ENV_NAME="Production"
+          else
+            PREFIX="/homely/dev"
+            ENV_NAME="Dev"
+          fi
+          
+          echo "Loading secrets from AWS Parameter Store: $PREFIX"
+          echo "env_name=$ENV_NAME" >> $GITHUB_OUTPUT
+          
+          # Note: Secrets are NOT loaded here. They are referenced in task definition
+          # using AWS Secrets Manager / Parameter Store ARNs for better security
+          echo "Secrets will be injected via ECS Task Definition secrets"
+
+      - name: Update task definition with new image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: homely-${{ env.ENVIRONMENT }}-api
+          image: ${{ steps.get-vars.outputs.ecr_repository }}:${{ steps.get-vars.outputs.image_tag }}
+
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ steps.get-vars.outputs.ecs_service }}
+          cluster: ${{ steps.get-vars.outputs.ecs_cluster }}
+          wait-for-service-stability: true
+
+      - name: Health check
+        run: |
+          echo "Waiting for service to stabilize..."
+          sleep 30
+
+          # Get ALB DNS name
+          ALB_DNS=$(aws ecs describe-services \
+            --cluster ${{ steps.get-vars.outputs.ecs_cluster }} \
+            --services ${{ steps.get-vars.outputs.ecs_service }} \
+            --query 'services[0].loadBalancers[0].targetGroupArn' \
+            --output text | xargs -I {} aws elbv2 describe-target-groups \
+            --target-group-arns {} \
+            --query 'TargetGroups[0].LoadBalancerArns[0]' \
+            --output text | xargs -I {} aws elbv2 describe-load-balancers \
+            --load-balancer-arns {} \
+            --query 'LoadBalancers[0].DNSName' \
+            --output text)
+
+          echo "ALB DNS: $ALB_DNS"
+
+          # Check health endpoint
+          for i in {1..10}; do
+            if curl -f -s "http://$ALB_DNS/health" > /dev/null; then
+              echo "✅ Health check passed!"
+              exit 0
+            fi
+            echo "Attempt $i/10 failed, retrying in 10s..."
+            sleep 10
+          done
+
+          echo "❌ Health check failed after 10 attempts"
+          exit 1
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "✅ Backend deployed successfully!"
+          echo "Environment: ${{ env.ENVIRONMENT }}"
+          echo "ECR Repository: ${{ steps.get-vars.outputs.ecr_repository }}"
+          echo "Image Tag: ${{ steps.get-vars.outputs.image_tag }}"
+          echo "ECS Cluster: ${{ steps.get-vars.outputs.ecs_cluster }}"
+          echo "ECS Service: ${{ steps.get-vars.outputs.ecs_service }}"
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed, consider rolling back to previous version"
+          echo "Run: aws ecs update-service --cluster ${{ steps.get-vars.outputs.ecs_cluster }} --service ${{ steps.get-vars.outputs.ecs_service }} --task-definition <previous-task-def>"

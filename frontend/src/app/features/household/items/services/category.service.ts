@@ -13,6 +13,7 @@ import {
   CategorySortOrderItem,
   UpdateCategoriesSortOrderDto
 } from '../models/category.model';
+import { environment } from '../../../../../environments/environment';
 
 /**
  * CategoryService
@@ -38,9 +39,8 @@ export class CategoryService {
 
   /**
    * Base API URL
-   * TODO: Move to environment configuration
    */
-  private readonly API_URL = 'http://localhost:5000/api';
+  private readonly API_URL = environment.apiUrl;
 
   /**
    * Cache for category types

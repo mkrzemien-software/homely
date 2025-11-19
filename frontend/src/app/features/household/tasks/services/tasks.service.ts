@@ -8,6 +8,7 @@ import {
   UpdateTaskDto,
   TasksQueryParams
 } from '../models/task.model';
+import { environment } from '../../../../../environments/environment';
 
 /**
  * TasksService
@@ -36,9 +37,8 @@ export class TasksService {
 
   /**
    * Base API URL
-   * TODO: Move to environment configuration
    */
-  private readonly API_URL = 'http://localhost:5000/api';
+  private readonly API_URL = environment.apiUrl;
 
   /**
    * Cache for tasks

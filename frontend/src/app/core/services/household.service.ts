@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, catchError, of, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 /**
  * API Response wrapper
@@ -55,7 +56,7 @@ export interface HouseholdMember {
   providedIn: 'root'
 })
 export class HouseholdService {
-  private readonly API_URL = 'http://localhost:5000/api/households'; // Backend API base URL
+  private readonly API_URL = `${environment.apiUrl}/households`;
 
   private http = inject(HttpClient);
 

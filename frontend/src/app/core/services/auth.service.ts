@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, tap, catchError } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 /**
  * Login credentials interface
@@ -68,7 +69,7 @@ export interface UserProfile {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:5000/api/auth'; // Backend API base URL
+  private readonly API_URL = `${environment.apiUrl}/auth`;
   private readonly TOKEN_KEY = 'homely-auth-token';
   private readonly REFRESH_TOKEN_KEY = 'homely-refresh-token';
   private readonly USER_KEY = 'homely-user';

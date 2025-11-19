@@ -11,6 +11,7 @@ import {
   CancelEventDto,
   EventsQueryParams
 } from '../models/event.model';
+import { environment } from '../../../../../environments/environment';
 
 /**
  * EventsService
@@ -42,9 +43,8 @@ export class EventsService {
 
   /**
    * Base API URL
-   * TODO: Move to environment configuration
    */
-  private readonly API_URL = 'http://localhost:5000/api';
+  private readonly API_URL = environment.apiUrl;
 
   /**
    * Cache for events

@@ -7,6 +7,7 @@ import {
   DashboardStatisticsResponse,
   DashboardEvent
 } from '../models/dashboard.model';
+import { environment } from '../../../../../environments/environment';
 
 /**
  * DashboardService
@@ -40,9 +41,8 @@ export class DashboardService {
 
   /**
    * Base API URL
-   * TODO: Move to environment configuration
    */
-  private readonly API_URL = 'http://localhost:5000/api';
+  private readonly API_URL = environment.apiUrl;
 
   /**
    * Cache for upcoming events

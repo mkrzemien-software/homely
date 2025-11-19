@@ -11,24 +11,51 @@ using Client = Supabase.Client;
 var builder = WebApplication.CreateBuilder(args);
 
 // ============================================================================
+// ENVIRONMENT SETUP
+// ============================================================================
+// ASPNETCORE_ENVIRONMENT can be: Development, Production, Local, Dev
+var environmentName = builder.Environment.EnvironmentName;
+Console.WriteLine($"🌍 Starting Homely API in {environmentName} environment");
+
+// Load environment-specific configuration
+// Priority: appsettings.{Environment}.json > Environment Variables > AWS Systems Manager
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables()  // Override with environment variables
+    .AddCommandLine(args);
+
+// ============================================================================
 // CONFIGURATION SECTIONS
 // ============================================================================
+builder.Services.Configure<EnvironmentSettings>(
+    builder.Configuration.GetSection(EnvironmentSettings.SectionName));
+builder.Services.Configure<DatabaseSettings>(
+    builder.Configuration.GetSection(DatabaseSettings.SectionName));
 builder.Services.Configure<SupabaseSettings>(
     builder.Configuration.GetSection(SupabaseSettings.SectionName));
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection(JwtSettings.SectionName));
 
 // Get configuration values
+var environmentSettings = builder.Configuration.GetSection(EnvironmentSettings.SectionName).Get<EnvironmentSettings>()
+    ?? new EnvironmentSettings { Name = environmentName };
 var supabaseSettings = builder.Configuration.GetSection(SupabaseSettings.SectionName).Get<SupabaseSettings>()
     ?? throw new InvalidOperationException("Supabase configuration is missing");
 var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
     ?? throw new InvalidOperationException("JWT configuration is missing");
+
+Console.WriteLine($"📊 Environment: {environmentSettings.Name} - {environmentSettings.Description}");
 
 // ============================================================================
 // DATABASE CONFIGURATION
 // ============================================================================
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+// Mask sensitive data in connection string for logging
+var maskedConnectionString = MaskConnectionString(connectionString);
+Console.WriteLine($"🔗 Database Connection: {maskedConnectionString}");
 
 // Add Homely services (Entity Framework + Repositories)
 builder.Services.AddHomelyServices(connectionString);
@@ -175,15 +202,22 @@ builder.Services.AddCors(options =>
     {
         if (builder.Environment.IsDevelopment())
         {
-            // Allow any origin in development
-            policy.AllowAnyOrigin()
+            // Development environment origins
+            policy.WithOrigins(
+                      "https://dev.homely.maflint.com",
+                      "http://localhost:4200"  // Alternative local port
+                  )
                   .AllowAnyMethod()
-                  .AllowAnyHeader();
+                  .AllowAnyHeader()
+                  .AllowCredentials();
         }
         else
         {
-            // Restrict origins in production
-            policy.WithOrigins("https://yourdomain.com", "https://www.yourdomain.com")
+            // Production environment origins
+            policy.WithOrigins(
+                      "https://homely.maflint.com",
+                      "https://maflint.com"
+                  )
                   .AllowAnyMethod()
                   .AllowAnyHeader()
                   .AllowCredentials();
@@ -238,6 +272,7 @@ app.MapControllers();
 app.MapGet("/health", () => new { 
         Status = "Healthy", 
         Timestamp = DateTime.UtcNow,
+        Environment = environmentName,
         Database = "EntityFramework with Repository Pattern",
         Authentication = "Supabase + JWT"
     })
@@ -245,3 +280,21 @@ app.MapGet("/health", () => new {
     .WithOpenApi();
 
 app.Run();
+
+// ============================================================================
+// HELPER METHODS
+// ============================================================================
+static string MaskConnectionString(string connectionString)
+{
+    var parts = connectionString.Split(';');
+    var maskedParts = parts.Select(part =>
+    {
+        if (part.Contains("Password=", StringComparison.OrdinalIgnoreCase))
+        {
+            var index = part.IndexOf('=') + 1;
+            return part.Substring(0, index) + "****";
+        }
+        return part;
+    });
+    return string.Join(";", maskedParts);
+}

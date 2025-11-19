@@ -1,0 +1,19 @@
+# Development Environment Variables
+#
+# Copy this file to terraform.tfvars and customize with your values
+# NEVER commit terraform.tfvars to version control!
+#
+# Usage:
+#   cp terraform.tfvars.example terraform.tfvars
+#   # Edit terraform.tfvars with your values
+#   terraform -chdir=environments/dev init
+#   terraform -chdir=environments/dev plan
+#   terraform -chdir=environments/dev apply
+
+# NOTE: Most variables have defaults in main.tf
+# Only override if you need different values
+
+# domain_name = "yourdomain.com"
+# frontend_subdomain = "dev-app"
+# backend_subdomain = "dev-api"
+# github_repo = "yourusername/homely"

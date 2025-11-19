@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError, tap, catchError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 /**
  * Subscription status types
@@ -136,7 +137,7 @@ export interface AssignAdminRequest {
   providedIn: 'root'
 })
 export class SystemHouseholdsService {
-  private readonly API_URL = 'http://localhost:5000/api/system/households';
+  private readonly API_URL = `${environment.apiUrl}/system/households`;
 
   private http = inject(HttpClient);
 

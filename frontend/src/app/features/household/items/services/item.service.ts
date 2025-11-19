@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError, of } from 'rxjs';
 import { Item, CreateItemDto, UpdateItemDto, Category } from '../models/item.model';
 import { ItemFilter } from '../models/item-filter.model';
+import { environment } from '../../../../../environments/environment';
 
 /**
  * ItemService
@@ -26,9 +27,8 @@ export class ItemService {
 
   /**
    * Base API URL
-   * TODO: Move to environment configuration
    */
-  private readonly API_URL = 'http://localhost:5000/api';
+  private readonly API_URL = environment.apiUrl;
 
   /**
    * Cache for items by household

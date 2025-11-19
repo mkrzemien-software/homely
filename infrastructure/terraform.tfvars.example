@@ -1,0 +1,52 @@
+# Example Terraform Variables Configuration
+#
+# Copy this file to terraform.tfvars and customize with your values
+# NEVER commit terraform.tfvars to version control!
+#
+# Usage:
+#   cp terraform.tfvars.example terraform.tfvars
+#   # Edit terraform.tfvars with your values
+#   terraform plan
+#   terraform apply
+
+# Project Configuration
+project_name = "homely"
+environment  = "prod" # or "dev"
+aws_region   = "us-east-1"
+
+# Domain Configuration (OVH)
+domain_name        = "yourdomain.com"     # REPLACE with your actual domain
+frontend_subdomain = "app"                 # Will create app.yourdomain.com
+backend_subdomain  = "api"                 # Will create api.yourdomain.com
+
+# Backend Configuration
+docker_image_tag          = "latest"
+backend_cpu               = 256  # 0.25 vCPU
+backend_memory            = 512  # 512 MB
+backend_port              = 5000
+backend_health_check_path = "/health"
+
+# Supabase Configuration
+# IMPORTANT: These are just placeholders. Real values should be set in AWS Parameter Store
+# Do not put actual secrets here!
+supabase_url      = "" # Will be set via Parameter Store
+supabase_anon_key = "" # Will be set via Parameter Store
+
+# GitHub Configuration
+github_repo             = "yourusername/homely" # REPLACE with your GitHub repo
+github_oidc_thumbprint  = "6938fd4d98bab03faadb97b34396831e3780aea1"
+
+# Cost Optimization Settings
+use_fargate_spot              = true  # Use Fargate Spot for 70% cost savings
+use_single_az                 = true  # Single AZ for lower cost
+cloudwatch_log_retention_days = 7     # Short retention for cost savings
+enable_alb_access_logs        = false # Disable to save S3 costs
+
+# Tagging
+cost_center = "Engineering"
+
+additional_tags = {
+  # Add any additional tags here
+  # "Team" = "Platform"
+  # "Owner" = "DevOps"
+}
