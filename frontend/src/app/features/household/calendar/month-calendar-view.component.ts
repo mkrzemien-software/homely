@@ -1,10 +1,10 @@
-import { Component, signal, computed, inject, effect, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject, effect, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
 // FullCalendar
-import { FullCalendarModule } from '@fullcalendar/angular';
+import { FullCalendarModule, FullCalendarComponent } from '@fullcalendar/angular';
 import { CalendarOptions, DateSelectArg, EventClickArg, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -66,6 +66,11 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private eventsService = inject(EventsService);
   private destroy$ = new Subject<void>();
+
+  /**
+   * Reference to FullCalendar component
+   */
+  @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
 
   /**
    * Household ID from route
@@ -176,9 +181,10 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
   }));
 
   constructor() {
-    // Load events when household changes
+    // Load events when household or current date changes
     effect(() => {
       const household = this.householdId();
+      const currentDate = this.currentDate(); // Track currentDate changes
       if (household) {
         this.loadEventsForCurrentMonth();
       }
@@ -328,25 +334,24 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
    * Navigate to previous month
    */
   goToPreviousMonth(): void {
-    const currentDate = this.currentDate();
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-    this.currentDate.set(newDate);
+    const calendarApi = this.calendarComponent.getApi();
+    calendarApi.prev();
   }
 
   /**
    * Navigate to next month
    */
   goToNextMonth(): void {
-    const currentDate = this.currentDate();
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-    this.currentDate.set(newDate);
+    const calendarApi = this.calendarComponent.getApi();
+    calendarApi.next();
   }
 
   /**
    * Go to today
    */
   goToToday(): void {
-    this.currentDate.set(new Date());
+    const calendarApi = this.calendarComponent.getApi();
+    calendarApi.today();
     this.selectedDate.set(null);
   }
 
