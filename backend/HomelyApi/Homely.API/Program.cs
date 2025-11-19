@@ -200,9 +200,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        if (builder.Environment.IsDevelopment())
+        if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Local")
         {
-            // Development environment origins
+            // Development and Local environment origins
             policy.WithOrigins(
                       "https://dev.homely.maflint.com",
                       "http://localhost:4200"  // Alternative local port
