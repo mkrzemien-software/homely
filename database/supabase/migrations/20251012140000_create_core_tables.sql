@@ -13,7 +13,7 @@ create table plan_types (
     name varchar(50) not null unique,
     description text,
     max_household_members integer,
-    max_items integer,
+    max_tasks integer,
     price_monthly decimal(10,2),
     price_yearly decimal(10,2),
     features jsonb default '[]',
@@ -124,12 +124,12 @@ comment on table categories is 'Specific categories within category types for it
 comment on column categories.category_type_id is 'References category_types.id for hierarchical organization';
 
 -- ============================================================================
--- 6. ITEMS TABLE
+-- 6. TASKS TABLE
 -- ============================================================================
--- Household items/appliances/visits that need maintenance tracking
-create table items (
+-- Task templates defining what needs to be done and how often
+create table tasks (
     id uuid primary key default gen_random_uuid(),
-    household_id uuid references households(id) on delete cascade,
+    household_id uuid references households(id) on delete cascade not null,
     category_id integer references categories(id),
     name varchar(100) not null,
     description text,
@@ -147,64 +147,65 @@ create table items (
     deleted_at timestamp with time zone
 );
 
--- Enable RLS for items
-alter table items enable row level security;
+-- Enable RLS for tasks
+alter table tasks enable row level security;
 
-comment on table items is 'Household items, appliances, and visits that require maintenance tracking';
-comment on column items.years_value is 'Maintenance interval in years';
-comment on column items.months_value is 'Maintenance interval in months';
-comment on column items.weeks_value is 'Maintenance interval in weeks';
-comment on column items.days_value is 'Maintenance interval in days';
-comment on column items.last_date is 'Date of last maintenance/service';
-comment on column items.priority is 'Item priority level: low, medium, high';
+comment on table tasks is 'Task templates defining what needs to be done and how often (intervals)';
+comment on column tasks.category_id is 'References categories.id for task categorization';
+comment on column tasks.years_value is 'Recurrence interval in years';
+comment on column tasks.months_value is 'Recurrence interval in months';
+comment on column tasks.weeks_value is 'Recurrence interval in weeks';
+comment on column tasks.days_value is 'Recurrence interval in days';
+comment on column tasks.last_date is 'Date when this task was last completed';
+comment on column tasks.priority is 'Task priority level: low, medium, high';
+comment on column tasks.is_active is 'Whether this task template is active';
 
 -- ============================================================================
--- 7. TASKS TABLE
+-- 7. EVENTS TABLE
 -- ============================================================================
--- Individual maintenance tasks/appointments for items
-create table tasks (
+-- Concrete scheduled occurrences of tasks (individual appointments/due dates)
+create table events (
     id uuid primary key default gen_random_uuid(),
-    item_id uuid references items(id) on delete cascade,
-    household_id uuid references households(id) on delete cascade,
+    task_id uuid references tasks(id) on delete set null,
+    household_id uuid references households(id) on delete cascade not null,
     assigned_to uuid references auth.users(id),
     due_date date not null,
-    title varchar(200) not null,
-    description text,
     status varchar(20) default 'pending' check (status in ('pending', 'completed', 'postponed', 'cancelled')),
     priority varchar(10) default 'medium' check (priority in ('low', 'medium', 'high')),
     completion_date date,
     completion_notes text,
     postponed_from_date date,
     postpone_reason text,
-    is_recurring boolean default true,
+    notes text,
     created_by uuid references auth.users(id) not null,
     created_at timestamp with time zone default now(),
     updated_at timestamp with time zone default now(),
     deleted_at timestamp with time zone
 );
 
--- Enable RLS for tasks
-alter table tasks enable row level security;
+-- Enable RLS for events
+alter table events enable row level security;
 
-comment on table tasks is 'Individual maintenance tasks and appointments with scheduling and tracking';
-comment on column tasks.status is 'Task status: pending, completed, postponed, cancelled';
-comment on column tasks.is_recurring is 'Whether task should automatically regenerate when completed';
-comment on column tasks.postponed_from_date is 'Original due date if task was postponed';
+comment on table events is 'Events (task occurrences) - concrete scheduled instances of tasks. Events display the task name as their title and do not have their own title field.';
+comment on column events.task_id is 'References tasks.id - the task template this event is based on (nullable for one-off events)';
+comment on column events.status is 'Event status: pending, completed, postponed, cancelled';
+comment on column events.postponed_from_date is 'Original due date if event was postponed';
+comment on column events.notes is 'Event-specific notes (separate from task template notes)';
 
 -- ============================================================================
 -- 8. TASKS HISTORY TABLE
 -- ============================================================================
--- Historical record of completed tasks (premium feature)
+-- Historical record of completed events (premium feature)
 create table tasks_history (
     id uuid primary key default gen_random_uuid(),
+    event_id uuid references events(id) on delete cascade,
     task_id uuid references tasks(id) on delete cascade,
-    item_id uuid references items(id) on delete cascade,
     household_id uuid references households(id) on delete cascade,
     assigned_to uuid references auth.users(id),
     completed_by uuid references auth.users(id),
     due_date date not null,
     completion_date date not null,
-    title varchar(200) not null,
+    task_name varchar(100) not null,
     completion_notes text,
     created_at timestamp with time zone default now(),
     deleted_at timestamp with time zone
@@ -213,8 +214,11 @@ create table tasks_history (
 -- Enable RLS for tasks history
 alter table tasks_history enable row level security;
 
-comment on table tasks_history is 'Historical record of completed tasks for premium plan analytics';
-comment on column tasks_history.completed_by is 'User who marked the task as completed';
+comment on table tasks_history is 'Historical record of completed events for premium plan analytics';
+comment on column tasks_history.event_id is 'References events.id - the completed event occurrence';
+comment on column tasks_history.task_id is 'References tasks.id - the task template this event was based on';
+comment on column tasks_history.completed_by is 'User who marked the event as completed';
+comment on column tasks_history.task_name is 'Snapshot of task name at completion time';
 
 -- ============================================================================
 -- 9. PLAN USAGE TABLE

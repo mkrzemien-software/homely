@@ -9,90 +9,98 @@
 -- ============================================================================
 
 -- ============================================================================
--- 1. DASHBOARD UPCOMING TASKS VIEW
+-- 1. DASHBOARD UPCOMING EVENTS VIEW
 -- ============================================================================
--- Optimized view for dashboard showing upcoming maintenance tasks with urgency classification
+-- Optimized view for dashboard showing upcoming events with urgency classification
 create view dashboard_upcoming_tasks as
-select 
-    t.id,
-    t.due_date,
-    t.title,
+select
+    e.id,
+    e.due_date,
+    t.name as title,
     t.description,
-    t.status,
-    t.priority,
-    t.assigned_to,
-    i.name as item_name,
-    i.description as item_description,
+    e.status,
+    e.priority,
+    e.assigned_to,
+    t.name as task_name,
+    t.description as task_description,
     c.name as category_name,
     ct.name as category_type_name,
     -- User names would need to be fetched from auth.users if needed
     h.id as household_id,
     h.name as household_name,
     -- Urgency classification for dashboard prioritization
-    case 
-        when t.due_date < current_date then 'overdue'
-        when t.due_date = current_date then 'today'
-        when t.due_date <= current_date + interval '7 days' then 'this_week'
-        when t.due_date <= current_date + interval '30 days' then 'this_month'
+    case
+        when e.due_date < current_date then 'overdue'
+        when e.due_date = current_date then 'today'
+        when e.due_date <= current_date + interval '7 days' then 'this_week'
+        when e.due_date <= current_date + interval '30 days' then 'this_month'
         else 'upcoming'
     end as urgency_status,
     -- Days until due (negative for overdue)
-    t.due_date - current_date as days_until_due,
+    e.due_date - current_date as days_until_due,
     -- Combined priority score for sorting (urgency + priority)
-    case 
-        when t.due_date < current_date then 1000 + case t.priority when 'high' then 3 when 'medium' then 2 else 1 end
-        when t.due_date = current_date then 500 + case t.priority when 'high' then 3 when 'medium' then 2 else 1 end
-        when t.due_date <= current_date + interval '7 days' then 100 + case t.priority when 'high' then 3 when 'medium' then 2 else 1 end
-        else case t.priority when 'high' then 3 when 'medium' then 2 else 1 end
+    case
+        when e.due_date < current_date then 1000 + case e.priority when 'high' then 3 when 'medium' then 2 else 1 end
+        when e.due_date = current_date then 500 + case e.priority when 'high' then 3 when 'medium' then 2 else 1 end
+        when e.due_date <= current_date + interval '7 days' then 100 + case e.priority when 'high' then 3 when 'medium' then 2 else 1 end
+        else case e.priority when 'high' then 3 when 'medium' then 2 else 1 end
     end as priority_score
-from tasks t
-join items i on t.item_id = i.id
-join categories c on i.category_id = c.id
-join category_types ct on c.category_type_id = ct.id
-join households h on t.household_id = h.id
+from events e
+left join tasks t on e.task_id = t.id
+left join categories c on t.category_id = c.id
+left join category_types ct on c.category_type_id = ct.id
+join households h on e.household_id = h.id
 -- User data can be fetched from auth.users if needed
-where t.deleted_at is null 
-    and t.status = 'pending'
-    and i.deleted_at is null
-    and i.is_active = true
+where e.deleted_at is null
+    and e.status = 'pending'
+    and (t.id is null or (t.deleted_at is null and t.is_active = true))
     and h.deleted_at is null
-order by priority_score desc, t.due_date asc, t.priority desc;
+order by priority_score desc, e.due_date asc, e.priority desc;
 
-comment on view dashboard_upcoming_tasks is 'Optimized dashboard view showing pending tasks with urgency classification and priority scoring';
+comment on view dashboard_upcoming_tasks is 'Optimized dashboard view showing pending events with urgency classification and priority scoring';
 
 -- ============================================================================
 -- AUTOMATED TRIGGERS FOR BUSINESS LOGIC
 -- ============================================================================
 
 -- ============================================================================
--- 2. AUTOMATIC TASK HISTORY CREATION TRIGGER
+-- 2. AUTOMATIC EVENT HISTORY CREATION TRIGGER
 -- ============================================================================
--- Automatically creates history record when task is completed (premium feature)
-create or replace function create_task_history()
+-- Automatically creates history record when event is completed (premium feature)
+create or replace function create_event_history()
 returns trigger as $$
+declare
+    task_name_var varchar(100);
 begin
-    -- Only create history when task is marked as completed
+    -- Only create history when event is marked as completed
     if new.status = 'completed' and old.status != 'completed' then
+        -- Get task name if event is linked to a task
+        if new.task_id is not null then
+            select name into task_name_var from tasks where id = new.task_id;
+        else
+            task_name_var := 'One-off event';
+        end if;
+
         insert into tasks_history (
+            event_id,
             task_id,
-            item_id,
             household_id,
             assigned_to,
             completed_by,
             due_date,
             completion_date,
-            title,
+            task_name,
             completion_notes
         )
         values (
             new.id,
-            new.item_id,
+            new.task_id,
             new.household_id,
             new.assigned_to,
             auth.uid(), -- user who marked it complete
             new.due_date,
             coalesce(new.completion_date, current_date),
-            new.title,
+            task_name_var,
             new.completion_notes
         );
     end if;
@@ -100,103 +108,101 @@ begin
 end;
 $$ language plpgsql security definer;
 
--- Create trigger on tasks table
-create trigger create_task_history_trigger
-    after update on tasks
+-- Create trigger on events table
+create trigger create_event_history_trigger
+    after update on events
     for each row
-    execute function create_task_history();
+    execute function create_event_history();
 
-comment on function create_task_history() is 'Premium feature: Automatically records task completion history';
-comment on trigger create_task_history_trigger on tasks is 'Creates history record when task is completed';
+comment on function create_event_history() is 'Premium feature: Automatically records event completion history';
+comment on trigger create_event_history_trigger on events is 'Creates history record when event is completed';
 
 -- ============================================================================
--- 3. AUTOMATIC RECURRING TASK CREATION TRIGGER
+-- 3. AUTOMATIC RECURRING EVENT CREATION TRIGGER
 -- ============================================================================
--- Automatically creates next recurring task when current task is completed
-create or replace function create_recurring_task()
+-- Automatically creates next recurring event when current event is completed
+create or replace function create_recurring_event()
 returns trigger as $$
 declare
     next_due_date date;
-    item_intervals record;
+    task_intervals record;
 begin
-    -- Only process if task is marked completed and is recurring
-    if new.status = 'completed' and old.status != 'completed' and new.is_recurring = true then
-        
-        -- Get the interval values from the associated item
+    -- Only process if event is marked completed and has a linked task with intervals
+    if new.status = 'completed' and old.status != 'completed' and new.task_id is not null then
+
+        -- Get the interval values from the associated task template
         select years_value, months_value, weeks_value, days_value
-        into item_intervals
-        from items
-        where id = new.item_id;
-        
-        -- Calculate next due date based on completion date
-        next_due_date := coalesce(new.completion_date, current_date);
-        
-        -- Add intervals to calculate next due date
-        if item_intervals.years_value > 0 then
-            next_due_date := next_due_date + (item_intervals.years_value || ' years')::interval;
+        into task_intervals
+        from tasks
+        where id = new.task_id;
+
+        -- Only create recurring event if task has at least one interval set
+        if task_intervals.years_value > 0 or task_intervals.months_value > 0
+           or task_intervals.weeks_value > 0 or task_intervals.days_value > 0 then
+
+            -- Calculate next due date based on completion date
+            next_due_date := coalesce(new.completion_date, current_date);
+
+            -- Add intervals to calculate next due date
+            if task_intervals.years_value > 0 then
+                next_due_date := next_due_date + (task_intervals.years_value || ' years')::interval;
+            end if;
+
+            if task_intervals.months_value > 0 then
+                next_due_date := next_due_date + (task_intervals.months_value || ' months')::interval;
+            end if;
+
+            if task_intervals.weeks_value > 0 then
+                next_due_date := next_due_date + (task_intervals.weeks_value || ' weeks')::interval;
+            end if;
+
+            if task_intervals.days_value > 0 then
+                next_due_date := next_due_date + (task_intervals.days_value || ' days')::interval;
+            end if;
+
+            -- Create the next recurring event
+            insert into events (
+                task_id,
+                household_id,
+                assigned_to,
+                due_date,
+                priority,
+                created_by
+            )
+            values (
+                new.task_id,
+                new.household_id,
+                new.assigned_to,
+                next_due_date,
+                new.priority,
+                new.created_by
+            );
+
+            -- Update the task's last_date
+            update tasks
+            set last_date = coalesce(new.completion_date, current_date),
+                updated_at = now()
+            where id = new.task_id;
         end if;
-        
-        if item_intervals.months_value > 0 then
-            next_due_date := next_due_date + (item_intervals.months_value || ' months')::interval;
-        end if;
-        
-        if item_intervals.weeks_value > 0 then
-            next_due_date := next_due_date + (item_intervals.weeks_value || ' weeks')::interval;
-        end if;
-        
-        if item_intervals.days_value > 0 then
-            next_due_date := next_due_date + (item_intervals.days_value || ' days')::interval;
-        end if;
-        
-        -- Create the next recurring task
-        insert into tasks (
-            item_id,
-            household_id,
-            assigned_to,
-            due_date,
-            title,
-            description,
-            priority,
-            is_recurring,
-            created_by
-        )
-        values (
-            new.item_id,
-            new.household_id,
-            new.assigned_to,
-            next_due_date,
-            new.title,
-            new.description,
-            new.priority,
-            true,
-            new.created_by
-        );
-        
-        -- Update the item's last_date
-        update items 
-        set last_date = coalesce(new.completion_date, current_date),
-            updated_at = now()
-        where id = new.item_id;
-        
     end if;
-    
+
     return new;
 end;
 $$ language plpgsql security definer;
 
--- Create trigger on tasks table
-create trigger create_recurring_task_trigger
-    after update on tasks
+-- Create trigger on events table
+create trigger create_recurring_event_trigger
+    after update on events
     for each row
-    execute function create_recurring_task();
+    execute function create_recurring_event();
 
-comment on function create_recurring_task() is 'Automatically creates next recurring task when current task is completed';
-comment on trigger create_recurring_task_trigger on tasks is 'Generates recurring tasks based on item maintenance intervals';
+comment on function create_recurring_event() is 'Automatically creates next recurring event when current event is completed';
+comment on trigger create_recurring_event_trigger on events is 'Generates recurring events based on task template intervals';
 
 -- ============================================================================
 -- 4. PLAN USAGE TRACKING TRIGGER
 -- ============================================================================
--- Automatically updates plan usage statistics when items/members are added
+-- Automatically updates plan usage statistics when tasks/members are added
 create or replace function update_plan_usage()
 returns trigger as $$
 declare
@@ -204,49 +210,49 @@ declare
     usage_count integer;
 begin
     -- Determine household_id based on table
-    if tg_table_name = 'items' then
+    if tg_table_name = 'tasks' then
         household_uuid := coalesce(new.household_id, old.household_id);
-        
-        -- Count current active items for household
+
+        -- Count current active tasks for household
         select count(*) into usage_count
-        from items
-        where household_id = household_uuid 
-            and deleted_at is null 
+        from tasks
+        where household_id = household_uuid
+            and deleted_at is null
             and is_active = true;
-            
+
         -- Update or insert plan usage record
         insert into plan_usage (household_id, usage_type, current_value, usage_date)
-        values (household_uuid, 'items', usage_count, current_date)
+        values (household_uuid, 'tasks', usage_count, current_date)
         on conflict (household_id, usage_type, usage_date)
-        do update set 
+        do update set
             current_value = excluded.current_value,
             updated_at = now();
-            
+
     elsif tg_table_name = 'household_members' then
         household_uuid := coalesce(new.household_id, old.household_id);
-        
+
         -- Count current active members for household
         select count(*) into usage_count
         from household_members
-        where household_id = household_uuid 
+        where household_id = household_uuid
             and deleted_at is null;
-            
+
         -- Update or insert plan usage record
         insert into plan_usage (household_id, usage_type, current_value, usage_date)
         values (household_uuid, 'household_members', usage_count, current_date)
         on conflict (household_id, usage_type, usage_date)
-        do update set 
+        do update set
             current_value = excluded.current_value,
             updated_at = now();
     end if;
-    
+
     return coalesce(new, old);
 end;
 $$ language plpgsql security definer;
 
 -- Create triggers for plan usage tracking
-create trigger update_items_plan_usage_trigger
-    after insert or update or delete on items
+create trigger update_tasks_plan_usage_trigger
+    after insert or update or delete on tasks
     for each row
     execute function update_plan_usage();
 
@@ -261,10 +267,10 @@ comment on function update_plan_usage() is 'Automatically tracks plan usage stat
 -- 5. INSERT DEFAULT PLAN TYPES AND CATEGORY DATA
 -- ============================================================================
 -- Wstawienie domyślnych typów planów dla modelu freemium
-insert into plan_types (id, name, description, max_household_members, max_items, price_monthly, price_yearly, features, is_active) values
+insert into plan_types (id, name, description, max_household_members, max_tasks, price_monthly, price_yearly, features, is_active) values
 (1, 'Darmowy', 'Podstawowe zarządzanie gospodarstwem domowym', 3, 5, 0.00, 0.00, '["podstawowe_zadania", "widok_kalendarza"]', true),
 (2, 'Premium', 'Pełne zarządzanie gospodarstwem z analityką', 10, 100, 9.99, 99.99, '["podstawowe_zadania", "widok_kalendarza", "powiadomienia_email", "dokumenty", "analityka", "historia", "wsparcie_priorytetowe"]', true),
-(3, 'Rodzinny', 'Kompletne rozwiązanie dla rodziny', null, null, 19.99, 199.99, '["podstawowe_zadania", "widok_kalendarza", "powiadomienia_email", "dokumenty", "analityka", "historia", "wsparcie_priorytetowe", "nieograniczeni_czlonkowie", "nieograniczone_przedmioty"]', true)
+(3, 'Rodzinny', 'Kompletne rozwiązanie dla rodziny', null, null, 19.99, 199.99, '["podstawowe_zadania", "widok_kalendarza", "powiadomienia_email", "dokumenty", "analityka", "historia", "wsparcie_priorytetowe", "nieograniczeni_czlonkowie", "nieograniczone_zadania"]', true)
 on conflict (id) do nothing;
 
 -- Wstawienie domyślnych typów kategorii (tylko MVP)
@@ -288,7 +294,7 @@ insert into categories (category_type_id, name, description, sort_order, is_acti
 ((select id from category_types where name = 'Wizyty medyczne'), 'Badania kontrolne', 'Regularne badania profilaktyczne', 3, true)
 on conflict (category_type_id, name) do nothing;
 
-comment on view dashboard_upcoming_tasks is 'Main dashboard view with all pending tasks and urgency classification';
+comment on view dashboard_upcoming_tasks is 'Main dashboard view with all pending events and urgency classification';
 
 -- ============================================================================
 -- END OF VIEWS AND TRIGGERS MIGRATION

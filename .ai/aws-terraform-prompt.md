@@ -6,7 +6,7 @@ Stwórz kompletną infrastrukturę AWS dla aplikacji webowej składającej się 
 - **Backend**: .NET 8 w kontenerze Docker
 - **Baza danych**: Supabase Cloud (zewnętrzna)
 - **Uwierzytelnianie**: Supabase Cloud
-- **Ruch**: mały (setki użytkowników dziennie)
+- **Ruch**: mały
 - **Budżet**: minimalny
 - **CI/CD**: GitHub Actions
 
@@ -60,7 +60,7 @@ Stwórz kompletną infrastrukturę AWS dla aplikacji webowej składającej się 
   - Backend configuration (String)
   - Frontend environment variables
   - Inne configuration secrets
-  - Użyj hierarchii: /{project_name}/{environment}/* (np. /myapp/prod/supabase_url)
+  - Użyj hierarchii: /{project_name}/{environment}/* (np. /homely/prod/supabase_url)
 
 ### 5. CI/CD (GitHub Actions)
 Wygeneruj przykładowe pliki workflow:
@@ -143,7 +143,7 @@ Po wykonaniu `terraform apply`, wyświetl:
 - Parameter Store paths (ścieżki do parametrów)
 - Instrukcje konfiguracji DNS w OVH
 - Przykładowe komendy GitHub Actions secrets
-- Komendy AWS CLI do ustawienia parametrów (np. `aws ssm put-parameter --name "/myapp/prod/supabase_url" --value "..." --type SecureString`)
+- Komendy AWS CLI do ustawienia parametrów (np. `aws ssm put-parameter --name "/homely/prod/supabase_url" --value "..." --type SecureString`)
 
 ## Dokumentacja
 
@@ -157,7 +157,7 @@ Dodaj README.md z:
 
 ## Bezpieczeństwo plików
 
-Stwórz `.gitignore` z:
+Dodaj do `.gitignore` :
 ```
 *.tfstate
 *.tfstate.backup
@@ -184,10 +184,10 @@ terraform.tfvars
    - String dla non-sensitive config
    - ECS task definition pobiera zmienne z Parameter Store
    - Przykłady parametrów:
-     - `/myapp/prod/supabase_url` (SecureString)
-     - `/myapp/prod/supabase_anon_key` (SecureString)
-     - `/myapp/prod/backend_log_level` (String)
-     - `/myapp/prod/cors_origins` (String)
+     - `/homely/prod/supabase_url` (SecureString)
+     - `/homely/prod/supabase_anon_key` (SecureString)
+     - `/homely/prod/backend_log_level` (String)
+     - `/homely/prod/cors_origins` (String)
 
 4. **Backup plan** - instrukcje jak zachować state i odtworzyć infrastrukturę
 
@@ -198,7 +198,7 @@ terraform.tfvars
 ## Format odpowiedzi
 
 Wygeneruj:
-1. Wszystkie pliki Terraform z pełnym kodem
+1. Wszystkie pliki Terraform z pełnym kodem (katalog "infrastructure")
 2. Pliki GitHub Actions workflows
 3. README.md z instrukcjami
 4. Przykładowy Dockerfile dla backendu .NET 8

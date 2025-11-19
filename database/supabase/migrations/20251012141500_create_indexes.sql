@@ -86,48 +86,51 @@ comment on index idx_categories_type is 'Optimizes category type to categories r
 comment on index idx_categories_active is 'Filters active categories for item assignment';
 
 -- ============================================================================
--- 6. ITEMS INDEXES
+-- 6. TASKS INDEXES
 -- ============================================================================
--- Critical index for household items - used extensively in dashboard queries
-create index idx_items_household on items(household_id) where deleted_at is null;
+-- Critical index for household tasks - used for filtering task templates
+create index idx_tasks_household on tasks(household_id) where deleted_at is null;
 
 -- Index for category-based filtering and reporting
-create index idx_items_category on items(category_id) where deleted_at is null;
+create index idx_tasks_category on tasks(category_id) where deleted_at is null;
 
--- Index for tracking item creators
-create index idx_items_created_by on items(created_by) where deleted_at is null;
+-- Index for tracking task creators
+create index idx_tasks_created_by on tasks(created_by) where deleted_at is null;
 
--- Index for active items filtering
-create index idx_items_active on items(is_active) where deleted_at is null;
+-- Index for active tasks filtering
+create index idx_tasks_active on tasks(is_active) where deleted_at is null;
 
-comment on index idx_items_household is 'Critical for dashboard queries - finds all household items';
-comment on index idx_items_category is 'Optimizes category-based item filtering and reports';
-comment on index idx_items_created_by is 'Tracks item creation for audit purposes';
-comment on index idx_items_active is 'Filters active items in household views';
+comment on index idx_tasks_household is 'Critical for queries - finds all household task templates';
+comment on index idx_tasks_category is 'Optimizes category-based task filtering and reports';
+comment on index idx_tasks_created_by is 'Tracks task template creation for audit purposes';
+comment on index idx_tasks_active is 'Filters active task templates in household views';
 
 -- ============================================================================
--- 7. TASKS INDEXES - CRITICAL FOR DASHBOARD PERFORMANCE
+-- 7. EVENTS INDEXES - CRITICAL FOR DASHBOARD PERFORMANCE
 -- ============================================================================
--- Most important index - due date sorting for dashboard upcoming tasks
-create index idx_tasks_due_date on tasks(due_date) where deleted_at is null;
+-- Most important index - due date sorting for dashboard upcoming events
+create index idx_events_due_date on events(due_date) where deleted_at is null;
 
--- Composite index for household task filtering by status - critical for dashboard
-create index idx_tasks_household_status on tasks(household_id, status) where deleted_at is null;
+-- Composite index for household event filtering by status - critical for dashboard
+create index idx_events_household_status on events(household_id, status) where deleted_at is null;
 
--- Index for task assignment queries
-create index idx_tasks_assigned_to on tasks(assigned_to) where deleted_at is null;
+-- Index for event assignment queries
+create index idx_events_assigned_to on events(assigned_to) where deleted_at is null;
 
 -- Composite index for status and due date - optimizes dashboard urgency queries
-create index idx_tasks_status_due on tasks(status, due_date) where deleted_at is null;
+create index idx_events_status_due on events(status, due_date) where deleted_at is null;
 
--- Index for item-to-tasks relationships
-create index idx_tasks_item on tasks(item_id) where deleted_at is null;
+-- Index for task-to-events relationships
+create index idx_events_task on events(task_id) where deleted_at is null;
 
-comment on index idx_tasks_due_date is 'CRITICAL: Optimizes dashboard upcoming tasks sorting by due date';
-comment on index idx_tasks_household_status is 'CRITICAL: Dashboard household task filtering by status';
-comment on index idx_tasks_assigned_to is 'Optimizes user-assigned task queries';
-comment on index idx_tasks_status_due is 'CRITICAL: Dashboard urgency calculations (overdue, today, upcoming)';
-comment on index idx_tasks_item is 'Links tasks back to their parent items';
+-- Index for household events
+create index idx_events_household on events(household_id) where deleted_at is null;
+
+comment on index idx_events_due_date is 'CRITICAL: Optimizes dashboard upcoming events sorting by due date';
+comment on index idx_events_household_status is 'CRITICAL: Dashboard household event filtering by status';
+comment on index idx_events_assigned_to is 'Optimizes user-assigned event queries';
+comment on index idx_events_status_due is 'CRITICAL: Dashboard urgency calculations (overdue, today, upcoming)';
+comment on index idx_events_task is 'Links events back to their parent task templates';
 
 -- ============================================================================
 -- 8. TASKS HISTORY INDEXES
@@ -138,12 +141,16 @@ create index idx_tasks_history_household on tasks_history(household_id);
 -- Index for completion date analytics
 create index idx_tasks_history_completion_date on tasks_history(completion_date);
 
--- Index for item history tracking
-create index idx_tasks_history_item on tasks_history(item_id);
+-- Index for task template history tracking
+create index idx_tasks_history_task on tasks_history(task_id);
+
+-- Index for event history tracking
+create index idx_tasks_history_event on tasks_history(event_id);
 
 comment on index idx_tasks_history_household is 'Premium feature: household maintenance history analytics';
 comment on index idx_tasks_history_completion_date is 'Time-based analytics for completion patterns';
-comment on index idx_tasks_history_item is 'Item-specific maintenance history tracking';
+comment on index idx_tasks_history_task is 'Task template-specific maintenance history tracking';
+comment on index idx_tasks_history_event is 'Event-specific completion history tracking';
 
 -- ============================================================================
 -- 9. PLAN USAGE INDEXES

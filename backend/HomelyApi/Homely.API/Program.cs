@@ -105,8 +105,7 @@ builder.Services.AddAuthentication(options =>
         OnTokenValidated = context =>
         {
             var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-            logger.LogInformation("Token validated for user: {UserId}", 
-                context.Principal?.FindFirst("sub")?.Value ?? "Unknown");
+            logger.LogInformation("Token validated for user");
             return Task.CompletedTask;
         }
     };

@@ -155,112 +155,112 @@ create policy "anyone_can_select_active_categories" on categories
 comment on policy "anyone_can_select_active_categories" on categories is 'Public access to view item categories';
 
 -- ============================================================================
--- 6. ITEMS POLICIES
+-- 6. TASKS POLICIES
 -- ============================================================================
--- Items are restricted to household members with full CRUD access
+-- Task templates are restricted to household members with full CRUD access
 
--- Select policy: Household members can view household items
-create policy "household_members_can_select_items" on items
-    for select to authenticated
-    using (
-        household_id in (
-            select household_id from household_members 
-            where user_id = auth.uid() and deleted_at is null
-        )
-    );
-
--- Insert policy: Household members can add new items
-create policy "household_members_can_insert_items" on items
-    for insert to authenticated
-    with check (
-        household_id in (
-            select household_id from household_members 
-            where user_id = auth.uid() and deleted_at is null
-        )
-    );
-
--- Update policy: Household members can update items
-create policy "household_members_can_update_items" on items
-    for update to authenticated
-    using (
-        household_id in (
-            select household_id from household_members 
-            where user_id = auth.uid() and deleted_at is null
-        )
-    )
-    with check (
-        household_id in (
-            select household_id from household_members 
-            where user_id = auth.uid() and deleted_at is null
-        )
-    );
-
--- Delete policy: Household members can delete items
-create policy "household_members_can_delete_items" on items
-    for delete to authenticated
-    using (
-        household_id in (
-            select household_id from household_members 
-            where user_id = auth.uid() and deleted_at is null
-        )
-    );
-
-comment on policy "household_members_can_select_items" on items is 'Members can view all household items and equipment';
-comment on policy "household_members_can_insert_items" on items is 'Members can add new items to household inventory';
-
--- ============================================================================
--- 7. TASKS POLICIES
--- ============================================================================
--- Tasks are restricted to household members with full CRUD access
-
--- Select policy: Household members can view household tasks
+-- Select policy: Household members can view household task templates
 create policy "household_members_can_select_tasks" on tasks
     for select to authenticated
     using (
         household_id in (
-            select household_id from household_members 
+            select household_id from household_members
             where user_id = auth.uid() and deleted_at is null
         )
     );
 
--- Insert policy: Household members can create new tasks
+-- Insert policy: Household members can add new task templates
 create policy "household_members_can_insert_tasks" on tasks
     for insert to authenticated
     with check (
         household_id in (
-            select household_id from household_members 
+            select household_id from household_members
             where user_id = auth.uid() and deleted_at is null
         )
     );
 
--- Update policy: Household members can update tasks
+-- Update policy: Household members can update task templates
 create policy "household_members_can_update_tasks" on tasks
     for update to authenticated
     using (
         household_id in (
-            select household_id from household_members 
+            select household_id from household_members
             where user_id = auth.uid() and deleted_at is null
         )
     )
     with check (
         household_id in (
-            select household_id from household_members 
+            select household_id from household_members
             where user_id = auth.uid() and deleted_at is null
         )
     );
 
--- Delete policy: Household members can delete tasks
+-- Delete policy: Household members can delete task templates
 create policy "household_members_can_delete_tasks" on tasks
     for delete to authenticated
     using (
         household_id in (
-            select household_id from household_members 
+            select household_id from household_members
             where user_id = auth.uid() and deleted_at is null
         )
     );
 
-comment on policy "household_members_can_select_tasks" on tasks is 'Members can view all household maintenance tasks';
-comment on policy "household_members_can_insert_tasks" on tasks is 'Members can create new maintenance tasks';
+comment on policy "household_members_can_select_tasks" on tasks is 'Members can view all household task templates';
+comment on policy "household_members_can_insert_tasks" on tasks is 'Members can add new task templates to household';
+
+-- ============================================================================
+-- 7. EVENTS POLICIES
+-- ============================================================================
+-- Events (task occurrences) are restricted to household members with full CRUD access
+
+-- Select policy: Household members can view household events
+create policy "household_members_can_select_events" on events
+    for select to authenticated
+    using (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
+
+-- Insert policy: Household members can create new events
+create policy "household_members_can_insert_events" on events
+    for insert to authenticated
+    with check (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
+
+-- Update policy: Household members can update events
+create policy "household_members_can_update_events" on events
+    for update to authenticated
+    using (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    )
+    with check (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
+
+-- Delete policy: Household members can delete events
+create policy "household_members_can_delete_events" on events
+    for delete to authenticated
+    using (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
+
+comment on policy "household_members_can_select_events" on events is 'Members can view all household events (task occurrences)';
+comment on policy "household_members_can_insert_events" on events is 'Members can create new events (scheduled occurrences)';
 
 -- ============================================================================
 -- 8. TASKS HISTORY POLICIES (PREMIUM FEATURE)
