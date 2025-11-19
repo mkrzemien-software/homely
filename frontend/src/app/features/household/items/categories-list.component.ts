@@ -209,19 +209,16 @@ export class CategoriesListComponent implements OnInit {
       grouped.get(category.categoryTypeId)!.push(category);
     });
 
-    // Build result array
-    const result: CategoriesByType[] = [];
-    grouped.forEach((typeCategories, categoryTypeId) => {
-      const categoryType = categoryTypes.find(ct => ct.id === categoryTypeId);
-      if (categoryType) {
-        result.push({
-          categoryTypeId,
-          categoryTypeName: categoryType.name,
-          categoryTypeDescription: categoryType.description,
-          categories: typeCategories,
-          categoryCount: typeCategories.length
-        });
-      }
+    // Build result array - INCLUDE ALL CATEGORY TYPES (even those without categories)
+    const result: CategoriesByType[] = categoryTypes.map(categoryType => {
+      const typeCategories = grouped.get(categoryType.id) || [];
+      return {
+        categoryTypeId: categoryType.id,
+        categoryTypeName: categoryType.name,
+        categoryTypeDescription: categoryType.description,
+        categories: typeCategories,
+        categoryCount: typeCategories.length
+      };
     });
 
     // Sort by sortOrder

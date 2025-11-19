@@ -169,59 +169,72 @@
             </ng-template>
 
             <!-- Categories in type -->
-            <div
-              class="items-grid"
-              cdkDropList
-              [cdkDropListData]="typeGroup.categories"
-              (cdkDropListDropped)="onCategoryDrop($event, typeGroup.categoryTypeId)"
-            >
-              @for (category of typeGroup.categories; track category.id) {
-                <p-card class="item-card" cdkDrag>
-                  <ng-template pTemplate="header">
-                    <div class="item-card-header">
-                      <i class="pi pi-bars drag-handle" cdkDragHandle></i>
-                      <h3 class="item-name">{{ category.name }}</h3>
-                      <div class="item-actions">
-                        <p-button
-                          icon="pi pi-pencil"
-                          severity="secondary"
-                          [text]="true"
-                          [rounded]="true"
-                          size="small"
-                          (onClick)="editCategory(category)"
-                          pTooltip="Edytuj"
-                        ></p-button>
-                        <p-button
-                          icon="pi pi-trash"
-                          severity="danger"
-                          [text]="true"
-                          [rounded]="true"
-                          size="small"
-                          (onClick)="deleteCategory(category)"
-                          pTooltip="Usuń"
-                        ></p-button>
+            @if (typeGroup.categoryCount === 0) {
+              <div class="empty-category-type">
+                <p class="empty-message">Brak podkategorii w tej kategorii</p>
+                <p-button
+                  icon="pi pi-plus"
+                  label="Dodaj podkategorię"
+                  size="small"
+                  [outlined]="true"
+                  (onClick)="addNewCategory()"
+                ></p-button>
+              </div>
+            } @else {
+              <div
+                class="items-grid"
+                cdkDropList
+                [cdkDropListData]="typeGroup.categories"
+                (cdkDropListDropped)="onCategoryDrop($event, typeGroup.categoryTypeId)"
+              >
+                @for (category of typeGroup.categories; track category.id) {
+                  <p-card class="item-card" cdkDrag>
+                    <ng-template pTemplate="header">
+                      <div class="item-card-header">
+                        <i class="pi pi-bars drag-handle" cdkDragHandle></i>
+                        <h3 class="item-name">{{ category.name }}</h3>
+                        <div class="item-actions">
+                          <p-button
+                            icon="pi pi-pencil"
+                            severity="secondary"
+                            [text]="true"
+                            [rounded]="true"
+                            size="small"
+                            (onClick)="editCategory(category)"
+                            pTooltip="Edytuj"
+                          ></p-button>
+                          <p-button
+                            icon="pi pi-trash"
+                            severity="danger"
+                            [text]="true"
+                            [rounded]="true"
+                            size="small"
+                            (onClick)="deleteCategory(category)"
+                            pTooltip="Usuń"
+                          ></p-button>
+                        </div>
                       </div>
+                    </ng-template>
+
+                    <div class="item-details">
+                      <!-- Description -->
+                      @if (category.description) {
+                        <div class="detail-row description">
+                          <!-- <span class="detail-label">Opis:</span> -->
+                          <p class="detail-value">{{ category.description }}</p>
+                        </div>
+                      }
+
+                      <!-- Sort order -->
+                      <!-- <div class="detail-row">
+                        <span class="detail-label">Kolejność:</span>
+                        <span class="detail-value">{{ category.sortOrder }}</span>
+                      </div> -->
                     </div>
-                  </ng-template>
-
-                  <div class="item-details">
-                    <!-- Description -->
-                    @if (category.description) {
-                      <div class="detail-row description">
-                        <!-- <span class="detail-label">Opis:</span> -->
-                        <p class="detail-value">{{ category.description }}</p>
-                      </div>
-                    }
-
-                    <!-- Sort order -->
-                    <!-- <div class="detail-row">
-                      <span class="detail-label">Kolejność:</span>
-                      <span class="detail-value">{{ category.sortOrder }}</span>
-                    </div> -->
-                  </div>
-                </p-card>
-              }
-            </div>
+                  </p-card>
+                }
+              </div>
+            }
           </p-accordionTab>
         }
       </p-accordion>
