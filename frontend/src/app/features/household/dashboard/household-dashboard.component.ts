@@ -462,15 +462,4 @@ export class HouseholdDashboardComponent implements OnInit {
   onFiltersChange(filters: EventFilters): void {
     this.currentFilters.set(filters);
   }
-
-  /**
-   * Handle action click from events list
-   */
-  onActionClick(action: { event: DashboardEvent; action: string }): void {
-    console.log('Action click:', action);
-
-    if (action.action === 'complete') {
-      this.completeEvent(action.event);
-    }
-  }
 }
