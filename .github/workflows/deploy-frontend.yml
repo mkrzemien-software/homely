@@ -64,6 +64,31 @@ jobs:
             npm run build -- --configuration development
           fi
 
+      - name: Verify build output
+        run: |
+          echo "📦 Checking build output..."
+          ls -la frontend/dist/
+          if [ -d "frontend/dist/frontend" ]; then
+            echo "✅ Build directory exists"
+            ls -la frontend/dist/frontend/
+            if [ -d "frontend/dist/frontend/browser" ]; then
+              echo "✅ Browser directory exists"
+              ls -la frontend/dist/frontend/browser/
+              if [ -f "frontend/dist/frontend/browser/index.html" ]; then
+                echo "✅ index.html found"
+              else
+                echo "❌ ERROR: index.html not found!"
+                exit 1
+              fi
+            else
+              echo "❌ ERROR: browser directory not found!"
+              exit 1
+            fi
+          else
+            echo "❌ ERROR: dist/frontend directory not found!"
+            exit 1
+          fi
+
       - name: Configure AWS credentials (Access Keys)
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -81,9 +106,25 @@ jobs:
             echo "bucket_name=${{ secrets.FRONTEND_S3_BUCKET_DEV }}" >> $GITHUB_OUTPUT
             echo "cloudfront_id=${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_DEV }}" >> $GITHUB_OUTPUT
           fi
+      
+      - name: Verify S3 bucket policy
+        run: |
+          echo "🔍 Checking S3 bucket policy..."
+          BUCKET_NAME="${{ steps.get-bucket.outputs.bucket_name }}"
+          
+          if aws s3api get-bucket-policy --bucket "$BUCKET_NAME" >/dev/null 2>&1; then
+            echo "✅ Bucket policy exists"
+            aws s3api get-bucket-policy --bucket "$BUCKET_NAME" --query Policy --output text | jq '.'
+          else
+            echo "⚠️  WARNING: No bucket policy found! CloudFront may not have access to S3."
+            echo "You need to apply Terraform configuration to set up the bucket policy."
+          fi
 
       - name: Sync files to S3
         run: |
+          echo "📤 Uploading files to S3..."
+          
+          # Sync all files except index.html
           aws s3 sync frontend/dist/frontend/browser/ s3://${{ steps.get-bucket.outputs.bucket_name }}/ \
             --delete \
             --cache-control "public,max-age=31536000,immutable" \
@@ -94,12 +135,24 @@ jobs:
           # Upload index.html with no-cache to ensure users get latest version
           aws s3 cp frontend/dist/frontend/browser/index.html s3://${{ steps.get-bucket.outputs.bucket_name }}/index.html \
             --cache-control "no-cache,no-store,must-revalidate"
+          
+          echo "✅ Files uploaded successfully"
+          
+          # Verify files in S3
+          echo "📋 Verifying S3 contents..."
+          aws s3 ls s3://${{ steps.get-bucket.outputs.bucket_name }}/ --recursive | head -20
 
       - name: Invalidate CloudFront cache
         run: |
-          aws cloudfront create-invalidation \
+          echo "🔄 Creating CloudFront invalidation..."
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
             --distribution-id ${{ steps.get-bucket.outputs.cloudfront_id }} \
-            --paths "/*"
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+          
+          echo "✅ Invalidation created: $INVALIDATION_ID"
+          echo "⏳ Note: It may take 5-10 minutes for CloudFront to propagate changes globally."
 
       - name: Deployment summary
         run: |
