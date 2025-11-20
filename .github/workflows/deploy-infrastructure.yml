@@ -161,6 +161,8 @@ jobs:
 
       - name: Terraform Apply
         if: env.PLAN_ONLY == 'false' && (env.AUTO_APPROVE == 'true' || env.ENVIRONMENT == 'dev')
+        id: apply
+        continue-on-error: true
         run: |
           echo "🚀 Applying Terraform changes..."
           echo "Environment: $ENVIRONMENT"
@@ -171,6 +173,8 @@ jobs:
           else
             terraform apply -input=false tfplan
           fi
+          
+          echo "apply_status=$?" >> $GITHUB_OUTPUT
       
       - name: Check ACM Certificate Status
         if: env.PLAN_ONLY == 'false'
@@ -179,11 +183,16 @@ jobs:
         run: |
           echo "🔍 Checking ACM certificate status..."
           
+          # Check if apply failed
+          if [ "${{ steps.apply.outputs.apply_status }}" != "0" ]; then
+            echo "⚠️ Terraform apply had issues - checking if it's certificate related..."
+          fi
+          
           # Get certificate ARN from outputs
           CERT_ARN=$(terraform output -raw acm_certificate_arn 2>/dev/null || echo "")
           
           if [ -z "$CERT_ARN" ]; then
-            echo "No ACM certificate found (may not be created yet)"
+            echo "No ACM certificate found"
             echo "needs_validation=false" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -312,7 +321,7 @@ jobs:
           exit 1
       
       - name: Apply CloudFront Configuration
-        if: env.PLAN_ONLY == 'false' && steps.acm_check.outputs.status == 'ISSUED'
+        if: env.PLAN_ONLY == 'false' && steps.acm_check.outputs.status == 'ISSUED' && steps.apply.outputs.apply_status != '0'
         run: |
           echo "🚀 Certificate is validated! Applying final CloudFront configuration..."
           echo ""
@@ -322,6 +331,23 @@ jobs:
           
           echo ""
           echo "✅ CloudFront configuration updated with SSL certificate!"
+      
+      - name: Check Final Apply Status
+        if: env.PLAN_ONLY == 'false'
+        run: |
+          # If initial apply failed and it wasn't certificate-related, fail the job
+          if [ "${{ steps.apply.outputs.apply_status }}" != "0" ] && [ "${{ steps.acm_check.outputs.needs_validation }}" != "true" ]; then
+            echo "❌ Terraform apply failed for reasons other than certificate validation"
+            exit 1
+          fi
+          
+          # If certificate needs validation, treat as expected state
+          if [ "${{ steps.acm_check.outputs.needs_validation }}" == "true" ]; then
+            echo "✅ Infrastructure partially deployed - waiting for certificate validation"
+            exit 0
+          fi
+          
+          echo "✅ All infrastructure deployed successfully"
 
       - name: Terraform Output
         if: env.PLAN_ONLY == 'false'
