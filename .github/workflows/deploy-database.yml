@@ -14,13 +14,6 @@
 name: Deploy Database Migrations
 
 on:
-  push:
-    branches:
-      - main
-      - master
-    paths:
-      - 'database/supabase/migrations/**'
-      - '.github/workflows/deploy-database.yml'
   workflow_dispatch:
     inputs:
       environment:
