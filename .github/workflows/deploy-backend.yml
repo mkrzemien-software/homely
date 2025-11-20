@@ -121,14 +121,65 @@ jobs:
           image: ${{ steps.get-vars.outputs.ecr_repository }}:${{ steps.get-vars.outputs.image_tag }}
 
       - name: Deploy to Amazon ECS
+        id: ecs-deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ steps.get-vars.outputs.ecs_service }}
           cluster: ${{ steps.get-vars.outputs.ecs_cluster }}
           wait-for-service-stability: true
+          wait-for-minutes: 10
+        timeout-minutes: 15
+        continue-on-error: true
+
+      - name: Check ECS Service Status and Events
+        if: steps.ecs-deploy.outcome == 'failure'
+        run: |
+          echo "================================"
+          echo "❌ ECS Deployment Failed"
+          echo "================================"
+          echo ""
+          echo "Fetching ECS service events for debugging..."
+          echo ""
+
+          # Get service events (last 10)
+          aws ecs describe-services \
+            --cluster ${{ steps.get-vars.outputs.ecs_cluster }} \
+            --services ${{ steps.get-vars.outputs.ecs_service }} \
+            --query 'services[0].events[:10]' \
+            --output table
+
+          echo ""
+          echo "Fetching task failures..."
+          echo ""
+
+          # Get failed tasks
+          FAILED_TASKS=$(aws ecs list-tasks \
+            --cluster ${{ steps.get-vars.outputs.ecs_cluster }} \
+            --service-name ${{ steps.get-vars.outputs.ecs_service }} \
+            --desired-status STOPPED \
+            --query 'taskArns[:3]' \
+            --output text)
+
+          if [ ! -z "$FAILED_TASKS" ]; then
+            for TASK_ARN in $FAILED_TASKS; do
+              echo "Task: $TASK_ARN"
+              aws ecs describe-tasks \
+                --cluster ${{ steps.get-vars.outputs.ecs_cluster }} \
+                --tasks $TASK_ARN \
+                --query 'tasks[0].[stopCode,stoppedReason,containers[0].reason]' \
+                --output table
+              echo ""
+            done
+          fi
+
+          echo "Check CloudWatch Logs for more details:"
+          echo "https://console.aws.amazon.com/cloudwatch/home?region=${{ env.AWS_REGION }}#logsV2:log-groups"
+
+          exit 1
 
       - name: Health check
+        if: steps.ecs-deploy.outcome == 'success'
         run: |
           echo "Waiting for service to stabilize..."
           sleep 30
