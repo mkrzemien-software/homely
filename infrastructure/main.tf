@@ -56,8 +56,9 @@ module "parameters" {
   environment  = var.environment
 
   # Default values (will be overwritten manually or by CI/CD)
-  supabase_url      = var.supabase_url
-  supabase_anon_key = var.supabase_anon_key
+  supabase_url                = var.supabase_url
+  supabase_anon_key           = var.supabase_anon_key
+  database_connection_string  = var.database_connection_string
 
   # Non-sensitive defaults
   backend_log_level = var.environment == "prod" ? "Warning" : "Information"

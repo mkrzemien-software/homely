@@ -136,6 +136,10 @@ resource "aws_ecs_task_definition" "backend" {
         {
           name      = "SUPABASE_ANON_KEY"
           valueFrom = var.parameter_store_paths.supabase_anon_key
+        },
+        {
+          name      = "ConnectionStrings__DefaultConnection"
+          valueFrom = var.parameter_store_paths.database_connection_string
         }
       ]
 

@@ -1,0 +1,296 @@
+# GitHub Actions Workflow - Terraform Infrastructure Deployment
+#
+# This workflow deploys AWS infrastructure using Terraform
+#
+# Features:
+# - Manual workflow dispatch only (safety first!)
+# - Option to run only 'terraform plan' (dry run)
+# - Separate workflows for dev and prod environments
+# - Shows detailed plan output before apply
+#
+# Prerequisites:
+# - AWS credentials configured (access keys or OIDC)
+# - Terraform backend initialized (S3 + DynamoDB)
+# - terraform.tfvars configured for each environment
+
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+      plan_only:
+        description: 'Only run terraform plan (do not apply changes)'
+        required: false
+        default: true
+        type: boolean
+      auto_approve:
+        description: 'Auto-approve apply (skip manual confirmation)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  pull-requests: write  # For posting plan output as comment (if triggered from PR)
+
+jobs:
+  terraform:
+    name: Terraform ${{ github.event.inputs.plan_only == 'true' && 'Plan' || 'Apply' }}
+    runs-on: ubuntu-latest
+
+    env:
+      ENVIRONMENT: ${{ github.event.inputs.environment }}
+      PLAN_ONLY: ${{ github.event.inputs.plan_only }}
+      AUTO_APPROVE: ${{ github.event.inputs.auto_approve }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
+
+    defaults:
+      run:
+        working-directory: infrastructure/environments/${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+          terraform_wrapper: true
+
+      - name: Configure AWS credentials (Access Keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-1
+
+      - name: Verify environment
+        run: |
+          echo "🌍 Environment: $ENVIRONMENT"
+          echo "📋 Plan Only: $PLAN_ONLY"
+          echo "✅ Auto Approve: $AUTO_APPROVE"
+          echo ""
+          echo "Working Directory: $(pwd)"
+          ls -la
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: |
+          echo "Initializing Terraform..."
+          terraform init -input=false
+
+      - name: Terraform Validate
+        id: validate
+        run: |
+          echo "Validating Terraform configuration..."
+          terraform validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          echo "Running Terraform plan..."
+          terraform plan -no-color -input=false -out=tfplan
+        continue-on-error: false
+
+      - name: Show Plan Summary
+        run: |
+          echo "📊 Terraform Plan Summary:"
+          echo "================================"
+          terraform show -no-color tfplan | head -100
+          echo ""
+          echo "Full plan saved in tfplan file"
+
+      - name: Save Plan Output
+        if: always()
+        run: |
+          terraform show -no-color tfplan > plan-output.txt
+          echo "Plan output saved to plan-output.txt"
+
+      - name: Upload Plan Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ env.ENVIRONMENT }}-${{ github.run_number }}
+          path: infrastructure/environments/${{ env.ENVIRONMENT }}/plan-output.txt
+          retention-days: 30
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if terraform show -no-color tfplan | grep -q "No changes"; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "✅ No infrastructure changes detected"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Infrastructure changes detected"
+          fi
+
+      - name: Plan Only - Exit
+        if: env.PLAN_ONLY == 'true'
+        run: |
+          echo "================================"
+          echo "📋 PLAN ONLY MODE"
+          echo "================================"
+          echo ""
+          echo "Terraform plan completed successfully!"
+          echo "No changes were applied to infrastructure."
+          echo ""
+          echo "To apply these changes:"
+          echo "1. Review the plan output above"
+          echo "2. Run the workflow again with 'Only plan' unchecked"
+          echo ""
+          echo "Plan artifact uploaded for review."
+          exit 0
+
+      - name: Require confirmation for production
+        if: env.PLAN_ONLY == 'false' && env.ENVIRONMENT == 'prod' && env.AUTO_APPROVE == 'false'
+        run: |
+          echo "⚠️  PRODUCTION DEPLOYMENT"
+          echo "================================"
+          echo ""
+          echo "You are about to apply changes to PRODUCTION environment!"
+          echo "This workflow requires manual confirmation."
+          echo ""
+          echo "To proceed, run with 'Auto-approve' checked."
+          echo "Or use Terraform CLI locally:"
+          echo "  cd infrastructure/environments/prod"
+          echo "  terraform apply"
+          echo ""
+          exit 1
+
+      - name: Terraform Apply
+        if: env.PLAN_ONLY == 'false' && (env.AUTO_APPROVE == 'true' || env.ENVIRONMENT == 'dev')
+        run: |
+          echo "🚀 Applying Terraform changes..."
+          echo "Environment: $ENVIRONMENT"
+          echo ""
+
+          if [ "$AUTO_APPROVE" == "true" ]; then
+            terraform apply -auto-approve -input=false tfplan
+          else
+            terraform apply -input=false tfplan
+          fi
+
+      - name: Terraform Output
+        if: env.PLAN_ONLY == 'false' && steps.changes.outputs.has_changes == 'true'
+        id: output
+        run: |
+          echo "📤 Terraform Outputs:"
+          echo "================================"
+          terraform output -no-color
+
+      - name: Save Terraform Outputs
+        if: env.PLAN_ONLY == 'false' && steps.changes.outputs.has_changes == 'true'
+        run: |
+          terraform output -json > outputs.json
+          echo "Outputs saved to outputs.json"
+
+      - name: Upload Outputs Artifact
+        if: env.PLAN_ONLY == 'false' && steps.changes.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-outputs-${{ env.ENVIRONMENT }}-${{ github.run_number }}
+          path: infrastructure/environments/${{ env.ENVIRONMENT }}/outputs.json
+          retention-days: 90
+
+      - name: Deployment Summary
+        if: env.PLAN_ONLY == 'false' && success()
+        run: |
+          echo "================================"
+          echo "✅ DEPLOYMENT SUCCESSFUL"
+          echo "================================"
+          echo ""
+          echo "Environment: $ENVIRONMENT"
+          echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo ""
+          echo "Next steps:"
+          echo "1. Verify resources in AWS Console"
+          echo "2. Check application health"
+          echo "3. Update DNS records if needed (see outputs)"
+          echo "4. Configure GitHub Actions secrets (see outputs)"
+          echo ""
+          echo "Outputs are available in the artifacts."
+
+      - name: Post Plan to PR Comment
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('infrastructure/environments/${{ env.ENVIRONMENT }}/plan-output.txt', 'utf8');
+
+            const output = `## Terraform Plan - ${{ env.ENVIRONMENT }}
+
+            <details>
+            <summary>Show Plan</summary>
+
+            \`\`\`terraform
+            ${plan}
+            \`\`\`
+
+            </details>
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name: Failure Notification
+        if: failure()
+        run: |
+          echo "================================"
+          echo "❌ DEPLOYMENT FAILED"
+          echo "================================"
+          echo ""
+          echo "Environment: $ENVIRONMENT"
+          echo "Action: ${{ env.PLAN_ONLY == 'true' && 'Plan' || 'Apply' }}"
+          echo ""
+          echo "Check the logs above for error details."
+          echo ""
+          if [ "$PLAN_ONLY" == "false" ]; then
+            echo "Infrastructure may be in an inconsistent state."
+            echo "Consider running 'terraform plan' to check current state."
+          fi
+
+  notify-success:
+    name: Notify on Success
+    runs-on: ubuntu-latest
+    needs: terraform
+    if: success() && github.event.inputs.plan_only == 'false' && github.event.inputs.environment == 'prod'
+
+    steps:
+      - name: Production deployment notification
+        run: |
+          echo "🎉 Production infrastructure deployed successfully!"
+          echo "Environment: prod"
+          echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo ""
+          echo "Remember to:"
+          echo "1. Verify all resources in AWS Console"
+          echo "2. Update DNS records if needed"
+          echo "3. Test application deployment"
+          echo "4. Monitor CloudWatch logs"
+
+          # Here you could add Slack/Discord/Email notifications
+          # Example:
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"text":"Production infrastructure deployed successfully!"}'

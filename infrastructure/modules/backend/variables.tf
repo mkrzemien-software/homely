@@ -95,8 +95,9 @@ variable "ecs_task_role_arn" {
 variable "parameter_store_paths" {
   description = "Map of parameter store paths for environment variables"
   type = object({
-    supabase_url      = string
-    supabase_anon_key = string
+    supabase_url               = string
+    supabase_anon_key          = string
+    database_connection_string = string
   })
 }
 

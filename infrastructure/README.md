@@ -272,7 +272,41 @@ terraform output
 
 For Supabase setup, see [database/SUPABASE_SETUP.md](../database/SUPABASE_SETUP.md)
 
-### 9. Deploy Application
+### 9. Deploy Infrastructure and Application
+
+#### Deploy Infrastructure (Terraform)
+
+Use GitHub Actions workflow for safe infrastructure deployment:
+
+**Via GitHub Actions UI:**
+1. Go to Actions → "Deploy Infrastructure"
+2. Click "Run workflow"
+3. Select options:
+   - **Environment**: dev or prod
+   - **Only run terraform plan**: ✅ Check for dry-run (recommended first!)
+   - **Auto-approve apply**: ⚠️ Only for dev or after reviewing plan
+4. Review plan output in workflow logs
+5. If plan looks good, run again with "Only plan" unchecked
+
+**Workflow features:**
+- ✅ Dry-run mode (plan only) - safe to run anytime
+- ✅ Requires manual confirmation for prod (unless auto-approve checked)
+- ✅ Uploads plan output as artifact (30 days retention)
+- ✅ Saves Terraform outputs as artifact (90 days retention)
+- ✅ Format validation before apply
+
+**Local deployment (alternative):**
+```bash
+cd infrastructure/environments/dev  # or prod
+
+# Review changes first
+terraform plan
+
+# Apply changes
+terraform apply
+```
+
+#### Deploy Application
 
 Push to main/master branch or trigger workflow manually:
 
@@ -287,6 +321,7 @@ Push to main/master branch or trigger workflow manually:
 # Triggers automatically when backend/ files change
 
 # Or manually via GitHub Actions UI:
+# - Deploy Infrastructure (dev/prod with plan-only option) ← NEW!
 # - Deploy Database Migrations (dev/prod with dry-run option)
 # - Deploy Frontend (dev/prod)
 # - Deploy Backend (dev/prod)

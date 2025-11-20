@@ -93,6 +93,14 @@ variable "supabase_anon_key" {
   default     = "" # PLACEHOLDER: Will be stored in Parameter Store
 }
 
+# Database configuration (stored in Parameter Store)
+variable "database_connection_string" {
+  description = "PostgreSQL database connection string"
+  type        = string
+  sensitive   = true
+  default     = "" # PLACEHOLDER: Will be stored in Parameter Store
+}
+
 # GitHub configuration
 variable "github_repo" {
   description = "GitHub repository name (owner/repo)"

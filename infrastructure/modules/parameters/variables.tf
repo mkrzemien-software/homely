@@ -25,6 +25,14 @@ variable "supabase_anon_key" {
   default     = ""
 }
 
+# Database Configuration
+variable "database_connection_string" {
+  description = "PostgreSQL database connection string"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 # Application Configuration
 variable "backend_log_level" {
   description = "Backend application log level (Debug, Information, Warning, Error)"

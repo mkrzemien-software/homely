@@ -44,6 +44,25 @@ resource "aws_ssm_parameter" "supabase_anon_key" {
   }
 }
 
+# Database Connection String (SecureString)
+resource "aws_ssm_parameter" "database_connection_string" {
+  name        = "${local.parameter_prefix}/database_connection_string"
+  description = "PostgreSQL database connection string"
+  type        = "SecureString"
+  value       = var.database_connection_string != "" ? var.database_connection_string : "PLACEHOLDER_SET_MANUALLY"
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${local.name_prefix}-db-connection-string"
+    }
+  )
+
+  lifecycle {
+    ignore_changes = [value] # Prevent Terraform from overwriting manually set values
+  }
+}
+
 # Backend Log Level (String)
 resource "aws_ssm_parameter" "backend_log_level" {
   name        = "${local.parameter_prefix}/backend_log_level"
