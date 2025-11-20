@@ -69,9 +69,9 @@ jobs:
         run: |
           echo "Verifying connection to Supabase project..."
           supabase link --project-ref ${{ steps.get-vars.outputs.project_ref }}
-
-          # Check project status
-          supabase status
+          
+          echo "✅ Successfully linked to project: ${{ steps.get-vars.outputs.project_ref }}"
+          echo "Environment: $ENVIRONMENT"
 
       - name: Validate migrations
         working-directory: database
