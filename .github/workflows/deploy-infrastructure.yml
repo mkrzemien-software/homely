@@ -63,7 +63,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.0
+          terraform_version: 1.6.1
           terraform_wrapper: true
 
       - name: Configure AWS credentials (Access Keys)
