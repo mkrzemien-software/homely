@@ -30,7 +30,7 @@ variable "github_repo" {
 variable "docker_image_tag" {
   description = "Docker image tag for backend deployment"
   type        = string
-  default     = "dev-latest"
+  default     = "latest"
 }
 
 variable "backend_cpu" {
