@@ -1,6 +1,29 @@
 # Development Environment Outputs
 # These outputs pass through values from the root infrastructure module
 
+# ============================================================================
+# ACM Certificate Outputs
+# ============================================================================
+
+output "acm_certificate_arn" {
+  description = "ARN of the ACM certificate"
+  value       = module.infrastructure.acm_certificate_arn
+}
+
+output "acm_certificate_status" {
+  description = "Status of the ACM certificate (PENDING_VALIDATION, ISSUED, etc.)"
+  value       = module.infrastructure.acm_certificate_status
+}
+
+output "acm_validation_records" {
+  description = "🔐 DNS validation records - ADD THESE TO OVH DNS"
+  value       = module.infrastructure.acm_validation_records
+}
+
+# ============================================================================
+# Frontend Outputs
+# ============================================================================
+
 # Frontend outputs
 output "frontend_bucket_name" {
   description = "Name of the S3 bucket hosting the frontend"

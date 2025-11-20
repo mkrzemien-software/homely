@@ -112,6 +112,27 @@ module "backend" {
   tags = local.common_tags
 }
 
+# ACM Module (for CloudFront SSL certificate)
+# Creates SSL certificate in us-east-1 for CloudFront custom domain
+module "acm" {
+  source = "./modules/acm"
+
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  project_name = var.project_name
+  environment  = var.environment
+
+  # Request wildcard certificate for all subdomains
+  domain_name = "*.${var.domain_name}"
+  
+  # Also include root domain
+  subject_alternative_names = [var.domain_name]
+
+  tags = local.common_tags
+}
+
 # Frontend Module
 # Creates S3 bucket and CloudFront distribution
 module "frontend" {
@@ -122,9 +143,8 @@ module "frontend" {
 
   domain_name = local.frontend_domain
 
-  # ACM Certificate ARN for CloudFront (must be in us-east-1)
-  # PLACEHOLDER: Create certificate in ACM (us-east-1) for *.yourdomain.com
-  acm_certificate_arn = "" # Leave empty to use CloudFront default certificate
+  # Use ACM certificate for custom domain
+  acm_certificate_arn = module.acm.certificate_arn
 
   # CORS configuration for API calls
   cors_allowed_origins = ["https://${local.backend_domain}"]

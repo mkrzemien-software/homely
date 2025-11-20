@@ -1,6 +1,22 @@
 # Terraform Outputs
 # These values are displayed after successful deployment
 
+# ACM outputs
+output "acm_certificate_arn" {
+  description = "ARN of the ACM certificate"
+  value       = module.acm.certificate_arn
+}
+
+output "acm_certificate_status" {
+  description = "Status of the ACM certificate (PENDING_VALIDATION, ISSUED, etc.)"
+  value       = module.acm.certificate_status
+}
+
+output "acm_validation_records" {
+  description = "DNS validation records to add to OVH DNS"
+  value       = module.acm.validation_records
+}
+
 # Frontend outputs
 output "frontend_bucket_name" {
   description = "Name of the S3 bucket hosting the frontend"
