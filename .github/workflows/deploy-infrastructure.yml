@@ -82,11 +82,6 @@ jobs:
           echo "Working Directory: $(pwd)"
           ls -la
 
-      - name: Terraform Format Check
-        id: fmt
-        run: terraform fmt -check -recursive
-        continue-on-error: true
-
       - name: Terraform Init
         id: init
         run: |

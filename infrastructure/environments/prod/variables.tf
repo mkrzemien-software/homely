@@ -4,14 +4,15 @@
 # Most have sensible defaults for production environment
 
 variable "domain_name" {
-  description = "Root domain name (e.g., homely.maflint.com)"
+  description = "Root domain name"
   type        = string
+  default     = "homely.maflint.com"
 }
 
 variable "frontend_subdomain" {
   description = "Subdomain for frontend application"
   type        = string
-  default     = "app"
+  default     = ""
 }
 
 variable "backend_subdomain" {
@@ -23,6 +24,7 @@ variable "backend_subdomain" {
 variable "github_repo" {
   description = "GitHub repository name (owner/repo)"
   type        = string
+  default     = "mkrzemien/homely"
 }
 
 variable "docker_image_tag" {

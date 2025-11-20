@@ -6,6 +6,7 @@
 variable "domain_name" {
   description = "Root domain name (e.g., homely.maflint.com)"
   type        = string
+  default     = "homely.maflint.com"
 }
 
 variable "frontend_subdomain" {
@@ -23,6 +24,7 @@ variable "backend_subdomain" {
 variable "github_repo" {
   description = "GitHub repository name (owner/repo)"
   type        = string
+  default     = "mkrzemien/homely"
 }
 
 variable "docker_image_tag" {
