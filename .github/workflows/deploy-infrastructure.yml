@@ -179,20 +179,52 @@ jobs:
           echo "📤 Terraform Outputs:"
           echo "================================"
           terraform output -no-color
+          echo ""
+          echo "================================"
+          echo "📋 Formatted Outputs:"
+          echo "================================"
+          
+          # Display formatted outputs for better readability
+          terraform output -json | jq -r '
+            to_entries[] | 
+            if .value.sensitive then
+              "\n🔒 \(.key) (sensitive - see artifacts for details)"
+            else
+              "\n📌 \(.key):\n\(.value.value)"
+            end
+          '
 
       - name: Save Terraform Outputs
         if: env.PLAN_ONLY == 'false'
         run: |
+          # Save raw JSON
           terraform output -json > outputs.json
-          echo "Outputs saved to outputs.json"
-          cat outputs.json
+          
+          # Save formatted text version
+          echo "========================================" > outputs-formatted.txt
+          echo "Terraform Outputs - $ENVIRONMENT" >> outputs-formatted.txt
+          echo "Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> outputs-formatted.txt
+          echo "========================================" >> outputs-formatted.txt
+          echo "" >> outputs-formatted.txt
+          
+          terraform output -json | jq -r '
+            to_entries[] | 
+            "\n[\(.key)]\n\(.value.value)\n" + ("=" * 40)
+          ' >> outputs-formatted.txt
+          
+          echo ""
+          echo "✅ Outputs saved:"
+          echo "  - outputs.json (raw JSON)"
+          echo "  - outputs-formatted.txt (human-readable)"
 
       - name: Upload Outputs Artifact
         if: env.PLAN_ONLY == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: terraform-outputs-${{ env.ENVIRONMENT }}-${{ github.run_number }}
-          path: infrastructure/environments/${{ env.ENVIRONMENT }}/outputs.json
+          path: |
+            infrastructure/environments/${{ env.ENVIRONMENT }}/outputs.json
+            infrastructure/environments/${{ env.ENVIRONMENT }}/outputs-formatted.txt
           retention-days: 90
 
       - name: Deployment Summary
