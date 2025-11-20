@@ -11,7 +11,7 @@ resource "aws_ssm_parameter" "supabase_url" {
   name        = "${local.parameter_prefix}/supabase_url"
   description = "Supabase project URL"
   type        = "SecureString"
-  value       = var.supabase_url != "" ? var.supabase_url : "PLACEHOLDER_SET_MANUALLY"
+  value       = nonsensitive(var.supabase_url) != "" ? var.supabase_url : "PLACEHOLDER_SET_MANUALLY"
 
   tags = merge(
     var.tags,
@@ -30,7 +30,7 @@ resource "aws_ssm_parameter" "supabase_anon_key" {
   name        = "${local.parameter_prefix}/supabase_anon_key"
   description = "Supabase anonymous key"
   type        = "SecureString"
-  value       = var.supabase_anon_key != "" ? var.supabase_anon_key : "PLACEHOLDER_SET_MANUALLY"
+  value       = nonsensitive(var.supabase_anon_key) != "" ? var.supabase_anon_key : "PLACEHOLDER_SET_MANUALLY"
 
   tags = merge(
     var.tags,
@@ -49,7 +49,7 @@ resource "aws_ssm_parameter" "database_connection_string" {
   name        = "${local.parameter_prefix}/database_connection_string"
   description = "PostgreSQL database connection string"
   type        = "SecureString"
-  value       = var.database_connection_string != "" ? var.database_connection_string : "PLACEHOLDER_SET_MANUALLY"
+  value       = nonsensitive(var.database_connection_string) != "" ? var.database_connection_string : "PLACEHOLDER_SET_MANUALLY"
 
   tags = merge(
     var.tags,
