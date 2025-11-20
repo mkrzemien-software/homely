@@ -104,7 +104,9 @@ resource "aws_cloudfront_distribution" "frontend" {
   default_root_object = "index.html"
   price_class         = "PriceClass_100" # US, Canada, Europe only (lowest cost)
 
-  # Use custom domain if ACM certificate is provided, otherwise use CloudFront domain
+  # Only use custom domain alias if certificate is provided
+  # NOTE: Certificate must be in ISSUED status for this to work
+  # If certificate is PENDING_VALIDATION, this will be empty and you must apply again after validation
   aliases = var.acm_certificate_arn != "" ? [var.domain_name] : []
 
   origin {
@@ -160,6 +162,11 @@ resource "aws_cloudfront_distribution" "frontend" {
     ssl_support_method             = var.acm_certificate_arn != "" ? "sni-only" : null
     minimum_protocol_version       = "TLSv1.2_2021"
     cloudfront_default_certificate = var.acm_certificate_arn == "" ? true : false
+  }
+
+  # Ignore changes to aliases if they cause issues during certificate validation
+  lifecycle {
+    ignore_changes = []
   }
 
   tags = merge(

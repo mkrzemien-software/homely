@@ -133,6 +133,20 @@ module "acm" {
   tags = local.common_tags
 }
 
+# Data source to check certificate status
+data "aws_acm_certificate" "frontend" {
+  provider = aws.us_east_1
+  
+  domain      = "*.${var.domain_name}"
+  statuses    = ["ISSUED"]
+  most_recent = true
+
+  depends_on = [module.acm]
+  
+  # This will only succeed if certificate is ISSUED
+  # If PENDING_VALIDATION, this will fail gracefully
+}
+
 # Frontend Module
 # Creates S3 bucket and CloudFront distribution
 module "frontend" {
@@ -143,8 +157,9 @@ module "frontend" {
 
   domain_name = local.frontend_domain
 
-  # Use ACM certificate for custom domain
-  acm_certificate_arn = module.acm.certificate_arn
+  # Use certificate ARN only if it exists and is ISSUED
+  # Otherwise use empty string to fall back to CloudFront default certificate
+  acm_certificate_arn = try(data.aws_acm_certificate.frontend.arn, "")
 
   # CORS configuration for API calls
   cors_allowed_origins = ["https://${local.backend_domain}"]

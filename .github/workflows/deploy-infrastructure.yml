@@ -171,6 +171,157 @@ jobs:
           else
             terraform apply -input=false tfplan
           fi
+      
+      - name: Check ACM Certificate Status
+        if: env.PLAN_ONLY == 'false'
+        id: acm_check
+        continue-on-error: true
+        run: |
+          echo "🔍 Checking ACM certificate status..."
+          
+          # Get certificate ARN from outputs
+          CERT_ARN=$(terraform output -raw acm_certificate_arn 2>/dev/null || echo "")
+          
+          if [ -z "$CERT_ARN" ]; then
+            echo "No ACM certificate found (may not be created yet)"
+            echo "needs_validation=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Certificate ARN: $CERT_ARN"
+          
+          # Get certificate status
+          CERT_STATUS=$(aws acm describe-certificate \
+            --certificate-arn "$CERT_ARN" \
+            --region us-east-1 \
+            --query 'Certificate.Status' \
+            --output text)
+          
+          echo "Certificate Status: $CERT_STATUS"
+          echo "status=$CERT_STATUS" >> $GITHUB_OUTPUT
+          
+          if [ "$CERT_STATUS" == "PENDING_VALIDATION" ]; then
+            echo "needs_validation=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Certificate requires DNS validation!"
+          elif [ "$CERT_STATUS" == "ISSUED" ]; then
+            echo "needs_validation=false" >> $GITHUB_OUTPUT
+            echo "✅ Certificate is already validated!"
+          else
+            echo "needs_validation=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ Certificate status: $CERT_STATUS"
+          fi
+      
+      - name: Display DNS Validation Records
+        if: env.PLAN_ONLY == 'false' && steps.acm_check.outputs.needs_validation == 'true'
+        run: |
+          echo "========================================"
+          echo "🔐 ACM CERTIFICATE VALIDATION REQUIRED"
+          echo "========================================"
+          echo ""
+          echo "Your SSL certificate has been created but needs DNS validation."
+          echo ""
+          
+          CERT_ARN=$(terraform output -raw acm_certificate_arn)
+          
+          echo "📋 Add these CNAME records to your OVH DNS:"
+          echo ""
+          
+          # Get validation records
+          aws acm describe-certificate \
+            --certificate-arn "$CERT_ARN" \
+            --region us-east-1 \
+            --query 'Certificate.DomainValidationOptions[*].ResourceRecord' \
+            --output json | jq -r '.[] | 
+              "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+              "Type:       \(.Type)\n" +
+              "Name:       \(.Name)\n" +
+              "Value:      \(.Value)\n" +
+              "\nIn OVH, add as:\n" +
+              "  Subdomain:  " + (.Name | sub("\\..*$"; "")) + "\n" +
+              "  Type:       CNAME\n" +
+              "  Target:     \(.Value)\n"
+            '
+          
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "📝 INSTRUCTIONS:"
+          echo "1. Log in to OVH control panel"
+          echo "2. Go to: Domains → homely.maflint.com → DNS Zone"
+          echo "3. Click 'Add entry'"
+          echo "4. Select type: CNAME"
+          echo "5. Copy the subdomain and target from above"
+          echo "6. Save the record"
+          echo "7. Wait 5-30 minutes for validation"
+          echo ""
+          echo "⏳ The workflow will now wait for certificate validation..."
+          echo ""
+      
+      - name: Wait for Certificate Validation
+        if: env.PLAN_ONLY == 'false' && steps.acm_check.outputs.needs_validation == 'true'
+        run: |
+          echo "⏳ Waiting for ACM certificate validation..."
+          echo "This may take 5-30 minutes after you add DNS records."
+          echo ""
+          
+          CERT_ARN=$(terraform output -raw acm_certificate_arn)
+          MAX_WAIT=1800  # 30 minutes
+          ELAPSED=0
+          CHECK_INTERVAL=30
+          
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            STATUS=$(aws acm describe-certificate \
+              --certificate-arn "$CERT_ARN" \
+              --region us-east-1 \
+              --query 'Certificate.Status' \
+              --output text)
+            
+            echo "[$(date +%H:%M:%S)] Status: $STATUS (waited ${ELAPSED}s / ${MAX_WAIT}s)"
+            
+            if [ "$STATUS" == "ISSUED" ]; then
+              echo ""
+              echo "✅ Certificate validated successfully!"
+              echo ""
+              exit 0
+            fi
+            
+            if [ "$STATUS" == "FAILED" ]; then
+              echo ""
+              echo "❌ Certificate validation failed!"
+              echo "Please check your DNS records and try again."
+              echo ""
+              exit 1
+            fi
+            
+            sleep $CHECK_INTERVAL
+            ELAPSED=$((ELAPSED + CHECK_INTERVAL))
+          done
+          
+          echo ""
+          echo "⏰ Timeout waiting for certificate validation"
+          echo ""
+          echo "The certificate is still pending. This is normal if:"
+          echo "1. You haven't added DNS records yet"
+          echo "2. DNS propagation is taking longer than usual"
+          echo ""
+          echo "What to do next:"
+          echo "1. Verify DNS records are added correctly in OVH"
+          echo "2. Wait a bit longer and run this workflow again"
+          echo "3. Check certificate status in AWS Console"
+          echo ""
+          exit 1
+      
+      - name: Apply CloudFront Configuration
+        if: env.PLAN_ONLY == 'false' && steps.acm_check.outputs.status == 'ISSUED'
+        run: |
+          echo "🚀 Certificate is validated! Applying final CloudFront configuration..."
+          echo ""
+          
+          # Run terraform apply again to update CloudFront with the validated certificate
+          terraform apply -auto-approve -input=false
+          
+          echo ""
+          echo "✅ CloudFront configuration updated with SSL certificate!"
 
       - name: Terraform Output
         if: env.PLAN_ONLY == 'false'
@@ -237,11 +388,43 @@ jobs:
           echo "Environment: $ENVIRONMENT"
           echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
           echo ""
+          
+          # Check certificate status
+          CERT_ARN=$(terraform output -raw acm_certificate_arn 2>/dev/null || echo "")
+          if [ -n "$CERT_ARN" ]; then
+            CERT_STATUS=$(aws acm describe-certificate \
+              --certificate-arn "$CERT_ARN" \
+              --region us-east-1 \
+              --query 'Certificate.Status' \
+              --output text 2>/dev/null || echo "UNKNOWN")
+            
+            echo "🔐 Certificate Status: $CERT_STATUS"
+            
+            if [ "$CERT_STATUS" == "ISSUED" ]; then
+              echo "   ✅ SSL certificate is active!"
+              echo "   🌐 Your site is available at: https://${{ github.event.inputs.environment }}.homely.maflint.com"
+            elif [ "$CERT_STATUS" == "PENDING_VALIDATION" ]; then
+              echo "   ⚠️  SSL certificate is pending DNS validation"
+              echo "   📋 Please add the DNS records shown above to OVH"
+              echo "   ⏳ Then run this workflow again to complete setup"
+            fi
+          fi
+          
+          echo ""
           echo "Next steps:"
-          echo "1. Verify resources in AWS Console"
-          echo "2. Check application health"
-          echo "3. Update DNS records if needed (see outputs)"
-          echo "4. Configure GitHub Actions secrets (see outputs)"
+          
+          if [ "$CERT_STATUS" == "PENDING_VALIDATION" ]; then
+            echo "1. ⚠️  Add DNS validation records to OVH (shown above)"
+            echo "2. ⏳ Wait 5-30 minutes for validation"
+            echo "3. 🔄 Run this workflow again to apply certificate"
+            echo "4. 🌐 Then your site will be available at custom domain"
+          else
+            echo "1. Verify resources in AWS Console"
+            echo "2. Check application health"
+            echo "3. Deploy frontend/backend if needed"
+            echo "4. Monitor CloudWatch logs"
+          fi
+          
           echo ""
           echo "Outputs are available in the artifacts."
 
