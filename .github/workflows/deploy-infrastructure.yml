@@ -173,7 +173,7 @@ jobs:
           fi
 
       - name: Terraform Output
-        if: env.PLAN_ONLY == 'false' && steps.changes.outputs.has_changes == 'true'
+        if: env.PLAN_ONLY == 'false'
         id: output
         run: |
           echo "📤 Terraform Outputs:"
@@ -181,13 +181,14 @@ jobs:
           terraform output -no-color
 
       - name: Save Terraform Outputs
-        if: env.PLAN_ONLY == 'false' && steps.changes.outputs.has_changes == 'true'
+        if: env.PLAN_ONLY == 'false'
         run: |
           terraform output -json > outputs.json
           echo "Outputs saved to outputs.json"
+          cat outputs.json
 
       - name: Upload Outputs Artifact
-        if: env.PLAN_ONLY == 'false' && steps.changes.outputs.has_changes == 'true'
+        if: env.PLAN_ONLY == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: terraform-outputs-${{ env.ENVIRONMENT }}-${{ github.run_number }}

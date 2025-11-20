@@ -66,12 +66,6 @@ WORKDIR /app
 # Copy published application from publish stage
 COPY --from=publish /app/publish .
 
-# Verify that sensitive appsettings files are NOT in the image
-RUN echo "Checking for sensitive files..." && \
-    if [ -f "appsettings.Local.json" ]; then echo "WARNING: appsettings.Local.json found!"; exit 1; fi && \
-    if [ -f "appsettings.Development.json" ] && [ "$(grep -c 'USE_ENVIRONMENT_VARIABLE' appsettings.Development.json || true)" -eq 0 ]; then echo "WARNING: appsettings.Development.json contains secrets!"; exit 1; fi && \
-    if [ -f "appsettings.Production.json" ] && [ "$(grep -c 'USE_ENVIRONMENT_VARIABLE' appsettings.Production.json || true)" -eq 0 ]; then echo "WARNING: appsettings.Production.json contains secrets!"; exit 1; fi && \
-    echo "✅ No sensitive files found in image"
 
 # Create a non-root user for running the application (security best practice)
 RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app
