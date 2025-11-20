@@ -101,14 +101,6 @@ jobs:
           terraform plan -no-color -input=false -out=tfplan
         continue-on-error: false
 
-      - name: Show Plan Summary
-        run: |
-          echo "📊 Terraform Plan Summary:"
-          echo "================================"
-          terraform show -no-color tfplan | head -100
-          echo ""
-          echo "Full plan saved in tfplan file"
-
       - name: Save Plan Output
         if: always()
         run: |
