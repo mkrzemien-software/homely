@@ -98,6 +98,8 @@ variable "parameter_store_paths" {
     supabase_url               = string
     supabase_anon_key          = string
     database_connection_string = string
+    backend_log_level          = string
+    cors_origins               = string
   })
 }
 

@@ -84,10 +84,11 @@ output "public_subnet_ids" {
 output "parameter_store_paths" {
   description = "Parameter Store parameter paths"
   value = {
-    supabase_url      = module.parameters.parameter_paths.supabase_url
-    supabase_anon_key = module.parameters.parameter_paths.supabase_anon_key
-    backend_log_level = module.parameters.parameter_paths.backend_log_level
-    cors_origins      = module.parameters.parameter_paths.cors_origins
+    supabase_url               = module.parameters.parameter_paths.supabase_url
+    supabase_anon_key          = module.parameters.parameter_paths.supabase_anon_key
+    database_connection_string = module.parameters.parameter_paths.database_connection_string
+    backend_log_level          = module.parameters.parameter_paths.backend_log_level
+    cors_origins               = module.parameters.parameter_paths.cors_origins
   }
 }
 
@@ -106,6 +107,14 @@ output "parameter_store_setup_commands" {
     aws ssm put-parameter \
       --name "${module.parameters.parameter_paths.supabase_anon_key}" \
       --value "YOUR_SUPABASE_ANON_KEY" \
+      --type "SecureString" \
+      --region ${var.aws_region} \
+      --overwrite
+
+    # Set Database Connection String
+    aws ssm put-parameter \
+      --name "${module.parameters.parameter_paths.database_connection_string}" \
+      --value "YOUR_DATABASE_CONNECTION_STRING" \
       --type "SecureString" \
       --region ${var.aws_region} \
       --overwrite

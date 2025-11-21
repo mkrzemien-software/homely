@@ -92,19 +92,3 @@ resource "aws_ssm_parameter" "cors_origins" {
     }
   )
 }
-
-# Additional parameters can be added here as needed
-# Example:
-# resource "aws_ssm_parameter" "database_connection_string" {
-#   name        = "${local.parameter_prefix}/database_connection_string"
-#   description = "Database connection string"
-#   type        = "SecureString"
-#   value       = var.database_connection_string
-#
-#   tags = merge(
-#     var.tags,
-#     {
-#       Name = "${local.name_prefix}-db-connection-string"
-#     }
-#   )
-# }

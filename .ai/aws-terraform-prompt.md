@@ -186,6 +186,7 @@ terraform.tfvars
    - Przykłady parametrów:
      - `/homely/prod/supabase_url` (SecureString)
      - `/homely/prod/supabase_anon_key` (SecureString)
+     - `/homely/prod/database_connection_string` (SecureString)
      - `/homely/prod/backend_log_level` (String)
      - `/homely/prod/cors_origins` (String)
 
