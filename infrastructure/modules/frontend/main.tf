@@ -87,6 +87,53 @@ resource "aws_s3_bucket_cors_configuration" "frontend" {
   }
 }
 
+# S3 Bucket for CloudFront Logs
+resource "aws_s3_bucket" "cloudfront_logs" {
+  bucket = "${local.name_prefix}-cloudfront-logs"
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${local.name_prefix}-cloudfront-logs"
+    }
+  )
+}
+
+# S3 Bucket Ownership Controls for Logs
+resource "aws_s3_bucket_ownership_controls" "cloudfront_logs" {
+  bucket = aws_s3_bucket.cloudfront_logs.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+# S3 Bucket Public Access Block for Logs
+resource "aws_s3_bucket_public_access_block" "cloudfront_logs" {
+  bucket = aws_s3_bucket.cloudfront_logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# S3 Bucket Lifecycle Configuration for Logs (auto-delete after 90 days)
+resource "aws_s3_bucket_lifecycle_configuration" "cloudfront_logs" {
+  bucket = aws_s3_bucket.cloudfront_logs.id
+
+  rule {
+    id     = "delete-old-logs"
+    status = "Enabled"
+
+    filter {}
+
+    expiration {
+      days = 90
+    }
+  }
+}
+
 # CloudFront Origin Access Control (OAC) - Modern replacement for OAI
 resource "aws_cloudfront_origin_access_control" "frontend" {
   name                              = "${local.name_prefix}-oac"
@@ -108,6 +155,13 @@ resource "aws_cloudfront_distribution" "frontend" {
   # NOTE: Certificate must be in ISSUED status for this to work
   # If certificate is PENDING_VALIDATION, this will be empty and you must apply again after validation
   aliases = var.acm_certificate_arn != "" ? [var.domain_name] : []
+
+  # CloudFront Logging Configuration
+  logging_config {
+    include_cookies = false
+    bucket          = aws_s3_bucket.cloudfront_logs.bucket_domain_name
+    prefix          = "cloudfront/"
+  }
 
   origin {
     domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name

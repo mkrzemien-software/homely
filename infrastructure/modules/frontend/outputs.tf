@@ -34,3 +34,8 @@ output "cloudfront_hosted_zone_id" {
   description = "Route53 zone ID of the CloudFront distribution"
   value       = aws_cloudfront_distribution.frontend.hosted_zone_id
 }
+
+output "cloudfront_logs_bucket_name" {
+  description = "Name of the S3 bucket for CloudFront logs"
+  value       = aws_s3_bucket.cloudfront_logs.id
+}
