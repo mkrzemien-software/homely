@@ -313,9 +313,10 @@ resource "aws_ecs_service" "backend" {
     container_port   = var.container_port
   }
 
-  # Allow external changes to task definition (for CI/CD)
+  # Allow external changes to desired_count (for CI/CD)
+  # Note: task_definition is NOT ignored during infrastructure changes
   lifecycle {
-    ignore_changes = [task_definition, desired_count]
+    ignore_changes = [desired_count]
   }
 
   # Wait for ALB to be ready
