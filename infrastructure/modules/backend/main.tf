@@ -232,6 +232,10 @@ resource "aws_lb_target_group" "backend" {
 
   deregistration_delay = 30
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   tags = merge(
     var.tags,
     {
