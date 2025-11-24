@@ -29,12 +29,12 @@ on:
       plan_only:
         description: 'Only run terraform plan (do not apply changes)'
         required: false
-        default: true
+        default: false
         type: boolean
       auto_approve:
         description: 'Auto-approve apply (skip manual confirmation)'
         required: false
-        default: false
+        default: true
         type: boolean
 
 permissions:
