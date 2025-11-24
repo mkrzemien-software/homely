@@ -97,6 +97,7 @@ variable "parameter_store_paths" {
   type = object({
     supabase_url               = string
     supabase_anon_key          = string
+    supabase_service_role_key  = string
     database_connection_string = string
     backend_log_level          = string
     cors_origins               = string

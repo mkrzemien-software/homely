@@ -130,12 +130,16 @@ resource "aws_ecs_task_definition" "backend" {
       # Environment variables from Parameter Store
       secrets = [
         {
-          name      = "SUPABASE_URL"
+          name      = "Supabase__Url"
           valueFrom = var.parameter_store_paths.supabase_url
         },
         {
-          name      = "SUPABASE_ANON_KEY"
+          name      = "Supabase__Key"
           valueFrom = var.parameter_store_paths.supabase_anon_key
+        },
+        {
+          name      = "Supabase__ServiceRoleKey"
+          valueFrom = var.parameter_store_paths.supabase_service_role_key
         },
         {
           name      = "ConnectionStrings__DefaultConnection"
