@@ -86,6 +86,7 @@ output "parameter_store_paths" {
   value = {
     supabase_url               = module.parameters.parameter_paths.supabase_url
     supabase_anon_key          = module.parameters.parameter_paths.supabase_anon_key
+    supabase_service_role_key  = module.parameters.parameter_paths.supabase_service_role_key
     database_connection_string = module.parameters.parameter_paths.database_connection_string
     backend_log_level          = module.parameters.parameter_paths.backend_log_level
     cors_origins               = module.parameters.parameter_paths.cors_origins
@@ -107,6 +108,14 @@ output "parameter_store_setup_commands" {
     aws ssm put-parameter \
       --name "${module.parameters.parameter_paths.supabase_anon_key}" \
       --value "YOUR_SUPABASE_ANON_KEY" \
+      --type "SecureString" \
+      --region ${var.aws_region} \
+      --overwrite
+
+    # Set Supabase Service Role Key
+    aws ssm put-parameter \
+      --name "${module.parameters.parameter_paths.supabase_service_role_key}" \
+      --value "YOUR_SUPABASE_SERVICE_ROLE_KEY" \
       --type "SecureString" \
       --region ${var.aws_region} \
       --overwrite

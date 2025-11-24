@@ -44,6 +44,25 @@ resource "aws_ssm_parameter" "supabase_anon_key" {
   }
 }
 
+# Supabase Service Role Key (SecureString)
+resource "aws_ssm_parameter" "supabase_service_role_key" {
+  name        = "${local.parameter_prefix}/supabase_service_role_key"
+  description = "Supabase service role key for admin operations"
+  type        = "SecureString"
+  value       = nonsensitive(var.supabase_service_role_key) != "" ? var.supabase_service_role_key : "PLACEHOLDER_SET_MANUALLY"
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${local.name_prefix}-supabase-service-role-key"
+    }
+  )
+
+  lifecycle {
+    ignore_changes = [value] # Prevent Terraform from overwriting manually set values
+  }
+}
+
 # Database Connection String (SecureString)
 resource "aws_ssm_parameter" "database_connection_string" {
   name        = "${local.parameter_prefix}/database_connection_string"

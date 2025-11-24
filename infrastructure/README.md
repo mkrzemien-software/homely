@@ -223,6 +223,13 @@ aws ssm put-parameter \
   --type "SecureString" \
   --region us-east-1 \
   --overwrite
+
+aws ssm put-parameter \
+  --name "/homely/prod/supabase_service_role_key" \
+  --value "your-service-role-key-here" \
+  --type "SecureString" \
+  --region us-east-1 \
+  --overwrite
 ```
 
 ### 8. Configure GitHub Actions

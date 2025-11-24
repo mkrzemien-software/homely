@@ -25,6 +25,13 @@ variable "supabase_anon_key" {
   default     = ""
 }
 
+variable "supabase_service_role_key" {
+  description = "Supabase service role key for admin operations"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 # Database Configuration
 variable "database_connection_string" {
   description = "PostgreSQL database connection string"

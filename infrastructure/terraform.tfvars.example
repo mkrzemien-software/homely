@@ -29,8 +29,9 @@ backend_health_check_path = "/health"
 # Supabase Configuration
 # IMPORTANT: These are just placeholders. Real values should be set in AWS Parameter Store
 # Do not put actual secrets here!
-supabase_url      = "" # Will be set via Parameter Store
-supabase_anon_key = "" # Will be set via Parameter Store
+supabase_url              = "" # Will be set via Parameter Store
+supabase_anon_key         = "" # Will be set via Parameter Store
+supabase_service_role_key = "" # Will be set via Parameter Store
 
 # GitHub Configuration
 github_repo             = "yourusername/homely" # REPLACE with your GitHub repo

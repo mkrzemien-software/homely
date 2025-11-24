@@ -58,6 +58,7 @@ module "parameters" {
   # Default values (will be overwritten manually or by CI/CD)
   supabase_url                = var.supabase_url
   supabase_anon_key           = var.supabase_anon_key
+  supabase_service_role_key   = var.supabase_service_role_key
   database_connection_string  = var.database_connection_string
 
   # Non-sensitive defaults
