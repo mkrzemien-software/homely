@@ -9,6 +9,7 @@ using Supabase;
 using System.Net;
 using System.Text;
 using Client = Supabase.Client;
+using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
 var builder = WebApplication.CreateBuilder(args);
 
