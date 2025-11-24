@@ -213,7 +213,7 @@ resource "aws_lb" "backend" {
 
 # ALB Target Group
 resource "aws_lb_target_group" "backend" {
-  name        = "${local.name_prefix}-tg"
+  name_prefix = "hml-"  # AWS will add unique suffix (max 6 chars for prefix)
   port        = var.container_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
