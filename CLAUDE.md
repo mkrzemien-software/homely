@@ -60,7 +60,7 @@ dotnet test
 dotnet publish -c Release
 ```
 
-The backend API runs on `https://localhost:5000` by default.
+The backend API runs on `https://localhost:8080` by default.
 
 ### Database Development
 

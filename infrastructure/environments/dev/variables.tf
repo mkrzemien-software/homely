@@ -48,7 +48,7 @@ variable "backend_memory" {
 variable "backend_port" {
   description = "Port on which backend application listens"
   type        = number
-  default     = 5000
+  default     = 8080
 }
 
 variable "backend_health_check_path" {

@@ -23,7 +23,7 @@ backend_subdomain  = "api"                 # Will create api.yourdomain.com
 docker_image_tag          = "latest"
 backend_cpu               = 256  # 0.25 vCPU
 backend_memory            = 512  # 512 MB
-backend_port              = 5000
+backend_port              = 8080
 backend_health_check_path = "/health"
 
 # Supabase Configuration

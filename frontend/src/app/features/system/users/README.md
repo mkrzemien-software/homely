@@ -175,7 +175,7 @@ Wszystkie endpointy API są zdefiniowane w `SystemUsersService`:
 ```
 
 > **Note:** URL jest konfigurowany przez pliki environment:
-> - Local: `http://localhost:5000/api/system/users`
+> - Local: `http://localhost:8080/api/system/users`
 > - Dev: `https://dev-api.homely.example.com/api/system/users`
 > - Prod: `https://api.homely.example.com/api/system/users`
 

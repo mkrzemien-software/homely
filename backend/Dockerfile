@@ -11,7 +11,7 @@
 #   docker build -t homely-backend --build-arg BUILD_ENV=Development .
 #
 # Run examples:
-#   docker run -p 5000:5000 \
+#   docker run -p 8080:8080 \
 #     -e ASPNETCORE_ENVIRONMENT=Production \
 #     -e ConnectionStrings__DefaultConnection="Host=..." \
 #     -e Supabase__Url="https://..." \

@@ -48,7 +48,7 @@ variable "task_memory" {
 variable "container_port" {
   description = "Port on which the container listens"
   type        = number
-  default     = 5000
+  default     = 8080
 }
 
 variable "desired_count" {

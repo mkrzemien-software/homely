@@ -2,9 +2,11 @@ using Homely.API.Configuration;
 using Homely.API.Extensions;
 using Homely.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Supabase;
+using System.Net;
 using System.Text;
 using Client = Supabase.Client;
 
@@ -230,6 +232,17 @@ var app = builder.Build();
 // ============================================================================
 // CONFIGURE HTTP REQUEST PIPELINE
 // ============================================================================
+
+// Configure ForwardedHeaders for ALB/CloudFront
+// This middleware must be placed BEFORE UseHttpsRedirection and UseAuthentication
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+    // Trust ALB/CloudFront proxy
+    KnownNetworks = { new IPNetwork(IPAddress.Parse("0.0.0.0"), 0) },
+    KnownProxies = { }
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -248,12 +261,12 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("X-Frame-Options", "DENY");
     context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-    
+
     if (!app.Environment.IsDevelopment())
     {
         context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
     }
-    
+
     await next();
 });
 

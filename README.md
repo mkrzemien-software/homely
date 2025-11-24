@@ -104,7 +104,7 @@ Make sure you have the following installed:
 
 3. **Access the Application**
    - Frontend: `http://localhost:4200`
-   - Backend API: `http://localhost:5000`
+   - Backend API: `http://localhost:8080`
 
 ## Available Scripts
 

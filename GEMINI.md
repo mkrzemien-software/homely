@@ -45,7 +45,7 @@ dotnet restore
 dotnet run --project Homely.API
 ```
 
-The backend API will be available at `http://localhost:5000`.
+The backend API will be available at `http://localhost:8080`.
 
 ### Database
 

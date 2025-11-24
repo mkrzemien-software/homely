@@ -84,7 +84,7 @@ module "backend" {
   docker_image_tag  = var.docker_image_tag
   task_cpu          = var.backend_cpu
   task_memory       = var.backend_memory
-  container_port    = var.backend_port
+  container_port    = 8080
   desired_count     = 1
   use_fargate_spot  = var.use_fargate_spot
 

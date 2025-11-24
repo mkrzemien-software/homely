@@ -1,4 +1,4 @@
-@Homely_API_HostAddress = http://localhost:5000
+@Homely_API_HostAddress = http://localhost:8080
 @access_token = 
 
 ### Health Check
