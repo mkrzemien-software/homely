@@ -100,9 +100,9 @@ module "backend" {
   # Parameter Store paths for environment variables
   parameter_store_paths = module.parameters.parameter_paths
 
-  # ACM Certificate ARN (must be created manually or via ACM module)
-  # PLACEHOLDER: Create certificate in ACM for *.yourdomain.com
-  acm_certificate_arn = "" # Leave empty for HTTP-only ALB, or provide ARN for HTTPS
+  # ACM Certificate ARN from ACM module
+  # Uses the same wildcard certificate as CloudFront (*.maflint.com)
+  acm_certificate_arn = module.acm.certificate_arn
 
   # Monitoring
   cloudwatch_log_retention_days = var.cloudwatch_log_retention_days

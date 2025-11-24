@@ -23,7 +23,9 @@
       "Bash(find:*)",
       "Bash(npx ng build:*)",
       "Bash(git mv:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(nslookup:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
