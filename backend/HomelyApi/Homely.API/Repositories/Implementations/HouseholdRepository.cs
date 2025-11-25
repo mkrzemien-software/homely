@@ -138,8 +138,8 @@ public class HouseholdRepository : BaseRepository<HouseholdEntity, Guid>, IHouse
             FreeHouseholds = households.Count(h => h.SubscriptionStatus == "free"),
             PremiumHouseholds = households.Count(h => h.SubscriptionStatus == "active"),
             TotalMembers = households.Sum(h => h.HouseholdMembers.Count(hm => hm.DeletedAt == null)),
-            TotalItems = households.Sum(h => h.Tasks.Count(t => t.DeletedAt == null)),
-            TotalTasks = households.Sum(h => h.Events.Count(e => e.DeletedAt == null))
+            TotalTasks = households.Sum(h => h.Tasks.Count(t => t.DeletedAt == null)),
+            TotalEvents = households.Sum(h => h.Events.Count(e => e.DeletedAt == null))
         };
     }
 }

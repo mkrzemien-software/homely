@@ -17,7 +17,10 @@ import { TagModule } from 'primeng/tag';
 import { Task, Priority, getPriorityLabel, getPrioritySeverity, formatInterval } from '../../models/task.model';
 
 // Services
+import { EventsService } from '../../../events/services/events.service';
 import { HouseholdService } from '../../../../../core/services/household.service';
+import { CreateEventDto } from '../../../events/models/event.model';
+import { AuthService, UserProfile } from '../../../../../core/services/auth.service';
 
 /**
  * CreateEventFromTaskDialogComponent
@@ -64,11 +67,12 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
   private householdService = inject(HouseholdService);
-  // TODO: Inject EventsService when implemented
-  // private eventsService = inject(EventsService);
+  private eventsService = inject(EventsService);
+  private authService = inject(AuthService);
 
   createEventForm: FormGroup;
   isLoading = signal<boolean>(false);
+  currentUser = signal<UserProfile | null>(null);
 
   /**
    * Household members loaded from API
@@ -126,6 +130,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
 
     // Load household members
     this.loadHouseholdMembers();
+    this.currentUser.set(this.authService.getCurrentUser() || null);
   }
 
   /**
@@ -168,18 +173,25 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
     this.isLoading.set(true);
     const formValue = this.createEventForm.value;
 
-    // TODO: Replace with actual API call to EventsService
-    /*
-    const createEventDto = {
+    // Build CreateEventDto
+    // Format dueDate as YYYY-MM-DD (DateOnly format for backend)
+    const dueDate = formValue.dueDate;
+    const dueDateString = `${dueDate.getFullYear()}-${String(dueDate.getMonth() + 1).padStart(2, '0')}-${String(dueDate.getDate()).padStart(2, '0')}`;
+
+    const createDto: CreateEventDto = {
+      householdId: this.householdId!,
       taskId: this.task.id,
-      assignedTo: formValue.assignedTo,
-      dueDate: formValue.dueDate,
+      assignedTo: formValue.assignedTo || undefined,
+      dueDate: dueDateString,
+      notes: formValue.notes?.trim() || undefined,
       priority: formValue.priority,
-      notes: formValue.notes?.trim() || undefined
+      createdBy: this.currentUser()?.id || ''
     };
 
-    this.eventsService.createEvent(createEventDto).subscribe({
-      next: () => {
+    // Call service to create event
+    this.eventsService.createEvent(createDto).subscribe({
+      next: (newEvent) => {
+        console.log('Event created:', newEvent);
         this.messageService.add({
           severity: 'success',
           summary: 'Sukces',
@@ -187,33 +199,15 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
         });
         this.onCreated.emit();
         this.closeDialog();
-      },
-      error: (error) => {
-        const errorMessage = error.error?.error || 'Nie udało się utworzyć wydarzenia';
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Błąd',
-          detail: errorMessage
-        });
         this.isLoading.set(false);
       },
-      complete: () => {
+      error: (error) => {
+        console.error('Error creating event:', error);
+        const errorMessage = error.error?.error || 'Nie udało się utworzyć wydarzenia. Spróbuj ponownie.';
+        alert(errorMessage);
         this.isLoading.set(false);
       }
     });
-    */
-
-    // Placeholder implementation
-    setTimeout(() => {
-      this.messageService.add({
-        severity: 'info',
-        summary: 'TODO',
-        detail: 'Tworzenie wydarzeń zostanie zaimplementowane po utworzeniu Events API'
-      });
-      this.isLoading.set(false);
-      this.onCreated.emit();
-      this.closeDialog();
-    }, 1000);
   }
 
   /**

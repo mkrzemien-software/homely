@@ -242,64 +242,60 @@ public class EventService : IEventService
     {
         try
         {
-            // Start transaction for atomic completion and recurring event creation
-            await _unitOfWork.BeginTransactionAsync(cancellationToken);
-
-            var eventEntity = await _unitOfWork.Events.GetWithDetailsAsync(eventId, cancellationToken);
-
-            if (eventEntity == null || eventEntity.DeletedAt != null)
+            // Execute in transaction using the execution strategy
+            return await _unitOfWork.ExecuteInTransactionAsync(async (ct) =>
             {
-                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                throw new InvalidOperationException($"Event with ID {eventId} not found");
-            }
+                var eventEntity = await _unitOfWork.Events.GetWithDetailsAsync(eventId, ct);
 
-            if (eventEntity.Status == "completed")
-            {
-                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                throw new InvalidOperationException($"Event {eventId} is already completed");
-            }
-
-            // Parse completion date or use today
-            var completionDate = !string.IsNullOrEmpty(completeDto.CompletionDate)
-                ? DateOnly.Parse(completeDto.CompletionDate)
-                : DateOnly.FromDateTime(DateTime.UtcNow);
-
-            // Mark event as completed
-            eventEntity.Status = "completed";
-            eventEntity.CompletionDate = completionDate;
-            eventEntity.CompletionNotes = completeDto.Notes;
-            eventEntity.UpdatedAt = DateTimeOffset.UtcNow;
-
-            await _unitOfWork.Events.UpdateAsync(eventEntity, cancellationToken);
-
-            _logger.LogInformation("Event {EventId} marked as completed", eventId);
-
-            // If task template has an interval, create next recurring event
-            if (eventEntity.TaskId.HasValue)
-            {
-                var task = await _unitOfWork.Tasks.GetByIdAsync(eventEntity.TaskId.Value, cancellationToken);
-                if (task != null && task.DeletedAt == null)
+                if (eventEntity == null || eventEntity.DeletedAt != null)
                 {
-                    // Check if task has any interval values set
-                    bool hasInterval = (task.YearsValue.HasValue && task.YearsValue.Value > 0) ||
-                                     (task.MonthsValue.HasValue && task.MonthsValue.Value > 0) ||
-                                     (task.WeeksValue.HasValue && task.WeeksValue.Value > 0) ||
-                                     (task.DaysValue.HasValue && task.DaysValue.Value > 0);
+                    throw new InvalidOperationException($"Event with ID {eventId} not found");
+                }
 
-                    if (hasInterval)
+                if (eventEntity.Status == "completed")
+                {
+                    throw new InvalidOperationException($"Event {eventId} is already completed");
+                }
+
+                // Parse completion date or use today
+                var completionDate = !string.IsNullOrEmpty(completeDto.CompletionDate)
+                    ? DateOnly.Parse(completeDto.CompletionDate)
+                    : DateOnly.FromDateTime(DateTime.UtcNow);
+
+                // Mark event as completed
+                eventEntity.Status = "completed";
+                eventEntity.CompletionDate = completionDate;
+                eventEntity.CompletionNotes = completeDto.Notes;
+                eventEntity.UpdatedAt = DateTimeOffset.UtcNow;
+
+                await _unitOfWork.Events.UpdateAsync(eventEntity, ct);
+
+                _logger.LogInformation("Event {EventId} marked as completed", eventId);
+
+                // If task template has an interval, create next recurring event
+                if (eventEntity.TaskId.HasValue)
+                {
+                    var task = await _unitOfWork.Tasks.GetByIdAsync(eventEntity.TaskId.Value, ct);
+                    if (task != null && task.DeletedAt == null)
                     {
-                        await CreateNextRecurringEventAsync(eventEntity, completionDate, cancellationToken);
+                        // Check if task has any interval values set
+                        bool hasInterval = (task.YearsValue.HasValue && task.YearsValue.Value > 0) ||
+                                         (task.MonthsValue.HasValue && task.MonthsValue.Value > 0) ||
+                                         (task.WeeksValue.HasValue && task.WeeksValue.Value > 0) ||
+                                         (task.DaysValue.HasValue && task.DaysValue.Value > 0);
+
+                        if (hasInterval)
+                        {
+                            await CreateNextRecurringEventAsync(eventEntity, completionDate, ct);
+                        }
                     }
                 }
-            }
 
-            // TODO: Archive to task_history if household has premium plan
-            // This would require checking household's plan type and adding to tasks_history table
+                // TODO: Archive to task_history if household has premium plan
+                // This would require checking household's plan type and adding to tasks_history table
 
-            // Commit transaction
-            await _unitOfWork.CommitTransactionAsync(cancellationToken);
-
-            return MapToDto(eventEntity);
+                return MapToDto(eventEntity);
+            }, cancellationToken);
         }
         catch (Exception ex)
         {

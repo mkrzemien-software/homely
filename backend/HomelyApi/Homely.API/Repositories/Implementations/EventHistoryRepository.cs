@@ -7,18 +7,18 @@ using Homely.API.Repositories.Interfaces;
 
 namespace Homely.API.Repositories.Implementations;
 
-public class TaskHistoryRepository : BaseRepository<TaskHistoryEntity, Guid>, ITaskHistoryRepository
+public class EventHistoryRepository : BaseRepository<EventHistoryEntity, Guid>, IEventHistoryRepository
 {
-    public TaskHistoryRepository(HomelyDbContext context) : base(context)
+    public EventHistoryRepository(HomelyDbContext context) : base(context)
     {
     }
 
-    protected override Expression<Func<TaskHistoryEntity, bool>> GetIdPredicate(Guid id)
+    protected override Expression<Func<EventHistoryEntity, bool>> GetIdPredicate(Guid id)
     {
         return x => x.Id == id;
     }
 
-    public async Task<IEnumerable<TaskHistoryEntity>> GetHouseholdHistoryAsync(Guid householdId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<EventHistoryEntity>> GetHouseholdHistoryAsync(Guid householdId, CancellationToken cancellationToken = default)
     {
         return await Query()
             .Where(th => th.HouseholdId == householdId)
@@ -28,21 +28,21 @@ public class TaskHistoryRepository : BaseRepository<TaskHistoryEntity, Guid>, IT
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<TaskHistoryEntity>> GetTaskTemplateHistoryAsync(Guid taskId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<EventHistoryEntity>> GetTaskTemplateHistoryAsync(Guid taskId, CancellationToken cancellationToken = default)
     {
         return await GetWhereAsync(th => th.TaskId == taskId,
             th => th.Task,
             th => th.Event);
     }
 
-    public async Task<IEnumerable<TaskHistoryEntity>> GetCompletedByUserAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<EventHistoryEntity>> GetCompletedByUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await GetWhereAsync(th => th.CompletedBy == userId,
             th => th.Task,
             th => th.Household);
     }
 
-    public async Task<IEnumerable<TaskHistoryEntity>> GetHistoryInDateRangeAsync(Guid householdId, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<EventHistoryEntity>> GetHistoryInDateRangeAsync(Guid householdId, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken = default)
     {
         return await Query()
             .Where(th => th.HouseholdId == householdId &&
@@ -63,11 +63,11 @@ public class TaskHistoryRepository : BaseRepository<TaskHistoryEntity, Guid>, IT
             .Join(Context.Set<TaskEntity>(),
                 th => th.TaskId,
                 t => t.Id,
-                (th, t) => new { TaskHistory = th, Task = t })
+                (th, t) => new { EventHistory = th, Task = t })
             .Join(Context.Set<CategoryEntity>(),
                 tht => tht.Task.CategoryId,
                 c => c.Id,
-                (tht, c) => new { tht.TaskHistory, Category = c })
+                (tht, c) => new { tht.EventHistory, Category = c })
             .GroupBy(x => x.Category.Name)
             .Select(g => new { CategoryName = g.Key, Count = g.Count() })
             .ToListAsync(cancellationToken);
@@ -75,3 +75,4 @@ public class TaskHistoryRepository : BaseRepository<TaskHistoryEntity, Guid>, IT
         return stats.ToDictionary(s => s.CategoryName, s => s.Count);
     }
 }
+

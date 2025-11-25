@@ -261,7 +261,7 @@ export class EventDetailsDialogComponent {
         action: 'postpone',
         event: ev,
         data: {
-          newDueDate: newDate.toISOString(),
+          newDueDate: newDate.toISOString().split('T')[0],
           reason
         }
       });
@@ -309,7 +309,7 @@ export class EventDetailsDialogComponent {
         action: 'cancel',
         event: ev,
         data: {
-          cancelReason: reason.trim() // Send trimmed version
+          reason: reason.trim() // Send trimmed version
         }
       });
       this.closeDialog();

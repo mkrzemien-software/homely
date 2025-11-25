@@ -94,7 +94,7 @@ export const routes: Routes = [
       },
       {
         path: 'events',
-        loadComponent: () => import('./features/household/events/events-view.component').then(m => m.EventsViewComponent),
+        loadComponent: () => import('./features/household/events/events-list.component').then(m => m.EventsListComponent),
         title: 'Wydarzenia - Homely',
         // canActivate: [authGuard, householdMemberGuard]
       },
@@ -106,7 +106,7 @@ export const routes: Routes = [
       },
       {
         path: 'categories',
-        loadComponent: () => import('./features/household/items/categories-list.component').then(m => m.CategoriesListComponent),
+        loadComponent: () => import('./features/household/categories/categories-list.component').then(m => m.CategoriesListComponent),
         title: 'Kategorie - Homely',
         // canActivate: [authGuard, householdMemberGuard]
       },

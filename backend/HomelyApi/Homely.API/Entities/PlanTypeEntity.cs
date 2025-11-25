@@ -22,8 +22,8 @@ public class PlanTypeEntity
     [Column("max_household_members")]
     public int? MaxHouseholdMembers { get; set; }
 
-    [Column("max_items")]
-    public int? MaxItems { get; set; }
+    [Column("max_tasks")]
+    public int? MaxTasks { get; set; }
 
     [Column("price_monthly", TypeName = "decimal(10,2)")]
     public decimal? PriceMonthly { get; set; }

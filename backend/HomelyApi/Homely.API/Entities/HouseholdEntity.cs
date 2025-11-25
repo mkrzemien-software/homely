@@ -47,6 +47,6 @@ public class HouseholdEntity
     public virtual ICollection<HouseholdMemberEntity> HouseholdMembers { get; set; } = new List<HouseholdMemberEntity>();
     public virtual ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
     public virtual ICollection<EventEntity> Events { get; set; } = new List<EventEntity>();
-    public virtual ICollection<TaskHistoryEntity> TasksHistory { get; set; } = new List<TaskHistoryEntity>();
+    public virtual ICollection<EventHistoryEntity> EventsHistory { get; set; } = new List<EventHistoryEntity>();
     public virtual ICollection<PlanUsageEntity> PlanUsages { get; set; } = new List<PlanUsageEntity>();
 }

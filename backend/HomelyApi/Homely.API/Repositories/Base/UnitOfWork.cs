@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore;
 using Homely.API.Data;
 using Homely.API.Repositories.Interfaces;
 using Homely.API.Repositories.Implementations;
@@ -18,7 +19,7 @@ public class UnitOfWork : IUnitOfWork
     private ICategoryRepository? _categories;
     private ITaskRepository? _tasks;
     private IEventRepository? _events;
-    private ITaskHistoryRepository? _tasksHistory;
+    private IEventHistoryRepository? _eventsHistory;
     private IPlanUsageRepository? _planUsages;
 
     public UnitOfWork(HomelyDbContext context)
@@ -98,12 +99,12 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
-    public ITaskHistoryRepository TasksHistory
+    public IEventHistoryRepository EventsHistory
     {
         get
         {
-            _tasksHistory ??= new TaskHistoryRepository(_context);
-            return _tasksHistory;
+            _eventsHistory ??= new EventHistoryRepository(_context);
+            return _eventsHistory;
         }
     }
 
@@ -170,6 +171,43 @@ public class UnitOfWork : IUnitOfWork
             await _transaction.DisposeAsync();
             _transaction = null;
         }
+    }
+
+    /// <summary>
+    /// Executes an operation within a transaction using the configured execution strategy.
+    /// This method is compatible with retry strategies like NpgsqlRetryingExecutionStrategy.
+    /// </summary>
+    public async Task<TResult> ExecuteInTransactionAsync<TResult>(
+        Func<CancellationToken, Task<TResult>> operation,
+        CancellationToken cancellationToken = default)
+    {
+        // Get the execution strategy configured for the context
+        var strategy = _context.Database.CreateExecutionStrategy();
+
+        // Execute the operation within the strategy's transaction handling
+        return await strategy.ExecuteAsync(async (ct) =>
+        {
+            // Begin transaction
+            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
+
+            try
+            {
+                // Execute the operation
+                var result = await operation(ct);
+
+                // Save changes and commit
+                await _context.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
+
+                return result;
+            }
+            catch
+            {
+                // Rollback on error
+                await transaction.RollbackAsync(ct);
+                throw;
+            }
+        }, cancellationToken);
     }
 
     public void Dispose()

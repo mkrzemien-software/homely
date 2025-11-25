@@ -155,10 +155,6 @@ resource "aws_ecs_task_definition" "backend" {
         {
           name  = "ASPNETCORE_URLS"
           value = "http://+:${var.container_port}"
-        },
-        {
-          name  = "DOTNET_SYSTEM_NET_DISABLEIPV6"
-          value = "1"
         }
       ]
 

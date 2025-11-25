@@ -18,7 +18,7 @@ import { DividerModule } from 'primeng/divider';
 import { TasksService } from '../../services/tasks.service';
 
 // Models
-import { Category } from '../../../items/models/category.model';
+import { Category } from '../../../categories/models/category.model';
 import { Task, Priority, UpdateTaskDto, getPriorityLabel } from '../../models/task.model';
 
 /**

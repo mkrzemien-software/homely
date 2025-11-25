@@ -133,7 +133,7 @@ public class DashboardService : IDashboardService
                 .Where(hm => hm.HouseholdId == householdId && hm.DeletedAt == null)
                 .CountAsync(cancellationToken);
 
-            var tasksLimit = household?.PlanType?.MaxItems ?? 5; // Default free plan limit
+            var tasksLimit = household?.PlanType?.MaxTasks ?? 5; // Default free plan limit
             var membersLimit = household?.PlanType?.MaxHouseholdMembers ?? 3; // Default free plan limit
 
             var statistics = new DashboardStatisticsResponseDto

@@ -244,7 +244,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     KnownProxies = { }
 });
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Local")
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
@@ -263,7 +263,7 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
 
-    if (!app.Environment.IsDevelopment())
+    if (!(app.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Local"))
     {
         context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
     }

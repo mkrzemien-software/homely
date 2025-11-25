@@ -19,7 +19,7 @@ import { TasksService } from '../../services/tasks.service';
 import { AuthService } from '../../../../../core/services/auth.service';
 
 // Models
-import { Category } from '../../../items/models/category.model';
+import { Category } from '../../../categories/models/category.model';
 import { Priority, CreateTaskDto, getPriorityLabel } from '../../models/task.model';
 
 /**

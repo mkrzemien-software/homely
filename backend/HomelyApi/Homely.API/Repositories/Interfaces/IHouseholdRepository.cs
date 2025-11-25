@@ -35,6 +35,6 @@ public class HouseholdStatsResult
     public int FreeHouseholds { get; set; }
     public int PremiumHouseholds { get; set; }
     public int TotalMembers { get; set; }
-    public int TotalItems { get; set; }
     public int TotalTasks { get; set; }
+    public int TotalEvents { get; set; }
 }

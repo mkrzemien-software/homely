@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ITaskRepository, TaskRepository>();
         services.AddScoped<IEventRepository, EventRepository>();
-        services.AddScoped<ITaskHistoryRepository, TaskHistoryRepository>();
+        services.AddScoped<IEventHistoryRepository, EventHistoryRepository>();
         services.AddScoped<IPlanUsageRepository, PlanUsageRepository>();
 
         return services;

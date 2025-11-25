@@ -29,7 +29,11 @@ public class HomelyDbContext : DbContext
     /// </summary>
     public DbSet<EventEntity> Events { get; set; }
 
-    public DbSet<TaskHistoryEntity> TasksHistory { get; set; }
+    /// <summary>
+    /// Events History DbSet - archival record of completed events (premium feature)
+    /// Maps to the 'events_history' table in the database
+    /// </summary>
+    public DbSet<EventHistoryEntity> EventsHistory { get; set; }
     public DbSet<PlanUsageEntity> PlanUsages { get; set; }
 
     public DbSet<DashboardUpcomingTaskViewModel> DashboardUpcomingTasks { get; set; }
@@ -158,22 +162,22 @@ public class HomelyDbContext : DbContext
             .HasFilter("deleted_at IS NULL")
             .HasDatabaseName("idx_events_task");
 
-        // Task History
-        modelBuilder.Entity<TaskHistoryEntity>()
+        // Event History
+        modelBuilder.Entity<EventHistoryEntity>()
             .HasIndex(th => th.HouseholdId)
-            .HasDatabaseName("idx_tasks_history_household");
+            .HasDatabaseName("idx_events_history_household");
 
-        modelBuilder.Entity<TaskHistoryEntity>()
+        modelBuilder.Entity<EventHistoryEntity>()
             .HasIndex(th => th.CompletionDate)
-            .HasDatabaseName("idx_tasks_history_completion_date");
+            .HasDatabaseName("idx_events_history_completion_date");
 
-        modelBuilder.Entity<TaskHistoryEntity>()
+        modelBuilder.Entity<EventHistoryEntity>()
             .HasIndex(th => th.TaskId)
-            .HasDatabaseName("idx_tasks_history_task");
+            .HasDatabaseName("idx_events_history_task");
 
-        modelBuilder.Entity<TaskHistoryEntity>()
+        modelBuilder.Entity<EventHistoryEntity>()
             .HasIndex(th => th.EventId)
-            .HasDatabaseName("idx_tasks_history_event");
+            .HasDatabaseName("idx_events_history_event");
 
         // Plan Usage
         modelBuilder.Entity<PlanUsageEntity>()
@@ -265,24 +269,24 @@ public class HomelyDbContext : DbContext
             .HasPrincipalKey(u => u.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // TaskHistory -> Event (completed event)
-        modelBuilder.Entity<TaskHistoryEntity>()
+        // EventHistory -> Event (completed event)
+        modelBuilder.Entity<EventHistoryEntity>()
             .HasOne(th => th.Event)
             .WithMany()
             .HasForeignKey(th => th.EventId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // TaskHistory -> Task (task template)
-        modelBuilder.Entity<TaskHistoryEntity>()
+        // EventHistory -> Task (task template)
+        modelBuilder.Entity<EventHistoryEntity>()
             .HasOne(th => th.Task)
             .WithMany()
             .HasForeignKey(th => th.TaskId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // TaskHistory -> Household
-        modelBuilder.Entity<TaskHistoryEntity>()
+        // EventHistory -> Household
+        modelBuilder.Entity<EventHistoryEntity>()
             .HasOne(th => th.Household)
-            .WithMany(h => h.TasksHistory)
+            .WithMany(h => h.EventsHistory)
             .HasForeignKey(th => th.HouseholdId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -343,7 +347,7 @@ public class HomelyDbContext : DbContext
                 Name = "Darmowy",
                 Description = "Podstawowe zarządzanie gospodarstwem domowym",
                 MaxHouseholdMembers = 3,
-                MaxItems = 5,
+                MaxTasks = 5,
                 PriceMonthly = 0.00m,
                 PriceYearly = 0.00m,
                 Features = "[\"podstawowe_zadania\", \"widok_kalendarza\"]",
@@ -357,7 +361,7 @@ public class HomelyDbContext : DbContext
                 Name = "Premium",
                 Description = "Pełne zarządzanie gospodarstwem z analityką",
                 MaxHouseholdMembers = 10,
-                MaxItems = 100,
+                MaxTasks = 100,
                 PriceMonthly = 9.99m,
                 PriceYearly = 99.99m,
                 Features = "[\"podstawowe_zadania\", \"widok_kalendarza\", \"powiadomienia_email\", \"dokumenty\", \"analityka\", \"historia\", \"wsparcie_priorytetowe\"]",
@@ -371,7 +375,7 @@ public class HomelyDbContext : DbContext
                 Name = "Rodzinny",
                 Description = "Kompletne rozwiązanie dla rodziny",
                 MaxHouseholdMembers = null,
-                MaxItems = null,
+                MaxTasks = null,
                 PriceMonthly = 19.99m,
                 PriceYearly = 199.99m,
                 Features = "[\"podstawowe_zadania\", \"widok_kalendarza\", \"powiadomienia_email\", \"dokumenty\", \"analityka\", \"historia\", \"wsparcie_priorytetowe\", \"nieograniczeni_czlonkowie\", \"nieograniczone_przedmioty\"]",

@@ -28,8 +28,8 @@ import {
 
 // Services
 import { TasksService } from './services/tasks.service';
-import { CategoryService } from '../items/services/category.service';
-import { Category } from '../items/models/category.model';
+import { CategoryService } from '../categories/services/category.service';
+import { Category } from '../categories/models/category.model';
 
 // Components
 import { CreateTaskDialogComponent } from './components/create-task-dialog/create-task-dialog.component';

@@ -99,14 +99,14 @@ public class SystemHouseholdsService : ISystemHouseholdsService
             MemberCount = household.HouseholdMembers.Count(hm => hm.DeletedAt == null),
             ItemCount = household.Tasks.Count(t => t.DeletedAt == null),
             TaskCount = household.Events.Count(e => e.DeletedAt == null),
-            CompletedTasksCount = household.TasksHistory.Count(th => th.DeletedAt == null),
+            CompletedTasksCount = household.EventsHistory.Count(th => th.DeletedAt == null),
             LastActivityAt = household.HouseholdMembers
                 .Where(hm => hm.DeletedAt == null)
                 .Select(hm => hm.UpdatedAt)
                 .DefaultIfEmpty()
                 .Max(),
             MaxMembers = household.PlanType.MaxHouseholdMembers,
-            MaxItems = household.PlanType.MaxItems,
+            MaxTasks = household.PlanType.MaxTasks,
             Members = memberDetails
         };
     }
@@ -123,8 +123,8 @@ public class SystemHouseholdsService : ISystemHouseholdsService
             FreeHouseholds = stats.FreeHouseholds,
             PremiumHouseholds = stats.PremiumHouseholds,
             TotalMembers = stats.TotalMembers,
-            TotalItems = stats.TotalItems,
-            TotalTasks = stats.TotalTasks
+            TotalItems = stats.TotalTasks,
+            TotalTasks = stats.TotalEvents
         };
     }
 

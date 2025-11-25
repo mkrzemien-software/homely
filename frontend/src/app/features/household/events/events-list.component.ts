@@ -37,17 +37,17 @@ import { CreateEventDto } from './models/event.model';
 
 // Services
 import { EventsService } from './services/events.service';
-import { CategoryService } from '../items/services/category.service';
+import { CategoryService } from '../categories/services/category.service';
 import { HouseholdService } from '../../../core/services/household.service';
 import { TasksService } from '../tasks/services/tasks.service';
-import { Category } from '../items/models/category.model';
+import { Category } from '../categories/models/category.model';
 
 // Components (to be created)
 // import { EventDetailsDialogComponent } from './components/event-details-dialog/event-details-dialog.component';
 // import { StatusCountersComponent } from './components/status-counters/status-counters.component';
 
 /**
- * EventsViewComponent
+ * EventsListComponent
  *
  * Main component for displaying and managing events (task occurrences).
  * Based on API plan - GET /events, POST /events, PUT /events/{id}, DELETE /events/{id}
@@ -68,7 +68,7 @@ import { Category } from '../items/models/category.model';
  * // Route configuration
  * {
  *   path: ':householdId/events',
- *   loadComponent: () => import('./events-view.component').then(m => m.EventsViewComponent)
+ *   loadComponent: () => import('./events-view.component').then(m => m.EventsListComponent)
  * }
  */
 @Component({
@@ -94,10 +94,10 @@ import { Category } from '../items/models/category.model';
     // EventDetailsDialogComponent,
     // StatusCountersComponent
   ],
-  templateUrl: './events-view.component.html',
-  styleUrl: './events-view.component.scss'
+  templateUrl: './events-list.component.html',
+  styleUrl: './events-list.component.scss'
 })
-export class EventsViewComponent implements OnInit {
+export class EventsListComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private eventsService = inject(EventsService);
@@ -654,7 +654,9 @@ export class EventsViewComponent implements OnInit {
   completeEvent(event: Event): void {
     if (confirm(`Czy na pewno chcesz oznaczyć wydarzenie "${event.taskName}" jako wykonane?`)) {
       this.eventsService.completeEvent(event.id, {
-        completionDate: new Date().toISOString()
+        completionDate: new Date().toISOString().split('T')[0],
+        notes: 'notatki',
+        attachmentUrl: 'Jaki URL'
       }).subscribe({
         next: (response) => {
           console.log('Event completed:', response);
@@ -691,7 +693,7 @@ export class EventsViewComponent implements OnInit {
       }
 
       this.eventsService.postponeEvent(event.id, {
-        newDueDate: newDueDate.toISOString(),
+        newDueDate: newDueDate.toISOString().split('T')[0],
         reason: reason.trim()
       }).subscribe({
         next: (updatedEvent) => {

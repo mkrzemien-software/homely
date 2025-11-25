@@ -4,26 +4,27 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Homely.API.Entities;
 
 /// <summary>
-/// Task History Entity - archival record of completed events (premium feature).
-/// Maps to the 'tasks_history' table in the database.
+/// Event History Entity - archival record of completed events (premium feature).
+/// Maps to the 'events_history' table in the database.
+/// Stores a snapshot of completed event data for analytics and historical tracking.
 /// </summary>
-[Table("tasks_history")]
-public class TaskHistoryEntity
+[Table("events_history")]
+public class EventHistoryEntity
 {
     [Key]
     [Column("id")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
     /// <summary>
-    /// Reference to the event that was completed (maps to task_id column for backward compatibility)
+    /// Reference to the event that was completed
     /// </summary>
-    [Column("task_id")]
+    [Column("event_id")]
     public Guid? EventId { get; set; }
 
     /// <summary>
-    /// Reference to the task template (maps to item_id column for backward compatibility)
+    /// Reference to the task template (if the event was based on a template)
     /// </summary>
-    [Column("item_id")]
+    [Column("task_id")]
     public Guid? TaskId { get; set; }
 
     [Required]
@@ -44,10 +45,13 @@ public class TaskHistoryEntity
     [Column("completion_date")]
     public DateOnly CompletionDate { get; set; }
 
+    /// <summary>
+    /// Snapshot of task name at completion time
+    /// </summary>
     [Required]
-    [MaxLength(200)]
-    [Column("title")]
-    public string Title { get; set; } = string.Empty;
+    [MaxLength(100)]
+    [Column("task_name")]
+    public string TaskName { get; set; } = string.Empty;
 
     [Column("completion_notes")]
     public string? CompletionNotes { get; set; }
@@ -68,3 +72,4 @@ public class TaskHistoryEntity
     [ForeignKey("HouseholdId")]
     public virtual HouseholdEntity Household { get; set; } = null!;
 }
+

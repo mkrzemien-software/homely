@@ -47,14 +47,14 @@ public class PlanTypeRepository : BaseRepository<PlanTypeEntity, int>, IPlanType
 
     private async Task<bool> CheckItemsLimitAsync(PlanTypeEntity planType, Guid householdId, CancellationToken cancellationToken)
     {
-        if (planType.MaxItems == null) return true; // Unlimited
+        if (planType.MaxTasks == null) return true; // Unlimited
 
         var currentCount = await Context.Set<TaskEntity>()
             .CountAsync(t => t.HouseholdId == householdId &&
                            t.DeletedAt == null &&
                            t.IsActive, cancellationToken);
 
-        return currentCount < planType.MaxItems.Value;
+        return currentCount < planType.MaxTasks.Value;
     }
 
     private async Task<bool> CheckMembersLimitAsync(PlanTypeEntity planType, Guid householdId, CancellationToken cancellationToken)

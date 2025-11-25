@@ -48,7 +48,7 @@ public class SystemHouseholdDetailsDto
 
     // Plan limits
     public int? MaxMembers { get; set; }
-    public int? MaxItems { get; set; }
+    public int? MaxTasks { get; set; }
 
     // Members list
     public List<HouseholdMemberSummaryDto> Members { get; set; } = new();

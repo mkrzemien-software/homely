@@ -111,6 +111,7 @@
     &__theme-toggle {
       top: 1rem;
       right: 1rem;
+      scale: 0.7;
     }
 
     &__container {
@@ -150,8 +151,9 @@
     padding: 1rem;
 
     &__theme-toggle {
-      top: 0.75rem;
-      right: 0.75rem;
+      top: -20px;
+      right: -50px;
+      scale: 0.6;
     }
 
     &__container {

@@ -12,7 +12,7 @@ public interface IUnitOfWork : IDisposable
     ICategoryRepository Categories { get; }
     ITaskRepository Tasks { get; }
     IEventRepository Events { get; }
-    ITaskHistoryRepository TasksHistory { get; }
+    IEventHistoryRepository EventsHistory { get; }
     IPlanUsageRepository PlanUsages { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
@@ -22,4 +22,12 @@ public interface IUnitOfWork : IDisposable
     Task CommitTransactionAsync(CancellationToken cancellationToken = default);
 
     Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Executes an operation within a transaction using the configured execution strategy.
+    /// This method is compatible with retry strategies like NpgsqlRetryingExecutionStrategy.
+    /// </summary>
+    Task<TResult> ExecuteInTransactionAsync<TResult>(
+        Func<CancellationToken, Task<TResult>> operation,
+        CancellationToken cancellationToken = default);
 }
