@@ -101,6 +101,9 @@ variable "parameter_store_paths" {
     database_connection_string = string
     backend_log_level          = string
     cors_origins               = string
+    jwt_valid_issuer           = string
+    jwt_valid_audience         = string
+    jwt_secret                 = string
   })
 }
 
