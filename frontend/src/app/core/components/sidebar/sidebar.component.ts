@@ -73,7 +73,9 @@ export class SidebarComponent {
     // Effect to sync with auth service user data
     effect(() => {
       const user = this.authService.currentUser();
-      if (user) {
+      const isAuthenticated = this.authService.isAuthenticated();
+
+      if (user && isAuthenticated) {
         // Only set householdId if it's not empty
         const householdId = user.householdId && user.householdId.trim() !== ''
           ? user.householdId

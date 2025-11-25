@@ -72,12 +72,12 @@ export class LoginFormComponent {
 
     // Call auth service
     this.authService.login(credentials).subscribe({
-      next: () => {
+      next: (response) => {
         // Login successful
         this.loginSuccess.emit();
 
-        // Get current user to navigate to their household dashboard
-        const user = this.authService.getCurrentUser();
+        // Use user data from response directly (signal may not be updated yet due to queueMicrotask)
+        const user = response.data?.user;
         if (user?.householdId) {
           this.router.navigate([`/${user.householdId}/dashboard`]);
         } else {

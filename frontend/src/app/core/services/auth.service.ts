@@ -101,15 +101,21 @@ export class AuthService {
           throw new Error(response.errorMessage || 'Login failed');
         }
 
-        // Store tokens
-        this.storeTokens(response.data.accessToken, response.data.refreshToken);
+        // Store reference to response data for use in microtask
+        const responseData = response.data;
 
-        // Store user data
-        this.storeUser(response.data.user);
+        // IMPORTANT: Store tokens and user data synchronously first
+        // This ensures the token is available in localStorage before any
+        // reactive effects are triggered by signal updates
+        this.storeTokens(responseData.accessToken, responseData.refreshToken);
+        this.storeUser(responseData.user);
 
-        // Update authentication state
-        this.isAuthenticated.set(true);
-        this.currentUser.set(response.data.user);
+        // Use queueMicrotask to defer signal updates until after current execution
+        // This ensures localStorage operations complete before effects fire
+        queueMicrotask(() => {
+          this.isAuthenticated.set(true);
+          this.currentUser.set(responseData.user);
+        });
       }),
       catchError((error: HttpErrorResponse) => {
         this.isLoading.set(false);
