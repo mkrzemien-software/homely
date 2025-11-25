@@ -7,6 +7,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { BadgeModule } from 'primeng/badge';
 import { DividerModule } from 'primeng/divider';
 import { MenuModule } from 'primeng/menu';
+import { timeout, TimeoutError } from 'rxjs';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { HouseholdService } from '../../../core/services/household.service';
@@ -116,24 +117,32 @@ export class SidebarComponent {
       return;
     }
 
-    // Call the API to get household details
-    this.householdService.getById(householdId).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.householdName.set(response.data.name);
-        } else {
-          // Fallback to short ID if API call fails
-          const shortId = householdId.length > 8 ? householdId.substring(0, 8) : householdId;
-          this.householdName.set(`Household ${shortId}`);
+    // Call the API to get household details with 5 second timeout
+    this.householdService.getById(householdId)
+      .pipe(timeout(2000))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.householdName.set(response.data.name);
+          } else {
+            // Fallback to short ID if API call fails
+            const shortId = householdId.length > 8 ? householdId.substring(0, 8) : householdId;
+            this.householdName.set(`Household ${shortId}`);
+          }
+        },
+        error: (error) => {
+          if (error instanceof TimeoutError) {
+            console.error('Timeout fetching household name - possible token race condition:', error);
+            const shortId = householdId.length > 8 ? householdId.substring(0, 8) : householdId;
+            this.householdName.set(`Household ${shortId} (timeout)`);
+          } else {
+            console.error('Error fetching household name:', error);
+            // Fallback to short ID on error
+            const shortId = householdId.length > 8 ? householdId.substring(0, 8) : householdId;
+            this.householdName.set(`Household ${shortId}`);
+          }
         }
-      },
-      error: (error) => {
-        console.error('Error fetching household name:', error);
-        // Fallback to short ID on error
-        const shortId = householdId.length > 8 ? householdId.substring(0, 8) : householdId;
-        this.householdName.set(`Household ${shortId}`);
-      }
-    });
+      });
   }
 
   // Check if current route is active
