@@ -111,3 +111,56 @@ resource "aws_ssm_parameter" "cors_origins" {
     }
   )
 }
+
+# JWT Valid Issuer (SecureString)
+resource "aws_ssm_parameter" "jwt_valid_issuer" {
+  name        = "${local.parameter_prefix}/jwt_valid_issuer"
+  description = "JWT token issuer URL"
+  type        = "SecureString"
+  value       = nonsensitive(var.jwt_valid_issuer) != "" ? var.jwt_valid_issuer : "PLACEHOLDER_SET_MANUALLY"
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${local.name_prefix}-jwt-issuer"
+    }
+  )
+
+  lifecycle {
+    ignore_changes = [value] # Prevent Terraform from overwriting manually set values
+  }
+}
+
+# JWT Valid Audience (String)
+resource "aws_ssm_parameter" "jwt_valid_audience" {
+  name        = "${local.parameter_prefix}/jwt_valid_audience"
+  description = "JWT token audience"
+  type        = "String"
+  value       = var.jwt_valid_audience
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${local.name_prefix}-jwt-audience"
+    }
+  )
+}
+
+# JWT Secret (SecureString)
+resource "aws_ssm_parameter" "jwt_secret" {
+  name        = "${local.parameter_prefix}/jwt_secret"
+  description = "JWT signing secret from Supabase"
+  type        = "SecureString"
+  value       = nonsensitive(var.jwt_secret) != "" ? var.jwt_secret : "PLACEHOLDER_SET_MANUALLY"
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${local.name_prefix}-jwt-secret"
+    }
+  )
+
+  lifecycle {
+    ignore_changes = [value] # Prevent Terraform from overwriting manually set values
+  }
+}

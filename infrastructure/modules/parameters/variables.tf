@@ -58,6 +58,27 @@ variable "cors_origins" {
   default     = "*"
 }
 
+# JWT Configuration
+variable "jwt_valid_issuer" {
+  description = "JWT token issuer (e.g., https://your-project.supabase.co/auth/v1)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "jwt_valid_audience" {
+  description = "JWT token audience (typically 'authenticated' for Supabase)"
+  type        = string
+  default     = "authenticated"
+}
+
+variable "jwt_secret" {
+  description = "JWT signing secret from Supabase project settings"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)

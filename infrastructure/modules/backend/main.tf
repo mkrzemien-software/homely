@@ -144,6 +144,18 @@ resource "aws_ecs_task_definition" "backend" {
         {
           name      = "ConnectionStrings__DefaultConnection"
           valueFrom = var.parameter_store_paths.database_connection_string
+        },
+        {
+          name      = "JwtSettings__ValidIssuer"
+          valueFrom = var.parameter_store_paths.jwt_valid_issuer
+        },
+        {
+          name      = "JwtSettings__ValidAudience"
+          valueFrom = var.parameter_store_paths.jwt_valid_audience
+        },
+        {
+          name      = "JwtSettings__Secret"
+          valueFrom = var.parameter_store_paths.jwt_secret
         }
       ]
 

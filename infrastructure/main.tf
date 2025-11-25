@@ -61,6 +61,11 @@ module "parameters" {
   supabase_service_role_key   = var.supabase_service_role_key
   database_connection_string  = var.database_connection_string
 
+  # JWT configuration
+  jwt_valid_issuer   = var.jwt_valid_issuer
+  jwt_valid_audience = var.jwt_valid_audience
+  jwt_secret         = var.jwt_secret
+
   # Non-sensitive defaults
   backend_log_level = var.environment == "prod" ? "Warning" : "Information"
   cors_origins      = "https://${local.frontend_domain}"
