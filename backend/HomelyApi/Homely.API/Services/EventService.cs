@@ -237,7 +237,7 @@ public class EventService : IEventService
     }
 
     /// <inheritdoc/>
-    public async Task<EventDto> CompleteEventAsync(Guid eventId, CompleteEventDto completeDto, CancellationToken cancellationToken = default)
+    public async Task<EventDto> CompleteEventAsync(Guid eventId, CompleteEventDto completeDto, Guid completedBy, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -290,8 +290,8 @@ public class EventService : IEventService
                     }
                 }
 
-                // TODO: Archive to task_history if household has premium plan
-                // This would require checking household's plan type and adding to tasks_history table
+                // Archive to events_history if household has premium plan
+                await CreateEventHistoryIfPremiumAsync(eventEntity, completedBy, ct);
 
                 return MapToDto(eventEntity);
             }, cancellationToken);
@@ -478,6 +478,78 @@ public class EventService : IEventService
         }
 
         return nextDate;
+    }
+
+    /// <summary>
+    /// Creates event history record if household has premium plan.
+    /// Premium plans are identified by plan name containing "Premium" or "Rodzinny".
+    /// This method is called within a transaction context and does not commit changes.
+    /// </summary>
+    private async Task CreateEventHistoryIfPremiumAsync(EventEntity eventEntity, Guid completedBy, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Get household with plan details
+            var household = await _unitOfWork.Households.GetByIdAsync(
+                eventEntity.HouseholdId,
+                h => h.PlanType);
+
+            if (household == null || household.PlanType == null)
+            {
+                _logger.LogWarning("Cannot create event history: Household {HouseholdId} or plan type not found", eventEntity.HouseholdId);
+                return;
+            }
+
+            // Check if household has premium plan (Premium or Rodzinny)
+            var isPremium = household.PlanType.Name.Contains("Premium", StringComparison.OrdinalIgnoreCase) ||
+                           household.PlanType.Name.Contains("Rodzinny", StringComparison.OrdinalIgnoreCase);
+
+            if (!isPremium)
+            {
+                _logger.LogDebug("Skipping event history creation: Household {HouseholdId} does not have premium plan", eventEntity.HouseholdId);
+                return;
+            }
+
+            // Get task name if event is linked to a task
+            string taskName = "One-off event";
+            if (eventEntity.TaskId.HasValue)
+            {
+                var task = await _unitOfWork.Tasks.GetByIdAsync(eventEntity.TaskId.Value, cancellationToken);
+                if (task != null)
+                {
+                    taskName = task.Name;
+                }
+            }
+
+            // Create event history record
+            var historyEntry = new EventHistoryEntity
+            {
+                EventId = eventEntity.Id,
+                TaskId = eventEntity.TaskId,
+                HouseholdId = eventEntity.HouseholdId,
+                AssignedTo = eventEntity.AssignedTo,
+                CompletedBy = completedBy,
+                DueDate = eventEntity.DueDate,
+                CompletionDate = eventEntity.CompletionDate ?? DateOnly.FromDateTime(DateTime.UtcNow),
+                TaskName = taskName,
+                CompletionNotes = eventEntity.CompletionNotes,
+                CreatedAt = DateTimeOffset.UtcNow
+            };
+
+            await _unitOfWork.EventsHistory.AddAsync(historyEntry, cancellationToken);
+            // Note: SaveChanges is NOT called here - transaction will be committed by the caller
+
+            _logger.LogInformation(
+                "Created event history entry {HistoryId} for event {EventId} in premium household {HouseholdId}",
+                historyEntry.Id,
+                eventEntity.Id,
+                eventEntity.HouseholdId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating event history for event {EventId}", eventEntity.Id);
+            throw; // Re-throw to rollback the entire transaction
+        }
     }
 
     /// <summary>

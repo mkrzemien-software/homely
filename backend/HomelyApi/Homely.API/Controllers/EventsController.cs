@@ -2,6 +2,7 @@ using Homely.API.Models.DTOs;
 using Homely.API.Models.DTOs.Tasks;
 using Homely.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Homely.API.Controllers;
 
@@ -427,14 +428,23 @@ public class EventsController : ControllerBase
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                
+
                 return BadRequest(ApiResponseDto<object>.ErrorResponse(
                     "Validation failed",
                     StatusCodes.Status400BadRequest,
                     errors));
             }
 
-            var eventDto = await _eventService.CompleteEventAsync(id, completeDto, cancellationToken);
+            // Get current user ID from claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var completedBy))
+            {
+                return Unauthorized(ApiResponseDto<object>.ErrorResponse(
+                    "User not authenticated",
+                    StatusCodes.Status401Unauthorized));
+            }
+
+            var eventDto = await _eventService.CompleteEventAsync(id, completeDto, completedBy, cancellationToken);
             return Ok(ApiResponseDto<EventDto>.SuccessResponse(eventDto));
         }
         catch (InvalidOperationException ex)

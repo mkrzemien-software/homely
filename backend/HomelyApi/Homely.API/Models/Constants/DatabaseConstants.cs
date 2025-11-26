@@ -51,12 +51,12 @@ public static class DatabaseConstants
         public static readonly string[] AllUrgencyStatuses = { Overdue, Today, ThisWeek, ThisMonth, Upcoming };
     }
 
-    public static class UsageTypes
+    public static class PlanUsageTypes
     {
-        public const string Items = "items";
+        public const string Tasks = "tasks";
         public const string HouseholdMembers = "household_members";
         public const string StorageMb = "storage_mb";
 
-        public static readonly string[] AllUsageTypes = { Items, HouseholdMembers, StorageMb };
+        public static readonly string[] AllUsageTypes = { Tasks, HouseholdMembers, StorageMb };
     }
 }

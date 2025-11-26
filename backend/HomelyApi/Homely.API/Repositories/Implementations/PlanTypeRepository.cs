@@ -39,8 +39,8 @@ public class PlanTypeRepository : BaseRepository<PlanTypeEntity, int>, IPlanType
 
         return limitType switch
         {
-            DatabaseConstants.UsageTypes.Items => await CheckItemsLimitAsync(planType, householdId, cancellationToken),
-            DatabaseConstants.UsageTypes.HouseholdMembers => await CheckMembersLimitAsync(planType, householdId, cancellationToken),
+            DatabaseConstants.PlanUsageTypes.Tasks => await CheckItemsLimitAsync(planType, householdId, cancellationToken),
+            DatabaseConstants.PlanUsageTypes.HouseholdMembers => await CheckMembersLimitAsync(planType, householdId, cancellationToken),
             _ => true
         };
     }

@@ -1,8 +1,9 @@
--- Migration: Create Views and Triggers
--- Description: Creates optimized views for dashboard queries and automated triggers for business logic
--- Objects: dashboard_upcoming_tasks view, user profile creation trigger, plan data insertion
+-- Migration: Create Views and Insert Default Data
+-- Description: Creates optimized views for dashboard queries and inserts default plan types and categories
+-- Objects: dashboard_upcoming_tasks view, plan types, category types, categories
 -- Author: Homely MVP Database Schema
 -- Date: 2025-10-12
+-- Updated: 2025-11-26 - Removed database triggers, business logic moved to .NET code
 
 -- ============================================================================
 -- DASHBOARD VIEWS FOR OPTIMIZED QUERIES
@@ -60,132 +61,24 @@ order by priority_score desc, e.due_date asc, e.priority desc;
 comment on view dashboard_upcoming_tasks is 'Optimized dashboard view showing pending events with urgency classification and priority scoring';
 
 -- ============================================================================
--- AUTOMATED TRIGGERS FOR BUSINESS LOGIC
+-- BUSINESS LOGIC NOW HANDLED IN .NET CODE
 -- ============================================================================
-
--- ============================================================================
--- 2. AUTOMATIC EVENT HISTORY CREATION TRIGGER
--- ============================================================================
--- Automatically creates history record when event is completed (premium feature)
-create or replace function create_event_history()
-returns trigger as $$
-declare
-    task_name_var varchar(100);
-begin
-    -- Only create history when event is marked as completed
-    if new.status = 'completed' and old.status != 'completed' then
-        -- Get task name if event is linked to a task
-        if new.task_id is not null then
-            select name into task_name_var from tasks where id = new.task_id;
-        else
-            task_name_var := 'One-off event';
-        end if;
-
-        insert into tasks_history (
-            event_id,
-            task_id,
-            household_id,
-            assigned_to,
-            completed_by,
-            due_date,
-            completion_date,
-            task_name,
-            completion_notes
-        )
-        values (
-            new.id,
-            new.task_id,
-            new.household_id,
-            new.assigned_to,
-            auth.uid(), -- user who marked it complete
-            new.due_date,
-            coalesce(new.completion_date, current_date),
-            task_name_var,
-            new.completion_notes
-        );
-    end if;
-    return new;
-end;
-$$ language plpgsql security definer;
-
--- Create trigger on events table
-create trigger create_event_history_trigger
-    after update on events
-    for each row
-    execute function create_event_history();
-
-comment on function create_event_history() is 'Premium feature: Automatically records event completion history';
-comment on trigger create_event_history_trigger on events is 'Creates history record when event is completed';
-
--- ============================================================================
--- 3. AUTOMATIC RECURRING EVENT CREATION
--- ============================================================================
--- NOTE: Recurring event creation is handled in application code, not via database trigger
--- This ensures better control, error handling, and business logic flexibility
-
--- ============================================================================
--- 4. PLAN USAGE TRACKING TRIGGER
--- ============================================================================
--- Automatically updates plan usage statistics when tasks/members are added
-create or replace function update_plan_usage()
-returns trigger as $$
-declare
-    household_uuid uuid;
-    usage_count integer;
-begin
-    -- Determine household_id based on table
-    if tg_table_name = 'tasks' then
-        household_uuid := coalesce(new.household_id, old.household_id);
-
-        -- Count current active tasks for household
-        select count(*) into usage_count
-        from tasks
-        where household_id = household_uuid
-            and deleted_at is null
-            and is_active = true;
-
-        -- Update or insert plan usage record
-        insert into plan_usage (household_id, usage_type, current_value, usage_date)
-        values (household_uuid, 'tasks', usage_count, current_date)
-        on conflict (household_id, usage_type, usage_date)
-        do update set
-            current_value = excluded.current_value,
-            updated_at = now();
-
-    elsif tg_table_name = 'household_members' then
-        household_uuid := coalesce(new.household_id, old.household_id);
-
-        -- Count current active members for household
-        select count(*) into usage_count
-        from household_members
-        where household_id = household_uuid
-            and deleted_at is null;
-
-        -- Update or insert plan usage record
-        insert into plan_usage (household_id, usage_type, current_value, usage_date)
-        values (household_uuid, 'household_members', usage_count, current_date)
-        on conflict (household_id, usage_type, usage_date)
-        do update set
-            current_value = excluded.current_value,
-            updated_at = now();
-    end if;
-
-    return coalesce(new, old);
-end;
-$$ language plpgsql security definer;
-
--- Create triggers for plan usage tracking
-create trigger update_tasks_plan_usage_trigger
-    after insert or update or delete on tasks
-    for each row
-    execute function update_plan_usage();
-
-create trigger update_members_plan_usage_trigger
-    after insert or update or delete on household_members
-    for each row
-    execute function update_plan_usage();
-
-comment on function update_plan_usage() is 'Automatically tracks plan usage statistics for subscription limits';
+-- All business logic previously handled by database triggers is now implemented
+-- in the .NET application layer for better control, testability, and maintainability:
+--
+-- 1. Event History Creation (Premium Feature):
+--    - Handled in EventService.CompleteEventAsync()
+--    - Creates tasks_history entry only for premium households
+--
+-- 2. Recurring Event Creation:
+--    - Handled in EventService.CompleteEventAsync()
+--    - Creates next event based on task template interval
+--
+-- 3. Plan Usage Tracking:
+--    - Handled in PlanUsageService
+--    - UpdateTasksUsageAsync() tracks task count
+--    - UpdateMembersUsageAsync() tracks member count
+--    - Integrated in TaskService and HouseholdMemberService
 
 -- ============================================================================
 -- 5. INSERT DEFAULT PLAN TYPES AND CATEGORY DATA
@@ -221,7 +114,7 @@ on conflict (category_type_id, name) do nothing;
 comment on view dashboard_upcoming_tasks is 'Main dashboard view with all pending events and urgency classification';
 
 -- ============================================================================
--- END OF VIEWS AND TRIGGERS MIGRATION
+-- END OF VIEWS MIGRATION
 -- ============================================================================
 
 

@@ -110,16 +110,18 @@ The database uses a multi-tenant architecture with households as the primary iso
 - `households` - Household entities with subscription plans
 - `household_members` - User-household relationship with roles (admin, member, dashboard)
 - `plan_types` - Subscription plan definitions
+- `plan_usage` - Usage tracking for subscription limits (managed by PlanUsageService)
 - `category_types` - High-level categories (technical inspections, waste collection, medical visits)
 - `categories` - Specific categories within types
-- `items` - Devices and visits to track
-- `tasks` - Scheduled appointments with due dates
-- `tasks_history` - Completed tasks archive (premium feature)
+- `tasks` - Task templates defining what and how often
+- `events` - Scheduled task occurrences with due dates
+- `events_history` - Completed events archive (premium feature)
 
 **Key Relationships**:
 - Users can belong to multiple households
-- Each household has a subscription plan with limits (free: 3 members, 5 items)
-- Items generate recurring tasks based on intervals (years, months, weeks, days)
+- Each household has a subscription plan with limits (free: 3 members, 5 tasks)
+- Task templates define recurring patterns (years, months, weeks, days)
+- Events are generated from task templates and track completion
 - All tables implement soft delete pattern (`deleted_at` column)
 
 **Security**:
@@ -135,7 +137,7 @@ The database uses a multi-tenant architecture with households as the primary iso
 - Create rich domain models with behavior, not just data
 - Implement value objects for concepts without identity
 - Use aggregates to enforce consistency boundaries
-- Trigger Supabase operations via domain events (asynchronously)
+- Business logic is implemented in services, not database triggers
 
 **Entity Framework Guidelines**:
 - Use Repository and Unit of Work patterns
@@ -152,6 +154,17 @@ The database uses a multi-tenant architecture with households as the primary iso
   - Singleton: Stateless services
 - Integrate Supabase SDK via typed HTTP clients
 - Implement Supabase JWT authentication using ASP.NET middleware
+
+**Business Logic Services**:
+- `PlanUsageService` - Tracks subscription usage (tasks, household members)
+  - `UpdateTasksUsageAsync()` - Updates task count after create/delete
+  - `UpdateMembersUsageAsync()` - Updates member count after add/remove
+  - `WouldExceedLimitAsync()` - Validates plan limits before operations
+- `EventService` - Manages event lifecycle
+  - `CompleteEventAsync()` - Marks event complete, creates next recurring event
+  - Creates `events_history` entries for premium households only
+- `TaskService` - Manages task templates with usage limit validation
+- `HouseholdMemberService` - Manages household members with usage limit validation
 
 **Supabase Integration**:
 - Use official Supabase .NET SDK or REST API via typed HTTP clients
@@ -195,9 +208,10 @@ The REST API follows RESTful conventions with resource-based endpoints:
 **Validation**: Enforced on both client and server side
 
 **Business Rules**:
-- Free plan limits: 3 household members, 5 items
-- Task generation: Automatic based on item intervals
-- Premium features: Task history, unlimited items/members
+- Free plan limits: 3 household members, 5 tasks (enforced in .NET services)
+- Recurring event creation: Automatic on event completion (handled in EventService)
+- Premium features: Event history archive, unlimited tasks/members
+- Plan usage tracking: Managed by PlanUsageService (replaces database triggers)
 
 ## Coding Standards
 
@@ -275,12 +289,16 @@ From `.cursor/rules/devops.mdc`:
 The `auth.users` table is automatically managed by Supabase - **DO NOT create it manually**. User data should be accessed directly from the `auth.users` table when needed.
 
 ### Freemium Limitations
-Free plan enforces:
+Free plan enforces (validated in .NET services):
 - Maximum 3 household members
-- Maximum 5 items (devices/visits)
-- No access to task history and analytics
+- Maximum 5 task templates
+- No access to event history and analytics
 
-Premium plan removes these limits and adds advanced features.
+Premium plan (Premium, Rodzinny) removes these limits and adds:
+- Event history archive (`events_history` table)
+- Unlimited task templates
+- Unlimited household members
+- Advanced analytics and reporting
 
 ### Soft Delete Pattern
 All main tables use soft delete (`deleted_at` timestamp). Always filter out soft-deleted records in queries and indexes.
@@ -291,12 +309,41 @@ All main tables use soft delete (`deleted_at` timestamp). Always filter out soft
 - Never expose Supabase API keys or secrets in client code
 - Use JWT tokens with proper expiration (30 days)
 
-### Task Generation Logic
-When a task is completed:
-1. Mark current task as completed
-2. Calculate next due date: completion_date + interval
-3. Create new recurring task automatically
-4. Archive to `tasks_history` if premium user
+### Event Completion Logic
+**Implemented in**: `EventService.CompleteEventAsync()` (backend/HomelyApi/Homely.API/Services/EventService.cs:240)
+
+When an event is completed:
+1. Mark current event as completed
+2. If event has a task template with interval:
+   - Calculate next due date: completion_date + interval
+   - Create new recurring event automatically
+3. If household has premium plan (Premium or Rodzinny):
+   - Archive completion to `events_history` table
+   - Includes event details, task name snapshot, completion notes
+
+**Note**: Previously handled by database triggers, now implemented in .NET for better testability and control.
+
+### Plan Usage Tracking
+**Implemented in**: `PlanUsageService` (backend/HomelyApi/Homely.API/Services/PlanUsageService.cs)
+
+Subscription plan usage is tracked and validated in application code:
+
+**TaskService Integration**:
+- Before creating a task: `WouldExceedLimitAsync()` validates plan limit
+- After creating/deleting a task: `UpdateTasksUsageAsync()` updates usage count
+- Throws `InvalidOperationException` if plan limit exceeded
+
+**HouseholdMemberService Integration**:
+- Before adding a member: `WouldExceedLimitAsync()` validates plan limit
+- After adding/removing a member: `UpdateMembersUsageAsync()` updates usage count
+- Throws `InvalidOperationException` if plan limit exceeded
+
+**Database Table**: `plan_usage`
+- Stores current usage counts per household per day
+- Fields: `household_id`, `usage_type` (tasks/household_members), `current_value`, `max_value`, `usage_date`
+- Updated via `PlanUsageRepository.UpdateOrCreateUsageAsync()`
+
+**Note**: Previously handled by database triggers (`update_plan_usage()`), now implemented in .NET for better testability, error handling, and business logic control.
 
 ## Project Status
 

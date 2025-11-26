@@ -55,7 +55,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITaskService, TaskService>();
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<IHouseholdService, HouseholdService>();
+        services.AddScoped<IHouseholdMemberService, HouseholdMemberService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IPlanUsageService, PlanUsageService>();
 
         return services;
     }

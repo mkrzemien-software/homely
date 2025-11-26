@@ -55,8 +55,14 @@ public interface IEventService
     /// <summary>
     /// Mark event as completed. If event is recurring and has an associated task template,
     /// automatically creates the next recurring event based on task's interval.
+    /// For premium households, archives the completion to events_history.
     /// </summary>
-    Task<EventDto> CompleteEventAsync(Guid eventId, CompleteEventDto completeDto, CancellationToken cancellationToken = default);
+    /// <param name="eventId">The event ID to complete</param>
+    /// <param name="completeDto">Completion details</param>
+    /// <param name="completedBy">User ID who completed the event</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The completed event</returns>
+    Task<EventDto> CompleteEventAsync(Guid eventId, CompleteEventDto completeDto, Guid completedBy, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Postpone event to a new due date with a reason

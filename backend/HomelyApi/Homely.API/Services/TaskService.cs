@@ -10,13 +10,16 @@ namespace Homely.API.Services;
 public class TaskService : ITaskService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPlanUsageService _planUsageService;
     private readonly ILogger<TaskService> _logger;
 
     public TaskService(
         IUnitOfWork unitOfWork,
+        IPlanUsageService planUsageService,
         ILogger<TaskService> logger)
     {
         _unitOfWork = unitOfWork;
+        _planUsageService = planUsageService;
         _logger = logger;
     }
 
@@ -144,6 +147,12 @@ public class TaskService : ITaskService
                 throw new InvalidOperationException($"User with ID {createDto.CreatedBy} does not exist in user_profiles. Please ensure the user profile is created before creating tasks.");
             }
 
+            // Check if adding this task would exceed plan limit
+            if (await _planUsageService.WouldExceedLimitAsync(createDto.HouseholdId, Models.Constants.DatabaseConstants.PlanUsageTypes.Tasks, cancellationToken))
+            {
+                throw new InvalidOperationException($"Cannot create task: Household {createDto.HouseholdId} has reached its plan limit for tasks. Please upgrade to a premium plan.");
+            }
+
             var task = new TaskEntity
             {
                 HouseholdId = createDto.HouseholdId,
@@ -167,6 +176,9 @@ public class TaskService : ITaskService
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Task created with ID {TaskId} for household {HouseholdId}", task.Id, task.HouseholdId);
+
+            // Update plan usage tracking (replaces database trigger)
+            await _planUsageService.UpdateTasksUsageAsync(createDto.HouseholdId, cancellationToken);
 
             // Reload with details
             var createdTask = await _unitOfWork.Tasks.GetWithDetailsAsync(task.Id, cancellationToken);
@@ -232,6 +244,8 @@ public class TaskService : ITaskService
                 return false;
             }
 
+            var householdId = task.HouseholdId;
+
             // Soft delete
             task.DeletedAt = DateTimeOffset.UtcNow;
             task.UpdatedAt = DateTimeOffset.UtcNow;
@@ -240,6 +254,9 @@ public class TaskService : ITaskService
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Task {TaskId} soft deleted successfully", taskId);
+
+            // Update plan usage tracking (replaces database trigger)
+            await _planUsageService.UpdateTasksUsageAsync(householdId, cancellationToken);
 
             return true;
         }
