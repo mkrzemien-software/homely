@@ -233,10 +233,14 @@ export class EventDetailsDialogComponent {
    */
   showPostponeForm(): void {
     this.postponeMode.set(true);
-    // Set default new date to tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    this.newDueDate.set(tomorrow);
+    // Set default new date to current event's due date
+    const ev = this.event();
+    if (ev) {
+      // Parse date in local timezone to avoid timezone issues
+      const [year, month, day] = ev.dueDate.split('-').map(Number);
+      const currentDueDate = new Date(year, month - 1, day);
+      this.newDueDate.set(currentDueDate);
+    }
   }
 
   /**
@@ -257,11 +261,17 @@ export class EventDetailsDialogComponent {
     const reason = this.postponeReason();
 
     if (ev && newDate) {
+      // Format date in local timezone to avoid timezone issues
+      const year = newDate.getFullYear();
+      const month = String(newDate.getMonth() + 1).padStart(2, '0');
+      const day = String(newDate.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+
       this.action.emit({
         action: 'postpone',
         event: ev,
         data: {
-          newDueDate: newDate.toISOString().split('T')[0],
+          newDueDate: formattedDate,
           reason
         }
       });

@@ -38,6 +38,31 @@ public class EventDto
     public Guid? AssignedTo { get; set; }
 
     /// <summary>
+    /// Assigned user first name
+    /// </summary>
+    public string? AssignedToFirstName { get; set; }
+
+    /// <summary>
+    /// Assigned user last name
+    /// </summary>
+    public string? AssignedToLastName { get; set; }
+
+    /// <summary>
+    /// Category ID from the task
+    /// </summary>
+    public int? CategoryId { get; set; }
+
+    /// <summary>
+    /// Category name from the task
+    /// </summary>
+    public string? CategoryName { get; set; }
+
+    /// <summary>
+    /// Category type name from the task
+    /// </summary>
+    public string? CategoryTypeName { get; set; }
+
+    /// <summary>
     /// Due date for the event
     /// </summary>
     public DateOnly DueDate { get; set; }

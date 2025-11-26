@@ -117,9 +117,7 @@ export class SidebarComponent {
       return;
     }
 
-    // Call the API to get household details with 5 second timeout
     this.householdService.getById(householdId)
-      .pipe(timeout(2000))
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {

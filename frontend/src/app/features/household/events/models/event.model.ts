@@ -68,6 +68,31 @@ export interface Event {
   assignedTo: string;
 
   /**
+   * Assigned user first name
+   */
+  assignedToFirstName?: string;
+
+  /**
+   * Assigned user last name
+   */
+  assignedToLastName?: string;
+
+  /**
+   * Category ID from the task
+   */
+  categoryId?: number;
+
+  /**
+   * Category name from the task
+   */
+  categoryName?: string;
+
+  /**
+   * Category type name from the task
+   */
+  categoryTypeName?: string;
+
+  /**
    * Due date
    */
   dueDate: string;

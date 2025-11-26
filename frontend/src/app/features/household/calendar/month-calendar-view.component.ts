@@ -455,11 +455,8 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
 
   /**
    * Convert Event to DashboardEvent
-   * This is a temporary solution - ideally we'd fetch the full event with relations
    */
   private convertToDashboardEvent(event: Event): DashboardEvent {
-    // This is a simplified conversion
-    // In production, you'd want to fetch the full event details from the API
     return {
       id: event.id,
       dueDate: event.dueDate,
@@ -467,15 +464,15 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
       task: {
         name: event.taskName,
         category: {
-          name: 'Unknown', // We don't have this info in Event model
+          name: event.categoryName || 'Bez kategorii',
           categoryType: {
-            name: 'Unknown'
+            name: event.categoryTypeName || 'Ogólne'
           }
         }
       },
       assignedTo: {
-        firstName: 'Unknown', // We don't have this info in Event model
-        lastName: ''
+        firstName: event.assignedToFirstName || 'Nieprzypisany',
+        lastName: event.assignedToLastName || ''
       },
       priority: event.priority,
       status: event.status as any

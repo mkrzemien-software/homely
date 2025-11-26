@@ -36,6 +36,7 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
             e => e.HouseholdId == householdId,
             e => e.Task!,
             e => e.Task!.Category!,
+            e => e.Task!.Category!.CategoryType,
             e => e.AssignedToUser!);
     }
 
@@ -46,7 +47,10 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
         return await GetWhereAsync(
             e => e.AssignedTo == userId,
             e => e.Task!,
-            e => e.Household);
+            e => e.Task!.Category!,
+            e => e.Task!.Category!.CategoryType,
+            e => e.Household,
+            e => e.AssignedToUser!);
     }
 
     public async Task<IEnumerable<EventEntity>> GetByStatusAsync(
@@ -57,7 +61,9 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
         return await GetWhereAsync(
             e => e.HouseholdId == householdId && e.Status == status,
             e => e.Task!,
-            e => e.Task!.Category!);
+            e => e.Task!.Category!,
+            e => e.Task!.Category!.CategoryType,
+            e => e.AssignedToUser!);
     }
 
     public async Task<IEnumerable<EventEntity>> GetUpcomingEventsAsync(
@@ -74,7 +80,9 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
                        e.DeletedAt == null)
             .Include(e => e.Task)
                 .ThenInclude(t => t!.Category)
+                .ThenInclude(c => c!.CategoryType)
             .Include(e => e.Household)
+            .Include(e => e.AssignedToUser)
             .OrderBy(e => e.DueDate)
             .ToListAsync(cancellationToken);
     }
@@ -94,7 +102,9 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
                  e.DueDate <= toDate &&
                  e.Status == DatabaseConstants.TaskStatuses.Pending,
             e => e.Task!,
-            e => e.Task!.Category!);
+            e => e.Task!.Category!,
+            e => e.Task!.Category!.CategoryType,
+            e => e.AssignedToUser!);
     }
 
     public async Task<IEnumerable<EventEntity>> GetOverdueEventsAsync(
@@ -108,7 +118,9 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
                  e.DueDate < today &&
                  e.Status == DatabaseConstants.TaskStatuses.Pending,
             e => e.Task!,
-            e => e.Task!.Category!);
+            e => e.Task!.Category!,
+            e => e.Task!.Category!.CategoryType,
+            e => e.AssignedToUser!);
     }
 
     public async Task<IEnumerable<EventEntity>> GetTaskEventsAsync(
@@ -126,6 +138,7 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
             eventId,
             e => e.Task!,
             e => e.Task!.Category!,
+            e => e.Task!.Category!.CategoryType,
             e => e.Household,
             e => e.AssignedToUser!,
             e => e.CreatedByUser);

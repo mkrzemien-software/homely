@@ -135,8 +135,8 @@ public class EventService : IEventService
     {
         try
         {
-            // Get the task to inherit priority if not specified
-            var task = await _unitOfWork.Tasks.GetByIdAsync(createDto.TaskId, cancellationToken);
+            // Get the task with full details to inherit priority and category info
+            var task = await _unitOfWork.Tasks.GetWithDetailsAsync(createDto.TaskId, cancellationToken);
             if (task == null || task.DeletedAt != null)
             {
                 throw new InvalidOperationException($"Task template with ID {createDto.TaskId} not found");
@@ -162,10 +162,9 @@ public class EventService : IEventService
             _logger.LogInformation("Event created with ID {EventId} for task {TaskId} in household {HouseholdId}",
                 eventEntity.Id, task.Id, eventEntity.HouseholdId);
 
-            // Load task navigation property for DTO mapping
-            eventEntity.Task = task;
-
-            return MapToDto(eventEntity);
+            // Load full event details to return complete DTO
+            var createdEvent = await _unitOfWork.Events.GetWithDetailsAsync(eventEntity.Id, cancellationToken);
+            return MapToDto(createdEvent!);
         }
         catch (Exception ex)
         {
@@ -416,7 +415,7 @@ public class EventService : IEventService
             }
 
             // Calculate next due date based on task template's interval
-            var nextDueDate = CalculateNextDueDate(completionDate, taskTemplate);
+            var nextDueDate = CalculateNextDueDate(completedEvent.DueDate, taskTemplate);
 
             // Create new event
             var newEvent = new EventEntity
@@ -494,6 +493,11 @@ public class EventService : IEventService
             HouseholdId = entity.HouseholdId,
             HouseholdName = entity.Household?.Name,
             AssignedTo = entity.AssignedTo,
+            AssignedToFirstName = entity.AssignedToUser?.FirstName,
+            AssignedToLastName = entity.AssignedToUser?.LastName,
+            CategoryId = entity.Task?.Category?.Id,
+            CategoryName = entity.Task?.Category?.Name,
+            CategoryTypeName = entity.Task?.Category?.CategoryType?.Name,
             DueDate = entity.DueDate,
             Status = entity.Status,
             Priority = entity.Priority,
