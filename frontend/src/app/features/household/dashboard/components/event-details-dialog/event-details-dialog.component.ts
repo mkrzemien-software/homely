@@ -237,7 +237,9 @@ export class EventDetailsDialogComponent {
     const ev = this.event();
     if (ev) {
       // Parse date in local timezone to avoid timezone issues
-      const [year, month, day] = ev.dueDate.split('-').map(Number);
+      // dueDate is in ISO 8601 format, e.g., "2025-01-15" or "2025-01-15T10:00:00Z"
+      const datePart = ev.dueDate.split('T')[0]; // Take only the date part (YYYY-MM-DD)
+      const [year, month, day] = datePart.split('-').map(Number);
       const currentDueDate = new Date(year, month - 1, day);
       this.newDueDate.set(currentDueDate);
     }

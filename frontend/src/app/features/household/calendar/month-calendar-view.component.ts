@@ -252,7 +252,19 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
       backgroundColor: this.getEventColor(event),
       borderColor: this.getEventColor(event),
       extendedProps: {
-        event: event
+        event: event,
+        // Map category information
+        categoryId: event.categoryId,
+        categoryName: event.categoryName,
+        categoryTypeName: event.categoryTypeName,
+        // Map assigned user information
+        assignedTo: event.assignedTo,
+        assignedToFirstName: event.assignedToFirstName,
+        assignedToLastName: event.assignedToLastName,
+        // Additional event properties
+        priority: event.priority,
+        status: event.status,
+        isOverdue: event.isOverdue
       }
     }));
   }

@@ -22,11 +22,40 @@ public class EventService : IEventService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<EventDto>> GetHouseholdEventsAsync(Guid householdId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<EventDto>> GetHouseholdEventsAsync(Guid householdId, DateOnly? startDate = null, DateOnly? endDate = null, CancellationToken cancellationToken = default)
     {
         try
         {
-            var events = await _unitOfWork.Events.GetHouseholdEventsAsync(householdId, cancellationToken);
+            IEnumerable<EventEntity> events;
+            
+            // If date range is specified, use custom query without status filter
+            if (startDate.HasValue || endDate.HasValue)
+            {
+                // Build query with date filtering but without status restriction
+                var query = _unitOfWork.Events.Query()
+                    .Include(e => e.Task!)
+                        .ThenInclude(t => t.Category!)
+                        .ThenInclude(c => c!.CategoryType)
+                    .Include(e => e.AssignedToUser)
+                    .Where(e => e.HouseholdId == householdId && e.DeletedAt == null);
+
+                if (startDate.HasValue)
+                {
+                    query = query.Where(e => e.DueDate >= startDate.Value);
+                }
+
+                if (endDate.HasValue)
+                {
+                    query = query.Where(e => e.DueDate <= endDate.Value);
+                }
+
+                events = await query.ToListAsync(cancellationToken);
+            }
+            else
+            {
+                events = await _unitOfWork.Events.GetHouseholdEventsAsync(householdId, cancellationToken);
+            }
+            
             return events
                 .Where(e => e.DeletedAt == null)
                 .Select(MapToDto);

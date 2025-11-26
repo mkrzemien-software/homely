@@ -30,6 +30,8 @@ public class EventsController : ControllerBase
     /// </summary>
     /// <param name="householdId">Household ID</param>
     /// <param name="status">Optional status filter</param>
+    /// <param name="startDate">Optional start date filter (YYYY-MM-DD)</param>
+    /// <param name="endDate">Optional end date filter (YYYY-MM-DD)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of events</returns>
     [HttpGet]
@@ -39,6 +41,8 @@ public class EventsController : ControllerBase
     public async Task<ActionResult<ApiResponseDto<IEnumerable<EventDto>>>> GetEvents(
         [FromQuery] Guid householdId,
         [FromQuery] string? status = null,
+        [FromQuery] string? startDate = null,
+        [FromQuery] string? endDate = null,
         CancellationToken cancellationToken = default)
     {
         try
@@ -52,13 +56,47 @@ public class EventsController : ControllerBase
 
             IEnumerable<EventDto> events;
 
+            // Parse dates if provided
+            DateOnly? parsedStartDate = null;
+            DateOnly? parsedEndDate = null;
+
+            if (!string.IsNullOrEmpty(startDate))
+            {
+                if (!DateOnly.TryParse(startDate, out var sd))
+                {
+                    return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                        "Invalid start date format. Use YYYY-MM-DD",
+                        StatusCodes.Status400BadRequest));
+                }
+                parsedStartDate = sd;
+            }
+
+            if (!string.IsNullOrEmpty(endDate))
+            {
+                if (!DateOnly.TryParse(endDate, out var ed))
+                {
+                    return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                        "Invalid end date format. Use YYYY-MM-DD",
+                        StatusCodes.Status400BadRequest));
+                }
+                parsedEndDate = ed;
+            }
+
             if (!string.IsNullOrEmpty(status))
             {
                 events = await _eventService.GetEventsByStatusAsync(householdId, status, cancellationToken);
+                
+                // Apply date filtering if specified
+                if (parsedStartDate.HasValue || parsedEndDate.HasValue)
+                {
+                    events = events.Where(e => 
+                        (!parsedStartDate.HasValue || e.DueDate >= parsedStartDate.Value) &&
+                        (!parsedEndDate.HasValue || e.DueDate <= parsedEndDate.Value));
+                }
             }
             else
             {
-                events = await _eventService.GetHouseholdEventsAsync(householdId, cancellationToken);
+                events = await _eventService.GetHouseholdEventsAsync(householdId, parsedStartDate, parsedEndDate, cancellationToken);
             }
 
             return Ok(ApiResponseDto<IEnumerable<EventDto>>.SuccessResponse(events));

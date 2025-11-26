@@ -8,9 +8,9 @@ namespace Homely.API.Services;
 public interface IEventService
 {
     /// <summary>
-    /// Get all events for a household
+    /// Get all events for a household with optional date filtering
     /// </summary>
-    Task<IEnumerable<EventDto>> GetHouseholdEventsAsync(Guid householdId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<EventDto>> GetHouseholdEventsAsync(Guid householdId, DateOnly? startDate = null, DateOnly? endDate = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get events assigned to a specific user
