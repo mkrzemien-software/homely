@@ -25,7 +25,9 @@
       "Bash(git mv:*)",
       "Bash(npm install:*)",
       "Bash(nslookup:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet test:*)"
     ],
     "deny": [],
     "ask": []
