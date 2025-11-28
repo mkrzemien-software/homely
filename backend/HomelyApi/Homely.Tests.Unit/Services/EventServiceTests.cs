@@ -593,4 +593,270 @@ public class EventServiceTests : UnitTestBase
     }
 
     #endregion
+
+    #region Logging Tests
+
+    [Fact]
+    public async Task CompleteEventAsync_ShouldLogInformation_WhenEventIsCompleted()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        var existingEvent = TestDataBuilder.CreateEvent(id: eventId);
+
+        _mockEventRepository
+            .Setup(r => r.GetWithDetailsAsync(eventId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingEvent);
+
+        _mockEventRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<EventEntity>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventEntity e, CancellationToken ct) => e);
+
+        // Act
+        await _eventService.CompleteEventAsync(eventId, new CompleteEventDto(), Guid.NewGuid());
+
+        // Assert
+        VerifyLoggerWasCalled(
+            _mockLogger,
+            LogLevel.Information,
+            Times.AtLeastOnce());
+    }
+
+    [Fact]
+    public async Task CompleteEventAsync_WithRecurringTask_ShouldLogRecurringEventCreation()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        var taskId = Guid.NewGuid();
+
+        var existingEvent = TestDataBuilder.CreateEvent(
+            id: eventId,
+            taskId: taskId
+        );
+
+        var taskTemplate = TestDataBuilder.CreateTask(
+            id: taskId,
+            monthsValue: 1
+        );
+
+        _mockEventRepository
+            .Setup(r => r.GetWithDetailsAsync(eventId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingEvent);
+
+        _mockTaskRepository
+            .Setup(r => r.GetByIdAsync(taskId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(taskTemplate);
+
+        _mockEventRepository
+            .Setup(r => r.AddAsync(It.IsAny<EventEntity>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventEntity e, CancellationToken ct) => e);
+
+        _mockEventRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<EventEntity>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventEntity e, CancellationToken ct) => e);
+
+        // Act
+        await _eventService.CompleteEventAsync(eventId, new CompleteEventDto(), Guid.NewGuid());
+
+        // Assert - Should log both event completion and recurring event creation
+        VerifyLoggerWasCalled(
+            _mockLogger,
+            LogLevel.Information,
+            Times.AtLeast(2)); // At least: event completed + recurring event created
+    }
+
+    [Fact]
+    public async Task CompleteEventAsync_WithDeletedTaskTemplate_ShouldLogWarning()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        var taskId = Guid.NewGuid();
+
+        var existingEvent = TestDataBuilder.CreateEvent(
+            id: eventId,
+            taskId: taskId
+        );
+
+        // Task template is soft-deleted
+        var deletedTask = TestDataBuilder.CreateTask(
+            id: taskId,
+            monthsValue: 1,
+            deletedAt: DateTimeOffset.UtcNow
+        );
+
+        _mockEventRepository
+            .Setup(r => r.GetWithDetailsAsync(eventId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingEvent);
+
+        _mockTaskRepository
+            .Setup(r => r.GetByIdAsync(taskId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(deletedTask);
+
+        _mockEventRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<EventEntity>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventEntity e, CancellationToken ct) => e);
+
+        // Act
+        await _eventService.CompleteEventAsync(eventId, new CompleteEventDto(), Guid.NewGuid());
+
+        // Assert - Should log warning about missing task template
+        VerifyLoggerWasCalled(
+            _mockLogger,
+            LogLevel.Warning,
+            Times.Once());
+    }
+
+    [Fact]
+    public async Task CompleteEventAsync_WithPremiumPlan_ShouldLogEventHistoryCreation()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        var taskId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var existingEvent = TestDataBuilder.CreateEvent(
+            id: eventId,
+            taskId: taskId,
+            householdId: householdId
+        );
+
+        var taskTemplate = TestDataBuilder.CreateTask(id: taskId);
+        var premiumPlan = TestDataBuilder.CreatePremiumPlanType("Premium");
+        var household = TestDataBuilder.CreateHousehold(
+            id: householdId,
+            planType: premiumPlan
+        );
+
+        _mockEventRepository
+            .Setup(r => r.GetWithDetailsAsync(eventId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingEvent);
+
+        _mockTaskRepository
+            .Setup(r => r.GetByIdAsync(taskId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(taskTemplate);
+
+        _mockHouseholdRepository
+            .Setup(r => r.GetByIdAsync(
+                householdId,
+                It.IsAny<Expression<Func<HouseholdEntity, object>>>()))
+            .ReturnsAsync(household);
+
+        _mockEventHistoryRepository
+            .Setup(r => r.AddAsync(It.IsAny<EventHistoryEntity>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventHistoryEntity h, CancellationToken ct) => h);
+
+        _mockEventRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<EventEntity>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventEntity e, CancellationToken ct) => e);
+
+        // Act
+        await _eventService.CompleteEventAsync(eventId, new CompleteEventDto(), Guid.NewGuid());
+
+        // Assert - Should log event history creation
+        VerifyLoggerWasCalled(
+            _mockLogger,
+            LogLevel.Information,
+            Times.AtLeast(2)); // Event completed + event history created
+    }
+
+    [Fact]
+    public async Task CompleteEventAsync_WithFreePlan_ShouldLogDebug_SkippingEventHistory()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var existingEvent = TestDataBuilder.CreateEvent(
+            id: eventId,
+            householdId: householdId
+        );
+
+        var freePlan = TestDataBuilder.CreateFreePlanType();
+        var household = TestDataBuilder.CreateHousehold(
+            id: householdId,
+            planType: freePlan
+        );
+
+        _mockEventRepository
+            .Setup(r => r.GetWithDetailsAsync(eventId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingEvent);
+
+        _mockHouseholdRepository
+            .Setup(r => r.GetByIdAsync(
+                householdId,
+                It.IsAny<Expression<Func<HouseholdEntity, object>>>()))
+            .ReturnsAsync(household);
+
+        _mockEventRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<EventEntity>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventEntity e, CancellationToken ct) => e);
+
+        // Act
+        await _eventService.CompleteEventAsync(eventId, new CompleteEventDto(), Guid.NewGuid());
+
+        // Assert - Should log debug message about skipping event history
+        VerifyLoggerWasCalled(
+            _mockLogger,
+            LogLevel.Debug,
+            Times.Once());
+    }
+
+    [Fact]
+    public async Task CompleteEventAsync_WithNullHousehold_ShouldLogWarning()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var existingEvent = TestDataBuilder.CreateEvent(
+            id: eventId,
+            householdId: householdId
+        );
+
+        _mockEventRepository
+            .Setup(r => r.GetWithDetailsAsync(eventId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingEvent);
+
+        // Household not found (returns null)
+        _mockHouseholdRepository
+            .Setup(r => r.GetByIdAsync(
+                householdId,
+                It.IsAny<Expression<Func<HouseholdEntity, object>>>()))
+            .ReturnsAsync((HouseholdEntity?)null);
+
+        _mockEventRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<EventEntity>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventEntity e, CancellationToken ct) => e);
+
+        // Act
+        await _eventService.CompleteEventAsync(eventId, new CompleteEventDto(), Guid.NewGuid());
+
+        // Assert - Should log warning about missing household
+        VerifyLoggerWasCalled(
+            _mockLogger,
+            LogLevel.Warning,
+            Times.Once());
+    }
+
+    [Fact]
+    public async Task CompleteEventAsync_NonexistentEvent_ShouldLogError()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+
+        _mockEventRepository
+            .Setup(r => r.GetWithDetailsAsync(eventId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventEntity?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _eventService.CompleteEventAsync(eventId, new CompleteEventDto(), Guid.NewGuid()));
+
+        // Verify error was logged
+        VerifyLoggerWasCalled(
+            _mockLogger,
+            LogLevel.Error,
+            Times.Once());
+    }
+
+    #endregion
 }
