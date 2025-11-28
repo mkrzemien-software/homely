@@ -312,3 +312,6 @@ static string MaskConnectionString(string connectionString)
     });
     return string.Join(";", maskedParts);
 }
+
+// Make Program class accessible for integration tests (WebApplicationFactory)
+public partial class Program { }

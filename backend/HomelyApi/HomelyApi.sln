@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Homely.API", "Homely.API\Ho
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Homely.Tests.Unit", "Homely.Tests.Unit\Homely.Tests.Unit.csproj", "{FFE86902-84F4-4BB8-AF79-9F1256B26023}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Homely.Tests.Integration", "Homely.Tests.Integration\Homely.Tests.Integration.csproj", "{3B2021DC-580A-4758-99D6-C3BAD3D86638}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{FFE86902-84F4-4BB8-AF79-9F1256B26023}.Release|x64.Build.0 = Release|Any CPU
 		{FFE86902-84F4-4BB8-AF79-9F1256B26023}.Release|x86.ActiveCfg = Release|Any CPU
 		{FFE86902-84F4-4BB8-AF79-9F1256B26023}.Release|x86.Build.0 = Release|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Debug|x64.Build.0 = Debug|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Debug|x86.Build.0 = Debug|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Release|x64.ActiveCfg = Release|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Release|x64.Build.0 = Release|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Release|x86.ActiveCfg = Release|Any CPU
+		{3B2021DC-580A-4758-99D6-C3BAD3D86638}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
