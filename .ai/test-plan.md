@@ -945,32 +945,32 @@ Testy są zakończone gdy:
 
 ### 10.5 Plan Mitygacji - Action Items
 
-**Natychmiastowe (Tydzień 1)**:
-- [ ] Setup Testcontainers dla RLS testing (R1)
-- [ ] Create EF + Supabase migration verification test (R4)
-- [ ] Configure GitHub Actions caching (R15)
-- [ ] Setup pre-commit hooks (git-secrets) (R19)
-- [ ] Enable GitHub secret scanning (R19)
+**Natychmiastowe**:
+- Setup Testcontainers dla RLS testing (R1)
+- Create EF + Supabase migration verification test (R4)
+- Configure GitHub Actions caching (R15)
+- Setup pre-commit hooks (git-secrets) (R19)
+- Enable GitHub secret scanning (R19)
 
-**Krótkoterminowe (Tydzień 1-4)**:
-- [ ] Write soft delete global query filter (R6)
-- [ ] Create test data fixtures dla różnych planów (R8)
-- [ ] Setup SonarQube quality gates (R13)
-- [ ] Implement Respawn for database cleanup (R2)
-- [ ] Configure Snyk in CI/CD (R20)
+**Krótkoterminowe**:
+- Write soft delete global query filter (R6)
+- Create test data fixtures dla różnych planów (R8)
+- Setup SonarQube quality gates (R13)
+- Implement Respawn for database cleanup (R2)
+- Configure Snyk in CI/CD (R20)
 
-**Średnioterminowe (Tydzień 5-8)**:
-- [ ] Conduct RLS security review session (R18)
-- [ ] Create test best practices documentation (R10)
-- [ ] Setup Application Insights monitoring (R7)
-- [ ] Implement circuit breaker for Supabase (R14)
-- [ ] Configure PagerDuty alerts (R16)
+**Średnioterminowe**:
+- Conduct RLS security review session (R18)
+- Create test best practices documentation (R10)
+- Setup Application Insights monitoring (R7)
+- Implement circuit breaker for Supabase (R14)
+- Configure PagerDuty alerts (R16)
 
 **Długoterminowe (Post-MVP)**:
-- [ ] External security audit (R18)
-- [ ] Evaluate self-hosted GitHub runners (R15)
-- [ ] Quarterly penetration testing (R18, R20)
-- [ ] Test cleanup sprints scheduling (R13)
+- External security audit (R18)
+- Evaluate self-hosted GitHub runners (R15)
+- Quarterly penetration testing (R18, R20)
+- Test cleanup sprints scheduling (R13)
 
 ### 10.6 Risk Review Cadence
 
@@ -1065,31 +1065,31 @@ Testy są zakończone gdy:
 
 ### 11.3 Harmonogram Wdrożenia Narzędzi
 
-**Tydzień 1-2** (Setup):
-- [ ] Konfiguracja xUnit projektu testowego (.NET 9)
-- [ ] Instalacja FluentAssertions, Moq, Bogus
-- [ ] Setup Testcontainers.PostgreSQL
-- [ ] Setup Respawn dla database cleanup
-- [ ] Konfiguracja Coverlet + ReportGenerator
-- [ ] Setup Jasmine/Karma dla Angular (domyślne)
-- [ ] Instalacja Playwright dla E2E
-- [ ] Konfiguracja GitHub Actions (basic pipeline)
+**Setup**:
+- Konfiguracja xUnit projektu testowego (.NET 9)
+- Instalacja FluentAssertions, Moq, Bogus
+- Setup Testcontainers.PostgreSQL
+- Setup Respawn dla database cleanup
+- Konfiguracja Coverlet + ReportGenerator
+- Setup Jasmine/Karma dla Angular (domyślne)
+- Instalacja Playwright dla E2E
+- Konfiguracja GitHub Actions (basic pipeline)
 
-**Tydzień 3-4** (First Tests):
-- [ ] Pierwsze testy unit (xUnit + FluentAssertions)
-- [ ] Pierwsze integration tests (WebApplicationFactory)
-- [ ] Setup Snyk w GitHub Actions
-- [ ] Pierwsze testy frontend (Jasmine)
+**First Tests**:
+- Pierwsze testy unit (xUnit + FluentAssertions)
+- Pierwsze integration tests (WebApplicationFactory)
+- Setup Snyk w GitHub Actions
+- Pierwsze testy frontend (Jasmine)
 
-**Tydzień 5-6** (E2E & Performance):
-- [ ] Pierwsze E2E testy (Playwright)
-- [ ] Setup k6 dla performance tests (basic)
-- [ ] Manualne testy RLS (dokumentacja)
+**E2E & Performance**:
+- Pierwsze E2E testy (Playwright)
+- Setup k6 dla performance tests (basic)
+- Manualne testy RLS (dokumentacja)
 
-**Tydzień 7+** (Optimization):
-- [ ] CI/CD pipeline tuning
-- [ ] Test coverage monitoring
-- [ ] Regression suite stabilization
+**Optimization**:
+- CI/CD pipeline tuning
+- Test coverage monitoring
+- Regression suite stabilization
 
 ---
 
