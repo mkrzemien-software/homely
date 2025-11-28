@@ -15,7 +15,7 @@ Homely to aplikacja webowa do zarządzania terminami serwisów urządzeń domowy
 
 ### 1.3 Cele Testowania
 1. Zapewnienie poprawności kluczowych funkcjonalności biznesowych (zarządzanie zadaniami, wydarzeniami, gospodarstwami)
-2. Weryfikacja bezpieczeństwa i izolacji danych między gospodarstwami (RLS policies)
+2. Weryfikacja bezpieczeństwa i autoryzacji dostępu do danych
 3. Walidacja limitów planu freemium i funkcji premium
 4. Potwierdzenie zgodności z wymogami RODO
 5. Weryfikacja wydajności i skalowalności systemu
@@ -35,7 +35,6 @@ Homely to aplikacja webowa do zarządzania terminami serwisów urządzeń domowy
 - ✅ System ról i uprawnień (RBAC)
 - ✅ Plan usage tracking (PlanUsageService) i limity freemium
 - ✅ Soft delete pattern dla wszystkich głównych encji
-- ✅ Row Level Security (RLS) - izolacja danych między gospodarstwami
 - ✅ Dashboard z kalendarzem tygodniowym i miesięcznym
 - ✅ Widoki: Wydarzenia, Zadania, Kategorie
 - ✅ Filtrowanie i sortowanie
@@ -48,7 +47,6 @@ Homely to aplikacja webowa do zarządzania terminami serwisów urządzeń domowy
 **Bezpieczeństwo**:
 - ✅ Szyfrowanie danych (AES-256, TLS 1.3)
 - ✅ JWT token validation i expiration (30 dni)
-- ✅ RLS policies dla wszystkich tabel
 - ✅ RODO compliance (eksport danych, usuwanie konta)
 - ✅ Input validation i sanitization (XSS, SQL injection prevention)
 
@@ -186,16 +184,15 @@ Projekt wykorzystuje **podejście Test-Driven Development (TDD) dla komponentów
 **Database Integration Tests**:
 - **Framework**: xUnit + Testcontainers.PostgreSQL
 - **Zakres**:
-  - RLS policies - **manualne testy podstawowe** + integration tests przez API
   - Constraints i foreign keys
   - Indexes performance
+  - Soft delete pattern
   - **Uwaga**: Logika biznesowa w .NET services (nie w database triggers)
 - **Przykładowe przypadki**:
-  - Integration test: User A próbuje GET /tasks dla household B → 403 Forbidden (RLS)
   - Soft delete: zapytania filtrują rekordy z `deleted_at IS NOT NULL`
   - Constraint test: nie można dodać wydarzenia bez zadania (foreign key)
 
-**❌ Pominięte w MVP**: pgTAP (dedykowane testy PostgreSQL)
+**❌ Pominięte w MVP**: pgTAP (dedykowane testy PostgreSQL), RLS policies testing (manualna weryfikacja)
 
 **Frontend Integration Tests**:
 - **Framework**: Angular Testing Library
@@ -263,7 +260,6 @@ Projekt wykorzystuje **podejście Test-Driven Development (TDD) dla komponentów
 
 **Authentication & Authorization**:
 - JWT token validation (expired, invalid, missing)
-- RLS policies - data isolation tests
 - Role-based access control (Admin vs Domownik vs Dashboard)
 - Session management (30 dni expiration)
 
@@ -285,7 +281,6 @@ Projekt wykorzystuje **podejście Test-Driven Development (TDD) dla komponentów
 - Static Application Security Testing (SAST) - SonarQube
 
 **Przykładowe przypadki testowe**:
-- Test RLS: User z household A próbuje GET /tasks?householdId=B → 403 Forbidden
 - Test JWT: Request bez tokenu → 401 Unauthorized
 - Test JWT expired: Request z wygasłym tokenem → 401 + refresh flow
 - Test XSS: Wpisanie `<script>alert('XSS')</script>` w nazwę zadania → sanitization
@@ -592,7 +587,7 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
 
 | Priorytet | Kryteria | Test Coverage | Przykłady |
 |-----------|----------|---------------|-----------|
-| **P0 - Krytyczne** | Blocker dla MVP, bezpieczeństwo, data loss risk | 95%+ | Autentykacja, RLS policies, Event completion logic, Plan usage limits |
+| **P0 - Krytyczne** | Blocker dla MVP, bezpieczeństwo, data loss risk | 95%+ | Autentykacja, Event completion logic, Plan usage limits, Soft delete pattern |
 | **P1 - Wysokie** | Kluczowe funkcjonalności MVP | 85%+ | CRUD Tasks/Events, Dashboard, Role permissions |
 | **P2 - Średnie** | Ważne dla UX, ale nie blocker | 70%+ | Filtrowanie, Sortowanie, Responsive UI |
 | **P3 - Niskie** | Nice-to-have, edge cases | 50%+ | System Developer panel, Advanced analytics |
@@ -628,15 +623,7 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
   - Komunikaty o przekroczeniu limitu
 - **Uzasadnienie**: Model biznesowy freemium - kluczowy dla monetyzacji
 
-**4. Data Isolation (RLS)**
-- **Testy**: Database Integration + Security
-- **Obszary**:
-  - RLS policies dla wszystkich tabel
-  - User A nie widzi danych z household B
-  - Multi-tenant architecture correctness
-- **Uzasadnienie**: Krytyczne dla RODO i trust
-
-**5. Soft Delete Pattern**
+**4. Soft Delete Pattern**
 - **Testy**: Unit + Integration
 - **Obszary**:
   - Wszystkie DELETE operations ustawiają `deleted_at` timestamp
@@ -646,7 +633,7 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
 
 #### P1 - Wysokie (Should Have)
 
-**6. CRUD dla Tasks i Events**
+**5. CRUD dla Tasks i Events**
 - **Testy**: Unit + Integration API
 - **Obszary**:
   - Tworzenie zadania z walidacją
@@ -657,7 +644,7 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
   - Anulowanie wydarzenia (status = cancelled)
 - **Uzasadnienie**: Core functionality MVP
 
-**7. Dashboard i Kalendarz**
+**6. Dashboard i Kalendarz**
 - **Testy**: Unit (components) + E2E
 - **Obszary**:
   - Dashboard z kalendarzem tygodniowym
@@ -666,7 +653,7 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
   - Color-coding (overdue, today, upcoming)
 - **Uzasadnienie**: Primary user interface
 
-**8. Role-Based Access Control**
+**7. Role-Based Access Control**
 - **Testy**: Unit + Integration + E2E
 - **Obszary**:
   - Administrator: full access
@@ -675,7 +662,7 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
   - System Developer: global access
 - **Uzasadnienie**: Multi-user collaboration feature
 
-**9. Zarządzanie Gospodarstwem**
+**8. Zarządzanie Gospodarstwem**
 - **Testy**: Unit + Integration
 - **Obszary**:
   - Tworzenie gospodarstwa
@@ -686,7 +673,7 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
 
 #### P2 - Średnie (Could Have)
 
-**10. Filtry i Sortowanie**
+**9. Filtry i Sortowanie**
 - **Testy**: Unit + Integration
 - **Obszary**:
   - Filtrowanie wydarzeń (osoba, kategoria, priorytet, status, daty)
@@ -694,7 +681,7 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
   - Wyszukiwanie po nazwie
 - **Uzasadnienie**: UX improvement, ale nie blocker
 
-**11. Responsive UI**
+**10. Responsive UI**
 - **Testy**: E2E (Playwright multi-viewport)
 - **Obszary**:
   - Desktop (>1024px): sidebar persistent
@@ -703,7 +690,7 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
   - Kalendarz responsive (days stack vertically)
 - **Uzasadnienie**: Mobile usage expected
 
-**12. Onboarding Flow**
+**11. Onboarding Flow**
 - **Testy**: E2E
 - **Obszary**:
   - Krok 1: Stwórz gospodarstwo
@@ -714,15 +701,15 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
 
 #### P3 - Niskie (Won't Have w MVP)
 
-**13. System Developer Panel**
+**12. System Developer Panel**
 - **Testy**: Integration + E2E (basic smoke tests tylko)
 - **Uzasadnienie**: Admin functionality, niski impact na użytkowników końcowych
 
-**14. Advanced Analytics (Premium)**
+**13. Advanced Analytics (Premium)**
 - **Testy**: Unit + Integration (basic)
 - **Uzasadnienie**: Premium feature, post-MVP priority
 
-**15. Export do CSV/PDF**
+**14. Export do CSV/PDF**
 - **Testy**: Integration
 - **Uzasadnienie**: Nice-to-have feature
 
@@ -732,7 +719,7 @@ Priorytetyzacja oparta na **Risk-Based Testing**:
 - Setup projektu testowego (xUnit, Jasmine, Playwright)
 - Konfiguracja Testcontainers
 - Implementacja testów P0: Autentykacja (10 test cases)
-- Implementacja testów P0: RLS policies (15 test cases)
+- Implementacja testów P0: Soft delete pattern (10 test cases)
 
 **Tydzień 3-4: Core Logic**
 - Testy P0: EventService (20 test cases)
@@ -780,7 +767,6 @@ Testy można uznać za zakończone, gdy:
 **Security**:
 - ✅ 0 critical vulnerabilities (Snyk, OWASP ZAP)
 - ✅ 0 high severity issues (SonarQube)
-- ✅ RLS policies tests: 100% pass rate
 - ✅ Authentication tests: 100% pass rate
 
 **Performance**:
@@ -847,7 +833,7 @@ Testy są zakończone gdy:
 
 | Tydzień | Faza | Aktywności Testowe | Deliverables |
 |---------|------|-------------------|--------------|
-| **1-2** | Setup + Auth | - Setup xUnit, Jasmine, Playwright<br>- Testcontainers config<br>- Testy autentykacji (P0)<br>- Testy RLS policies (P0) | - Test project structure<br>- CI/CD pipeline (basic)<br>- 25 test cases (P0) |
+| **1-2** | Setup + Auth | - Setup xUnit, Jasmine, Playwright<br>- Testcontainers config<br>- Testy autentykacji (P0)<br>- Soft delete tests (P0) | - Test project structure<br>- CI/CD pipeline (basic)<br>- 20 test cases (P0) |
 | **3-4** | Core Logic | - EventService tests (P0)<br>- PlanUsageService tests (P0)<br>- Soft delete tests (P0)<br>- API integration tests (P0) | - 70 test cases (P0)<br>- Code coverage > 80% services<br>- Integration test suite |
 | **5-6** | CRUD + UI | - TaskService, HouseholdService (P1)<br>- Dashboard component tests (P1)<br>- RBAC tests (P1)<br>- E2E critical paths (P0) | - 65 test cases (P1)<br>- 5 E2E scenarios<br>- Frontend coverage > 70% |
 | **7-8** | Polish | - Filtry, sortowanie (P2)<br>- Responsive UI tests (P2)<br>- Security scanning (OWASP, Snyk)<br>- Performance tests (k6) | - 25 test cases (P2)<br>- Security report<br>- Performance baseline<br>- Regression suite |
@@ -907,74 +893,69 @@ Testy są zakończone gdy:
 
 | # | Ryzyko | Prawdopodobieństwo | Impact | Mitygacja | Owner |
 |---|--------|-------------------|--------|-----------|-------|
-| **R1** | **RLS policies trudne do przetestowania** - Supabase RLS wymaga specjalnego contextu użytkownika | Wysokie | Wysoki | - Dedykowane testy z Testcontainers PostgreSQL<br>- Helper functions do symulacji różnych user contexts<br>- Testy z `SET LOCAL role` w PostgreSQL<br>- Code review RLS policies przez security expert | Backend Lead |
-| **R2** | **Flaky E2E tests** - testy Playwright mogą być niestabilne (timing issues, async) | Średnie | Średni | - Użycie Playwright auto-waiting mechanisms<br>- Explicit waits dla network requests<br>- Retry logic dla transient failures<br>- Isolation: każdy test z czystą bazą (Respawn)<br>- Screenshot/video recording dla debugging | QA Engineer |
-| **R3** | **Testcontainers wolne w CI/CD** - podnoszenie kontenerów PostgreSQL może wydłużyć pipeline | Średnie | Średni | - Caching Docker images w GitHub Actions<br>- Parallel test execution<br>- Selective test runs (tylko dla zmian w DB schema)<br>- Rozważyć shared test database dla non-conflicting tests | DevOps |
-| **R4** | **Synchronizacja EF migrations z Supabase schema** - ryzyko desynchronizacji | Wysokie | Wysoki | - Integration tests weryfikujące schema compatibility<br>- Automated migration testing w CI/CD<br>- Supabase CLI w pipeline (npx supabase db diff)<br>- Manual review: EF migration vs Supabase migration | Backend Lead |
-| **R5** | **N+1 query problem** - EF Core może generować nieoptymalne queries | Średnie | Średni | - Code review guidelines (mandatory .Include())<br>- Performance tests z k6 (query count monitoring)<br>- EF Core logging w dev environment<br>- Database query profiler (pg_stat_statements) | Backend Lead |
-| **R6** | **Soft delete pattern - easy to forget filters** | Wysokie | Średni | - Global query filter w EF Core: `HasQueryFilter(e => e.DeletedAt == null)`<br>- Unit tests weryfikujące soft delete w każdym repository<br>- Code review checklist<br>- Linting rules (custom analyzer) | Backend Lead |
-| **R7** | **JWT token expiration issues** (30 dni) | Niskie | Średni | - Unit tests dla token expiration scenarios<br>- Integration tests z expired tokens<br>- Monitoring real user sessions (Application Insights)<br>- Refresh token flow testowany | Backend Lead |
-| **R8** | **Premium feature flags testing** - conditional logic (free vs premium) | Średnie | Średni | - Parametrized tests (xUnit Theory) dla różnych planów<br>- Helper fixtures dla każdego typu planu<br>- E2E tests dla upgrade flow<br>- Database seedy z różnymi planami | QA Engineer |
+| **R1** | **Flaky E2E tests** - testy Playwright mogą być niestabilne (timing issues, async) | Średnie | Średni | - Użycie Playwright auto-waiting mechanisms<br>- Explicit waits dla network requests<br>- Retry logic dla transient failures<br>- Isolation: każdy test z czystą bazą (Respawn)<br>- Screenshot/video recording dla debugging | QA Engineer |
+| **R2** | **Testcontainers wolne w CI/CD** - podnoszenie kontenerów PostgreSQL może wydłużyć pipeline | Średnie | Średni | - Caching Docker images w GitHub Actions<br>- Parallel test execution<br>- Selective test runs (tylko dla zmian w DB schema)<br>- Rozważyć shared test database dla non-conflicting tests | DevOps |
+| **R3** | **Synchronizacja EF migrations z Supabase schema** - ryzyko desynchronizacji | Wysokie | Wysoki | - Integration tests weryfikujące schema compatibility<br>- Automated migration testing w CI/CD<br>- Supabase CLI w pipeline (npx supabase db diff)<br>- Manual review: EF migration vs Supabase migration | Backend Lead |
+| **R4** | **N+1 query problem** - EF Core może generować nieoptymalne queries | Średnie | Średni | - Code review guidelines (mandatory .Include())<br>- Performance tests z k6 (query count monitoring)<br>- EF Core logging w dev environment<br>- Database query profiler (pg_stat_statements) | Backend Lead |
+| **R5** | **Soft delete pattern - easy to forget filters** | Wysokie | Średni | - Global query filter w EF Core: `HasQueryFilter(e => e.DeletedAt == null)`<br>- Unit tests weryfikujące soft delete w każdym repository<br>- Code review checklist<br>- Linting rules (custom analyzer) | Backend Lead |
+| **R6** | **JWT token expiration issues** (30 dni) | Niskie | Średni | - Unit tests dla token expiration scenarios<br>- Integration tests z expired tokens<br>- Monitoring real user sessions (Application Insights)<br>- Refresh token flow testowany | Backend Lead |
+| **R7** | **Premium feature flags testing** - conditional logic (free vs premium) | Średnie | Średni | - Parametrized tests (xUnit Theory) dla różnych planów<br>- Helper fixtures dla każdego typu planu<br>- E2E tests dla upgrade flow<br>- Database seedy z różnymi planami | QA Engineer |
 
 ### 10.2 Ryzyka Organizacyjne
 
 | # | Ryzyko | Prawdopodobieństwo | Impact | Mitygacja | Owner |
 |---|--------|-------------------|--------|-----------|-------|
-| **R9** | **Ograniczony budżet czasu - MVP w 12 tygodni** | Wysokie | Wysoki | - Priorytetyzacja P0 > P1 > P2<br>- Automatyzacja gdzie możliwe (CI/CD)<br>- TDD: testy pisane podczas development, nie po<br>- Realistyczne scope (nie wszystkie edge cases w MVP) | Project Manager |
-| **R10** | **Brak dedykowanego QA team** - deweloperzy piszą testy | Wysokie | Średni | - Code review testów przez senior devs<br>- Pair testing dla krytycznych obszarów<br>- Test guidelines i best practices document<br>- 1 dedykowany tester (part-time) dla E2E | Tech Lead |
-| **R11** | **Zmiana requirements** - PRD może ewoluować | Średnie | Średni | - Regression tests aktualizowane przy zmianach<br>- Test plan review co 2 tygodnie<br>- Flexible test architecture (BDD SpecFlow) dla zmian | Product Owner |
-| **R12** | **Niska adopcja testów przez team** | Niskie | Wysoki | - Szkolenia z xUnit, Playwright, TDD<br>- Showcase: demo wartości automated tests<br>- Mandatory code coverage minimum (80%)<br>- Gamification: leaderboard code coverage | Tech Lead |
-| **R13** | **Test debt accumulation** - pominięcie testów dla speed | Średnie | Wysoki | - Definition of Done: code + tests<br>- PR nie może być merge bez testów<br>- Technical debt tracking (SonarQube)<br>- Dedicated "test cleanup" sprints co 2 miesiące | Tech Lead |
+| **R8** | **Ograniczony budżet czasu - MVP w 12 tygodni** | Wysokie | Wysoki | - Priorytetyzacja P0 > P1 > P2<br>- Automatyzacja gdzie możliwe (CI/CD)<br>- TDD: testy pisane podczas development, nie po<br>- Realistyczne scope (nie wszystkie edge cases w MVP) | Project Manager |
+| **R9** | **Brak dedykowanego QA team** - deweloperzy piszą testy | Wysokie | Średni | - Code review testów przez senior devs<br>- Pair testing dla krytycznych obszarów<br>- Test guidelines i best practices document<br>- 1 dedykowany tester (part-time) dla E2E | Tech Lead |
+| **R10** | **Zmiana requirements** - PRD może ewoluować | Średnie | Średni | - Regression tests aktualizowane przy zmianach<br>- Test plan review co 2 tygodnie<br>- Flexible test architecture (BDD SpecFlow) dla zmian | Product Owner |
+| **R11** | **Niska adopcja testów przez team** | Niskie | Wysoki | - Szkolenia z xUnit, Playwright, TDD<br>- Showcase: demo wartości automated tests<br>- Mandatory code coverage minimum (80%)<br>- Gamification: leaderboard code coverage | Tech Lead |
+| **R12** | **Test debt accumulation** - pominięcie testów dla speed | Średnie | Wysoki | - Definition of Done: code + tests<br>- PR nie może być merge bez testów<br>- Technical debt tracking (SonarQube)<br>- Dedicated "test cleanup" sprints co 2 miesiące | Tech Lead |
 
 ### 10.3 Ryzyka Infrastrukturalne
 
 | # | Ryzyko | Prawdopodobieństwo | Impact | Mitygacja | Owner |
 |---|--------|-------------------|--------|-----------|-------|
-| **R14** | **Supabase downtime** - external dependency | Niskie | Wysoki | - Fallback: Testcontainers dla local/CI testing<br>- Supabase uptime SLA monitoring<br>- Backup test environment (local PostgreSQL)<br>- Circuit breaker pattern w integration tests | DevOps |
-| **R15** | **GitHub Actions quota limits** (free tier) | Średnie | Średni | - Optimize pipeline (parallel jobs, caching)<br>- Selective test runs (nie full suite dla każdego commita)<br>- Self-hosted runners (jeśli budget pozwoli)<br>- Monitor usage dashboard | DevOps |
-| **R16** | **AWS deployment issues** - staging environment down | Niskie | Średni | - Smoke tests with retry logic<br>- Rollback automation<br>- Health checks przed deployment<br>- Monitoring alerts (PagerDuty) | DevOps |
-| **R17** | **Test data privacy** - staging może mieć real user data | Niskie | Wysoki | - NIGDY production data w staging<br>- Anonymized data lub synthetic data (Bogus)<br>- RODO compliance check<br>- Access controls (tylko authorized personnel) | Security Lead |
+| **R13** | **Supabase downtime** - external dependency | Niskie | Wysoki | - Fallback: Testcontainers dla local/CI testing<br>- Supabase uptime SLA monitoring<br>- Backup test environment (local PostgreSQL)<br>- Circuit breaker pattern w integration tests | DevOps |
+| **R14** | **GitHub Actions quota limits** (free tier) | Średnie | Średni | - Optimize pipeline (parallel jobs, caching)<br>- Selective test runs (nie full suite dla każdego commita)<br>- Self-hosted runners (jeśli budget pozwoli)<br>- Monitor usage dashboard | DevOps |
+| **R15** | **AWS deployment issues** - staging environment down | Niskie | Średni | - Smoke tests with retry logic<br>- Rollback automation<br>- Health checks przed deployment<br>- Monitoring alerts (PagerDuty) | DevOps |
+| **R16** | **Test data privacy** - staging może mieć real user data | Niskie | Wysoki | - NIGDY production data w staging<br>- Anonymized data lub synthetic data (Bogus)<br>- RODO compliance check<br>- Access controls (tylko authorized personnel) | Security Lead |
 
 ### 10.4 Ryzyka Bezpieczeństwa
 
 | # | Ryzyko | Prawdopodobieństwo | Impact | Mitygacja | Owner |
 |---|--------|-------------------|--------|-----------|-------|
-| **R18** | **RLS bypass vulnerability** | Niskie | Krytyczny | - Penetration testing przed production<br>- Code review: każda RLS policy przez 2 osoby<br>- Automated RLS tests w CI/CD (mandatory)<br>- Security audit (external) | Security Lead |
-| **R19** | **Secrets exposure** - API keys w kodzie/testach | Średnie | Wysoki | - GitHub secret scanning enabled<br>- .gitignore dla .env files<br>- User secrets w .NET<br>- Pre-commit hooks (detect-secrets) | DevOps |
-| **R20** | **Dependency vulnerabilities** | Średnie | Średni | - Snyk scan w CI/CD (blocking)<br>- Dependabot alerts<br>- Quarterly dependency updates<br>- OWASP Top 10 checklist | Security Lead |
+| **R17** | **Secrets exposure** - API keys w kodzie/testach | Średnie | Wysoki | - GitHub secret scanning enabled<br>- .gitignore dla .env files<br>- User secrets w .NET<br>- Pre-commit hooks (detect-secrets) | DevOps |
+| **R18** | **Dependency vulnerabilities** | Średnie | Średni | - Snyk scan w CI/CD (blocking)<br>- Dependabot alerts<br>- Quarterly dependency updates<br>- OWASP Top 10 checklist | Security Lead |
 
 ### 10.5 Plan Mitygacji - Action Items
 
 **Natychmiastowe**:
-- Setup Testcontainers dla RLS testing (R1)
-- Create EF + Supabase migration verification test (R4)
-- Configure GitHub Actions caching (R15)
-- Setup pre-commit hooks (git-secrets) (R19)
-- Enable GitHub secret scanning (R19)
+- Create EF + Supabase migration verification test (R3)
+- Configure GitHub Actions caching (R14)
+- Setup pre-commit hooks (git-secrets) (R17)
+- Enable GitHub secret scanning (R17)
 
 **Krótkoterminowe**:
-- Write soft delete global query filter (R6)
-- Create test data fixtures dla różnych planów (R8)
-- Setup SonarQube quality gates (R13)
-- Implement Respawn for database cleanup (R2)
-- Configure Snyk in CI/CD (R20)
+- Write soft delete global query filter (R5)
+- Create test data fixtures dla różnych planów (R7)
+- Setup SonarQube quality gates (R12)
+- Implement Respawn for database cleanup (R1)
+- Configure Snyk in CI/CD (R18)
 
 **Średnioterminowe**:
-- Conduct RLS security review session (R18)
-- Create test best practices documentation (R10)
-- Setup Application Insights monitoring (R7)
-- Implement circuit breaker for Supabase (R14)
-- Configure PagerDuty alerts (R16)
+- Create test best practices documentation (R9)
+- Setup Application Insights monitoring (R6)
+- Implement circuit breaker for Supabase (R13)
+- Configure PagerDuty alerts (R15)
 
 **Długoterminowe (Post-MVP)**:
-- External security audit (R18)
-- Evaluate self-hosted GitHub runners (R15)
-- Quarterly penetration testing (R18, R20)
-- Test cleanup sprints scheduling (R13)
+- Evaluate self-hosted GitHub runners (R14)
+- Quarterly penetration testing (R18)
+- Test cleanup sprints scheduling (R12)
 
 ### 10.6 Risk Review Cadence
 
-- **Weekly**: Review high-priority risks (R1, R4, R6, R9) - status check
+- **Weekly**: Review high-priority risks (R3, R5, R8) - status check
 - **Bi-weekly**: Full risk register review - update probabilities i mitigation status
 - **Monthly**: Risk retrospective - new risks identification
 - **Quarterly**: External audit results review - update security risks
@@ -1059,7 +1040,7 @@ Testy są zakończone gdy:
 | **Contract Testing** | Pact | Jeden zespół - integration tests wystarczą |
 | **Security** | SonarQube, OWASP ZAP | Snyk wystarczy dla MVP |
 | **Accessibility** | axe-core, Lighthouse | Skupienie na funkcjonalności |
-| **Database** | pgTAP | Testcontainers + manualne testy RLS |
+| **Database** | pgTAP | Testcontainers wystarczające dla MVP |
 | **Monitoring** | Application Insights, Sentry | Tylko logi w MVP |
 | **Reporting** | Allure, Codecov | Lokalne raporty wystarczą |
 
@@ -1084,7 +1065,6 @@ Testy są zakończone gdy:
 **E2E & Performance**:
 - Pierwsze E2E testy (Playwright)
 - Setup k6 dla performance tests (basic)
-- Manualne testy RLS (dokumentacja)
 
 **Optimization**:
 - CI/CD pipeline tuning
@@ -1097,11 +1077,11 @@ Testy są zakończone gdy:
 
 Ten plan testów zapewnia kompleksowe pokrycie funkcjonalności aplikacji Homely, z naciskiem na:
 
-1. **Bezpieczeństwo** - RLS policies, autentykacja, RODO compliance
+1. **Bezpieczeństwo** - Autentykacja, autoryzacja, RODO compliance
 2. **Krytyczna logika biznesowa** - EventService completion workflow, PlanUsageService limits
 3. **Automatyzacja** - CI/CD z GitHub Actions, regression suite
 4. **Priorytetyzacja** - P0 (95% coverage) > P1 (85%) > P2 (70%)
-5. **Risk mitigation** - 20 zidentyfikowanych ryzyk z konkretną mitygacją
+5. **Risk mitigation** - 18 zidentyfikowanych ryzyk z konkretną mitygacją
 
 **Kluczowe metryki sukcesu**:
 - ✅ 80%+ code coverage (backend services)
