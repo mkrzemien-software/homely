@@ -27,7 +27,9 @@ export class CategoryPage extends BasePage {
 
   // List locators
   private readonly categoryTypeList: Locator;
-  private readonly categoryList: Locator;
+
+  // View mode toggle button
+  private readonly viewModeToggleButton: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -53,15 +55,38 @@ export class CategoryPage extends BasePage {
 
     // Lists
     this.categoryTypeList = page.getByTestId('category-type-list');
-    this.categoryList = page.getByTestId('category-list');
+
+    // View mode toggle
+    this.viewModeToggleButton = page.locator('.toolbar-left button').filter({ hasText: /Lista|Grupowane/ });
+  }
+
+  /**
+   * Get current view mode based on button text
+   */
+  private async getCurrentViewMode(): Promise<'grouped' | 'list'> {
+    const buttonText = await this.viewModeToggleButton.textContent();
+    // If button says "Lista", current mode is "grouped"
+    // If button says "Grupowane", current mode is "list"
+    return buttonText?.includes('Lista') ? 'grouped' : 'list';
+  }
+
+  /**
+   * Switch to list view if not already in list view
+   */
+  async ensureListView(): Promise<void> {
+    const currentMode = await this.getCurrentViewMode();
+    if (currentMode === 'grouped') {
+      await this.viewModeToggleButton.click();
+      // Wait for view to switch
+      await this.page.waitForTimeout(500);
+    }
   }
 
   /**
    * Navigate to categories page
    */
   async navigateToCategories() {
-    // Wait for menu item to be visible and clickable
-    await this.categoriesMenuItem.waitFor({ state: 'visible' });
+    // Playwright auto-waits for visibility before click
     await this.categoriesMenuItem.click();
 
     // Wait for navigation to complete
@@ -88,7 +113,8 @@ export class CategoryPage extends BasePage {
    */
   async isCategoryTypeCreated(name: string): Promise<boolean> {
     // Wait for toast message to appear (indicates operation completed)
-    await this.toastMessage.waitFor({ state: 'visible', timeout: 5000 });
+    // Use .last() to get the most recent toast in case multiple toasts are visible
+    await this.toastMessage.last().waitFor({ state: 'visible' });
 
     // Find category type by text in the category name span
     const categoryTypeItem = this.categoryTypeList
@@ -98,7 +124,7 @@ export class CategoryPage extends BasePage {
 
     try {
       // Wait for the element to be visible
-      await categoryTypeItem.waitFor({ state: 'visible', timeout: 10000 });
+      await categoryTypeItem.waitFor({ state: 'visible' });
       return true;
     } catch {
       return false;
@@ -114,8 +140,18 @@ export class CategoryPage extends BasePage {
 
     // Select category type from dropdown
     await this.categoryTypeSelect.click();
-    const option = this.page.getByTestId(`category-type-option-${categoryTypeName}`);
+
+    // Wait for PrimeNG overlay to open
+    const overlay = this.page.locator('.p-select-overlay');
+    await overlay.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Find the option by text within the overlay
+    const option = overlay.locator('.p-select-option').filter({ hasText: categoryTypeName }).first();
+    await option.waitFor({ state: 'visible', timeout: 5000 });
     await option.click();
+
+    // Wait for overlay to close
+    await overlay.waitFor({ state: 'hidden', timeout: 3000 });
 
     if (description) {
       await this.categoryDescriptionInput.fill(description);
@@ -126,20 +162,23 @@ export class CategoryPage extends BasePage {
 
   /**
    * Verify category was created successfully
+   * Works in both grouped and list view modes
    */
   async isCategoryCreated(name: string): Promise<boolean> {
     // Wait for toast message to appear (indicates operation completed)
-    await this.toastMessage.waitFor({ state: 'visible', timeout: 5000 });
+    // Use .last() to get the most recent toast in case multiple toasts are visible
+    await this.toastMessage.last().waitFor({ state: 'visible', timeout: 5000 });
 
     // Find category by text in the item name heading
-    const categoryItem = this.categoryList
+    // This selector works in both grouped and list views
+    const categoryItem = this.page
       .locator('.item-name')
       .filter({ hasText: name })
       .first();
 
     try {
       // Wait for the element to be visible
-      await categoryItem.waitFor({ state: 'visible', timeout: 10000 });
+      await categoryItem.waitFor({ state: 'visible', timeout: 5000 });
       return true;
     } catch {
       return false;
@@ -151,10 +190,11 @@ export class CategoryPage extends BasePage {
    */
   async getSuccessMessage(): Promise<string> {
     // Wait for toast to be visible
-    await this.toastMessage.waitFor({ state: 'visible', timeout: 5000 });
+    // Use .last() to get the most recent toast in case multiple toasts are visible
+    await this.toastMessage.last().waitFor({ state: 'visible' });
 
-    // Get the detail text from the toast
-    const detailElement = this.toastMessage.locator('.p-toast-detail');
+    // Get the detail text from the toast (use .last() here as well)
+    const detailElement = this.toastMessage.last().locator('.p-toast-detail');
     return await detailElement.textContent() || '';
   }
 
@@ -163,34 +203,40 @@ export class CategoryPage extends BasePage {
    */
   async getCategoryTypeCount(): Promise<number> {
     // Wait for list to be stable
-    await this.categoryTypeList.waitFor({ state: 'visible', timeout: 5000 });
+    await this.categoryTypeList.waitFor({ state: 'visible' });
 
-    // Count accordion tabs (PrimeNG renders them with .p-accordiontab class)
-    const items = this.categoryTypeList.locator('.p-accordiontab');
+    // Count accordion tabs - PrimeNG v19 uses p-accordionTab component which renders as p-accordiontab element
+    // Try multiple selectors as PrimeNG structure may vary
+    const selectors = [
+      'p-accordiontab',
+      '.p-accordiontab',
+      '[data-testid^="category-type-"]'
+    ];
 
-    // Wait for at least one item or timeout
-    try {
-      await items.first().waitFor({ state: 'attached', timeout: 5000 });
-      return await items.count();
-    } catch {
-      // No items yet, return 0
-      return 0;
+    for (const selector of selectors) {
+      const items = this.categoryTypeList.locator(selector);
+      const count = await items.count();
+      if (count > 0) {
+        return count;
+      }
     }
+
+    // If no items found with any selector, return 0
+    return 0;
   }
 
   /**
    * Get count of categories
+   * Works in both grouped and list view modes
    */
   async getCategoryCount(): Promise<number> {
-    // Wait for list to be stable
-    await this.categoryList.waitFor({ state: 'visible', timeout: 5000 });
-
-    // Count p-card elements (categories are rendered as p-card components)
-    const items = this.categoryList.locator('.item-card');
+    // Count all p-card elements with item-card class
+    // This works in both grouped and list views
+    const items = this.page.locator('.item-card');
 
     // Wait for at least one item or timeout
     try {
-      await items.first().waitFor({ state: 'attached', timeout: 5000 });
+      await items.first().waitFor({ state: 'attached', timeout: 3000 });
       return await items.count();
     } catch {
       // No items yet, return 0

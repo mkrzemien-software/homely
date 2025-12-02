@@ -712,3 +712,5 @@ frontend/e2e/test-results/
 frontend/e2e/screenshots/
 frontend/e2e/videos/
 frontend/e2e/traces/
+# Playwright snapshots (visual regression)
+**/*-snapshots/

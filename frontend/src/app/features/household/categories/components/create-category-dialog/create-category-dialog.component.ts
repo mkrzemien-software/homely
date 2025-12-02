@@ -1,4 +1,4 @@
-import { Component, inject, signal, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, inject, signal, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
@@ -33,7 +33,8 @@ import { CategoryType, CreateCategoryDto } from '../../models/category.model';
   templateUrl: './create-category-dialog.component.html',
   styleUrls: ['./create-category-dialog.component.scss']
 })
-export class CreateCategoryDialogComponent implements OnInit {
+export class CreateCategoryDialogComponent {
+  @Input() categoryTypes: CategoryType[] = [];
   @Output() categoryCreated = new EventEmitter<void>();
   @Output() dialogClosed = new EventEmitter<void>();
 
@@ -43,7 +44,6 @@ export class CreateCategoryDialogComponent implements OnInit {
 
   createCategoryForm: FormGroup;
   isLoading = signal<boolean>(false);
-  categoryTypes = signal<CategoryType[]>([]);
 
   constructor() {
     this.createCategoryForm = this.fb.group({
@@ -51,26 +51,6 @@ export class CreateCategoryDialogComponent implements OnInit {
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(500)]],
       sortOrder: [0, [Validators.min(0)]]
-    });
-  }
-
-  ngOnInit(): void {
-    this.loadCategoryTypes();
-  }
-
-  private loadCategoryTypes(): void {
-    this.categoryService.getCategoryTypes().subscribe({
-      next: (types) => {
-        this.categoryTypes.set(types);
-      },
-      error: (error) => {
-        console.error('Error loading category types:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Błąd',
-          detail: 'Nie udało się załadować kategorii'
-        });
-      }
     });
   }
 

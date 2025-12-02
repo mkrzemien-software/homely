@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, inject, signal, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
@@ -9,6 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
 // Services
@@ -29,12 +30,14 @@ import { Category, CategoryType, UpdateCategoryDto } from '../../models/category
     TextareaModule,
     SelectModule,
     InputNumberModule,
+    ToastModule,
   ],
   templateUrl: './edit-category-dialog.component.html',
   styleUrls: ['./edit-category-dialog.component.scss']
 })
-export class EditCategoryDialogComponent implements OnInit, OnChanges {
+export class EditCategoryDialogComponent implements OnChanges {
   @Input() category: Category | null = null;
+  @Input() categoryTypes: CategoryType[] = [];
   @Output() categoryUpdated = new EventEmitter<void>();
   @Output() dialogClosed = new EventEmitter<void>();
 
@@ -44,7 +47,6 @@ export class EditCategoryDialogComponent implements OnInit, OnChanges {
 
   editCategoryForm: FormGroup;
   isLoading = signal<boolean>(false);
-  categoryTypes = signal<CategoryType[]>([]);
 
   constructor() {
     this.editCategoryForm = this.fb.group({
@@ -54,10 +56,6 @@ export class EditCategoryDialogComponent implements OnInit, OnChanges {
       sortOrder: [0, [Validators.min(0)]],
       isActive: [true]
     });
-  }
-
-  ngOnInit(): void {
-    this.loadCategoryTypes();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -70,22 +68,6 @@ export class EditCategoryDialogComponent implements OnInit, OnChanges {
         isActive: this.category.isActive
       });
     }
-  }
-
-  private loadCategoryTypes(): void {
-    this.categoryService.getCategoryTypes().subscribe({
-      next: (types) => {
-        this.categoryTypes.set(types);
-      },
-      error: (error) => {
-        console.error('Error loading category types:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Błąd',
-          detail: 'Nie udało się załadować kategorii'
-        });
-      }
-    });
   }
 
   onSubmit(): void {

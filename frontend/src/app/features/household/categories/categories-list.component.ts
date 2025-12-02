@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -86,10 +86,11 @@ import { EditCategoryTypeDialogComponent } from './components/edit-category-type
   templateUrl: './categories-list.component.html',
   styleUrl: './categories-list.component.scss'
 })
-export class CategoriesListComponent implements OnInit {
+export class CategoriesListComponent implements OnInit, AfterViewInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private categoryService = inject(CategoryService);
+  private cdr = inject(ChangeDetectorRef);
 
   /**
    * Household ID from route
@@ -160,6 +161,11 @@ export class CategoriesListComponent implements OnInit {
    * Category type to edit
    */
   categoryTypeToEdit = signal<CategoryType | null>(null);
+
+  /**
+   * Accordion active indexes - writable signal to avoid change detection issues
+   */
+  accordionActiveIndexes = signal<number[]>([]);
 
   /**
    * Filtered categories
@@ -270,6 +276,10 @@ export class CategoriesListComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit(): void {
+    // Accordion indexes will be set after data is loaded
+  }
+
   /**
    * Load categories from API
    */
@@ -281,6 +291,8 @@ export class CategoriesListComponent implements OnInit {
       next: (categories) => {
         this.allCategories.set(categories);
         this.isLoading.set(false);
+        // Update accordion after data is loaded
+        this.updateAccordionActiveIndexes();
       },
       error: (error) => {
         console.error('Error loading categories:', error);
@@ -297,6 +309,8 @@ export class CategoriesListComponent implements OnInit {
     this.categoryService.getCategoryTypes().subscribe({
       next: (categoryTypes) => {
         this.allCategoryTypes.set(categoryTypes);
+        // Update accordion after data is loaded
+        this.updateAccordionActiveIndexes();
       },
       error: (error) => {
         console.error('Error loading category types:', error);
@@ -445,6 +459,24 @@ export class CategoriesListComponent implements OnInit {
   refresh(): void {
     this.loadCategories();
     this.loadCategoryTypes();
+    // Update accordion state after refresh
+    setTimeout(() => this.updateAccordionActiveIndexes());
+  }
+
+  /**
+   * Update accordion active indexes to expand all panels
+   */
+  private updateAccordionActiveIndexes(): void {
+    // Use setTimeout to ensure this runs after change detection
+    setTimeout(() => {
+      const typeCount = this.categoriesByType().length;
+      const indexes = Array.from({ length: typeCount }, (_, i) => i);
+      this.accordionActiveIndexes.set(indexes);
+      // Run change detection in the next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 0);
+    }, 0);
   }
 
   /**

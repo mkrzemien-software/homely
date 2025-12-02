@@ -144,7 +144,7 @@
   <!-- Content - Grouped view -->
   @else if (viewMode() === 'grouped') {
     <div class="items-content grouped-view">
-      <p-accordion data-testid="category-type-list" [multiple]="true">
+      <p-accordion data-testid="category-type-list" [multiple]="true" [activeIndex]="accordionActiveIndexes()">
         @for (typeGroup of categoriesByType(); track typeGroup.categoryTypeId) {
           <p-accordionTab [attr.data-testid]="'category-type-' + typeGroup.categoryTypeName">
             <ng-template pTemplate="header">
@@ -319,6 +319,7 @@
   [resizable]="false"
 >
   <app-create-category-dialog
+    [categoryTypes]="allCategoryTypes()"
     (categoryCreated)="onCategoryCreated()"
     (dialogClosed)="hideCreateDialog()"
   />
@@ -354,6 +355,7 @@
 >
   <app-edit-category-dialog
     [category]="categoryToEdit()"
+    [categoryTypes]="allCategoryTypes()"
     (categoryUpdated)="onCategoryUpdated()"
     (dialogClosed)="hideEditDialog()"
   />
