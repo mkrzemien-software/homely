@@ -136,6 +136,7 @@ public class CategoriesController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryDto>> CreateCategory(
         [FromBody] CreateCategoryDto createDto,
@@ -154,6 +155,11 @@ public class CategoriesController : ControllerBase
                 nameof(GetCategoryById),
                 new { id = category.Id },
                 category);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogWarning(ex, "Duplicate category name: {Name}", createDto.Name);
+            return Conflict(new { error = ex.Message });
         }
         catch (Exception ex)
         {
@@ -186,6 +192,7 @@ public class CategoriesController : ControllerBase
     [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryDto>> UpdateCategory(
         int id,
@@ -201,6 +208,11 @@ public class CategoriesController : ControllerBase
 
             var category = await _categoryService.UpdateCategoryAsync(id, updateDto, cancellationToken);
             return Ok(category);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogWarning(ex, "Duplicate category name: {Name}", updateDto.Name);
+            return Conflict(new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {

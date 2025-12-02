@@ -75,6 +75,7 @@
 
       <!-- Add category type button -->
       <p-button
+        data-testid="create-category-type-btn"
         icon="pi pi-plus"
         label="Dodaj kategorię"
         severity="secondary"
@@ -85,6 +86,7 @@
 
       <!-- Add category button -->
       <p-button
+        data-testid="create-category-btn"
         icon="pi pi-plus"
         label="Dodaj podkategorię"
         (onClick)="addNewCategory()"
@@ -142,9 +144,9 @@
   <!-- Content - Grouped view -->
   @else if (viewMode() === 'grouped') {
     <div class="items-content grouped-view">
-      <p-accordion [multiple]="true" [activeIndex]="[0, 1, 2]">
+      <p-accordion data-testid="category-type-list" [multiple]="true">
         @for (typeGroup of categoriesByType(); track typeGroup.categoryTypeId) {
-          <p-accordionTab>
+          <p-accordionTab [attr.data-testid]="'category-type-' + typeGroup.categoryTypeName">
             <ng-template pTemplate="header">
               <div class="category-header">
                 <div class="category-info">
@@ -188,7 +190,7 @@
                 (cdkDropListDropped)="onCategoryDrop($event, typeGroup.categoryTypeId)"
               >
                 @for (category of typeGroup.categories; track category.id) {
-                  <p-card class="item-card" cdkDrag>
+                  <p-card class="item-card" cdkDrag [attr.data-testid]="'category-' + category.name">
                     <ng-template pTemplate="header">
                       <div class="item-card-header">
                         <i class="pi pi-bars drag-handle" cdkDragHandle></i>
@@ -244,9 +246,9 @@
   <!-- Content - List view -->
   @else {
     <div class="items-content list-view">
-      <div class="items-grid">
+      <div data-testid="category-list" class="items-grid">
         @for (category of filteredCategories(); track category.id) {
-          <p-card class="item-card">
+          <p-card class="item-card" [attr.data-testid]="'category-' + category.name">
             <ng-template pTemplate="header">
               <div class="item-card-header">
                 <h3 class="item-name">{{ category.name }}</h3>

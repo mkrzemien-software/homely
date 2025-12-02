@@ -41,7 +41,7 @@ public class CategoryRepository : BaseRepository<CategoryEntity, int>, ICategory
     public async Task<IEnumerable<CategoryEntity>> GetOrderedCategoriesAsync(int? categoryTypeId = null, CancellationToken cancellationToken = default)
     {
         var query = Query().Where(c => c.IsActive);
-        
+
         if (categoryTypeId.HasValue)
             query = query.Where(c => c.CategoryTypeId == categoryTypeId.Value);
 
@@ -50,6 +50,19 @@ public class CategoryRepository : BaseRepository<CategoryEntity, int>, ICategory
             .ThenBy(c => c.Name)
             .Include(c => c.CategoryType)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> ExistsWithNameInCategoryTypeAsync(int categoryTypeId, string name, int? excludeId = null, CancellationToken cancellationToken = default)
+    {
+        var query = Query()
+            .Where(c => c.CategoryTypeId == categoryTypeId && c.Name == name && c.DeletedAt == null);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(c => c.Id != excludeId.Value);
+        }
+
+        return await query.AnyAsync(cancellationToken);
     }
 }
 
@@ -89,5 +102,18 @@ public class CategoryTypeRepository : BaseRepository<CategoryTypeEntity, int>, I
             .ThenBy(ct => ct.Name)
             .Include(ct => ct.Categories.Where(c => c.IsActive && c.DeletedAt == null))
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> ExistsWithNameAsync(string name, int? excludeId = null, CancellationToken cancellationToken = default)
+    {
+        var query = Query()
+            .Where(ct => ct.Name == name && ct.DeletedAt == null);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(ct => ct.Id != excludeId.Value);
+        }
+
+        return await query.AnyAsync(cancellationToken);
     }
 }

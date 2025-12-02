@@ -2,6 +2,7 @@
   <!-- Error Message Display -->
   @if (errorMessage()) {
     <p-message
+      data-testid="login-error"
       severity="error"
       [text]="errorMessage()!"
       styleClass="login-form__error-message"
@@ -18,6 +19,7 @@
     <input
       pInputText
       id="email"
+      data-testid="login-email"
       formControlName="email"
       placeholder="Enter your email"
       [class.ng-invalid]="hasError('email')"
@@ -43,6 +45,7 @@
     <input
       pInputText
       id="password"
+      data-testid="login-password"
       type="password"
       formControlName="password"
       placeholder="Enter your password"
@@ -75,6 +78,7 @@
   <div class="login-form__actions">
     <p-button
       type="submit"
+      data-testid="login-submit"
       label="Sign In"
       [loading]="isLoading()"
       [disabled]="isLoading()"

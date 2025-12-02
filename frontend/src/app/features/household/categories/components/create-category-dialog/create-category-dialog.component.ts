@@ -9,7 +9,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
 // Services
@@ -30,9 +29,7 @@ import { CategoryType, CreateCategoryDto } from '../../models/category.model';
     TextareaModule,
     SelectModule,
     InputNumberModule,
-    ToastModule,
   ],
-  providers: [MessageService],
   templateUrl: './create-category-dialog.component.html',
   styleUrls: ['./create-category-dialog.component.scss']
 })

@@ -76,6 +76,13 @@ public class CategoryTypeService : ICategoryTypeService
     {
         try
         {
+            // Check if category type with the same name already exists
+            var exists = await _unitOfWork.CategoryTypes.ExistsWithNameAsync(createDto.Name, cancellationToken: cancellationToken);
+            if (exists)
+            {
+                throw new InvalidOperationException($"Category type with name '{createDto.Name}' already exists");
+            }
+
             var entity = new CategoryTypeEntity
             {
                 Name = createDto.Name,
@@ -89,6 +96,10 @@ public class CategoryTypeService : ICategoryTypeService
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return MapToDto(entity);
+        }
+        catch (InvalidOperationException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -107,6 +118,13 @@ public class CategoryTypeService : ICategoryTypeService
             if (entity == null || entity.DeletedAt != null)
             {
                 throw new InvalidOperationException($"Category type with ID {categoryTypeId} not found");
+            }
+
+            // Check if another category type with the same name already exists
+            var exists = await _unitOfWork.CategoryTypes.ExistsWithNameAsync(updateDto.Name, categoryTypeId, cancellationToken);
+            if (exists)
+            {
+                throw new InvalidOperationException($"Category type with name '{updateDto.Name}' already exists");
             }
 
             entity.Name = updateDto.Name;

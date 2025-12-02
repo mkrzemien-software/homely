@@ -1,5 +1,3 @@
-<p-toast />
-
 <form [formGroup]="createCategoryForm" (ngSubmit)="onSubmit()">
   <div class="dialog-content">
     <!-- Category Type -->
@@ -7,6 +5,7 @@
       <label for="categoryTypeId">Kategoria *</label>
       <p-select
         id="categoryTypeId"
+        data-testid="category-type-select"
         formControlName="categoryTypeId"
         [options]="categoryTypes()"
         optionLabel="name"
@@ -24,7 +23,7 @@
           }
         </ng-template>
         <ng-template pTemplate="item" let-categoryType>
-          <div class="flex align-items-center gap-2">
+          <div class="flex align-items-center gap-2" [attr.data-testid]="'category-type-option-' + categoryType.name">
             <span>{{ categoryType.name }}</span>
           </div>
         </ng-template>
@@ -43,6 +42,7 @@
       <label for="name">Nazwa podkategorii *</label>
       <input
         id="name"
+        data-testid="category-name"
         type="text"
         pInputText
         formControlName="name"
@@ -67,6 +67,7 @@
       <label for="description">Opis (opcjonalnie)</label>
       <textarea
         id="description"
+        data-testid="category-description"
         pTextarea
         formControlName="description"
         placeholder="Dodatkowe informacje o podkategorii"
@@ -113,6 +114,7 @@
       [disabled]="isLoading()"
     />
     <p-button
+      data-testid="category-submit"
       label="Utwórz podkategorię"
       type="submit"
       [loading]="isLoading()"

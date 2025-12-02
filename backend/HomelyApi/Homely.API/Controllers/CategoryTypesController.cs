@@ -129,6 +129,7 @@ public class CategoryTypesController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(CategoryTypeDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryTypeDto>> CreateCategoryType(
         [FromBody] CreateCategoryTypeDto createDto,
@@ -147,6 +148,11 @@ public class CategoryTypesController : ControllerBase
                 nameof(GetCategoryTypeById),
                 new { id = categoryType.Id },
                 categoryType);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogWarning(ex, "Duplicate category type name: {Name}", createDto.Name);
+            return Conflict(new { error = ex.Message });
         }
         catch (Exception ex)
         {
@@ -178,6 +184,7 @@ public class CategoryTypesController : ControllerBase
     [ProducesResponseType(typeof(CategoryTypeDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryTypeDto>> UpdateCategoryType(
         int id,
@@ -193,6 +200,11 @@ public class CategoryTypesController : ControllerBase
 
             var categoryType = await _categoryTypeService.UpdateCategoryTypeAsync(id, updateDto, cancellationToken);
             return Ok(categoryType);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogWarning(ex, "Duplicate category type name: {Name}", updateDto.Name);
+            return Conflict(new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {

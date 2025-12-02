@@ -98,6 +98,24 @@ public class CategoryService : ICategoryService
     {
         try
         {
+            // Validate that CategoryTypeId is provided
+            if (!createDto.CategoryTypeId.HasValue)
+            {
+                throw new InvalidOperationException("Category type ID is required");
+            }
+
+            // Check if category with the same name already exists in this category type
+            var exists = await _unitOfWork.Categories.ExistsWithNameInCategoryTypeAsync(
+                createDto.CategoryTypeId.Value,
+                createDto.Name,
+                null,
+                cancellationToken);
+
+            if (exists)
+            {
+                throw new InvalidOperationException($"Category with name '{createDto.Name}' already exists in this category type");
+            }
+
             var category = new CategoryEntity
             {
                 CategoryTypeId = createDto.CategoryTypeId,
@@ -115,6 +133,10 @@ public class CategoryService : ICategoryService
             _logger.LogInformation("Category created with ID {CategoryId}", category.Id);
 
             return MapToDto(category);
+        }
+        catch (InvalidOperationException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -135,6 +157,24 @@ public class CategoryService : ICategoryService
                 throw new InvalidOperationException($"Category with ID {categoryId} not found");
             }
 
+            // Validate that CategoryTypeId is provided
+            if (!updateDto.CategoryTypeId.HasValue)
+            {
+                throw new InvalidOperationException("Category type ID is required");
+            }
+
+            // Check if another category with the same name already exists in this category type
+            var exists = await _unitOfWork.Categories.ExistsWithNameInCategoryTypeAsync(
+                updateDto.CategoryTypeId.Value,
+                updateDto.Name,
+                categoryId,
+                cancellationToken);
+
+            if (exists)
+            {
+                throw new InvalidOperationException($"Category with name '{updateDto.Name}' already exists in this category type");
+            }
+
             category.CategoryTypeId = updateDto.CategoryTypeId;
             category.Name = updateDto.Name;
             category.Description = updateDto.Description;
@@ -148,6 +188,10 @@ public class CategoryService : ICategoryService
             _logger.LogInformation("Category {CategoryId} updated successfully", categoryId);
 
             return MapToDto(category);
+        }
+        catch (InvalidOperationException)
+        {
+            throw;
         }
         catch (Exception ex)
         {

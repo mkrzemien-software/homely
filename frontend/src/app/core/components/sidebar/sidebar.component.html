@@ -64,6 +64,7 @@
               [routerLink]="item.route"
               routerLinkActive="active"
               class="menu-item"
+              [attr.data-testid]="'menu-' + item.id"
               [class.has-badge]="item.badge"
               [pTooltip]="isCollapsed() ? item.label : item.tooltip || ''"
               tooltipPosition="right"
@@ -121,6 +122,7 @@
     <!-- User Info -->
     @if (authService.currentUser()) {
       <div
+        data-testid="user-menu"
         class="user-info"
         [class.collapsed]="isCollapsed()"
         [pTooltip]="isCollapsed() ? authService.currentUser()?.name : ''"

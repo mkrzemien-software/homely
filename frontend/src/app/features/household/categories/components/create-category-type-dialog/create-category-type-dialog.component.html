@@ -1,5 +1,3 @@
-<p-toast />
-
 <form [formGroup]="createCategoryTypeForm" (ngSubmit)="onSubmit()">
   <div class="dialog-content">
     <!-- Name -->
@@ -7,6 +5,7 @@
       <label for="name">Nazwa kategorii *</label>
       <input
         id="name"
+        data-testid="category-type-name"
         type="text"
         pInputText
         formControlName="name"
@@ -31,6 +30,7 @@
       <label for="description">Opis (opcjonalnie)</label>
       <textarea
         id="description"
+        data-testid="category-type-description"
         pTextarea
         formControlName="description"
         placeholder="Dodatkowe informacje o kategorii"
@@ -77,6 +77,7 @@
       [disabled]="isLoading()"
     />
     <p-button
+      data-testid="category-type-submit"
       label="Utwórz kategorię"
       type="submit"
       [loading]="isLoading()"
