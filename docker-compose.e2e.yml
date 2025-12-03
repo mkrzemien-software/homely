@@ -1,0 +1,113 @@
+# Docker Compose E2E Testing Environment
+# Simplified MVP: PostgreSQL + Backend API
+#
+# This file creates an isolated E2E testing environment with:
+# - Dedicated PostgreSQL database (port 54011) with auth schema
+# - Backend API (port 8081)
+# - Dedicated network for isolation
+#
+# Test users are created directly in auth.users via SQL (no Supabase Auth API)
+#
+# Usage:
+#   docker-compose -f docker-compose.e2e.yml up -d
+#   docker-compose -f docker-compose.e2e.yml down
+#   docker-compose -f docker-compose.e2e.yml down -v  # Clean volumes
+
+networks:
+  e2e-network:
+    driver: bridge
+    name: homely-e2e-network
+
+volumes:
+  postgres-e2e-data:
+    name: homely-e2e-postgres-data
+
+services:
+  # =============================================================================
+  # PostgreSQL Database (Supabase-compatible)
+  # =============================================================================
+  postgres-e2e:
+    image: supabase/postgres:17.6.1.058
+    container_name: homely-postgres-e2e
+    restart: unless-stopped
+    ports:
+      - "54011:5432"
+    networks:
+      - e2e-network
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: /var/run/postgresql
+      # Supabase extensions
+      POSTGRES_EXTENSIONS: uuid-ossp,pgcrypto,pgjwt
+    volumes:
+      - postgres-e2e-data:/var/lib/postgresql/data
+      # Init scripts (executed in alphabetical order)
+      - ./docker/init-supabase-e2e.sql:/docker-entrypoint-initdb.d/00-init-supabase.sql:ro
+      - ./docker/01-run-migrations.sql:/docker-entrypoint-initdb.d/01-run-migrations.sql:ro
+      # Migrations directory (accessed by 01-run-migrations.sql)
+      - ./database/supabase/migrations:/docker-entrypoint-initdb.d/migrations:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command:
+      - "postgres"
+      - "-c"
+      - "listen_addresses=*"
+      - "-c"
+      - "wal_level=logical"
+      - "-c"
+      - "max_replication_slots=10"
+      - "-c"
+      - "max_wal_senders=10"
+
+  # =============================================================================
+  # Backend API (.NET 9)
+  # =============================================================================
+  backend-e2e:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: E2E
+    container_name: homely-backend-e2e
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    networks:
+      - e2e-network
+    environment:
+      # ASP.NET Core settings
+      ASPNETCORE_ENVIRONMENT: E2E
+      ASPNETCORE_URLS: http://+:8080
+
+      # Database connection (using service name as hostname)
+      ConnectionStrings__DefaultConnection: "Host=postgres-e2e;Port=5432;Database=postgres;Username=postgres;Password=postgres;Include Error Detail=true"
+
+      # Supabase settings (not used in simplified setup)
+      Supabase__Url: "http://localhost:54010"
+      Supabase__Key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
+      Supabase__ServiceRoleKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
+
+      # JWT settings (using standard demo JWT secret)
+      JwtSettings__ValidIssuer: "http://localhost:54010/auth/v1"
+      JwtSettings__ValidAudience: "authenticated"
+      JwtSettings__Secret: "super-secret-jwt-token-with-at-least-32-characters-long"
+
+      # Logging
+      Logging__LogLevel__Default: "Information"
+      Logging__LogLevel__Microsoft.AspNetCore: "Warning"
+      Logging__LogLevel__Microsoft.EntityFrameworkCore: "Warning"
+    depends_on:
+      postgres-e2e:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s

@@ -33,6 +33,8 @@ WORKDIR /app
 # Copy solution and project files first (for layer caching)
 COPY HomelyApi/*.sln ./
 COPY HomelyApi/Homely.API/*.csproj ./Homely.API/
+COPY HomelyApi/Homely.Tests.Unit/*.csproj ./Homely.Tests.Unit/
+COPY HomelyApi/Homely.Tests.Integration/*.csproj ./Homely.Tests.Integration/
 
 # Restore dependencies (cached layer if .csproj files don't change)
 RUN dotnet restore

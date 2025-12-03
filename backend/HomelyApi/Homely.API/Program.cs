@@ -244,7 +244,9 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     KnownProxies = { }
 });
 
-if (app.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Local")
+if (app.Environment.IsDevelopment() ||
+    builder.Environment.EnvironmentName == "Local" ||
+    builder.Environment.EnvironmentName == "E2E")
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>

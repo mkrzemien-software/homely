@@ -27,7 +27,10 @@
       "Bash(nslookup:*)",
       "Bash(curl:*)",
       "Bash(dotnet add:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker-compose:*)"
     ],
     "deny": [],
     "ask": []
