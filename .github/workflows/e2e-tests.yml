@@ -9,9 +9,7 @@ on:
       - 'database/**'
       - 'docker-compose.e2e.yml'
       - '.github/workflows/e2e-tests.yml'
-  push:
-    branches: [main, master]
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:
 
 # Cancel in-progress runs for the same PR
 concurrency:
@@ -59,8 +57,9 @@ jobs:
             --tag homely-backend-e2e \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
-            --file backend/Dockerfile \
+            --file Dockerfile \
             .
+        working-directory: backend
 
       - name: 🚀 Start E2E environment
         run: docker-compose -f docker-compose.e2e.yml up -d
