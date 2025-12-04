@@ -17,8 +17,8 @@ export default defineConfig({
   // Test execution settings
   // Use 1 worker to avoid race conditions with database cleanup between tests
   fullyParallel: false,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  forbidOnly: !!process.env['CI'],
+  retries: process.env['CI'] ? 2 : 0,
   workers: 1,
 
   // Reporter configuration
@@ -63,9 +63,9 @@ export default defineConfig({
 
   // Development server configuration
   webServer: {
-    command: 'npm start',
+    command: 'npm run start:e2e',
     url: 'http://localhost:4200',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !process.env['CI'],
     timeout: 120 * 1000,
   },
 });

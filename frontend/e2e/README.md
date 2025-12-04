@@ -185,8 +185,8 @@ test('should perform action', async ({ page }) => {
 Test configuration is in `playwright.config.ts`:
 
 - **Browser**: Chromium only (Desktop Chrome)
-- **Base URL**: http://localhost:4200
-- **Backend API**: http://127.0.0.1:8081
+- **Frontend URL**: http://localhost:4200 (with E2E environment config)
+- **Backend API**: http://127.0.0.1:8081 (configured in `environment.e2e.ts`)
 - **Database**: 127.0.0.1:54011
 - **Workers**: 1 (sequential execution for database isolation)
 - **Global Setup**: Automatic environment initialization
@@ -196,6 +196,19 @@ Test configuration is in `playwright.config.ts`:
 - **Screenshots**: On failure only
 - **Videos**: Retained on failure
 - **Traces**: On first retry
+
+### Environment Configuration
+
+The E2E tests use a dedicated Angular environment file (`src/environments/environment.e2e.ts`):
+```typescript
+export const environment = {
+  production: false,
+  apiUrl: 'http://127.0.0.1:8081/api',
+  environmentName: 'e2e'
+};
+```
+
+This ensures that the frontend communicates with the correct backend API running in Docker on port 8081.
 
 ### Database Fixture
 

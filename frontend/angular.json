@@ -85,6 +85,21 @@
                 "styles": true,
                 "vendor": true
               }
+            },
+            "e2e": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": {
+                "scripts": true,
+                "styles": true,
+                "vendor": true
+              },
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.e2e.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "local"
@@ -103,6 +118,9 @@
             },
             "local": {
               "buildTarget": "frontend:build:local"
+            },
+            "e2e": {
+              "buildTarget": "frontend:build:e2e"
             }
           },
           "defaultConfiguration": "local"
