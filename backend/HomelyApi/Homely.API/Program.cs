@@ -219,12 +219,15 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Local")
+        if (builder.Environment.IsDevelopment() ||
+            builder.Environment.EnvironmentName == "Local" ||
+            builder.Environment.EnvironmentName == "E2E")
         {
-            // Development and Local environment origins
+            // Development, Local, and E2E environment origins
             policy.WithOrigins(
                       "https://dev.homely.maflint.com",
-                      "http://localhost:4200"  // Alternative local port
+                      "http://localhost:4200",      // Angular dev server
+                      "http://127.0.0.1:4200"       // Alternative localhost (E2E tests)
                   )
                   .AllowAnyMethod()
                   .AllowAnyHeader()
