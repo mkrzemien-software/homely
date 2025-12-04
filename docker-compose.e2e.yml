@@ -98,10 +98,14 @@ services:
       JwtSettings__ValidAudience: "authenticated"
       JwtSettings__Secret: "super-secret-jwt-token-with-at-least-32-characters-long"
 
-      # Logging
+      # Logging - Verbose for E2E debugging
       Logging__LogLevel__Default: "Information"
-      Logging__LogLevel__Microsoft.AspNetCore: "Warning"
-      Logging__LogLevel__Microsoft.EntityFrameworkCore: "Warning"
+      Logging__LogLevel__Microsoft.AspNetCore: "Information"
+      Logging__LogLevel__Microsoft.AspNetCore.Hosting: "Information"
+      Logging__LogLevel__Microsoft.AspNetCore.Routing: "Information"
+      Logging__LogLevel__Microsoft.AspNetCore.HttpLogging: "Information"
+      Logging__LogLevel__Microsoft.EntityFrameworkCore: "Information"
+      Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "Information"
     depends_on:
       postgres-e2e:
         condition: service_healthy

@@ -102,6 +102,22 @@ builder.Services.AddControllers()
     });
 
 // ============================================================================
+// HTTP LOGGING (E2E environment only for debugging)
+// ============================================================================
+if (builder.Environment.EnvironmentName == "E2E")
+{
+    builder.Services.AddHttpLogging(logging =>
+    {
+        logging.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
+        logging.RequestHeaders.Add("Authorization");
+        logging.ResponseHeaders.Add("Content-Type");
+        logging.MediaTypeOptions.AddText("application/json");
+        logging.RequestBodyLogLimit = 4096;
+        logging.ResponseBodyLogLimit = 4096;
+    });
+}
+
+// ============================================================================
 // AUTHENTICATION & AUTHORIZATION
 // ============================================================================
 builder.Services.AddAuthentication(options =>
@@ -274,6 +290,12 @@ app.Use(async (context, next) =>
 });
 
 app.UseHttpsRedirection();
+
+// Enable HTTP logging for E2E environment
+if (app.Environment.EnvironmentName == "E2E")
+{
+    app.UseHttpLogging();
+}
 
 app.UseCors("AllowFrontend");
 
