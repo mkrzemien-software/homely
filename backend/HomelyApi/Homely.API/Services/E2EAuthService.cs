@@ -48,7 +48,7 @@ namespace Homely.API.Services
                 const string query = @"
                     SELECT id, email, encrypted_password, email_confirmed_at, created_at
                     FROM auth.users
-                    WHERE email = @email AND deleted_at IS NULL
+                    WHERE email = @email
                     LIMIT 1";
 
                 await using var command = new NpgsqlCommand(query, connection);
@@ -160,7 +160,7 @@ namespace Homely.API.Services
                 const string query = @"
                     SELECT email, email_confirmed_at, created_at
                     FROM auth.users
-                    WHERE id = @id AND deleted_at IS NULL
+                    WHERE id = @id
                     LIMIT 1";
 
                 await using var command = new NpgsqlCommand(query, connection);
