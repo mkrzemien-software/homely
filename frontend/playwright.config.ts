@@ -18,7 +18,7 @@ export default defineConfig({
   // Use 1 worker to avoid race conditions with database cleanup between tests
   fullyParallel: false,
   forbidOnly: !!process.env['CI'],
-  retries: process.env['CI'] ? 2 : 0,
+  retries: 0,
   workers: 1,
 
   // Reporter configuration
