@@ -290,6 +290,68 @@ npx playwright show-trace trace.zip
 
 Failed tests automatically capture screenshots in `test-results/`
 
+### Browser Console Logs
+
+**All browser console logs are automatically captured** for every test and saved as JSON files.
+
+**Location:**
+```
+test-results/console-logs/
+  ├── should_login_successfully-1234567890.json
+  ├── should_create_category-1234567891.json
+  └── ...
+```
+
+**Log Format:**
+```json
+{
+  "test": {
+    "title": "should login successfully",
+    "file": "/path/to/test.spec.ts",
+    "status": "passed",
+    "duration": 1234
+  },
+  "logs": [
+    {
+      "timestamp": "2025-12-04T12:34:56.789Z",
+      "type": "log",
+      "text": "Angular is running in development mode",
+      "location": "http://localhost:4200/main.js:123"
+    },
+    {
+      "timestamp": "2025-12-04T12:34:57.123Z",
+      "type": "error",
+      "text": "Failed to load resource: 404",
+      "location": "http://localhost:4200/api/missing:1"
+    }
+  ]
+}
+```
+
+**Log Types Captured:**
+- ✅ `console.log()` - Regular logs
+- ✅ `console.error()` - Errors
+- ✅ `console.warn()` - Warnings
+- ✅ `console.info()` - Info messages
+- ✅ `pageerror` - Unhandled JavaScript exceptions
+
+**Real-time viewing:**
+Console logs are also printed to Node console during test execution:
+```
+📝 [Browser Console] log: Angular initialized
+❌ [Browser Console] error: Failed to fetch
+⚠️  [Browser Console] warning: Deprecated API used
+🔥 [Page Error] Uncaught TypeError: Cannot read property 'foo' of undefined
+```
+
+**In CI/CD:**
+Console logs are automatically uploaded as artifacts after every test run (both passed and failed).
+
+**Download from GitHub Actions:**
+1. Go to Actions tab
+2. Select the workflow run
+3. Download `browser-console-logs-{run_number}` artifact
+
 ## Best Practices
 
 1. **Use Page Objects** - Keep tests clean by abstracting page interactions

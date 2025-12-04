@@ -20,13 +20,18 @@ BEGIN
   IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'service_role') THEN
     CREATE ROLE service_role NOLOGIN NOINHERIT BYPASSRLS;
   END IF;
+
+  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'supabase_admin') THEN
+    CREATE ROLE supabase_admin NOLOGIN NOINHERIT BYPASSRLS;
+  END IF;
 END
 $$;
 
 -- Grant permissions
-GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
-GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
-GRANT ALL ON SCHEMA auth TO postgres;
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role, supabase_admin;
+GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role, supabase_admin;
+GRANT ALL ON SCHEMA auth TO postgres, supabase_admin;
+GRANT ALL ON SCHEMA public TO postgres, supabase_admin;
 
 -- Create Supabase helper functions for RLS policies
 -- These functions are used in migrations for Row Level Security

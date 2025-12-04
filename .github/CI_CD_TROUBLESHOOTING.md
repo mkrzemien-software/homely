@@ -1065,6 +1065,75 @@ docker compose -f docker-compose.e2e.yml logs backend-e2e | grep "POST /api/auth
 
 ---
 
+### Browser Console Logs (Frontend)
+
+The E2E tests **automatically capture all browser console logs** for debugging.
+
+**What is captured:**
+- ✅ `console.log()`, `console.error()`, `console.warn()`, `console.info()`
+- ✅ Unhandled JavaScript exceptions (`pageerror`)
+- ✅ Timestamp, log type, message, and source location
+- ✅ Test metadata (title, status, duration)
+
+**Location:**
+```
+frontend/test-results/console-logs/
+  ├── should_login_successfully-1234567890.json
+  ├── should_create_category-1234567891.json
+  └── ...
+```
+
+**Example log file:**
+```json
+{
+  "test": {
+    "title": "should login with valid credentials",
+    "file": "/path/to/auth.spec.ts",
+    "status": "failed",
+    "duration": 2341
+  },
+  "logs": [
+    {
+      "timestamp": "2025-12-04T12:34:56.789Z",
+      "type": "error",
+      "text": "Failed to fetch: POST http://localhost:8081/api/auth/login",
+      "location": "http://localhost:4200/main.js:456"
+    },
+    {
+      "timestamp": "2025-12-04T12:34:57.123Z",
+      "type": "pageerror",
+      "text": "Uncaught TypeError: Cannot read property 'token' of undefined",
+      "location": "Error stack trace..."
+    }
+  ]
+}
+```
+
+**Real-time viewing (during test execution):**
+```bash
+# Console logs are printed to terminal in real-time
+npm run e2e
+
+# Output:
+# 📝 [Browser Console] log: Angular initialized
+# ❌ [Browser Console] error: Failed to fetch
+# 🔥 [Page Error] Uncaught TypeError: ...
+```
+
+**In CI/CD:**
+Console logs are automatically uploaded as artifacts (both for passed and failed tests).
+
+**Download from GitHub Actions:**
+1. Navigate to Actions tab → Select workflow run
+2. Scroll to "Artifacts" section
+3. Download `browser-console-logs-{run_number}.zip`
+4. Extract and view JSON files
+
+**Configuration:**
+Console logging is implemented in `frontend/e2e/fixtures/database-fixture.ts` and runs automatically for all tests.
+
+---
+
 ## 💡 Pro Tips
 
 1. **Always use `if: always()` for cleanup steps only**
