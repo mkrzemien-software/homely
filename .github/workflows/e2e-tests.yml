@@ -85,6 +85,48 @@ jobs:
           docker compose -f docker-compose.e2e.yml ps || echo "Failed to get container status"
 
       # ============================================================================
+      # PRE-FLIGHT CHECKS - Verify Playwright can access services
+      # ============================================================================
+      - name: 🔍 Verify backend connectivity (from Playwright perspective)
+        if: success()
+        run: |
+          echo "🔍 Testing backend connectivity from host (Playwright will use same network)..."
+          echo ""
+
+          # Test 1: Health endpoint HTTP status
+          echo "1️⃣ Testing /health endpoint HTTP status..."
+          HEALTH_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8081/health)
+          if [ "$HEALTH_RESPONSE" -eq 200 ]; then
+            echo "✅ Backend /health responds with HTTP 200"
+          else
+            echo "❌ Backend /health returned HTTP $HEALTH_RESPONSE (expected 200)"
+            exit 1
+          fi
+
+          # Test 2: Get health endpoint content
+          echo ""
+          echo "2️⃣ Testing /health endpoint content..."
+          HEALTH_CONTENT=$(curl -s http://127.0.0.1:8081/health)
+          if [ -n "$HEALTH_CONTENT" ]; then
+            echo "✅ Backend /health returned content:"
+            echo "$HEALTH_CONTENT" | head -10
+          else
+            echo "❌ Backend /health returned empty response"
+            exit 1
+          fi
+
+          # Test 3: Verify port bindings
+          echo ""
+          echo "3️⃣ Verifying port bindings..."
+          docker compose -f docker-compose.e2e.yml ps
+          echo ""
+          echo "Open ports:"
+          netstat -tlnp 2>/dev/null | grep -E '(8081|54011)' || ss -tlnp 2>/dev/null | grep -E '(8081|54011)' || echo "⚠️ netstat/ss not available, skipping port check"
+
+          echo ""
+          echo "✅ All pre-flight checks passed! Playwright can access backend on 127.0.0.1:8081"
+
+      # ============================================================================
       # RUN TESTS
       # ============================================================================
       - name: 🧪 Run E2E tests
