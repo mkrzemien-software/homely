@@ -62,7 +62,7 @@ jobs:
         working-directory: backend
 
       - name: 🚀 Start E2E environment
-        run: docker-compose -f docker-compose.e2e.yml up -d
+        run: docker compose -f docker-compose.e2e.yml up -d
 
       - name: ⏳ Wait for services to be healthy
         run: |
@@ -74,14 +74,21 @@ jobs:
           timeout 60 bash -c 'until curl -f http://127.0.0.1:8081/health; do sleep 2; done'
           echo "✅ Backend API is ready"
 
-      - name: 📊 Display container status
-        if: always()
-        run: docker-compose -f docker-compose.e2e.yml ps
+      - name: 📊 Display container status (on success)
+        if: success()
+        run: docker compose -f docker-compose.e2e.yml ps
+
+      - name: 📊 Display container status (on failure)
+        if: failure()
+        run: |
+          echo "⚠️ Previous step failed. Checking container status..."
+          docker compose -f docker-compose.e2e.yml ps || echo "Failed to get container status"
 
       # ============================================================================
       # RUN TESTS
       # ============================================================================
       - name: 🧪 Run E2E tests
+        if: success()
         working-directory: frontend
         run: npm run e2e
         env:
@@ -117,14 +124,14 @@ jobs:
         if: failure()
         run: |
           echo "========== PostgreSQL Logs =========="
-          docker-compose -f docker-compose.e2e.yml logs postgres-e2e
+          docker compose -f docker-compose.e2e.yml logs postgres-e2e || echo "Failed to get PostgreSQL logs"
           echo ""
           echo "========== Backend Logs =========="
-          docker-compose -f docker-compose.e2e.yml logs backend-e2e
+          docker compose -f docker-compose.e2e.yml logs backend-e2e || echo "Failed to get backend logs"
 
       - name: 🧹 Cleanup E2E environment
         if: always()
-        run: docker-compose -f docker-compose.e2e.yml down -v
+        run: docker compose -f docker-compose.e2e.yml down -v || echo "Cleanup completed with warnings"
 
       # ============================================================================
       # SUMMARY
