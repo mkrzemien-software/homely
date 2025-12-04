@@ -5,11 +5,11 @@ import { Client } from 'pg';
  */
 const DB_CONFIG = {
   // Use 127.0.0.1 instead of localhost to avoid IPv6 resolution issues on Windows
-  host: process.env.E2E_DB_HOST || '127.0.0.1',
-  port: parseInt(process.env.E2E_DB_PORT || '54011'),
-  database: process.env.E2E_DB_NAME || 'postgres',
-  user: process.env.E2E_DB_USER || 'postgres',
-  password: process.env.E2E_DB_PASSWORD || 'postgres',
+  host: process.env['E2E_DB_HOST'] || '127.0.0.1',
+  port: parseInt(process.env['E2E_DB_PORT'] || '54011'),
+  database: process.env['E2E_DB_NAME'] || 'postgres',
+  user: process.env['E2E_DB_USER'] || 'postgres',
+  password: process.env['E2E_DB_PASSWORD'] || 'postgres',
   // Disable SSL for local development (not needed for localhost connections)
   ssl: false,
   // Connection timeout in milliseconds

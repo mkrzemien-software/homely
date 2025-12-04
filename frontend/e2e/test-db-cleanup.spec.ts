@@ -15,14 +15,14 @@ test.describe('Database Cleanup', () => {
     console.log('Table counts after cleanup:', counts);
 
     // Verify all business tables are empty
-    expect(counts.households).toBe(0);
-    expect(counts.household_members).toBe(0);
-    expect(counts.categories).toBe(0);
-    expect(counts.category_types).toBe(0);
-    expect(counts.tasks).toBe(0);
-    expect(counts.events).toBe(0);
-    expect(counts.tasks_history).toBe(0);
-    expect(counts.plan_usage).toBe(0);
+    expect(counts['households']).toBe(0);
+    expect(counts['household_members']).toBe(0);
+    expect(counts['categories']).toBe(0);
+    expect(counts['category_types']).toBe(0);
+    expect(counts['tasks']).toBe(0);
+    expect(counts['events']).toBe(0);
+    expect(counts['tasks_history']).toBe(0);
+    expect(counts['plan_usage']).toBe(0);
   });
 
   test('should clean tables between tests', async () => {
@@ -32,8 +32,8 @@ test.describe('Database Cleanup', () => {
     const counts = await getTableCounts();
 
     // All tables should still be empty in the second test
-    expect(counts.households).toBe(0);
-    expect(counts.household_members).toBe(0);
-    expect(counts.tasks).toBe(0);
+    expect(counts['households']).toBe(0);
+    expect(counts['household_members']).toBe(0);
+    expect(counts['tasks']).toBe(0);
   });
 });
