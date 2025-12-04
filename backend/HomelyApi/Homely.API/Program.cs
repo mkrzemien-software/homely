@@ -87,7 +87,18 @@ builder.Services.AddHttpClient();
 // ============================================================================
 // BUSINESS SERVICES
 // ============================================================================
-builder.Services.AddScoped<IAuthService, AuthService>();
+// Use E2E-specific auth service in E2E environment (bypasses Supabase Auth)
+if (builder.Environment.EnvironmentName == "E2E")
+{
+    Console.WriteLine("🔧 Using E2EAuthService (direct database authentication)");
+    builder.Services.AddScoped<IAuthService, E2EAuthService>();
+}
+else
+{
+    Console.WriteLine("🔧 Using AuthService (Supabase Auth integration)");
+    builder.Services.AddScoped<IAuthService, AuthService>();
+}
+
 builder.Services.AddScoped<ISupabaseAuthService, SupabaseAuthService>();
 
 // ============================================================================
