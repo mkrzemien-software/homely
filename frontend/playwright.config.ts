@@ -8,14 +8,18 @@ export default defineConfig({
   // Test directory
   testDir: './e2e',
 
+  // Global setup - runs once before all tests
+  globalSetup: require.resolve('./e2e/global-setup.ts'),
+
   // Maximum time one test can run (30 seconds)
   timeout: 30 * 1000,
 
   // Test execution settings
-  fullyParallel: true,
+  // Use 1 worker to avoid race conditions with database cleanup between tests
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
 
   // Reporter configuration
   reporter: [
@@ -27,6 +31,11 @@ export default defineConfig({
   use: {
     // Base URL for all tests
     baseURL: 'http://localhost:4200',
+
+    // Environment variables for E2E tests
+    extraHTTPHeaders: {
+      'X-Test-Environment': 'E2E'
+    },
 
     // Collect trace on failure for debugging
     trace: 'on-first-retry',

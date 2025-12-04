@@ -30,7 +30,10 @@
       "Bash(dotnet test:*)",
       "Bash(docker exec:*)",
       "Bash(docker logs:*)",
-      "Bash(docker-compose:*)"
+      "Bash(docker-compose:*)",
+      "Bash(npm run e2e:*)",
+      "Bash(npm run e2e:docker:restart:*)",
+      "Bash(npm run e2e:docker:ps:*)"
     ],
     "deny": [],
     "ask": []

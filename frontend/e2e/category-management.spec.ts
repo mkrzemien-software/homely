@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/database-fixture';
 import { LoginPage } from './page-objects/login.page';
 import { CategoryPage } from './page-objects/category.page';
 import { TEST_USERS, TEST_CATEGORY_TYPES, TEST_CATEGORIES, generateUniqueName } from './fixtures/test-data';

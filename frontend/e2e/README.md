@@ -1,6 +1,48 @@
 # E2E Tests with Playwright
 
-This directory contains End-to-End (E2E) tests for the Homely application using Playwright.
+This directory contains End-to-End (E2E) tests for the Homely application using Playwright with a dedicated Docker-based test database.
+
+## 🚀 Quick Start
+
+**Run complete E2E test suite:**
+```bash
+cd frontend
+npm run e2e:full
+```
+
+This single command:
+- ✅ Starts Docker containers (PostgreSQL + Backend API)
+- ✅ Waits for services to be healthy
+- ✅ Creates test users automatically
+- ✅ Runs all E2E tests with clean database
+- ✅ Stops and removes containers
+
+## 📋 E2E Database Environment
+
+### Architecture
+
+Tests run against a **dedicated isolated environment** with:
+- **PostgreSQL 17** (Supabase-compatible) on port `54011`
+- **Backend API** (.NET 9) on port `8081`
+- **Automatic database cleanup** before each test
+- **Test users** created in global setup
+
+### Benefits
+
+✅ **Isolated** - Separate from development database
+✅ **Deterministic** - Clean state for every test
+✅ **Automated** - Docker Compose manages everything
+✅ **Fast** - Sequential execution prevents race conditions
+
+### Test Users
+
+Three users are automatically created:
+
+| Email | Password | Role |
+|-------|----------|------|
+| `admin@e2e.homely.com` | `Test123!@#` | admin |
+| `member@e2e.homely.com` | `Test123!@#` | member |
+| `dashboard@e2e.homely.com` | `Test123!@#` | dashboard |
 
 ## Structure
 
@@ -39,17 +81,60 @@ await page.locator('.email-input');
 
 ### Prerequisites
 
-1. Install dependencies:
+1. **Docker Desktop** must be installed and running
+2. Install Node.js dependencies:
    ```bash
    npm install
    ```
-
-2. Install Playwright browsers (if not already done):
+3. Install Playwright browsers (if not already done):
    ```bash
    npx playwright install chromium
    ```
 
 ### Test Commands
+
+#### Complete Workflow (Recommended)
+
+```bash
+# Full workflow: Start → Test → Stop containers
+npm run e2e:full
+
+# Full workflow with deep cleanup (removes volumes)
+npm run e2e:full:clean
+```
+
+#### Manual Docker Management
+
+```bash
+# Start E2E environment
+npm run e2e:docker:start
+
+# Run tests only (environment must be running)
+npm run e2e
+
+# Stop environment
+npm run e2e:docker:stop
+
+# Clean environment (removes volumes)
+npm run e2e:docker:clean
+
+# Restart environment
+npm run e2e:docker:restart
+
+# View container status
+npm run e2e:docker:ps
+
+# View all logs
+npm run e2e:docker:logs
+
+# View backend logs only
+npm run e2e:docker:logs:backend
+
+# View database logs only
+npm run e2e:docker:logs:postgres
+```
+
+#### Test Execution Modes
 
 ```bash
 # Run all E2E tests (headless)
@@ -101,11 +186,36 @@ Test configuration is in `playwright.config.ts`:
 
 - **Browser**: Chromium only (Desktop Chrome)
 - **Base URL**: http://localhost:4200
+- **Backend API**: http://127.0.0.1:8081
+- **Database**: 127.0.0.1:54011
+- **Workers**: 1 (sequential execution for database isolation)
+- **Global Setup**: Automatic environment initialization
+- **Database Cleanup**: Before each test via fixture
 - **Timeout**: 30 seconds per test
 - **Retries**: 2 retries in CI, 0 locally
 - **Screenshots**: On failure only
 - **Videos**: Retained on failure
 - **Traces**: On first retry
+
+### Database Fixture
+
+All tests automatically use the `database-fixture` which:
+- ✅ Truncates all business tables before each test
+- ✅ Preserves test users (created in global setup)
+- ✅ Ensures deterministic test environment
+
+Import the fixture in your tests:
+```typescript
+import { test, expect } from './fixtures/database-fixture';
+```
+
+### Global Setup
+
+The `global-setup.ts` runs once before all tests:
+1. Checks database availability
+2. Checks backend API health
+3. Creates test users in `auth.users`
+4. Reports configuration (workers, timeouts, URLs)
 
 ## Writing New Tests
 
@@ -118,19 +228,21 @@ Test configuration is in `playwright.config.ts`:
 ### Example Test Template
 
 ```typescript
-import { test, expect } from '@playwright/test';
+// IMPORTANT: Import from database-fixture, not @playwright/test
+import { test, expect } from './fixtures/database-fixture';
 import { MyPage } from './page-objects/my.page';
 
 test.describe('Feature Name', () => {
   let myPage: MyPage;
 
   test.beforeEach(async ({ page }) => {
+    // Database is automatically cleaned before this runs
     myPage = new MyPage(page);
     await myPage.navigateToPage();
   });
 
   test('should do something', async ({ page }) => {
-    // Arrange
+    // Arrange - database is clean, use test users
     const testData = { ... };
 
     // Act
@@ -187,24 +299,108 @@ The E2E tests are configured to run in GitHub Actions:
 
 ## Troubleshooting
 
-### Tests fail locally but pass in CI
+### Docker Environment Issues
 
+#### Containers won't start
+```bash
+# Check Docker is running
+docker ps
+
+# View detailed logs
+npm run e2e:docker:logs
+
+# Full cleanup and restart
+npm run e2e:docker:clean
+npm run e2e:docker:start
+```
+
+#### Port already in use
+If ports `54011` or `8081` are occupied:
+```bash
+# Stop conflicting services
+docker-compose -f ../docker-compose.e2e.yml down
+
+# Or use different ports by editing docker-compose.e2e.yml
+```
+
+#### Database connection fails
+```bash
+# Verify PostgreSQL is healthy
+npm run e2e:docker:ps
+
+# Check database logs
+npm run e2e:docker:logs:postgres
+
+# Manually verify database
+docker exec homely-postgres-e2e psql -U postgres -d postgres -c "SELECT 1;"
+```
+
+#### Backend API not responding
+```bash
+# Check backend status
+npm run e2e:docker:ps
+
+# View backend logs
+npm run e2e:docker:logs:backend
+
+# Manually test health endpoint
+curl http://127.0.0.1:8081/health
+```
+
+### Database Issues
+
+#### Tests see data from previous runs
+- Database cleanup happens automatically via fixture
+- If issues persist:
+  ```bash
+  npm run e2e:full:clean  # Deep cleanup with volumes
+  ```
+
+#### Test users not found
+- Users are created in global-setup.ts
+- Check logs for user creation errors:
+  ```bash
+  npm run e2e:docker:logs:postgres | grep "admin@e2e.homely.com"
+  ```
+
+### Test Execution Issues
+
+#### Tests fail locally but pass in CI
 - Check Node.js and Playwright versions match CI
 - Clear browser cache: `npx playwright install --force`
+- Ensure Docker environment is clean
 
-### Flaky tests
-
+#### Flaky tests
+- Tests run sequentially (1 worker) to prevent race conditions
 - Add explicit waits: `await page.waitForLoadState('networkidle')`
-- Use retry logic in playwright.config.ts
-- Check for race conditions in async operations
+- Check for timing issues in test code
 
-### Browser not found
+#### Browser not found
+```bash
+npx playwright install chromium
+```
 
-- Run: `npx playwright install chromium`
+### Windows-Specific Issues
+
+#### IPv6 Connection Problems
+The setup uses `127.0.0.1` instead of `localhost` to avoid IPv6 issues on Windows. If you see connection errors, verify the configuration uses `127.0.0.1`.
+
+#### Line Ending Issues
+Ensure `.sh` scripts use LF line endings (not CRLF):
+```bash
+git config core.autocrlf false
+```
 
 ## Resources
 
+### Documentation
 - [Playwright Documentation](https://playwright.dev)
 - [Playwright Best Practices](https://playwright.dev/docs/best-practices)
-- [Test Plan](./.ai/test-plan.md)
-- [Testing Setup Tasks](./.ai/testing-setup-tasks.md)
+- [E2E Database Setup Plan](./E2E_DATABASE_SETUP_PLAN.md) - Complete architecture documentation
+
+### Project Files
+- `global-setup.ts` - Environment initialization and user creation
+- `database-fixture.ts` - Automatic database cleanup fixture
+- `db-helper.ts` - Database utility functions
+- `playwright.config.ts` - Test configuration
+- `../docker-compose.e2e.yml` - Docker environment definition
