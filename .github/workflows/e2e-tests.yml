@@ -132,7 +132,7 @@ jobs:
       - name: 🧪 Run E2E tests
         if: success()
         working-directory: frontend
-        run: npx playwright test category-management.spec.ts
+        run: npm run e2e
         env:
           CI: true
 
