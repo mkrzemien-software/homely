@@ -1,6 +1,7 @@
 import { test as base, ConsoleMessage } from '@playwright/test';
 import { truncateAllTables } from '../helpers/db-helper';
 import { setupTestHouseholdWithUsers } from '../services/e2e-auth.service';
+import { seedAllReferenceData } from '../services/e2e-seed.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -28,6 +29,10 @@ export const test = base.extend({
       // Setup: Clean database before test
       console.log('🔧 [Fixture] Cleaning database before test...');
       await truncateAllTables();
+
+      // Seed reference data from migrations (category_types, categories)
+      console.log('🔧 [Fixture] Seeding reference data from migrations...');
+      await seedAllReferenceData();
 
       // Create test household with all test users assigned
       console.log('🔧 [Fixture] Setting up test household and users...');

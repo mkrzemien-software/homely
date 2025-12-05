@@ -23,9 +23,12 @@ const DB_CONFIG = {
  * Order matters for foreign key constraints
  *
  * NOT included:
- * - plan_types: Reference data (plan definitions)
+ * - plan_types: Reference data (seeded from migrations, never truncated)
  * - user_profiles: Test users (created in global-setup)
  * - auth.users: Authentication users (managed separately)
+ *
+ * NOTE: category_types and categories ARE truncated and re-seeded before each test
+ * to ensure fresh reference data from migrations
  */
 const TABLES_TO_TRUNCATE = [
   'tasks_history',
