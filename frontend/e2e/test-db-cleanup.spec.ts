@@ -1,14 +1,22 @@
-import { test, expect } from './fixtures/database-fixture';
-import { getTableCounts } from './helpers/db-helper';
+import { test, expect } from '@playwright/test';
+import { getTableCounts, truncateAllTables } from './helpers/db-helper';
 
 /**
  * Test suite to verify database cleanup functionality
- * This test validates that the database-fixture correctly cleans tables before each test
+ * This test validates that truncateAllTables() works correctly
+ *
+ * NOTE: This test uses plain Playwright test (not database-fixture)
+ * to verify cleanup in isolation without automatic seeding
  */
 test.describe('Database Cleanup', () => {
+  test.beforeEach(async () => {
+    // Manually clean database before each test (without seeding)
+    await truncateAllTables();
+  });
+
   test('should clean all tables before test', async () => {
-    // The database should be clean at the start of this test
-    // because the cleanDatabase fixture runs automatically
+    // The database should be clean because we called truncateAllTables()
+    // and did NOT seed any data
 
     const counts = await getTableCounts();
 
