@@ -31,11 +31,12 @@ Homeowners managing household operations who need to organize and monitor variou
 ## Tech Stack
 
 ### Frontend
-- **Angular 20** - Modern web framework for building responsive user interfaces
+- **Angular 19** - Modern web framework for building responsive user interfaces
 - **PrimeNG** - Comprehensive UI component library
+- **Playwright** - End-to-end testing framework
 
 ### Backend
-- **.NET 8** - Robust framework for business logic and API development
+- **.NET 9** - Robust framework for business logic and API development
 - **ASP.NET Core** - Web API framework
 
 ### Database
@@ -43,9 +44,9 @@ Homeowners managing household operations who need to organize and monitor variou
 - **PostgreSQL** - Reliable relational database
 
 ### Infrastructure & DevOps
-- **GitHub Actions** - CI/CD pipeline automation
-- **AWS** - Cloud hosting platform
-- **Docker** - Containerization for deployment
+- **GitHub Actions** - CI/CD pipeline automation (backend, frontend, database, E2E tests)
+- **AWS** - Cloud hosting platform (planned)
+- **Docker** - Containerization for E2E testing and deployment
 
 ## Getting Started Locally
 
@@ -53,8 +54,9 @@ Homeowners managing household operations who need to organize and monitor variou
 
 Make sure you have the following installed:
 - [Node.js](https://nodejs.org/) (v18 or higher)
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Docker](https://www.docker.com/) (optional, for containerization)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [Docker](https://www.docker.com/) (for E2E tests)
+- [Supabase CLI](https://supabase.com/docs/guides/cli) (for database management)
 
 ### Installation
 
@@ -72,27 +74,45 @@ Make sure you have the following installed:
 
 3. **Setup Backend**
    ```bash
-   cd ../backend
+   cd backend/HomelyApi
    dotnet restore
    ```
 
 4. **Configure Environment Variables**
-   ```bash
-   # Copy environment template files
-   cp .env.example .env
-   # Configure your Supabase connection and other settings
+
+   Create `appsettings.Local.json` in `backend/HomelyApi/Homely.API/` with your Supabase credentials:
+   ```json
+   {
+     "Supabase": {
+       "Url": "https://your-project.supabase.co",
+       "Key": "your-anon-key"
+     },
+     "Jwt": {
+       "Secret": "your-jwt-secret",
+       "ValidIssuer": "https://your-project.supabase.co/auth/v1"
+     }
+   }
    ```
 
 5. **Database Setup**
-   - Create a Supabase project
-   - Configure connection string in your environment variables
-   - Run migrations (if available)
+   ```bash
+   cd database
+   npm install
+
+   # Link to your Supabase project
+   npx supabase link --project-ref <your-project-ref>
+
+   # Apply migrations
+   npx supabase db push
+
+   # Configure backend connection in appsettings.Local.json
+   ```
 
 ### Running the Application
 
 1. **Start the Backend API**
    ```bash
-   cd backend
+   cd backend/HomelyApi/Homely.API
    dotnet run
    ```
 
@@ -104,16 +124,18 @@ Make sure you have the following installed:
 
 3. **Access the Application**
    - Frontend: `http://localhost:4200`
-   - Backend API: `http://localhost:8080`
+   - Backend API: `http://localhost:5000` (or `https://localhost:5443`)
 
 ## Available Scripts
 
 ### Frontend (Angular)
-- `npm start` - Start development server
+- `npm start` - Start development server (local configuration)
+- `npm run start:e2e` - Start development server (E2E configuration)
 - `npm run build` - Build for production
 - `npm run test` - Run unit tests
-- `npm run lint` - Run linting
-- `npm run e2e` - Run end-to-end tests
+- `npm run e2e` - Run end-to-end tests with Playwright
+- `npm run e2e:ui` - Run E2E tests in UI mode
+- `npm run e2e:full` - Run full E2E test suite with Docker
 
 ### Backend (.NET)
 - `dotnet run` - Start development server
@@ -121,9 +143,17 @@ Make sure you have the following installed:
 - `dotnet test` - Run unit tests
 - `dotnet publish` - Publish for deployment
 
-### Docker
-- `docker-compose up` - Start all services with Docker
-- `docker-compose down` - Stop all services
+### Database (Supabase)
+- `cd database && npx supabase link` - Link to Supabase project
+- `npx supabase migration new <name>` - Create a new migration
+- `npx supabase db push` - Apply migrations to database
+- `npx supabase db reset` - Reset database (development only)
+- `npx supabase status` - Check Supabase project status
+
+### Docker (E2E Testing)
+- `cd frontend && npm run e2e:docker:start` - Start E2E test environment
+- `npm run e2e:docker:stop` - Stop E2E test environment
+- `npm run e2e:docker:clean` - Clean up E2E containers and volumes
 
 ## Project Scope
 
@@ -168,15 +198,16 @@ Post-MVP planned features:
 ### Current Progress
 - [x] Project planning and requirements documentation
 - [x] Technology stack selection
-- [ ] Backend API development
-- [ ] Frontend application development
+- [x] Backend API development (controllers, services, repositories)
+- [x] Frontend application development (Angular 19 with PrimeNG)
 - [x] Database schema implementation
-- [x] Authentication system
-- [ ] Core CRUD operations
+- [x] Authentication system (JWT-based with Supabase)
+- [x] Core CRUD operations (tasks, events, categories, households)
+- [x] Testing suite (unit, integration, and E2E tests with Playwright)
+- [x] CI/CD pipeline (GitHub Actions workflows)
 - [ ] Email notification system
 - [ ] Document upload functionality
-- [ ] Testing suite
-- [ ] Deployment pipeline
+- [ ] Production deployment
 
 ### Success Metrics
 - 1000+ registered users within 3 months

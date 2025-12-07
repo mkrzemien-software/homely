@@ -117,7 +117,7 @@
       .p-input-icon-right {
         width: 100%;
         position: relative;
-        
+
         // Eye icon positioning for password toggle
         .p-password-toggle-mask-icon {
           position: absolute;
@@ -212,6 +212,46 @@
     }
   }
 
+  // Demo Login Button
+  &__demo {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: center;
+
+    ::ng-deep .p-button.demo-login-btn {
+      width: 100%;
+      font-size: 0.875rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--p-orange-400) !important;
+      border-radius: 0.5rem;
+      background: transparent !important;
+      color: var(--p-orange-400) !important;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background: rgba(251, 146, 60, 0.1) !important;
+        border-color: var(--p-orange-500) !important;
+        color: var(--p-orange-500) !important;
+        transform: translateY(-1px);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .p-button-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+    }
+  }
+
 
   // Responsive Design
   @media (max-width: 480px) {
@@ -237,7 +277,7 @@
           font-size: 0.9375rem;
           padding-right: 2.5rem; // Make space for eye icon on mobile
         }
-        
+
         // Adjust eye icon for mobile
         .p-password-toggle-mask-icon {
           right: 0.625rem;
@@ -254,9 +294,22 @@
       ::ng-deep .p-button {
         font-size: 0.875rem;
         padding: 0.5rem 1rem;
-        
+
         .p-button-label {
           font-size: 0.875rem;
+        }
+      }
+    }
+
+    &__demo {
+      margin-top: 0.5rem;
+
+      ::ng-deep .p-button.demo-login-btn {
+        font-size: 0.8125rem;
+        padding: 0.375rem 0.875rem;
+
+        .p-button-label {
+          font-size: 0.8125rem;
         }
       }
     }

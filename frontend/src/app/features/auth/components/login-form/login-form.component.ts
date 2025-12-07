@@ -180,4 +180,19 @@ export class LoginFormComponent {
   clearError(): void {
     this.errorMessage.set(null);
   }
+
+  /**
+   * Login with demo credentials
+   */
+  loginWithDemo(): void {
+    // Fill form with demo credentials
+    this.loginForm.patchValue({
+      email: 'admin@e2e.homely.com',
+      password: 'Test123!@#',
+      rememberMe: false
+    });
+
+    // Submit the form
+    this.onSubmit();
+  }
 }
