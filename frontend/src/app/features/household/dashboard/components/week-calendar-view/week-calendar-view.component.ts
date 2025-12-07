@@ -107,9 +107,19 @@ export class WeekCalendarViewComponent implements OnInit {
   weekChange = output<Date>();
 
   /**
+   * Output event when show completed events toggle changes
+   */
+  showCompletedEventsChange = output<boolean>();
+
+  /**
    * Current week start date (Monday)
    */
   currentWeekStart = signal<Date>(this.getWeekStart(new Date()));
+
+  /**
+   * Show completed events in calendar
+   */
+  showCompletedEvents = input<boolean>(false);
 
   /**
    * Week days array (Monday to Sunday)
@@ -233,9 +243,9 @@ export class WeekCalendarViewComponent implements OnInit {
     const d = new Date(date);
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
-    const monday = new Date(d.setDate(diff));
-    monday.setHours(0, 0, 0, 0);
-    return monday;
+    d.setDate(diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
   }
 
   /**
@@ -277,5 +287,12 @@ export class WeekCalendarViewComponent implements OnInit {
    */
   getEventTooltip(event: DashboardEvent): string {
     return `${event.task.name}\n${event.task.category.categoryType.name} > ${event.task.category.name}\nOdpowiedzialny: ${event.assignedTo.firstName} ${event.assignedTo.lastName}`;
+  }
+
+  /**
+   * Toggle show completed events
+   */
+  toggleShowCompletedEvents(): void {
+    this.showCompletedEventsChange.emit(!this.showCompletedEvents());
   }
 }

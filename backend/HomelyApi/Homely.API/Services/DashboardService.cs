@@ -29,44 +29,59 @@ public class DashboardService : IDashboardService
     public async Task<DashboardUpcomingEventsResponseDto> GetUpcomingEventsAsync(
         Guid householdId,
         int days = 7,
+        DateOnly? startDate = null,
+        bool includeCompleted = false,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Fetching dashboard upcoming events for household {HouseholdId}, days: {Days}",
-                householdId, days);
+            _logger.LogInformation("Fetching dashboard events for household {HouseholdId}, days: {Days}, startDate: {StartDate}, includeCompleted: {IncludeCompleted}",
+                householdId, days, startDate, includeCompleted);
 
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
-            var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(days));
+            var today = startDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+            var endDate = today.AddDays(days);
+
+            // Build status filter
+            var statusFilter = includeCompleted
+                ? new[] { "pending", "completed", "postponed" }
+                : new[] { "pending", "postponed" };
 
             // Get events with all necessary navigation properties
             var events = await _context.Set<EventEntity>()
                 .Where(e => e.HouseholdId == householdId
                     && e.DeletedAt == null
-                    && e.Status == "pending"
-                    && e.DueDate <= endDate)
+                    && statusFilter.Contains(e.Status)
+                    && e.DueDate >= today
+                    && e.DueDate < endDate)
                 .Include(e => e.Task)
                     .ThenInclude(t => t!.Category)
                         .ThenInclude(c => c!.CategoryType)
                 .Include(e => e.AssignedToUser)
                 .OrderBy(e => e.DueDate)
+                    .ThenBy(e => e.Status == "completed" ? 1 : 0) // Show pending/postponed before completed
                 .ToListAsync(cancellationToken);
 
             _logger.LogInformation("Found {Count} events for household {HouseholdId}",
                 events.Count, householdId);
 
             // Calculate summary statistics from entities (before mapping to DTOs)
-            var weekEnd = today.AddDays(7);
+            // Only count pending/postponed events (not completed) for summary
+            // Use actual current date for overdue/today calculation (not the query startDate)
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            var weekEnd = currentDate.AddDays(7);
+            var pendingEvents = events.Where(e => e.Status == "pending" || e.Status == "postponed").ToList();
+
             var summary = new DashboardEventsSummaryDto
             {
-                Overdue = events.Count(e => e.DueDate < today),
-                Today = events.Count(e => e.DueDate == today),
-                ThisWeek = events.Count(e => e.DueDate >= today && e.DueDate <= weekEnd)
+                Overdue = pendingEvents.Count(e => e.DueDate < currentDate),
+                Today = pendingEvents.Count(e => e.DueDate == currentDate),
+                ThisWeek = pendingEvents.Count(e => e.DueDate >= currentDate && e.DueDate < weekEnd)
             };
 
             // Map to dashboard DTOs
+            // Use currentDate for urgency calculation, not the query startDate
             var dashboardEvents = events
-                .Select(e => MapToDashboardEventDto(e, today))
+                .Select(e => MapToDashboardEventDto(e, currentDate))
                 .ToList();
 
             _logger.LogInformation("Dashboard summary - Overdue: {Overdue}, Today: {Today}, ThisWeek: {ThisWeek}",

@@ -5,14 +5,23 @@
         <i class="pi pi-calendar"></i>
         <span class="header-title">Wydarzenia - {{ formattedDate() }}</span>
       </div>
-      <p-button
-        icon="pi pi-times"
-        [rounded]="true"
-        [text]="true"
-        severity="secondary"
-        (onClick)="onClose()"
-        aria-label="Zamknij panel"
-      />
+      <div class="header-actions">
+        <p-button
+          label="Dodaj wydarzenie"
+          icon="pi pi-plus"
+          severity="primary"
+          (onClick)="onCreateEvent()"
+          aria-label="Dodaj wydarzenie"
+        />
+        <p-button
+          icon="pi pi-times"
+          [rounded]="true"
+          [text]="true"
+          severity="secondary"
+          (onClick)="onClose()"
+          aria-label="Zamknij panel"
+        />
+      </div>
     </div>
   </ng-template>
 

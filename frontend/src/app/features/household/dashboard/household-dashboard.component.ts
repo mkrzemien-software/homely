@@ -7,6 +7,7 @@ import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
 import { MessageModule } from 'primeng/message';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ButtonModule } from 'primeng/button';
 
 // Custom Components
 import { WeekCalendarViewComponent } from './components/week-calendar-view/week-calendar-view.component';
@@ -67,6 +68,7 @@ import { DashboardEvent, DashboardUpcomingEventsResponse } from './models/dashbo
     DividerModule,
     MessageModule,
     ProgressSpinnerModule,
+    ButtonModule,
     WeekCalendarViewComponent,
     DashboardEventsListComponent,
     EventDetailsDialogComponent,
@@ -177,6 +179,16 @@ export class HouseholdDashboardComponent implements OnInit {
    * Current filters
    */
   currentFilters = signal<EventFilters>({});
+
+  /**
+   * Show completed events in calendar
+   */
+  showCompletedEvents = signal<boolean>(false);
+
+  /**
+   * Current week start date (for calendar view)
+   */
+  currentWeekStartDate = signal<Date | null>(null);
 
   /**
    * Filtered events based on current filters
@@ -296,10 +308,16 @@ export class HouseholdDashboardComponent implements OnInit {
   private loadUpcomingEvents(householdId: string): void {
     this.eventsLoading.set(true);
 
+    // Initialize current week start date if not set
+    if (!this.currentWeekStartDate()) {
+      this.currentWeekStartDate.set(this.getWeekStart(new Date()));
+    }
+
     this.dashboardService
       .getUpcomingEvents({
         days: this.selectedDays(),
-        householdId
+        householdId,
+        includeCompleted: this.showCompletedEvents()
       })
       .subscribe({
         next: (response: DashboardUpcomingEventsResponse) => {
@@ -330,7 +348,39 @@ export class HouseholdDashboardComponent implements OnInit {
    */
   onWeekChange(startDate: Date): void {
     console.log('Week changed to:', startDate);
-    // Optionally reload events for new week
+
+    // Store current week start date
+    this.currentWeekStartDate.set(startDate);
+
+    const householdId = this.householdId();
+    if (!householdId) {
+      return;
+    }
+
+    // Format date to ISO 8601 (YYYY-MM-DD)
+    const formattedStartDate = startDate.toISOString().split('T')[0];
+
+    // Fetch events for the new week (7 days from startDate)
+    this.eventsLoading.set(true);
+
+    this.dashboardService
+      .getUpcomingEvents({
+        days: 7,
+        householdId,
+        startDate: formattedStartDate,
+        includeCompleted: this.showCompletedEvents()
+      })
+      .subscribe({
+        next: (response) => {
+          this.upcomingEvents.set(response.data);
+          this.eventsSummary.set(response.summary);
+          this.eventsLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Error loading events for new week:', error);
+          this.eventsLoading.set(false);
+        }
+      });
   }
 
   /**
@@ -461,5 +511,54 @@ export class HouseholdDashboardComponent implements OnInit {
    */
   onFiltersChange(filters: EventFilters): void {
     this.currentFilters.set(filters);
+  }
+
+  /**
+   * Handle show completed events change from week calendar view
+   */
+  onShowCompletedEventsChange(showCompleted: boolean): void {
+    this.showCompletedEvents.set(showCompleted);
+    const id = this.householdId();
+    if (id) {
+      this.eventsLoading.set(true);
+
+      // Use current week start date if available, otherwise use default
+      const weekStartDate = this.currentWeekStartDate();
+      const startDate = weekStartDate
+        ? weekStartDate.toISOString().split('T')[0]
+        : undefined;
+
+      this.dashboardService
+        .getUpcomingEvents({
+          days: this.selectedDays(),
+          householdId: id,
+          startDate: startDate,
+          includeCompleted: this.showCompletedEvents()
+        })
+        .subscribe({
+          next: (response) => {
+            this.upcomingEvents.set(response.data);
+            this.eventsSummary.set(response.summary);
+            this.eventsLoading.set(false);
+          },
+          error: (error) => {
+            console.error('Error loading events:', error);
+            this.eventsLoading.set(false);
+          }
+        });
+    }
+  }
+
+  /**
+   * Get week start date (Monday) for given date
+   * Helper method to calculate the Monday of the week containing the given date
+   */
+  private getWeekStart(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
+    d.setDate(diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
   }
 }

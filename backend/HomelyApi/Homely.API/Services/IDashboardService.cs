@@ -14,11 +14,15 @@ public interface IDashboardService
     /// </summary>
     /// <param name="householdId">Household ID</param>
     /// <param name="days">Number of days to look ahead (default: 7)</param>
+    /// <param name="startDate">Optional start date. If not provided, defaults to today.</param>
+    /// <param name="includeCompleted">Include completed events in the response (default: false)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Dashboard upcoming events response with data and summary</returns>
     Task<DashboardUpcomingEventsResponseDto> GetUpcomingEventsAsync(
         Guid householdId,
         int days = 7,
+        DateOnly? startDate = null,
+        bool includeCompleted = false,
         CancellationToken cancellationToken = default);
 
     /// <summary>

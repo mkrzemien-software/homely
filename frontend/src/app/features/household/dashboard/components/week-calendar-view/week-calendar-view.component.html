@@ -7,19 +7,29 @@
           <i class="pi pi-calendar" aria-hidden="true"></i>
           <span>{{ currentMonthLabel() }}</span>
         </h3>
-        <p-button
-        label="Kalendarz"
-        icon="pi pi-calendar"
-        [routerLink]="['/', householdId(), 'calendar']"
-        [outlined]="true"
-        severity="success"
-        size="large"
-        aria-label="Przejdź do widoku kalendarza"
-        pTooltip="Przejdź do widoku kalendarza"
-        tooltipPosition="bottom">
-      </p-button>
+        <p class="week-range">{{ weekRangeLabel() }}</p>
       </div>
-      <p class="week-range">{{ weekRangeLabel() }}</p>
+      <div class="header-buttons">
+        <p-button
+          [label]="showCompletedEvents() ? 'Ukryj wykonane' : 'Pokaż wykonane'"
+          [icon]="showCompletedEvents() ? 'pi pi-eye-slash' : 'pi pi-eye'"
+          [outlined]="!showCompletedEvents()"
+          severity="secondary"
+          size="small"
+          (onClick)="toggleShowCompletedEvents()">
+        </p-button>
+        <p-button
+          label="Kalendarz"
+          icon="pi pi-calendar"
+          [routerLink]="['/', householdId(), 'calendar']"
+          [outlined]="true"
+          severity="success"
+          size="large"
+          aria-label="Przejdź do widoku kalendarza"
+          pTooltip="Przejdź do widoku kalendarza"
+          tooltipPosition="bottom">
+        </p-button>
+      </div>
     </div>
 
     <div class="header-actions">
@@ -96,6 +106,7 @@
               <div
                 class="event-item"
                 [class]="'event-' + getEventSeverity(event)"
+                [class.event-completed]="event.status === 'completed'"
                 (click)="onEventClick(event)"
                 (keydown.enter)="onEventClick(event)"
                 (keydown.space)="onEventClick(event)"
@@ -103,15 +114,20 @@
                 role="button"
                 [pTooltip]="getEventTooltip(event)"
                 tooltipPosition="top"
-                [attr.aria-label]="'Wydarzenie: ' + event.task.name">
+                [attr.aria-label]="'Wydarzenie: ' + event.task.name + (event.status === 'completed' ? ' (wykonane)' : '')">
 
                 <div class="event-content">
                   <div class="event-time">
-                    <i class="pi pi-clock" aria-hidden="true"></i>
-                    <span>{{ getEventTimeDisplay(event) }}</span>
+                    @if (event.status === 'completed') {
+                      <i class="pi pi-check-circle" aria-hidden="true"></i>
+                      <span>Wykonane</span>
+                    } @else {
+                      <i class="pi pi-clock" aria-hidden="true"></i>
+                      <span>{{ getEventTimeDisplay(event) }}</span>
+                    }
                   </div>
 
-                  <div class="event-title">
+                  <div class="event-title" [class.completed-title]="event.status === 'completed'">
                     {{ event.task.name }}
                   </div>
 

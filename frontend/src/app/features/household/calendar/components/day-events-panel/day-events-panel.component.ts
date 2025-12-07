@@ -70,6 +70,11 @@ export class DayEventsPanelComponent {
   close = output<void>();
 
   /**
+   * Create event button clicked
+   */
+  createEvent = output<void>();
+
+  /**
    * Formatted date for display
    */
   formattedDate = computed(() => {
@@ -99,6 +104,13 @@ export class DayEventsPanelComponent {
    */
   onClose(): void {
     this.close.emit();
+  }
+
+  /**
+   * Handle create event button click
+   */
+  onCreateEvent(): void {
+    this.createEvent.emit();
   }
 
   /**

@@ -37,6 +37,12 @@
         text-transform: capitalize;
       }
     }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
   }
 
   .panel-content {
@@ -175,6 +181,18 @@
       .header-content {
         .header-title {
           font-size: 1rem;
+        }
+      }
+
+      .header-actions {
+        ::ng-deep {
+          .p-button {
+            &:not(.p-button-rounded) {
+              .p-button-label {
+                display: none; // Hide label on mobile, show only icon
+              }
+            }
+          }
         }
       }
     }

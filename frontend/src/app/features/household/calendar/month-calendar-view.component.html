@@ -31,14 +31,6 @@
         (onClick)="goToToday()"
         severity="secondary"
       />
-
-      <!-- Add event button -->
-      <p-button
-        label="Dodaj wydarzenie"
-        icon="pi pi-plus"
-        (onClick)="showCreateEventDialog.set(true)"
-        severity="primary"
-      />
     </div>
   </p-toolbar>
 
@@ -64,6 +56,7 @@
       [date]="selectedDate()!"
       [events]="selectedDayEvents()"
       (eventClick)="onDayPanelEventClick($event)"
+      (createEvent)="onCreateEventFromDayPanel()"
       (close)="closeDayEventsPanel()"
     />
   }
@@ -81,6 +74,7 @@
       [visible]="showCreateEventDialog()"
       [householdId]="householdId()"
       [task]="null"
+      [initialDate]="createEventDate()"
       (onClose)="showCreateEventDialog.set(false)"
       (onCreated)="onEventCreated()"
     />

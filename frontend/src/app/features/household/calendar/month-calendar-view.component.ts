@@ -327,11 +327,11 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
     this.selectedDate.set(clickedDate);
 
     // If no events on this day, show create event dialog
-    const eventsOnDay = this.selectedDayEvents();
-    if (eventsOnDay.length === 0) {
-      this.createEventDate.set(clickedDate);
-      this.showCreateEventDialog.set(true);
-    }
+    // const eventsOnDay = this.selectedDayEvents();
+    // if (eventsOnDay.length === 0) {
+    //   this.createEventDate.set(clickedDate);
+    //   this.showCreateEventDialog.set(true);
+    // }
   }
 
   /**
@@ -463,6 +463,17 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
    */
   closeDayEventsPanel(): void {
     this.selectedDate.set(null);
+  }
+
+  /**
+   * Handle create event from day panel
+   */
+  onCreateEventFromDayPanel(): void {
+    const date = this.selectedDate();
+    if (date) {
+      this.createEventDate.set(date);
+      this.showCreateEventDialog.set(true);
+    }
   }
 
   /**

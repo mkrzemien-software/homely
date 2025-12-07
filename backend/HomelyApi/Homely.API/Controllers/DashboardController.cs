@@ -29,17 +29,20 @@ public class DashboardController : ControllerBase
     /// </summary>
     /// <param name="householdId">Household ID</param>
     /// <param name="days">Number of days to look ahead (default: 7, max: 365)</param>
+    /// <param name="startDate">Optional start date (ISO 8601 format). If not provided, defaults to today.</param>
+    /// <param name="includeCompleted">Include completed events in the response (default: false)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Dashboard upcoming events response with data and summary</returns>
     /// <remarks>
     /// Sample request:
     ///
-    ///     GET /api/dashboard/upcoming-events?householdId=00000000-0000-0000-0000-000000000000&amp;days=7
+    ///     GET /api/dashboard/upcoming-events?householdId=00000000-0000-0000-0000-000000000000&amp;days=7&amp;includeCompleted=true
     ///
     /// Response includes:
     /// - Full event data with task, category, and assigned user information
     /// - Calculated urgency status (overdue, today, upcoming)
     /// - Summary statistics (overdue count, today count, this week count)
+    /// - Optionally includes completed events when includeCompleted=true
     /// </remarks>
     [HttpGet("upcoming-events")]
     [ProducesResponseType(typeof(ApiResponseDto<DashboardUpcomingEventsResponseDto>), StatusCodes.Status200OK)]
@@ -48,6 +51,8 @@ public class DashboardController : ControllerBase
     public async Task<ActionResult<ApiResponseDto<DashboardUpcomingEventsResponseDto>>> GetUpcomingEvents(
         [FromQuery] Guid householdId,
         [FromQuery] int days = 7,
+        [FromQuery] string? startDate = null,
+        [FromQuery] bool includeCompleted = false,
         CancellationToken cancellationToken = default)
     {
         try
@@ -66,7 +71,25 @@ public class DashboardController : ControllerBase
                     StatusCodes.Status400BadRequest));
             }
 
-            var response = await _dashboardService.GetUpcomingEventsAsync(householdId, days, cancellationToken);
+            // Parse startDate if provided
+            DateOnly? parsedStartDate = null;
+            if (!string.IsNullOrWhiteSpace(startDate))
+            {
+                if (!DateOnly.TryParse(startDate, out var parsed))
+                {
+                    return BadRequest(ApiResponseDto<object>.ErrorResponse(
+                        "Invalid startDate format. Expected ISO 8601 format (YYYY-MM-DD)",
+                        StatusCodes.Status400BadRequest));
+                }
+                parsedStartDate = parsed;
+            }
+
+            var response = await _dashboardService.GetUpcomingEventsAsync(
+                householdId,
+                days,
+                parsedStartDate,
+                includeCompleted,
+                cancellationToken);
             return Ok(ApiResponseDto<DashboardUpcomingEventsResponseDto>.SuccessResponse(response));
         }
         catch (Exception ex)

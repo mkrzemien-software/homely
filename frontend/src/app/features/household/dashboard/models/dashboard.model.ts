@@ -141,6 +141,12 @@ export interface DashboardUpcomingEventsParams {
    * Defaults to today
    */
   startDate?: string;
+
+  /**
+   * Include completed events in the response
+   * Default: false
+   */
+  includeCompleted?: boolean;
 }
 
 /**

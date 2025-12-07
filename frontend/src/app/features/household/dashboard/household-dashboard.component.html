@@ -60,13 +60,20 @@
 
     <!-- Dashboard Widgets Section -->
     <section class="dashboard-widgets">
+      <!-- Calendar Header -->
+      <div class="widget-header">
+        <h2 class="section-title">Kalendarz tygodniowy</h2>
+      </div>
+
       <!-- Week Calendar View -->
       <div class="widget-calendar">
         <app-week-calendar-view
           [events]="filteredEvents()"
           [householdId]="householdId()"
+          [showCompletedEvents]="showCompletedEvents()"
           (eventClick)="onEventClick($event)"
-          (weekChange)="onWeekChange($event)">
+          (weekChange)="onWeekChange($event)"
+          (showCompletedEventsChange)="onShowCompletedEventsChange($event)">
         </app-week-calendar-view>
       </div>
 

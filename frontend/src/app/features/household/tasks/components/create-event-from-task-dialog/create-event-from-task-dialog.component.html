@@ -5,7 +5,7 @@
   [draggable]="false"
   [resizable]="false"
   [style]="{ width: '600px', maxWidth: '90vw' }"
-  header="Utwórz wydarzenie z zadania"
+  header="Utwórz wydarzenie"
   (onHide)="closeDialog()"
 >
   @if (task) {
@@ -45,9 +45,39 @@
     </div>
 
     <p-divider></p-divider>
+  }
 
-    <!-- Event Form -->
-    <form [formGroup]="createEventForm" (ngSubmit)="onSubmit()">
+  <!-- Event Form -->
+  <form [formGroup]="createEventForm" (ngSubmit)="onSubmit()">
+    <!-- Task Selection (only when no task provided) -->
+    @if (!task) {
+      <div class="form-field">
+        <label for="taskSelect" class="form-label">
+          Zadanie *
+        </label>
+        <p-select
+          id="taskSelect"
+          formControlName="taskId"
+          [options]="taskOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Wybierz zadanie"
+          [style]="{ width: '100%' }"
+          [disabled]="taskOptions().length === 0"
+          [filter]="true"
+          filterPlaceholder="Szukaj zadania..."
+        ></p-select>
+        @if (taskOptions().length === 0) {
+          <small class="form-info">
+            <i class="pi pi-info-circle"></i>
+            Brak dostępnych zadań w tym gospodarstwie.
+          </small>
+        }
+        @if (createEventForm.get('taskId')?.invalid && createEventForm.get('taskId')?.touched) {
+          <small class="form-error">Zadanie jest wymagane</small>
+        }
+      </div>
+    }
       <!-- Assigned To -->
       <div class="form-field">
         <label for="assignedTo" class="form-label">
@@ -95,39 +125,40 @@
         }
       </div>
 
-      <!-- Priority -->
-      <div class="form-field">
-        <label for="priority" class="form-label">
-          Priorytet *
-        </label>
-        <p-select
-          id="priority"
-          formControlName="priority"
-          [options]="priorityOptions"
-          [style]="{ width: '100%' }"
-        ></p-select>
+    <!-- Priority -->
+    <div class="form-field">
+      <label for="priority" class="form-label">
+        Priorytet *
+      </label>
+      <p-select
+        id="priority"
+        formControlName="priority"
+        [options]="priorityOptions"
+        [style]="{ width: '100%' }"
+      ></p-select>
+      @if (task) {
         <small class="form-info">
           <i class="pi pi-info-circle"></i>
           Priorytet dziedziczony z zadania ({{ getPriorityLabel(task.priority) }}). Możesz go zmienić.
         </small>
-      </div>
+      }
+    </div>
 
-      <!-- Notes -->
-      <div class="form-field">
-        <label for="notes" class="form-label">
-          Notatki
-        </label>
-        <textarea
-          pTextarea
-          id="notes"
-          formControlName="notes"
-          placeholder="Dodatkowe informacje o wydarzeniu..."
-          rows="3"
-          [style]="{ width: '100%' }"
-        ></textarea>
-      </div>
-    </form>
-  }
+    <!-- Notes -->
+    <div class="form-field">
+      <label for="notes" class="form-label">
+        Notatki
+      </label>
+      <textarea
+        pTextarea
+        id="notes"
+        formControlName="notes"
+        placeholder="Dodatkowe informacje o wydarzeniu..."
+        rows="3"
+        [style]="{ width: '100%' }"
+      ></textarea>
+    </div>
+  </form>
 
   <!-- Footer buttons -->
   <ng-template pTemplate="footer">

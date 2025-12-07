@@ -21,6 +21,7 @@ import { EventsService } from '../../../events/services/events.service';
 import { HouseholdService } from '../../../../../core/services/household.service';
 import { CreateEventDto } from '../../../events/models/event.model';
 import { AuthService, UserProfile } from '../../../../../core/services/auth.service';
+import { TasksService } from '../../services/tasks.service';
 
 /**
  * CreateEventFromTaskDialogComponent
@@ -60,6 +61,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
   @Input() visible = false;
   @Input() task: Task | null = null;
   @Input() householdId: string | null = null;
+  @Input() initialDate: Date | null = null;
 
   @Output() onClose = new EventEmitter<void>();
   @Output() onCreated = new EventEmitter<void>();
@@ -69,6 +71,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
   private householdService = inject(HouseholdService);
   private eventsService = inject(EventsService);
   private authService = inject(AuthService);
+  private tasksService = inject(TasksService);
 
   createEventForm: FormGroup;
   isLoading = signal<boolean>(false);
@@ -78,6 +81,11 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
    * Household members loaded from API
    */
   householdMembers = signal<Array<{ id: string; userId: string; firstName: string; lastName: string; email: string; role: string }>>([]);
+
+  /**
+   * Available tasks loaded from API (when no task provided)
+   */
+  availableTasks = signal<Task[]>([]);
 
   /**
    * Priority options for dropdown
@@ -92,10 +100,19 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
    * Household member options for dropdown
    */
   memberOptions = computed(() => {
-    // TODO: Replace with actual household members
     return this.householdMembers().map(member => ({
       label: `${member.firstName} ${member.lastName}`,
       value: member.userId
+    }));
+  });
+
+  /**
+   * Task options for dropdown (when no task provided)
+   */
+  taskOptions = computed(() => {
+    return this.availableTasks().map(task => ({
+      label: `${task.name} (${task.category.categoryType.name} → ${task.category.name})`,
+      value: task.id
     }));
   });
 
@@ -112,6 +129,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
   readonly getPrioritySeverity = getPrioritySeverity;
 
   constructor() {
+    // Initialize form - taskId will be added conditionally in ngOnInit
     this.createEventForm = this.fb.group({
       assignedTo: [null, [Validators.required]],
       dueDate: [null, [Validators.required]],
@@ -121,11 +139,26 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Initialize form with task priority
+    // Add taskId control if no task provided
+    if (!this.task) {
+      this.createEventForm.addControl('taskId', this.fb.control(null, [Validators.required]));
+      // Load available tasks
+      this.loadAvailableTasks();
+    }
+
+    // Initialize form with task priority and initial date
+    const patchData: any = {};
+
     if (this.task) {
-      this.createEventForm.patchValue({
-        priority: this.task.priority
-      });
+      patchData.priority = this.task.priority;
+    }
+
+    if (this.initialDate) {
+      patchData.dueDate = this.initialDate;
+    }
+
+    if (Object.keys(patchData).length > 0) {
+      this.createEventForm.patchValue(patchData);
     }
 
     // Load household members
@@ -162,16 +195,57 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
   }
 
   /**
+   * Load available tasks from API
+   */
+  private loadAvailableTasks(): void {
+    if (!this.householdId) {
+      console.warn('Cannot load tasks: householdId is null');
+      return;
+    }
+
+    console.log('loadAvailableTasks');
+
+    this.tasksService.getTasks({ householdId: this.householdId }).subscribe({
+      next: (response) => {
+        this.availableTasks.set(response.data || []);
+        console.log('Loaded available tasks:', response.data);
+      },
+      error: (error) => {
+        console.error('Error loading tasks:', error);
+        this.availableTasks.set([]);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Błąd',
+          detail: 'Nie udało się załadować listy zadań'
+        });
+      }
+    });
+  }
+
+  /**
    * Submit form
    */
   onSubmit(): void {
-    if (this.createEventForm.invalid || !this.task) {
+    if (this.createEventForm.invalid) {
       this.createEventForm.markAllAsTouched();
       return;
     }
 
     this.isLoading.set(true);
     const formValue = this.createEventForm.value;
+
+    // Get taskId from either the task prop or the form
+    const taskId = this.task ? this.task.id : formValue.taskId;
+
+    if (!taskId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Błąd',
+        detail: 'Nie wybrano zadania'
+      });
+      this.isLoading.set(false);
+      return;
+    }
 
     // Build CreateEventDto
     // Format dueDate as YYYY-MM-DD (DateOnly format for backend)
@@ -180,7 +254,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
 
     const createDto: CreateEventDto = {
       householdId: this.householdId!,
-      taskId: this.task.id,
+      taskId: taskId,
       assignedTo: formValue.assignedTo || undefined,
       dueDate: dueDateString,
       notes: formValue.notes?.trim() || undefined,

@@ -93,6 +93,9 @@ export class DashboardService {
       if (params.startDate) {
         httpParams = httpParams.append('startDate', params.startDate);
       }
+      if (params.includeCompleted !== undefined) {
+        httpParams = httpParams.append('includeCompleted', params.includeCompleted.toString());
+      }
     }
 
     // Generate cache key
@@ -302,7 +305,7 @@ export class DashboardService {
 
   /**
    * Generate cache key from parameters
-   * Format: "days:{days}|household:{id}|start:{date}"
+   * Format: "days:{days}|household:{id}|start:{date}|completed:{bool}"
    *
    * @param params - Query parameters
    * @returns Cache key string
@@ -311,7 +314,8 @@ export class DashboardService {
     const days = params?.days || 7;
     const householdId = params?.householdId || 'default';
     const startDate = params?.startDate || 'today';
+    const includeCompleted = params?.includeCompleted || false;
 
-    return `days:${days}|household:${householdId}|start:${startDate}`;
+    return `days:${days}|household:${householdId}|start:${startDate}|completed:${includeCompleted}`;
   }
 }
