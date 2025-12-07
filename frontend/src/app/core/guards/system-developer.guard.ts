@@ -21,8 +21,8 @@ export const systemDeveloperGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Check if user is authenticated
-  if (!authService.isAuthenticated()) {
+  // Check if user is authenticated and token is valid (not expired)
+  if (!authService.isAuthenticated() || !authService.isTokenValid()) {
     // Redirect to login with return URL
     router.navigate(['/auth/login'], {
       queryParams: { returnUrl: state.url }
@@ -59,7 +59,8 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (!authService.isAuthenticated()) {
+  // Check if user is authenticated and token is valid (not expired)
+  if (!authService.isAuthenticated() || !authService.isTokenValid()) {
     router.navigate(['/auth/login'], {
       queryParams: { returnUrl: state.url }
     });
@@ -88,8 +89,8 @@ export const householdMemberGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // First check authentication (redundant if used with authGuard, but safe)
-  if (!authService.isAuthenticated()) {
+  // First check authentication and token validity (redundant if used with authGuard, but safe)
+  if (!authService.isAuthenticated() || !authService.isTokenValid()) {
     router.navigate(['/auth/login'], {
       queryParams: { returnUrl: state.url }
     });

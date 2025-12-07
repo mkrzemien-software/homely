@@ -170,6 +170,55 @@ export class AuthService {
   }
 
   /**
+   * Decode JWT token and extract payload
+   */
+  private decodeToken(token: string): any {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        return null;
+      }
+
+      const payload = parts[1];
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Check if token is expired
+   */
+  private isTokenExpired(token: string): boolean {
+    const decoded = this.decodeToken(token);
+
+    if (!decoded || !decoded.exp) {
+      return true;
+    }
+
+    // exp is in seconds, Date.now() is in milliseconds
+    const expirationDate = decoded.exp * 1000;
+    const now = Date.now();
+
+    return now >= expirationDate;
+  }
+
+  /**
+   * Check if token is valid (exists and not expired)
+   */
+  isTokenValid(): boolean {
+    const token = this.getToken();
+
+    if (!token) {
+      return false;
+    }
+
+    return !this.isTokenExpired(token);
+  }
+
+  /**
    * Get current user profile
    */
   getCurrentUser(): UserProfile | null {
@@ -218,12 +267,22 @@ export class AuthService {
       : null;
 
     if (token && userJson) {
+      // Check if token is expired
+      if (this.isTokenExpired(token)) {
+        console.warn('Token has expired, clearing authentication data');
+        this.clearAuthData();
+        this.isAuthenticated.set(false);
+        this.currentUser.set(null);
+        return;
+      }
+
       try {
         const user = JSON.parse(userJson) as UserProfile;
         this.isAuthenticated.set(true);
         this.currentUser.set(user);
       } catch (error) {
         // Invalid stored data, clear it
+        console.error('Error parsing user data:', error);
         this.clearAuthData();
       }
     }

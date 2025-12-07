@@ -19,27 +19,27 @@ export const routes: Routes = [
         path: 'login',
         loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
         title: 'Login - Homely',
-        // canActivate: [guestOnlyGuard]
+        canActivate: [guestOnlyGuard]
       },
       {
         path: 'register',
         loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
         title: 'Register - Homely',
-        // canActivate: [guestOnlyGuard]
+        canActivate: [guestOnlyGuard]
         // TODO: Create RegisterComponent
       },
       {
         path: 'forgot-password',
         loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
         title: 'Forgot Password - Homely',
-        // canActivate: [guestOnlyGuard]
+        canActivate: [guestOnlyGuard]
         // TODO: Create ForgotPasswordComponent
       },
       {
         path: 'reset-password/:token',
         loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
         title: 'Reset Password - Homely',
-        // canActivate: [guestOnlyGuard]
+        canActivate: [guestOnlyGuard]
         // TODO: Create ResetPasswordComponent
       }
     ]
@@ -56,19 +56,19 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('./features/system/dashboard/system-dashboard.component').then(m => m.SystemDashboardComponent),
         title: 'System Dashboard - Homely',
-        // canActivate: [systemDeveloperGuard]
+        canActivate: [systemDeveloperGuard]
       },
       {
         path: 'users',
         loadComponent: () => import('./features/system/users/system-users.component').then(m => m.SystemUsersComponent),
         title: 'User Management - Homely System',
-        // canActivate: [systemDeveloperGuard]
+        canActivate: [systemDeveloperGuard]
       },
       {
         path: 'households',
         loadComponent: () => import('./features/system/households/system-households.component').then(m => m.SystemHouseholdsComponent),
         title: 'Household Management - Homely System',
-        // canActivate: [systemDeveloperGuard]
+        canActivate: [systemDeveloperGuard]
       }
     ]
   },
@@ -84,31 +84,31 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('./features/household/dashboard/household-dashboard.component').then(m => m.HouseholdDashboardComponent),
         title: 'Dashboard - Homely',
-        // canActivate: [authGuard, householdMemberGuard]
+        canActivate: [authGuard, householdMemberGuard]
       },
       {
         path: 'tasks',
         loadComponent: () => import('./features/household/tasks/tasks-list.component').then(m => m.TasksListComponent),
         title: 'Zadania - Homely',
-        // canActivate: [authGuard, householdMemberGuard]
+        canActivate: [authGuard, householdMemberGuard]
       },
       {
         path: 'events',
         loadComponent: () => import('./features/household/events/events-list.component').then(m => m.EventsListComponent),
         title: 'Wydarzenia - Homely',
-        // canActivate: [authGuard, householdMemberGuard]
+        canActivate: [authGuard, householdMemberGuard]
       },
       {
         path: 'calendar',
         loadComponent: () => import('./features/household/calendar/month-calendar-view.component').then(m => m.MonthCalendarViewComponent),
         title: 'Kalendarz - Homely',
-        // canActivate: [authGuard, householdMemberGuard]
+        canActivate: [authGuard, householdMemberGuard]
       },
       {
         path: 'categories',
         loadComponent: () => import('./features/household/categories/categories-list.component').then(m => m.CategoriesListComponent),
         title: 'Kategorie - Homely',
-        // canActivate: [authGuard, householdMemberGuard]
+        canActivate: [authGuard, householdMemberGuard]
       },
       {
         path: 'settings',
