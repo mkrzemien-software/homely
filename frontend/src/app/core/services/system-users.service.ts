@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError, tap, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { UserHousehold, AddUserToHouseholdRequest } from '../../features/system/users/models/user-household.model';
 
 /**
  * User role types in the system
@@ -294,6 +295,42 @@ export class SystemUsersService {
    */
   clearSelectedUser(): void {
     this.selectedUser.set(null);
+  }
+
+  /**
+   * Get all households a user belongs to
+   */
+  getUserHouseholds(userId: string): Observable<UserHousehold[]> {
+    return this.http.get<UserHousehold[]>(`${this.API_URL}/${userId}/households`).pipe(
+      catchError((error) => {
+        const err = this.handleError(error);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  /**
+   * Add user to a household
+   */
+  addUserToHousehold(userId: string, request: AddUserToHouseholdRequest): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(`${this.API_URL}/${userId}/households`, request).pipe(
+      catchError((error) => {
+        const err = this.handleError(error);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  /**
+   * Remove user from a household
+   */
+  removeUserFromHousehold(userId: string, householdId: string): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.API_URL}/${userId}/households/${householdId}`).pipe(
+      catchError((error) => {
+        const err = this.handleError(error);
+        return throwError(() => err);
+      })
+    );
   }
 
   /**

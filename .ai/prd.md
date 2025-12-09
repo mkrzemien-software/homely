@@ -56,7 +56,18 @@ Aplikacja rozwiązuje te problemy poprzez:
 - Możliwość resetowania hasła
 - Zgodność z RODO przy zbieraniu danych osobowych
 
-#### 3.1.2 Role i uprawnienia
+#### 3.1.2 Multi-household support
+
+Użytkownik może należeć do wielu gospodarstw jednocześnie:
+- Każdy użytkownik ma tablicę `households` z przypisanymi gospodarstwami
+- Każde gospodarstwo w tablicy zawiera: `householdId`, `householdName`, `role`, `joinedAt`
+- Użytkownik może mieć różne role w różnych gospodarstwach
+- W danym momencie aktywne jest jedno gospodarstwo (`activeHouseholdId`)
+- Przełączanie między gospodarstwami przez dropdown w sidebar
+- Menu i widoki dynamicznie dostosowują się do aktywnego gospodarstwa
+- Guardy sprawdzają membership w tablicy households zamiast pojedynczego pola
+
+#### 3.1.3 Role i uprawnienia
 
 System Developer (Super Admin):
 - Zarządzanie wszystkimi gospodarstwami w systemie
@@ -86,10 +97,13 @@ Dashboard (tylko odczyt):
 - Optymalizacja dla monitora na ścianie
 - Uproszczony interfejs z kluczowymi informacjami
 
-#### 3.1.3 Zarządzanie gospodarstwem
+#### 3.1.4 Zarządzanie gospodarstwem
+- Użytkownik może należeć do wielu gospodarstw jednocześnie
 - Limit wersji darmowej: 3 osoby w gospodarstwie
 - Brak limitu w wersji premium
 - Możliwość przypisywania kolorów/ikon członkom rodziny dla lepszej wizualizacji
+- Przełączanie między gospodarstwami przez dropdown w headerze sidebara
+- Zapamiętywanie ostatnio aktywnego gospodarstwa w localStorage
 
 ### 3.2 Zarządzanie zadaniami i wydarzeniami
 
@@ -181,12 +195,18 @@ Wydarzenie to konkretne zaplanowane wystąpienie zadania z przypisaną datą:
 #### 3.4.0 Główne menu nawigacyjne (Sidebar)
 Aplikacja wykorzystuje wysuwane menu z lewej strony, które zawiera:
 
+**Header z przełącznikiem gospodarstw**:
+- Dropdown z listą gospodarstw użytkownika (jeśli należy do więcej niż jednego)
+- Wyświetlanie nazwy aktywnego gospodarstwa i roli użytkownika
+- PrimeNG dropdown z custom templates pokazującymi ikonę, nazwę i rolę
+- Zmiana gospodarstwa aktualizuje routes w menu i przekierowuje do dashboard
+
 **Sekcja 1: Widoki Gospodarstwa** (dostępne dla wszystkich użytkowników w kontekście aktualnie otwartego gospodarstwa):
-- 📊 Dashboard - główny widok z kafelkami nawigacyjnymi (Kalendarz, Wydarzenia, Zadania, Kategorie) + interaktywny kalendarz tygodniowy + lista wydarzeń
-- 📅 Kalendarz - widok miesięczny kalendarz z zaznaczonymi wydarzeniami (Admin, Domownik)
-- 📋 Wydarzenia - lista wszystkich wydarzeń z filtrowaniem (Admin, Domownik)
-- 📝 Zadania - zarządzanie szablonami zadań (Admin, Domownik)
-- 🏷️ Kategorie - widok kategorii i podkategorii (Admin, Domownik)
+- 📊 Dashboard - główny widok z kafelkami nawigacyjnymi (Kalendarz, Wydarzenia, Zadania, Kategorie) + interaktywny kalendarz tygodniowy + lista wydarzeń (route: `/{householdId}/dashboard`)
+- 📅 Kalendarz - widok miesięczny kalendarz z zaznaczonymi wydarzeniami (Admin, Domownik) (route: `/{householdId}/calendar`)
+- 📋 Wydarzenia - lista wszystkich wydarzeń z filtrowaniem (Admin, Domownik) (route: `/{householdId}/events`)
+- 📝 Zadania - zarządzanie szablonami zadań (Admin, Domownik) (route: `/{householdId}/tasks`)
+- 🏷️ Kategorie - widok kategorii i podkategorii (Admin, Domownik) (route: `/{householdId}/categories`)
 - 👥 Gospodarstwo - zarządzanie członkami i ustawieniami (tylko Administrator)
 - 📈 Historia - archiwum wykonanych wydarzeń (tylko Premium)
 - 📊 Raporty - zestawienia kosztów (tylko Premium)
@@ -195,9 +215,9 @@ Aplikacja wykorzystuje wysuwane menu z lewej strony, które zawiera:
 - ❓ Pomoc - FAQ i wsparcie
 
 **Sekcja 2: Widoki Systemowe** (widoczna tylko dla użytkowników z rolą System Developer):
-- 🖥️ System Dashboard - główny panel administracyjny platformy
-- 🏢 Gospodarstwa - zarządzanie wszystkimi gospodarstwami w systemie
-- 👤 Użytkownicy - administracja wszystkich kont użytkowników
+- 🖥️ System Dashboard - główny panel administracyjny platformy (route: `/system/dashboard`)
+- 🏢 Gospodarstwa - zarządzanie wszystkimi gospodarstwami w systemie (route: `/system/households`)
+- 👤 Użytkownicy - administracja wszystkich kont użytkowników (route: `/system/users`)
 - 💳 Subskrypcje - monitoring płatności i metryk finansowych
 - 🔧 Administracja - zarządzanie infrastrukturą i konfiguracją
 - 🎧 Wsparcie - narzędzia do obsługi użytkowników i troubleshooting
@@ -211,6 +231,7 @@ Aplikacja wykorzystuje wysuwane menu z lewej strony, które zawiera:
 - Pozycje menu dynamicznie filtrowane na podstawie roli użytkownika i subskrypcji
 - Wyraźne wizualne oddzielenie sekcji (separator, nagłówki sekcji)
 - Active state indicator dla aktualnie wybranego widoku
+- **Reaktywne URL-e**: Menu items używają computed signals do automatycznego aktualizowania routes przy zmianie activeHouseholdId
 
 #### 3.4.1 Dashboard główny
 - **Kafelki nawigacyjne** (duże przyciski z ikonami) przekierowujące do głównych widoków:
@@ -573,11 +594,14 @@ Aby szybko zarządzać różnymi gospodarstwami
 
 Kryteria akceptacji:
 - Dropdown z listą gospodarstw w headerze sekcji gospodarstwa
-- Wyświetlanie roli w każdym gospodarstwie
-- Quick stats per household (liczba zadań, pilne terminy)
-- Zmiana gospodarstwa aktualizuje zawartość sekcji 1 sidebar
-- Zmiana gospodarstwa przekierowuje na dashboard wybranego gospodarstwa
-- Zapamiętanie ostatnio wybranego gospodarstwa
+- Wyświetlanie roli w każdym gospodarstwie (Administrator, Członek, Dashboard, Developer)
+- Zmiana gospodarstwa aktualizuje activeHouseholdId w AuthService
+- Zmiana gospodarstwa aktualizuje zawartość sekcji 1 sidebar (nowe URL-e w menu)
+- Zmiana gospodarstwa automatycznie przekierowuje do /{newHouseholdId}/dashboard
+- Zapamiętanie ostatnio wybranego gospodarstwa w localStorage
+- Guard (householdMemberGuard) sprawdza membership w tablicy households
+- Menu items automatycznie reagują na zmianę activeHouseholdId (computed signals)
+- Smooth transition między gospodarstwami bez przeładowania strony
 
 ### 5.1 Rejestracja i uwierzytelnianie
 

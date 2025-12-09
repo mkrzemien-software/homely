@@ -34,7 +34,8 @@
       "Bash(npm run e2e:*)",
       "Bash(npm run e2e:docker:restart:*)",
       "Bash(npm run e2e:docker:ps:*)",
-      "Bash(dotnet --version:*)"
+      "Bash(dotnet --version:*)",
+      "Bash(npx ng generate:*)"
     ],
     "deny": [],
     "ask": []

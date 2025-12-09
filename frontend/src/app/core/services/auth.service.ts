@@ -40,6 +40,16 @@ export interface LoginResponseData {
 export interface LoginResponse extends ApiResponse<LoginResponseData> {}
 
 /**
+ * User household interface
+ */
+export interface UserHousehold {
+  householdId: string;
+  householdName: string;
+  role: string;
+  joinedAt: string;
+}
+
+/**
  * User data from API
  */
 export interface UserDto {
@@ -48,8 +58,11 @@ export interface UserDto {
   name: string;
   emailConfirmed: boolean;
   createdAt: string;
+  /** @deprecated Use households instead */
   householdId: string;
+  /** @deprecated Use households instead */
   role: string;
+  households: UserHousehold[];
 }
 
 /**
@@ -61,8 +74,11 @@ export interface UserProfile {
   name: string;
   emailConfirmed: boolean;
   createdAt: string;
+  /** @deprecated Use households instead */
   householdId: string;
+  /** @deprecated Use households instead */
   role: string;
+  households: UserHousehold[];
 }
 
 @Injectable({
@@ -73,6 +89,7 @@ export class AuthService {
   private readonly TOKEN_KEY = 'homely-auth-token';
   private readonly REFRESH_TOKEN_KEY = 'homely-refresh-token';
   private readonly USER_KEY = 'homely-user';
+  private readonly ACTIVE_HOUSEHOLD_KEY = 'homely-active-household';
 
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -81,6 +98,8 @@ export class AuthService {
   isAuthenticated = signal<boolean>(false);
   currentUser = signal<UserProfile | null>(null);
   isLoading = signal<boolean>(false);
+  activeHouseholdId = signal<string | null>(null);
+  userHouseholds = signal<UserHousehold[]>([]);
 
   constructor() {
     // Check if user is already authenticated on service initialization
@@ -110,11 +129,24 @@ export class AuthService {
         this.storeTokens(responseData.accessToken, responseData.refreshToken);
         this.storeUser(responseData.user);
 
+        // Set active household (use stored preference or first household)
+        const storedActiveHousehold = this.getActiveHouseholdId();
+        const userHouseholds = responseData.user.households || [];
+        const activeHousehold = storedActiveHousehold && userHouseholds.some(h => h.householdId === storedActiveHousehold)
+          ? storedActiveHousehold
+          : userHouseholds[0]?.householdId || null;
+
+        if (activeHousehold) {
+          this.storeActiveHousehold(activeHousehold);
+        }
+
         // Use queueMicrotask to defer signal updates until after current execution
         // This ensures localStorage operations complete before effects fire
         queueMicrotask(() => {
           this.isAuthenticated.set(true);
           this.currentUser.set(responseData.user);
+          this.userHouseholds.set(userHouseholds);
+          this.activeHouseholdId.set(activeHousehold);
         });
       }),
       catchError((error: HttpErrorResponse) => {
@@ -137,6 +169,8 @@ export class AuthService {
     // Update state
     this.isAuthenticated.set(false);
     this.currentUser.set(null);
+    this.activeHouseholdId.set(null);
+    this.userHouseholds.set([]);
 
     // Navigate to login
     this.router.navigate(['/auth/login']);
@@ -254,6 +288,7 @@ export class AuthService {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.REFRESH_TOKEN_KEY);
       localStorage.removeItem(this.USER_KEY);
+      localStorage.removeItem(this.ACTIVE_HOUSEHOLD_KEY);
     }
   }
 
@@ -273,19 +308,81 @@ export class AuthService {
         this.clearAuthData();
         this.isAuthenticated.set(false);
         this.currentUser.set(null);
+        this.activeHouseholdId.set(null);
+        this.userHouseholds.set([]);
         return;
       }
 
       try {
         const user = JSON.parse(userJson) as UserProfile;
+        const activeHousehold = this.getActiveHouseholdId();
+        const households = user.households || [];
+
         this.isAuthenticated.set(true);
         this.currentUser.set(user);
+        this.userHouseholds.set(households);
+        this.activeHouseholdId.set(activeHousehold);
       } catch (error) {
         // Invalid stored data, clear it
         console.error('Error parsing user data:', error);
         this.clearAuthData();
       }
     }
+  }
+
+  /**
+   * Get active household ID
+   */
+  getActiveHouseholdId(): string | null {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem(this.ACTIVE_HOUSEHOLD_KEY);
+    }
+    return null;
+  }
+
+  /**
+   * Store active household ID in localStorage
+   */
+  private storeActiveHousehold(householdId: string): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(this.ACTIVE_HOUSEHOLD_KEY, householdId);
+    }
+  }
+
+  /**
+   * Set active household (for switching between user's households)
+   */
+  setActiveHousehold(householdId: string): void {
+    // Validate that user belongs to this household
+    const households = this.userHouseholds();
+    const household = households.find(h => h.householdId === householdId);
+
+    if (!household) {
+      console.error(`User does not belong to household: ${householdId}`);
+      return;
+    }
+
+    // Update active household
+    this.activeHouseholdId.set(householdId);
+    this.storeActiveHousehold(householdId);
+
+    // Force navigation to refresh dashboard
+    // Navigate to blank route first, then to new household dashboard
+    // This ensures the dashboard component reloads with new household data
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([`/${householdId}/dashboard`]);
+    });
+  }
+
+  /**
+   * Get current active household details
+   */
+  getActiveHousehold(): UserHousehold | null {
+    const activeId = this.activeHouseholdId();
+    if (!activeId) return null;
+
+    const households = this.userHouseholds();
+    return households.find(h => h.householdId === activeId) || null;
   }
 
   /**

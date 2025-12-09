@@ -51,4 +51,19 @@ public interface ISystemUsersService
     /// Delete user from system (soft delete profile, hard delete from Supabase Auth)
     /// </summary>
     Task<bool> DeleteUserAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get all households a user belongs to
+    /// </summary>
+    Task<List<UserHouseholdDto>> GetUserHouseholdsAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Add user to a household with specified role
+    /// </summary>
+    Task<bool> AddUserToHouseholdAsync(Guid userId, Guid householdId, string role, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Remove user from a household
+    /// </summary>
+    Task<bool> RemoveUserFromHouseholdAsync(Guid userId, Guid householdId, CancellationToken cancellationToken = default);
 }

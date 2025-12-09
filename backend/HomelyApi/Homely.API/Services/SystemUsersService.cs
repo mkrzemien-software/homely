@@ -15,6 +15,8 @@ public class SystemUsersService : ISystemUsersService
     private readonly IHouseholdMemberRepository _householdMemberRepository;
     private readonly IHouseholdRepository _householdRepository;
     private readonly ISupabaseAuthService _supabaseAuthService;
+    private readonly IHouseholdMemberService _householdMemberService;
+    private readonly IPlanUsageService _planUsageService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<SystemUsersService> _logger;
 
@@ -23,6 +25,8 @@ public class SystemUsersService : ISystemUsersService
         IHouseholdMemberRepository householdMemberRepository,
         IHouseholdRepository householdRepository,
         ISupabaseAuthService supabaseAuthService,
+        IHouseholdMemberService householdMemberService,
+        IPlanUsageService planUsageService,
         IUnitOfWork unitOfWork,
         ILogger<SystemUsersService> logger)
     {
@@ -30,6 +34,8 @@ public class SystemUsersService : ISystemUsersService
         _householdMemberRepository = householdMemberRepository;
         _householdRepository = householdRepository;
         _supabaseAuthService = supabaseAuthService;
+        _householdMemberService = householdMemberService;
+        _planUsageService = planUsageService;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -341,6 +347,121 @@ public class SystemUsersService : ISystemUsersService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting user {UserId}", userId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Get all households a user belongs to
+    /// </summary>
+    public async Task<List<UserHouseholdDto>> GetUserHouseholdsAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var user = await _userProfileRepository.GetUserWithHouseholdsAsync(userId, cancellationToken);
+            if (user == null)
+            {
+                throw new InvalidOperationException($"User {userId} not found");
+            }
+
+            var households = user.HouseholdMemberships
+                .Where(hm => hm.DeletedAt == null)
+                .Select(hm => new UserHouseholdDto
+                {
+                    HouseholdId = hm.HouseholdId,
+                    HouseholdName = hm.Household?.Name ?? "Unknown",
+                    Role = hm.Role,
+                    JoinedAt = hm.JoinedAt,
+                    PlanTypeName = hm.Household?.PlanType?.Name ?? "Unknown"
+                })
+                .ToList();
+
+            return households;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting households for userId: {UserId}", userId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Add user to a household with specified role
+    /// </summary>
+    public async Task<bool> AddUserToHouseholdAsync(Guid userId, Guid householdId, string role, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Check if user exists
+            var user = await _userProfileRepository.GetByIdAsync(userId, cancellationToken);
+            if (user == null)
+            {
+                throw new InvalidOperationException($"User {userId} not found");
+            }
+
+            // Check if household exists
+            var household = await _householdRepository.GetByIdAsync(householdId, cancellationToken);
+            if (household == null)
+            {
+                throw new InvalidOperationException($"Household {householdId} not found");
+            }
+
+            // Check if user is already a member
+            var existingMembership = await _householdMemberRepository.GetFirstAsync(
+                hm => hm.UserId == userId && hm.HouseholdId == householdId && hm.DeletedAt == null,
+                cancellationToken);
+
+            if (existingMembership != null)
+            {
+                _logger.LogWarning("User {UserId} is already a member of household {HouseholdId}", userId, householdId);
+                return false;
+            }
+
+            // Check if adding this member would exceed plan limit
+            await _householdMemberService.AddMemberAsync(householdId, userId, role, cancellationToken);
+
+            _logger.LogInformation("Added user {UserId} to household {HouseholdId} with role {Role}", userId, householdId, role);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding user {UserId} to household {HouseholdId}", userId, householdId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Remove user from a household
+    /// </summary>
+    public async Task<bool> RemoveUserFromHouseholdAsync(Guid userId, Guid householdId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var membership = await _householdMemberRepository.GetFirstAsync(
+                hm => hm.UserId == userId && hm.HouseholdId == householdId && hm.DeletedAt == null,
+                cancellationToken);
+
+            if (membership == null)
+            {
+                _logger.LogWarning("User {UserId} is not a member of household {HouseholdId}", userId, householdId);
+                return false;
+            }
+
+            // Soft delete the membership
+            membership.DeletedAt = DateTimeOffset.UtcNow;
+            membership.UpdatedAt = DateTimeOffset.UtcNow;
+            await _householdMemberRepository.UpdateAsync(membership, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // Update plan usage tracking
+            await _planUsageService.UpdateMembersUsageAsync(householdId, cancellationToken);
+
+            _logger.LogInformation("Removed user {UserId} from household {HouseholdId}", userId, householdId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error removing user {UserId} from household {HouseholdId}", userId, householdId);
             throw;
         }
     }

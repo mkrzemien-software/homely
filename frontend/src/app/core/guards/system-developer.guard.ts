@@ -107,18 +107,25 @@ export const householdMemberGuard: CanActivateFn = (route, state) => {
   // Get household ID from route params
   const householdIdParam = route.paramMap.get('householdId');
 
-  // Check if user has a household assigned
-  if (!currentUser.householdId || currentUser.householdId.trim() === '') {
-    console.warn('User has no household assigned');
+  // Get user's households from the new multi-household structure
+  const userHouseholds = currentUser.households || [];
+
+  // Check if user has any households assigned
+  if (userHouseholds.length === 0) {
+    console.warn('User has no households assigned');
     router.navigate(['/error/403']);
     return false;
   }
 
-  // If householdId is in route params, verify it matches user's household
-  if (householdIdParam && householdIdParam !== currentUser.householdId) {
-    console.warn(`User ${currentUser.id} attempted to access household ${householdIdParam} but belongs to ${currentUser.householdId}`);
-    router.navigate(['/error/403']);
-    return false;
+  // If householdId is in route params, verify user belongs to this household
+  if (householdIdParam) {
+    const isMember = userHouseholds.some(h => h.householdId === householdIdParam);
+
+    if (!isMember) {
+      console.warn(`User ${currentUser.id} attempted to access household ${householdIdParam} but is not a member`);
+      router.navigate(['/error/403']);
+      return false;
+    }
   }
 
   return true;

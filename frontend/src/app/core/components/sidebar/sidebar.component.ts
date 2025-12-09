@@ -11,6 +11,7 @@ import { timeout, TimeoutError } from 'rxjs';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { HouseholdService } from '../../../core/services/household.service';
+import { HouseholdSwitcherComponent } from '../household-switcher/household-switcher.component';
 import {
   MenuSection,
   MenuItem,
@@ -45,7 +46,8 @@ import {
     TooltipModule,
     BadgeModule,
     DividerModule,
-    MenuModule
+    MenuModule,
+    HouseholdSwitcherComponent
   ],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
@@ -65,36 +67,30 @@ export class SidebarComponent {
   currentTheme = this.themeService.appliedTheme;
 
   // User context signals - derived from AuthService
-  currentHouseholdId = signal<string | null>(null);
-  userRole = signal<UserRole>('admin'); // TODO: Get from user profile when role is added
+  currentHouseholdId = this.authService.activeHouseholdId;
+  userRole = signal<UserRole>('admin');
   hasPremium = signal<boolean>(false); // TODO: Get from household subscription
   householdName = signal<string>('Loading...');
 
   constructor() {
-    // Effect to sync with auth service user data
+    // Effect to sync with auth service active household
     effect(() => {
-      const user = this.authService.currentUser();
+      const activeHouseholdId = this.authService.activeHouseholdId();
+      const activeHousehold = this.authService.getActiveHousehold();
       const isAuthenticated = this.authService.isAuthenticated();
 
-      if (user && isAuthenticated) {
-        // Only set householdId if it's not empty
-        const householdId = user.householdId && user.householdId.trim() !== ''
-          ? user.householdId
-          : null;
+      if (activeHouseholdId && isAuthenticated && activeHousehold) {
+        // Set user role from active household
+        this.userRole.set((activeHousehold.role as UserRole) || 'member');
 
-        this.currentHouseholdId.set(householdId);
-
-        // Set user role from auth service
-        this.userRole.set((user.role as UserRole) || 'member');
-
-        // Fetch household name
-        if (householdId) {
-          this.fetchHouseholdName(householdId);
-        } else {
-          this.householdName.set('No household assigned');
-        }
+        // Set household name from active household
+        this.householdName.set(activeHousehold.householdName);
+      } else if (isAuthenticated) {
+        // User is authenticated but has no active household
+        this.userRole.set('member');
+        this.householdName.set('No household assigned');
       } else {
-        this.currentHouseholdId.set(null);
+        // User is not authenticated
         this.userRole.set('member');
         this.householdName.set('Not logged in');
       }

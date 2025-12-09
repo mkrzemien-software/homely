@@ -17,6 +17,7 @@ import { UserDetailsPanelComponent } from './components/user-details-panel/user-
 import { RoleManagementFormComponent } from './components/role-management-form/role-management-form.component';
 import { AccountActionsToolbarComponent } from './components/account-actions-toolbar/account-actions-toolbar.component';
 import { CreateUserDialogComponent } from './components/create-user-dialog/create-user-dialog.component';
+import { HouseholdAssignmentComponent } from './components/household-assignment/household-assignment.component';
 
 // Services and Interfaces
 import { SystemUsersService, SystemUser, UserSearchFilters, UserRole, UserAccountStatus } from '../../../core/services/system-users.service';
@@ -37,7 +38,8 @@ import { SystemUsersService, SystemUser, UserSearchFilters, UserRole, UserAccoun
     UserDetailsPanelComponent,
     RoleManagementFormComponent,
     AccountActionsToolbarComponent,
-    CreateUserDialogComponent
+    CreateUserDialogComponent,
+    HouseholdAssignmentComponent
   ],
   templateUrl: './system-users.component.html',
   styleUrl: './system-users.component.scss'

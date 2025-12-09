@@ -150,6 +150,11 @@
         <!-- User Details -->
         <app-user-details-panel [user]="selectedUser()!"></app-user-details-panel>
 
+        <!-- Household Assignment -->
+        <div class="household-assignment-section">
+          <app-household-assignment [user]="selectedUser()!"></app-household-assignment>
+        </div>
+
         <!-- Role Management -->
         <div class="role-management-section">
           <app-role-management-form

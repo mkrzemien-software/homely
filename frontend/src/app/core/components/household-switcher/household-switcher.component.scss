@@ -1,0 +1,69 @@
+.household-switcher {
+  padding: 1rem;
+  border-bottom: 1px solid var(--surface-border);
+  background-color: var(--surface-ground);
+
+  .switcher-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-color-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  ::ng-deep .household-dropdown {
+    width: 100%;
+
+    .p-dropdown {
+      width: 100%;
+    }
+  }
+}
+
+.household-single {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--surface-border);
+  background-color: var(--surface-ground);
+
+  i {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+  }
+
+  .household-name {
+    font-weight: 500;
+    color: var(--text-color);
+  }
+}
+
+.household-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+
+  i {
+    color: var(--primary-color);
+    font-size: 1.125rem;
+  }
+
+  .household-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+  }
+
+  .household-name {
+    font-weight: 500;
+    color: var(--text-color);
+  }
+
+  .household-role {
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+  }
+}

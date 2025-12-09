@@ -405,6 +405,134 @@ public class SystemUsersController : ControllerBase
             return StatusCode(500, new { error = "An error occurred while deleting user" });
         }
     }
+
+    /// <summary>
+    /// Get all households a user belongs to
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>List of user's households</returns>
+    [HttpGet("{userId}/households")]
+    [ProducesResponseType(typeof(List<UserHouseholdDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<List<UserHouseholdDto>>> GetUserHouseholds(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var households = await _systemUsersService.GetUserHouseholdsAsync(userId, cancellationToken);
+            return Ok(households);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "User not found while getting households");
+            return NotFound(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting households for userId: {UserId}", userId);
+            return StatusCode(500, new { error = "An error occurred while getting user households" });
+        }
+    }
+
+    /// <summary>
+    /// Add user to a household
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <param name="request">Add household request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Success status</returns>
+    [HttpPost("{userId}/households")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> AddUserToHousehold(
+        Guid userId,
+        [FromBody] AddUserToHouseholdRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var success = await _systemUsersService.AddUserToHouseholdAsync(
+                userId,
+                request.HouseholdId,
+                request.Role,
+                cancellationToken);
+
+            if (!success)
+            {
+                return BadRequest(new { error = "User is already a member of this household" });
+            }
+
+            return Ok(new
+            {
+                success = true,
+                message = "User added to household successfully"
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation while adding user to household");
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding user {UserId} to household", userId);
+            return StatusCode(500, new { error = "An error occurred while adding user to household" });
+        }
+    }
+
+    /// <summary>
+    /// Remove user from a household
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <param name="householdId">Household ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Success status</returns>
+    [HttpDelete("{userId}/households/{householdId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> RemoveUserFromHousehold(
+        Guid userId,
+        Guid householdId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var success = await _systemUsersService.RemoveUserFromHouseholdAsync(userId, householdId, cancellationToken);
+
+            if (!success)
+            {
+                return NotFound(new { error = "User is not a member of this household" });
+            }
+
+            return Ok(new
+            {
+                success = true,
+                message = "User removed from household successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error removing user {UserId} from household {HouseholdId}", userId, householdId);
+            return StatusCode(500, new { error = "An error occurred while removing user from household" });
+        }
+    }
 }
 
 /// <summary>
@@ -430,4 +558,13 @@ public class PasswordResetRequest
 public class MoveHouseholdRequest
 {
     public Guid NewHouseholdId { get; set; }
+}
+
+/// <summary>
+/// Request model for adding user to household
+/// </summary>
+public class AddUserToHouseholdRequest
+{
+    public Guid HouseholdId { get; set; }
+    public string Role { get; set; } = string.Empty;
 }

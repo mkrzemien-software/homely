@@ -191,7 +191,7 @@ export class HouseholdDashboardComponent implements OnInit {
   currentWeekStartDate = signal<Date | null>(null);
 
   /**
-   * Filtered events based on current filters
+   * Filtered events based on current filters (for events list only)
    */
   filteredEvents = computed(() => {
     const events = this.upcomingEvents();

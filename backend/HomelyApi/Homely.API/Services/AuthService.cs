@@ -216,9 +216,29 @@ namespace Homely.API.Services
             // Get user profile for first name and last name
             var userProfile = await _unitOfWork.UserProfiles.GetByIdAsync(userId);
 
-            // Get user's primary household membership (first active membership)
+            // Get all user's active household memberships
             var memberships = await _unitOfWork.HouseholdMembers.GetUserMembershipsAsync(userId);
-            var primaryMembership = memberships.FirstOrDefault(m => m.DeletedAt == null);
+            var activeMemberships = memberships.Where(m => m.DeletedAt == null).ToList();
+
+            // Map memberships to household DTOs
+            var households = new List<UserHouseholdDto>();
+            foreach (var membership in activeMemberships)
+            {
+                var household = await _unitOfWork.Households.GetByIdAsync(membership.HouseholdId);
+                if (household != null)
+                {
+                    households.Add(new UserHouseholdDto
+                    {
+                        HouseholdId = membership.HouseholdId.ToString(),
+                        HouseholdName = household.Name,
+                        Role = membership.Role,
+                        JoinedAt = membership.JoinedAt
+                    });
+                }
+            }
+
+            // Get primary membership for backwards compatibility
+            var primaryMembership = activeMemberships.FirstOrDefault();
 
             // Build full name from user profile, fallback to email username
             var fullName = userProfile != null
@@ -232,8 +252,13 @@ namespace Homely.API.Services
                 Name = fullName,
                 EmailConfirmed = user.EmailConfirmedAt.HasValue,
                 CreatedAt = user.CreatedAt,
+                // Deprecated fields - kept for backwards compatibility
+#pragma warning disable CS0618 // Type or member is obsolete
                 HouseholdId = primaryMembership?.HouseholdId.ToString() ?? string.Empty,
-                Role = primaryMembership?.Role ?? "member"
+                Role = primaryMembership?.Role ?? "member",
+#pragma warning restore CS0618 // Type or member is obsolete
+                // New households list
+                Households = households
             };
         }
     }

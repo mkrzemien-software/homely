@@ -1,0 +1,60 @@
+<p-card header="Przypisanie do gospodarstw">
+  <!-- Loading spinner -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <p-progressSpinner styleClass="w-4rem h-4rem" />
+      <p class="loading-text">Ładowanie gospodarstw...</p>
+    </div>
+  }
+
+  <!-- Error message -->
+  @if (errorMessage()) {
+    <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-3" />
+  }
+
+  <!-- Success message -->
+  @if (successMessage()) {
+    <p-message severity="success" [text]="successMessage()!" styleClass="w-full mb-3" />
+  }
+
+  <!-- Household checkboxes -->
+  @if (!isLoading()) {
+    <div class="household-list">
+      @if (households().length === 0) {
+        <p class="no-households">Brak dostępnych gospodarstw</p>
+      }
+
+      @for (household of households(); track household.householdId) {
+        <div class="household-item">
+          <div class="household-checkbox-wrapper">
+            <p-checkbox
+              [(ngModel)]="household.checked"
+              [binary]="true"
+              (onChange)="onHouseholdCheckboxChange(household)"
+              [inputId]="'household-' + household.householdId"
+            />
+            <label [for]="'household-' + household.householdId" class="household-name">
+              {{ household.householdName }}
+              @if (household.planTypeName) {
+                <span class="plan-type">({{ household.planTypeName }})</span>
+              }
+            </label>
+          </div>
+
+          <!-- Role dropdown (only visible when checked) -->
+          @if (household.checked) {
+            <p-dropdown
+              [(ngModel)]="household.role"
+              [options]="roleOptions"
+              optionLabel="label"
+              optionValue="value"
+              (onChange)="onRoleChange(household)"
+              placeholder="Wybierz rolę"
+              styleClass="role-dropdown"
+            />
+          }
+        </div>
+      }
+    </div>
+  }
+</p-card>

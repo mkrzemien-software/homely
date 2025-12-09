@@ -1,0 +1,36 @@
+@if (householdOptions().length > 1) {
+  <div class="household-switcher">
+    <label class="switcher-label">Wybierz gospodarstwo:</label>
+    <p-dropdown
+      [options]="householdOptions()"
+      [ngModel]="activeHouseholdId()"
+      (ngModelChange)="onHouseholdChange($event)"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Wybierz gospodarstwo"
+      styleClass="household-dropdown"
+      [showClear]="false"
+    >
+      <ng-template pTemplate="selectedItem" let-option>
+        <div class="household-item">
+          <i class="pi pi-home"></i>
+          <span class="household-name">{{ option.label }}</span>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="item" let-option>
+        <div class="household-item">
+          <i class="pi pi-home"></i>
+          <div class="household-info">
+            <span class="household-name">{{ option.label }}</span>
+            <span class="household-role">{{ getRoleLabel(option.role) }}</span>
+          </div>
+        </div>
+      </ng-template>
+    </p-dropdown>
+  </div>
+} @else if (householdOptions().length === 1) {
+  <div class="household-single">
+    <i class="pi pi-home"></i>
+    <span class="household-name">{{ householdOptions()[0].label }}</span>
+  </div>
+}

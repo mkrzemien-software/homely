@@ -68,7 +68,7 @@
       <!-- Week Calendar View -->
       <div class="widget-calendar">
         <app-week-calendar-view
-          [events]="filteredEvents()"
+          [events]="upcomingEvents()"
           [householdId]="householdId()"
           [showCompletedEvents]="showCompletedEvents()"
           (eventClick)="onEventClick($event)"
