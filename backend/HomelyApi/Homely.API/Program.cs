@@ -1,5 +1,6 @@
 using Homely.API.Configuration;
 using Homely.API.Extensions;
+using Homely.API.Models.Configuration;
 using Homely.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -39,6 +40,8 @@ builder.Services.Configure<SupabaseSettings>(
     builder.Configuration.GetSection(SupabaseSettings.SectionName));
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection(JwtSettings.SectionName));
+builder.Services.Configure<EventGenerationSettings>(
+    builder.Configuration.GetSection(EventGenerationSettings.SectionName));
 
 // Get configuration values
 var environmentSettings = builder.Configuration.GetSection(EnvironmentSettings.SectionName).Get<EnvironmentSettings>()

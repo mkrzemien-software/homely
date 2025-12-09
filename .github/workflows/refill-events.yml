@@ -1,0 +1,103 @@
+name: Refill Events
+
+# This workflow refills future events for all households
+# It runs monthly to ensure users always have upcoming events visible
+# Prevents the need to generate events on-the-fly during task completion
+
+on:
+  # Run on the 1st of every month at 00:00 UTC
+  #schedule:
+  #  - cron: '0 0 1 * *'  # Monthly: 1st day of month at midnight
+
+  # Allow manual trigger for testing and ad-hoc runs
+  workflow_dispatch:
+    inputs:
+      householdId:
+        description: 'Optional: Specific household ID to refill (leave empty for all households)'
+        required: false
+        type: string
+
+jobs:
+  refill-events:
+    name: Refill Events
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Refill events for specific household
+        if: ${{ github.event.inputs.householdId != '' }}
+        run: |
+          echo "Refilling events for household: ${{ github.event.inputs.householdId }}"
+
+          RESPONSE=$(curl -X POST \
+            "${{ secrets.API_BASE_URL }}/api/maintenance/refill-events?householdId=${{ github.event.inputs.householdId }}" \
+            -H "Authorization: Bearer ${{ secrets.MAINTENANCE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}" \
+            -s)
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Response: $BODY"
+          echo "HTTP Status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "Error: API returned status $HTTP_CODE"
+            exit 1
+          fi
+
+          echo "Successfully refilled events for household ${{ github.event.inputs.householdId }}"
+
+      - name: Refill events for all households
+        if: ${{ github.event.inputs.householdId == '' }}
+        run: |
+          echo "Refilling events for all households"
+
+          # TODO: In production, implement batch processing
+          # For now, this endpoint is not implemented
+          # Future implementation should:
+          # 1. Fetch all active households from database
+          # 2. Process in batches to avoid timeouts
+          # 3. Track failures and send notifications
+
+          RESPONSE=$(curl -X POST \
+            "${{ secrets.API_BASE_URL }}/api/maintenance/refill-events/all" \
+            -H "Authorization: Bearer ${{ secrets.MAINTENANCE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}" \
+            -s)
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Response: $BODY"
+          echo "HTTP Status: $HTTP_CODE"
+
+          # For MVP, we expect 200 with "not yet implemented" message
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "Error: API returned status $HTTP_CODE"
+            exit 1
+          fi
+
+          echo "Event refill job completed"
+
+      - name: Send notification on failure
+        if: failure()
+        run: |
+          echo "Event refill failed!"
+          # TODO: Implement notification (email, Slack, etc.)
+          # Example: Send to monitoring service
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"text":"Event refill workflow failed!"}'
+
+# Required GitHub Secrets:
+# - API_BASE_URL: Base URL of the production API (e.g., https://api.homely.app)
+# - MAINTENANCE_API_KEY: API key or service account token for maintenance endpoints
+#
+# Optional Secrets for notifications:
+# - SLACK_WEBHOOK_URL: Slack webhook for failure notifications
+# - EMAIL_SERVICE_API_KEY: Email service API key for notifications

@@ -427,6 +427,24 @@
   }
 }
 
+.dialog-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    width: 100%;
+
+    ::ng-deep .p-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
 // Create Event Dialog
 .create-event-dialog {
   .form-grid {

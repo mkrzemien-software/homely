@@ -309,19 +309,59 @@ All main tables use soft delete (`deleted_at` timestamp). Always filter out soft
 - Never expose Supabase API keys or secrets in client code
 - Use JWT tokens with proper expiration (30 days)
 
+### Event Generation Strategy
+**Architecture**: Pre-generation with scheduled replenishment
+
+The application uses a proactive event generation strategy instead of creating events on-the-fly:
+
+**Event Creation** - Implemented in `TaskService.CreateTaskAsync()`:
+1. When a task template is created, automatically generate a series of future events
+2. Events are generated for a period of `FutureYears` (default: 2 years) into the future
+3. Ensures consistent coverage: yearly tasks get ~2 events, weekly tasks get ~104 events
+4. Events cover the full time period regardless of task interval
+
+**Event Regeneration** - Implemented in `TaskService.UpdateTaskAsync()`:
+1. Detects when task interval changes (years, months, weeks, days)
+2. Deletes all future pending events
+3. Generates new series based on updated interval
+4. Ensures consistency between task definition and scheduled events
+
+**Event Refill** - Implemented in `EventService.RefillEventsForHouseholdAsync()`:
+1. Scheduled monthly via GitHub Actions workflow
+2. Checks each active task's furthest future event date
+3. If furthest event is less than `MinFutureMonthsThreshold` (default: 6 months) away, generates more events
+4. Generates events up to `FutureYears` (2 years) from today
+5. Ensures users always have sufficient future visibility
+
+**Configuration** (appsettings.json):
+```json
+"EventGenerationSettings": {
+  "FutureYears": 2,                    // Generate events 2 years into future
+  "MinFutureMonthsThreshold": 6        // Refill if events don't cover next 6 months
+}
+```
+
+**API Endpoints**:
+- `POST /api/tasks/{id}/regenerate-events` - Manual regeneration for specific task
+- `POST /api/maintenance/refill-events?householdId={id}` - Refill for household
+
+**Benefits**:
+- Users see all upcoming events immediately
+- No need to wait for previous event completion
+- Better planning and visibility
+- Reduced database load (no triggers on event completion)
+
 ### Event Completion Logic
-**Implemented in**: `EventService.CompleteEventAsync()` (backend/HomelyApi/Homely.API/Services/EventService.cs:240)
+**Implemented in**: `EventService.CompleteEventAsync()` (backend/HomelyApi/Homely.API/Services/EventService.cs:269)
 
 When an event is completed:
-1. Mark current event as completed
-2. If event has a task template with interval:
-   - Calculate next due date: completion_date + interval
-   - Create new recurring event automatically
+1. Mark current event as completed with completion date and notes
+2. **No longer creates next event** - events are pre-generated (see Event Generation Strategy above)
 3. If household has premium plan (Premium or Rodzinny):
    - Archive completion to `events_history` table
    - Includes event details, task name snapshot, completion notes
 
-**Note**: Previously handled by database triggers, now implemented in .NET for better testability and control.
+**Note**: Event creation on completion was removed in favor of pre-generation strategy for better user experience and visibility.
 
 ### Plan Usage Tracking
 **Implemented in**: `PlanUsageService` (backend/HomelyApi/Homely.API/Services/PlanUsageService.cs)

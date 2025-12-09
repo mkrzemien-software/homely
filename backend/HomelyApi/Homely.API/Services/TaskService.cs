@@ -1,6 +1,8 @@
 using Homely.API.Models.DTOs.Tasks;
+using Homely.API.Models.Configuration;
 using Homely.API.Repositories.Base;
 using Homely.API.Entities;
+using Microsoft.Extensions.Options;
 
 namespace Homely.API.Services;
 
@@ -11,15 +13,21 @@ public class TaskService : ITaskService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPlanUsageService _planUsageService;
+    private readonly IEventService _eventService;
+    private readonly EventGenerationSettings _eventSettings;
     private readonly ILogger<TaskService> _logger;
 
     public TaskService(
         IUnitOfWork unitOfWork,
         IPlanUsageService planUsageService,
+        IEventService eventService,
+        IOptions<EventGenerationSettings> eventSettings,
         ILogger<TaskService> logger)
     {
         _unitOfWork = unitOfWork;
         _planUsageService = planUsageService;
+        _eventService = eventService;
+        _eventSettings = eventSettings.Value;
         _logger = logger;
     }
 
@@ -180,6 +188,20 @@ public class TaskService : ITaskService
             // Update plan usage tracking (replaces database trigger)
             await _planUsageService.UpdateTasksUsageAsync(createDto.HouseholdId, cancellationToken);
 
+            // Generate series of future events if task has an interval
+            var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            var eventsGenerated = await _eventService.GenerateEventSeriesAsync(
+                task.Id,
+                startDate,
+                cancellationToken);
+
+            if (eventsGenerated > 0)
+            {
+                _logger.LogInformation(
+                    "Generated {Count} future events for task {TaskId}",
+                    eventsGenerated, task.Id);
+            }
+
             // Reload with details
             var createdTask = await _unitOfWork.Tasks.GetWithDetailsAsync(task.Id, cancellationToken);
             return MapToDto(createdTask!);
@@ -203,6 +225,12 @@ public class TaskService : ITaskService
                 throw new InvalidOperationException($"Task with ID {taskId} not found");
             }
 
+            // Check if interval has changed
+            var intervalChanged = task.YearsValue != updateDto.YearsValue ||
+                                 task.MonthsValue != updateDto.MonthsValue ||
+                                 task.WeeksValue != updateDto.WeeksValue ||
+                                 task.DaysValue != updateDto.DaysValue;
+
             task.CategoryId = updateDto.CategoryId;
             task.Name = updateDto.Name;
             task.Description = updateDto.Description;
@@ -220,6 +248,22 @@ public class TaskService : ITaskService
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Task {TaskId} updated successfully", taskId);
+
+            // If interval changed, regenerate all future events
+            if (intervalChanged)
+            {
+                _logger.LogInformation(
+                    "Task {TaskId} interval changed - regenerating future events",
+                    taskId);
+
+                var eventsGenerated = await _eventService.RegenerateEventsForTaskAsync(
+                    taskId,
+                    cancellationToken);
+
+                _logger.LogInformation(
+                    "Regenerated {Count} events for task {TaskId} after interval change",
+                    eventsGenerated, taskId);
+            }
 
             // Reload with details
             var updatedTask = await _unitOfWork.Tasks.GetWithDetailsAsync(taskId, cancellationToken);

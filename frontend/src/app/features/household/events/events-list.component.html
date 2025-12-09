@@ -9,14 +9,14 @@
         </h1>
         <p class="subtitle">Zarządzaj zaplanowanymi wydarzeniami i terminami</p>
       </div>
-      <div class="header-actions">
+      <!-- <div class="header-actions">
         <p-button
           label="Dodaj wydarzenie"
           icon="pi pi-plus"
           (onClick)="openCreateEventDialog()"
           severity="success"
         ></p-button>
-      </div>
+      </div> -->
     </div>
   </div>
 
@@ -435,12 +435,37 @@
   }
 
   <ng-template pTemplate="footer">
-    <p-button
-      label="Zamknij"
-      icon="pi pi-times"
-      (onClick)="hideEventDetailsDialog()"
-      severity="secondary"
-    ></p-button>
+    <div class="dialog-footer-actions">
+      @if (selectedEvent() && (selectedEvent()!.status === 'pending' || selectedEvent()!.status === 'postponed')) {
+        <p-button
+          label="Potwierdź"
+          icon="pi pi-check"
+          (onClick)="completeEvent(selectedEvent()!); hideEventDetailsDialog()"
+          severity="success"
+        ></p-button>
+        <p-button
+          label="Przełóż"
+          icon="pi pi-clock"
+          (onClick)="postponeEvent(selectedEvent()!); hideEventDetailsDialog()"
+          severity="warn"
+          [outlined]="true"
+        ></p-button>
+        <p-button
+          label="Anuluj wydarzenie"
+          icon="pi pi-times-circle"
+          (onClick)="cancelEvent(selectedEvent()!); hideEventDetailsDialog()"
+          severity="danger"
+          [outlined]="true"
+        ></p-button>
+      }
+      <p-button
+        label="Zamknij"
+        icon="pi pi-times"
+        (onClick)="hideEventDetailsDialog()"
+        severity="secondary"
+        [outlined]="true"
+      ></p-button>
+    </div>
   </ng-template>
 </p-dialog>
 

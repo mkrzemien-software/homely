@@ -73,4 +73,43 @@ public interface IEventService
     /// Cancel event with a reason (changes status to 'cancelled')
     /// </summary>
     Task<EventDto> CancelEventAsync(Guid eventId, CancelEventDto cancelDto, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Generate a series of future events for a task template.
+    /// Events are generated up to FutureYears (from configuration) into the future.
+    /// Used when creating a new task or regenerating events.
+    /// </summary>
+    /// <param name="taskId">Task template ID</param>
+    /// <param name="startDate">Starting date for event generation (typically today or last completion date)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Number of events generated</returns>
+    Task<int> GenerateEventSeriesAsync(Guid taskId, DateOnly startDate, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Regenerate events for a task template.
+    /// Deletes all future (non-completed) events and generates a new series.
+    /// Used when task interval is changed.
+    /// </summary>
+    /// <param name="taskId">Task template ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Number of events generated</returns>
+    Task<int> RegenerateEventsForTaskAsync(Guid taskId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Count future pending events for a task template.
+    /// </summary>
+    /// <param name="taskId">Task template ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Number of future pending events</returns>
+    Task<int> CountFutureEventsForTaskAsync(Guid taskId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Refill events for all active tasks in a household.
+    /// Checks each task and adds more events if below threshold.
+    /// Used by the GitHub Actions workflow.
+    /// </summary>
+    /// <param name="householdId">Household ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Total number of events generated across all tasks</returns>
+    Task<int> RefillEventsForHouseholdAsync(Guid householdId, CancellationToken cancellationToken = default);
 }

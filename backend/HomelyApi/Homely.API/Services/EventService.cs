@@ -1,7 +1,9 @@
 using Homely.API.Models.DTOs.Tasks;
 using Homely.API.Repositories.Base;
 using Homely.API.Entities;
+using Homely.API.Models.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Homely.API.Services;
 
@@ -12,13 +14,16 @@ public class EventService : IEventService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<EventService> _logger;
+    private readonly EventGenerationSettings _eventSettings;
 
     public EventService(
         IUnitOfWork unitOfWork,
-        ILogger<EventService> logger)
+        ILogger<EventService> logger,
+        IOptions<EventGenerationSettings> eventSettings)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _eventSettings = eventSettings.Value;
     }
 
     /// <inheritdoc/>
@@ -300,24 +305,9 @@ public class EventService : IEventService
 
                 _logger.LogInformation("Event {EventId} marked as completed", eventId);
 
-                // If task template has an interval, create next recurring event
-                if (eventEntity.TaskId.HasValue)
-                {
-                    var task = await _unitOfWork.Tasks.GetByIdAsync(eventEntity.TaskId.Value, ct);
-                    if (task != null && task.DeletedAt == null)
-                    {
-                        // Check if task has any interval values set
-                        bool hasInterval = (task.YearsValue.HasValue && task.YearsValue.Value > 0) ||
-                                         (task.MonthsValue.HasValue && task.MonthsValue.Value > 0) ||
-                                         (task.WeeksValue.HasValue && task.WeeksValue.Value > 0) ||
-                                         (task.DaysValue.HasValue && task.DaysValue.Value > 0);
-
-                        if (hasInterval)
-                        {
-                            await CreateNextRecurringEventAsync(eventEntity, completionDate, ct);
-                        }
-                    }
-                }
+                // NOTE: Event series generation is now handled at task creation time.
+                // No need to create individual events on completion.
+                // Future events are pre-generated and replenished via scheduled workflow.
 
                 // Archive to events_history if household has premium plan
                 await CreateEventHistoryIfPremiumAsync(eventEntity, completedBy, ct);
@@ -421,57 +411,212 @@ public class EventService : IEventService
         }
     }
 
-    /// <summary>
-    /// Creates next recurring event based on task template's interval settings.
-    /// This method is called within a transaction context and does not commit changes.
-    /// </summary>
-    private async Task CreateNextRecurringEventAsync(EventEntity completedEvent, DateOnly completionDate, CancellationToken cancellationToken)
+    /// <inheritdoc/>
+    public async Task<int> GenerateEventSeriesAsync(Guid taskId, DateOnly startDate, CancellationToken cancellationToken = default)
     {
         try
         {
-            if (!completedEvent.TaskId.HasValue)
+            var task = await _unitOfWork.Tasks.GetWithDetailsAsync(taskId, cancellationToken);
+            if (task == null || task.DeletedAt != null)
             {
-                return;
+                throw new InvalidOperationException($"Task template with ID {taskId} not found");
             }
 
-            // Get task template with interval settings
-            var taskTemplate = await _unitOfWork.Tasks.GetByIdAsync(completedEvent.TaskId.Value, cancellationToken);
+            // Check if task has any interval values set
+            bool hasInterval = (task.YearsValue.HasValue && task.YearsValue.Value > 0) ||
+                             (task.MonthsValue.HasValue && task.MonthsValue.Value > 0) ||
+                             (task.WeeksValue.HasValue && task.WeeksValue.Value > 0) ||
+                             (task.DaysValue.HasValue && task.DaysValue.Value > 0);
 
-            if (taskTemplate == null || taskTemplate.DeletedAt != null)
+            if (!hasInterval)
             {
-                _logger.LogWarning("Cannot create recurring event: Task template {TaskId} not found", completedEvent.TaskId.Value);
-                return;
+                _logger.LogInformation("Task {TaskId} has no interval - skipping event series generation", taskId);
+                return 0;
             }
 
-            // Calculate next due date based on task template's interval
-            var nextDueDate = CalculateNextDueDate(completedEvent.DueDate, taskTemplate);
+            // Calculate end date based on configuration (today + FutureYears)
+            var endDate = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(_eventSettings.FutureYears);
 
-            // Create new event
-            var newEvent = new EventEntity
+            var eventsGenerated = 0;
+            var currentDueDate = startDate;
+
+            // Generate events until we reach the end date
+            while (true)
             {
-                TaskId = completedEvent.TaskId,
-                HouseholdId = completedEvent.HouseholdId,
-                AssignedTo = completedEvent.AssignedTo,
-                DueDate = nextDueDate,
-                Status = "pending",
-                Priority = taskTemplate.Priority, // Use task template's priority
-                Notes = null, // New event starts with no notes
-                CreatedBy = completedEvent.CreatedBy,
-                CreatedAt = DateTimeOffset.UtcNow,
-                UpdatedAt = DateTimeOffset.UtcNow
-            };
+                // Calculate next due date
+                currentDueDate = CalculateNextDueDate(currentDueDate, task);
 
-            await _unitOfWork.Events.AddAsync(newEvent, cancellationToken);
-            // Note: SaveChanges is NOT called here - transaction will be committed by the caller (CompleteEventAsync)
+                // Stop if next event would be beyond our future window
+                if (currentDueDate > endDate)
+                {
+                    break;
+                }
+
+                // Create event
+                var eventEntity = new EventEntity
+                {
+                    TaskId = task.Id,
+                    HouseholdId = task.HouseholdId,
+                    AssignedTo = null, // Will be assigned later
+                    DueDate = currentDueDate,
+                    Status = "pending",
+                    Priority = task.Priority,
+                    Notes = null,
+                    CreatedBy = task.CreatedBy,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    UpdatedAt = DateTimeOffset.UtcNow
+                };
+
+                await _unitOfWork.Events.AddAsync(eventEntity, cancellationToken);
+                eventsGenerated++;
+            }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
-                "Created recurring event {NewEventId} for task template {TaskId} with due date {DueDate}",
-                newEvent.Id, taskTemplate.Id, nextDueDate);
+                "Generated {Count} events for task {TaskId} from {StartDate} to {EndDate}",
+                eventsGenerated, taskId, startDate, endDate);
+
+            return eventsGenerated;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating recurring event for completed event {EventId}", completedEvent.Id);
-            throw; // Re-throw to rollback the entire transaction
+            _logger.LogError(ex, "Error generating event series for task {TaskId}", taskId);
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<int> RegenerateEventsForTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _unitOfWork.ExecuteInTransactionAsync(async (ct) =>
+            {
+                var task = await _unitOfWork.Tasks.GetWithDetailsAsync(taskId, ct);
+                if (task == null || task.DeletedAt != null)
+                {
+                    throw new InvalidOperationException($"Task template with ID {taskId} not found");
+                }
+
+                // Delete all future pending events for this task
+                var futureEvents = await _unitOfWork.Events.Query()
+                    .Where(e => e.TaskId == taskId &&
+                               e.DeletedAt == null &&
+                               e.Status == "pending" &&
+                               e.DueDate >= DateOnly.FromDateTime(DateTime.UtcNow))
+                    .ToListAsync(ct);
+
+                foreach (var evt in futureEvents)
+                {
+                    evt.DeletedAt = DateTimeOffset.UtcNow;
+                    evt.UpdatedAt = DateTimeOffset.UtcNow;
+                    await _unitOfWork.Events.UpdateAsync(evt, ct);
+                }
+
+                _logger.LogInformation(
+                    "Deleted {Count} future events for task {TaskId}",
+                    futureEvents.Count, taskId);
+
+                // Generate new series of events
+                var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
+                var eventsGenerated = await GenerateEventSeriesAsync(
+                    taskId,
+                    startDate,
+                    ct);
+
+                return eventsGenerated;
+            }, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error regenerating events for task {TaskId}", taskId);
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<int> CountFutureEventsForTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            return await _unitOfWork.Events.Query()
+                .CountAsync(e => e.TaskId == taskId &&
+                               e.DeletedAt == null &&
+                               e.Status == "pending" &&
+                               e.DueDate >= today,
+                           cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error counting future events for task {TaskId}", taskId);
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<int> RefillEventsForHouseholdAsync(Guid householdId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var activeTasks = await _unitOfWork.Tasks.GetActiveTasksAsync(householdId, cancellationToken);
+            var totalEventsGenerated = 0;
+
+            foreach (var task in activeTasks)
+            {
+                // Skip tasks without intervals (one-time tasks)
+                bool hasInterval = (task.YearsValue.HasValue && task.YearsValue.Value > 0) ||
+                                 (task.MonthsValue.HasValue && task.MonthsValue.Value > 0) ||
+                                 (task.WeeksValue.HasValue && task.WeeksValue.Value > 0) ||
+                                 (task.DaysValue.HasValue && task.DaysValue.Value > 0);
+
+                if (!hasInterval)
+                {
+                    continue;
+                }
+
+                // Find the last future event date
+                var lastFutureEvent = await _unitOfWork.Events.Query()
+                    .Where(e => e.TaskId == task.Id &&
+                               e.DeletedAt == null &&
+                               e.Status == "pending")
+                    .OrderByDescending(e => e.DueDate)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                // Calculate the threshold date (today + MinFutureMonthsThreshold)
+                var thresholdDate = DateOnly.FromDateTime(DateTime.UtcNow).AddMonths(_eventSettings.MinFutureMonthsThreshold);
+
+                // If the last event is before the threshold (or no events exist), generate more
+                if (lastFutureEvent == null || lastFutureEvent.DueDate < thresholdDate)
+                {
+                    var startDate = lastFutureEvent?.DueDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
+                    // Generate events up to FutureYears
+                    var generated = await GenerateEventSeriesAsync(
+                        task.Id,
+                        startDate,
+                        cancellationToken);
+
+                    totalEventsGenerated += generated;
+
+                    var lastEventDate = lastFutureEvent?.DueDate.ToString("yyyy-MM-dd") ?? "none";
+                    _logger.LogInformation(
+                        "Refilled {Count} events for task {TaskId} (last event was: {LastEventDate}, threshold: {ThresholdDate})",
+                        generated, task.Id, lastEventDate, thresholdDate);
+                }
+            }
+
+            _logger.LogInformation(
+                "Refill complete for household {HouseholdId}: {TotalGenerated} total events generated",
+                householdId, totalEventsGenerated);
+
+            return totalEventsGenerated;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error refilling events for household {HouseholdId}", householdId);
+            throw;
         }
     }
 

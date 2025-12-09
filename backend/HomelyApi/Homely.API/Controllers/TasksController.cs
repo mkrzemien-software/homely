@@ -13,13 +13,16 @@ namespace Homely.API.Controllers;
 public class TasksController : ControllerBase
 {
     private readonly ITaskService _taskService;
+    private readonly IEventService _eventService;
     private readonly ILogger<TasksController> _logger;
 
     public TasksController(
         ITaskService taskService,
+        IEventService eventService,
         ILogger<TasksController> logger)
     {
         _taskService = taskService;
+        _eventService = eventService;
         _logger = logger;
     }
 
@@ -411,6 +414,45 @@ public class TasksController : ControllerBase
         {
             _logger.LogError(ex, "Error counting active tasks for household {HouseholdId}", householdId);
             return StatusCode(500, new { error = "An error occurred while counting active tasks" });
+        }
+    }
+
+    /// <summary>
+    /// Regenerate all future events for a task template.
+    /// Deletes all pending future events and creates a new series based on current task interval.
+    /// Useful when task interval has been modified or for manual event refresh.
+    /// </summary>
+    /// <param name="id">Task ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Number of events generated</returns>
+    [HttpPost("{id}/regenerate-events")]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<int>> RegenerateEvents(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var eventsGenerated = await _eventService.RegenerateEventsForTaskAsync(id, cancellationToken);
+
+            return Ok(new
+            {
+                success = true,
+                eventsGenerated = eventsGenerated,
+                message = $"Successfully regenerated {eventsGenerated} events for task {id}"
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation while regenerating events for task {TaskId}", id);
+            return NotFound(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error regenerating events for task {TaskId}", id);
+            return StatusCode(500, new { error = "An error occurred while regenerating events" });
         }
     }
 }
