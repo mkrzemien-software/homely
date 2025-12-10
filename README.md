@@ -217,5 +217,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Contributing**: We welcome contributions! Please read our contributing guidelines before submitting pull requests.
 
 **Support**: For questions and support, please open an issue in the GitHub repository.
-
-**Security**: For security concerns, please email security@homely-app.com instead of opening a public issue.
