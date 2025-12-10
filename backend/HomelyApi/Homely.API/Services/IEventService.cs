@@ -1,3 +1,4 @@
+using Homely.API.Models.DTOs;
 using Homely.API.Models.DTOs.Tasks;
 
 namespace Homely.API.Services;
@@ -7,6 +8,40 @@ namespace Homely.API.Services;
 /// </summary>
 public interface IEventService
 {
+    /// <summary>
+    /// Get events with filtering, sorting, and pagination
+    /// </summary>
+    /// <param name="householdId">Household ID (required)</param>
+    /// <param name="taskId">Optional filter by task ID</param>
+    /// <param name="assignedTo">Optional filter by assigned user ID</param>
+    /// <param name="categoryId">Optional filter by task category ID</param>
+    /// <param name="status">Optional filter by status (pending, completed, postponed, cancelled)</param>
+    /// <param name="priority">Optional filter by priority (low, medium, high)</param>
+    /// <param name="startDate">Optional filter by start date (YYYY-MM-DD)</param>
+    /// <param name="endDate">Optional filter by end date (YYYY-MM-DD)</param>
+    /// <param name="isOverdue">Optional filter for overdue events only</param>
+    /// <param name="sortBy">Sort field: dueDate, status, priority, createdAt (default: dueDate)</param>
+    /// <param name="sortOrder">Sort order: asc or desc (default: asc)</param>
+    /// <param name="page">Page number (default: 1)</param>
+    /// <param name="pageSize">Items per page (default: 20, max: 100)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Paginated list of events</returns>
+    Task<PaginatedResponseDto<EventDto>> GetFilteredEventsAsync(
+        Guid householdId,
+        Guid? taskId = null,
+        Guid? assignedTo = null,
+        int? categoryId = null,
+        string? status = null,
+        string? priority = null,
+        DateOnly? startDate = null,
+        DateOnly? endDate = null,
+        bool? isOverdue = null,
+        string sortBy = "dueDate",
+        string sortOrder = "asc",
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Get all events for a household with optional date filtering
     /// </summary>

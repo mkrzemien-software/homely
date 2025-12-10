@@ -73,9 +73,11 @@
             Brak dostępnych zadań w tym gospodarstwie.
           </small>
         }
-        @if (createEventForm.get('taskId')?.invalid && createEventForm.get('taskId')?.touched) {
-          <small class="form-error">Zadanie jest wymagane</small>
-        }
+        <div class="form-error-container">
+          @if (createEventForm.get('taskId')?.invalid && createEventForm.get('taskId')?.touched) {
+            <small class="form-error">Zadanie jest wymagane</small>
+          }
+        </div>
       </div>
     }
       <!-- Assigned To -->
@@ -99,9 +101,11 @@
             Brak członków gospodarstwa. Upewnij się, że jesteś zalogowany i masz dostęp do gospodarstwa.
           </small>
         }
-        @if (createEventForm.get('assignedTo')?.invalid && createEventForm.get('assignedTo')?.touched) {
-          <small class="form-error">Osoba odpowiedzialna jest wymagana</small>
-        }
+        <div class="form-error-container">
+          @if (createEventForm.get('assignedTo')?.invalid && createEventForm.get('assignedTo')?.touched) {
+            <small class="form-error">Osoba odpowiedzialna jest wymagana</small>
+          }
+        </div>
       </div>
 
       <!-- Due Date -->
@@ -120,9 +124,11 @@
           [style]="{ width: '100%' }"
           appendTo="body"
         ></p-datepicker>
-        @if (createEventForm.get('dueDate')?.invalid && createEventForm.get('dueDate')?.touched) {
-          <small class="form-error">Data terminu jest wymagana</small>
-        }
+        <div class="form-error-container">
+          @if (createEventForm.get('dueDate')?.invalid && createEventForm.get('dueDate')?.touched) {
+            <small class="form-error">Data terminu jest wymagana</small>
+          }
+        </div>
       </div>
 
     <!-- Priority -->
@@ -134,6 +140,8 @@
         id="priority"
         formControlName="priority"
         [options]="priorityOptions"
+        optionLabel="label"
+        optionValue="value"
         [style]="{ width: '100%' }"
       ></p-select>
       @if (task) {

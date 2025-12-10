@@ -26,23 +26,41 @@ public class EventsController : ControllerBase
     }
 
     /// <summary>
-    /// Get all events for a household
+    /// Get events for a household with filtering, sorting, and pagination
     /// </summary>
-    /// <param name="householdId">Household ID</param>
-    /// <param name="status">Optional status filter</param>
-    /// <param name="startDate">Optional start date filter (YYYY-MM-DD)</param>
-    /// <param name="endDate">Optional end date filter (YYYY-MM-DD)</param>
+    /// <param name="householdId">Household ID (required)</param>
+    /// <param name="taskId">Optional filter by task ID</param>
+    /// <param name="assignedToId">Optional filter by assigned user ID</param>
+    /// <param name="categoryId">Optional filter by task category ID</param>
+    /// <param name="status">Optional filter by status (pending, completed, postponed, cancelled)</param>
+    /// <param name="priority">Optional filter by priority (low, medium, high)</param>
+    /// <param name="startDate">Optional filter by start date (YYYY-MM-DD)</param>
+    /// <param name="endDate">Optional filter by end date (YYYY-MM-DD)</param>
+    /// <param name="isOverdue">Optional filter for overdue events only</param>
+    /// <param name="sortBy">Sort field: dueDate, status, priority, createdAt (default: dueDate)</param>
+    /// <param name="sortOrder">Sort order: asc or desc (default: asc)</param>
+    /// <param name="page">Page number (default: 1)</param>
+    /// <param name="limit">Items per page (default: 20, max: 100)</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of events</returns>
+    /// <returns>Paginated list of events</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<EventDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PaginatedResponseDto<EventDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponseDto<IEnumerable<EventDto>>>> GetEvents(
+    public async Task<ActionResult<PaginatedResponseDto<EventDto>>> GetEvents(
         [FromQuery] Guid householdId,
+        [FromQuery] Guid? taskId = null,
+        [FromQuery] Guid? assignedToId = null,
+        [FromQuery] int? categoryId = null,
         [FromQuery] string? status = null,
+        [FromQuery] string? priority = null,
         [FromQuery] string? startDate = null,
         [FromQuery] string? endDate = null,
+        [FromQuery] bool? isOverdue = null,
+        [FromQuery] string sortBy = "dueDate",
+        [FromQuery] string sortOrder = "asc",
+        [FromQuery] int page = 1,
+        [FromQuery] int limit = 20,
         CancellationToken cancellationToken = default)
     {
         try
@@ -53,8 +71,6 @@ public class EventsController : ControllerBase
                     "Household ID is required",
                     StatusCodes.Status400BadRequest));
             }
-
-            IEnumerable<EventDto> events;
 
             // Parse dates if provided
             DateOnly? parsedStartDate = null;
@@ -82,24 +98,24 @@ public class EventsController : ControllerBase
                 parsedEndDate = ed;
             }
 
-            if (!string.IsNullOrEmpty(status))
-            {
-                events = await _eventService.GetEventsByStatusAsync(householdId, status, cancellationToken);
-                
-                // Apply date filtering if specified
-                if (parsedStartDate.HasValue || parsedEndDate.HasValue)
-                {
-                    events = events.Where(e => 
-                        (!parsedStartDate.HasValue || e.DueDate >= parsedStartDate.Value) &&
-                        (!parsedEndDate.HasValue || e.DueDate <= parsedEndDate.Value));
-                }
-            }
-            else
-            {
-                events = await _eventService.GetHouseholdEventsAsync(householdId, parsedStartDate, parsedEndDate, cancellationToken);
-            }
+            // Call service with all filters and pagination
+            var paginatedEvents = await _eventService.GetFilteredEventsAsync(
+                householdId,
+                taskId,
+                assignedToId,
+                categoryId,
+                status,
+                priority,
+                parsedStartDate,
+                parsedEndDate,
+                isOverdue,
+                sortBy,
+                sortOrder,
+                page,
+                limit,
+                cancellationToken);
 
-            return Ok(ApiResponseDto<IEnumerable<EventDto>>.SuccessResponse(events));
+            return Ok(paginatedEvents);
         }
         catch (Exception ex)
         {

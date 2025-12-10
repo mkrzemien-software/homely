@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Homely.API.Entities;
+using Homely.API.Models.Configuration;
 using Homely.API.Models.DTOs.Tasks;
 using Homely.API.Repositories.Base;
 using Homely.API.Repositories.Interfaces;
@@ -7,6 +8,7 @@ using Homely.API.Services;
 using Homely.Tests.Unit.Base;
 using Homely.Tests.Unit.Helpers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using System.Linq.Expressions;
 
@@ -24,6 +26,7 @@ public class EventServiceTests : UnitTestBase
     private readonly Mock<IHouseholdRepository> _mockHouseholdRepository;
     private readonly Mock<IEventHistoryRepository> _mockEventHistoryRepository;
     private readonly Mock<ILogger<EventService>> _mockLogger;
+    private readonly Mock<IOptions<EventGenerationSettings>> _mockEventSettings;
     private readonly EventService _eventService;
 
     public EventServiceTests()
@@ -35,6 +38,14 @@ public class EventServiceTests : UnitTestBase
         _mockHouseholdRepository = new Mock<IHouseholdRepository>();
         _mockEventHistoryRepository = new Mock<IEventHistoryRepository>();
         _mockLogger = CreateMockLogger<EventService>();
+        _mockEventSettings = new Mock<IOptions<EventGenerationSettings>>();
+
+        // Setup event generation settings with default values
+        _mockEventSettings.Setup(x => x.Value).Returns(new EventGenerationSettings
+        {
+            FutureYears = 2,
+            MinFutureMonthsThreshold = 6
+        });
 
         // Setup UnitOfWork to return repository mocks
         _mockUnitOfWork.Setup(u => u.Events).Returns(_mockEventRepository.Object);
@@ -52,7 +63,7 @@ public class EventServiceTests : UnitTestBase
                 async (operation, ct) => await operation(ct));
 
         // Create service instance
-        _eventService = new EventService(_mockUnitOfWork.Object, _mockLogger.Object);
+        _eventService = new EventService(_mockUnitOfWork.Object, _mockLogger.Object, _mockEventSettings.Object);
     }
 
     #region CompleteEventAsync Tests

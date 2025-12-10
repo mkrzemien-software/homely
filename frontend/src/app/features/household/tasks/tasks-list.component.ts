@@ -460,8 +460,7 @@ export class TasksListComponent implements OnInit {
    */
   onEventCreated(): void {
     this.hideCreateEventDialog();
-    // Navigate to events view
-    this.router.navigate(['/', this.householdId(), 'events']);
+    // Success message is shown by the dialog itself
   }
 
   /**

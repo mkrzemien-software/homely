@@ -218,14 +218,23 @@
             <div class="task-card-footer">
               <!-- Left actions -->
               <div class="footer-left">
-                <p-button
-                  label="Utwórz wydarzenie"
-                  icon="pi pi-calendar-plus"
-                  severity="success"
-                  [outlined]="true"
-                  (onClick)="createEventFromTask(task)"
-                  pTooltip="Zaplanuj termin dla tego zadania"
-                ></p-button>
+                <!-- Show "Create Event" button only for one-time tasks (without interval) -->
+                @if (!hasInterval(task)) {
+                  <p-button
+                    label="Utwórz wydarzenie"
+                    icon="pi pi-calendar-plus"
+                    severity="success"
+                    [outlined]="true"
+                    (onClick)="createEventFromTask(task)"
+                    pTooltip="Zaplanuj termin dla tego zadania"
+                  ></p-button>
+                } @else {
+                  <p-tag
+                    value="Wydarzenia generowane automatycznie"
+                    severity="info"
+                    icon="pi pi-info-circle"
+                  ></p-tag>
+                }
               </div>
 
               <!-- Right actions -->

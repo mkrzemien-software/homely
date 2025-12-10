@@ -93,6 +93,16 @@ p-button button,
   color: var(--p-text-color) !important;
 }
 
+// Toast messages - ensure proper text color in all severities
+.p-toast .p-toast-message {
+  .p-toast-message-text {
+    .p-toast-summary,
+    .p-toast-detail {
+      color: var(--p-text-color);
+    }
+  }
+}
+
 // PrimeNG Dialog Customization
 .p-dialog-mask {
   background-color: rgba(0, 0, 0, 0.4);
@@ -273,6 +283,16 @@ a {
 
     &:hover {
       background: var(--p-surface-500);
+    }
+  }
+
+  // Toast messages - force white text in dark mode
+  .p-toast .p-toast-message {
+    .p-toast-message-text {
+      .p-toast-summary,
+      .p-toast-detail {
+        color: rgba(255, 255, 255, 0.87) !important;
+      }
     }
   }
 

@@ -264,10 +264,12 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
         Guid householdId,
         Guid? taskId = null,
         Guid? assignedTo = null,
+        int? categoryId = null,
         string? status = null,
         string? priority = null,
         DateOnly? dueDateFrom = null,
         DateOnly? dueDateTo = null,
+        bool? isOverdue = null,
         string sortBy = "dueDate",
         bool ascending = true,
         int page = 1,
@@ -288,6 +290,9 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
         if (assignedTo.HasValue)
             query = query.Where(e => e.AssignedTo == assignedTo.Value);
 
+        if (categoryId.HasValue)
+            query = query.Where(e => e.Task != null && e.Task.CategoryId == categoryId.Value);
+
         if (!string.IsNullOrEmpty(status))
             query = query.Where(e => e.Status == status);
 
@@ -299,6 +304,14 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
 
         if (dueDateTo.HasValue)
             query = query.Where(e => e.DueDate <= dueDateTo.Value);
+
+        if (isOverdue.HasValue && isOverdue.Value)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            query = query.Where(e => e.DueDate < today &&
+                                   (e.Status == DatabaseConstants.TaskStatuses.Pending ||
+                                    e.Status == DatabaseConstants.TaskStatuses.Postponed));
+        }
 
         // Apply sorting
         query = sortBy.ToLower() switch

@@ -26,9 +26,11 @@
           filterPlaceholder="Szukaj kategorii..."
           selectionMode="single"
         ></p-treeSelect>
-        @if (editTaskForm.get('categoryId')?.invalid && editTaskForm.get('categoryId')?.touched) {
-          <small class="form-error">Kategoria jest wymagana</small>
-        }
+        <div class="form-error-container">
+          @if (editTaskForm.get('categoryId')?.invalid && editTaskForm.get('categoryId')?.touched) {
+            <small class="form-error">Kategoria jest wymagana</small>
+          }
+        </div>
       </div>
 
       <!-- Name -->
@@ -43,16 +45,18 @@
           placeholder="np. Przegląd roczny"
           [style]="{ width: '100%' }"
         />
-        @if (editTaskForm.get('name')?.invalid && editTaskForm.get('name')?.touched) {
-          <small class="form-error">
-            @if (editTaskForm.get('name')?.hasError('required')) {
-              Nazwa jest wymagana
-            }
-            @if (editTaskForm.get('name')?.hasError('maxlength')) {
-              Nazwa może mieć maksymalnie 100 znaków
-            }
-          </small>
-        }
+        <div class="form-error-container">
+          @if (editTaskForm.get('name')?.invalid && editTaskForm.get('name')?.touched) {
+            <small class="form-error">
+              @if (editTaskForm.get('name')?.hasError('required')) {
+                Nazwa jest wymagana
+              }
+              @if (editTaskForm.get('name')?.hasError('maxlength')) {
+                Nazwa może mieć maksymalnie 100 znaków
+              }
+            </small>
+          }
+        </div>
       </div>
     </div>
 

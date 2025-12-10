@@ -129,7 +129,7 @@ export class HouseholdDashboardComponent implements OnInit {
   /**
    * Page subtitle/description
    */
-  readonly pageSubtitle = 'Witaj w panelu zarządzania gospodarstwem - wybierz sekcję aby rozpocząć';
+  readonly pageSubtitle = 'Witaj w panelu zarządzania gospodarstwem';
 
   /**
    * Whether household ID is loaded
@@ -183,7 +183,7 @@ export class HouseholdDashboardComponent implements OnInit {
   /**
    * Show completed events in calendar
    */
-  showCompletedEvents = signal<boolean>(false);
+  showCompletedEvents = signal<boolean>(true);
 
   /**
    * Current week start date (for calendar view)

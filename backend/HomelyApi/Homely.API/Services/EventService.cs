@@ -1,3 +1,4 @@
+using Homely.API.Models.DTOs;
 using Homely.API.Models.DTOs.Tasks;
 using Homely.API.Repositories.Base;
 using Homely.API.Entities;
@@ -24,6 +25,65 @@ public class EventService : IEventService
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventSettings = eventSettings.Value;
+    }
+
+    /// <inheritdoc/>
+    public async Task<PaginatedResponseDto<EventDto>> GetFilteredEventsAsync(
+        Guid householdId,
+        Guid? taskId = null,
+        Guid? assignedTo = null,
+        int? categoryId = null,
+        string? status = null,
+        string? priority = null,
+        DateOnly? startDate = null,
+        DateOnly? endDate = null,
+        bool? isOverdue = null,
+        string sortBy = "dueDate",
+        string sortOrder = "asc",
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Validate and limit page size to prevent excessive data retrieval
+            if (pageSize < 1) pageSize = 20;
+            if (pageSize > 100) pageSize = 100;
+
+            // Validate page number
+            if (page < 1) page = 1;
+
+            // Call repository with filtering and pagination
+            var pagedResult = await _unitOfWork.Events.GetFilteredEventsAsync(
+                householdId,
+                taskId,
+                assignedTo,
+                categoryId,
+                status,
+                priority,
+                startDate,
+                endDate,
+                isOverdue,
+                sortBy,
+                ascending: sortOrder.ToLower() == "asc",
+                page,
+                pageSize,
+                cancellationToken);
+
+            // Map to DTO using the helper method in PaginatedResponseDto
+            return PaginatedResponseDto<EventDto>.FromPagedResult(pagedResult, MapToDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Error retrieving filtered events for household {HouseholdId} with filters: " +
+                "taskId={TaskId}, assignedTo={AssignedTo}, categoryId={CategoryId}, status={Status}, " +
+                "priority={Priority}, startDate={StartDate}, endDate={EndDate}, isOverdue={IsOverdue}, " +
+                "sortBy={SortBy}, sortOrder={SortOrder}, page={Page}, pageSize={PageSize}",
+                householdId, taskId, assignedTo, categoryId, status, priority,
+                startDate, endDate, isOverdue, sortBy, sortOrder, page, pageSize);
+            throw;
+        }
     }
 
     /// <inheritdoc/>
@@ -174,6 +234,21 @@ public class EventService : IEventService
             if (task == null || task.DeletedAt != null)
             {
                 throw new InvalidOperationException($"Task template with ID {createDto.TaskId} not found");
+            }
+
+            // Check if task is recurring (has any interval values > 0)
+            // For recurring tasks, events are pre-generated and cannot be manually created
+            bool isRecurringTask = (task.YearsValue.HasValue && task.YearsValue.Value > 0) ||
+                                  (task.MonthsValue.HasValue && task.MonthsValue.Value > 0) ||
+                                  (task.WeeksValue.HasValue && task.WeeksValue.Value > 0) ||
+                                  (task.DaysValue.HasValue && task.DaysValue.Value > 0);
+
+            if (isRecurringTask)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot manually create events for recurring task {createDto.TaskId}. " +
+                    "Events for recurring tasks are automatically generated and managed. " +
+                    "To modify events, update the task template or use the regenerate-events endpoint.");
             }
 
             var eventEntity = new EventEntity

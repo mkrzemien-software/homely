@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input, Output, EventEmitter, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
@@ -57,7 +57,7 @@ import { TasksService } from '../../services/tasks.service';
   templateUrl: './create-event-from-task-dialog.component.html',
   styleUrl: './create-event-from-task-dialog.component.scss'
 })
-export class CreateEventFromTaskDialogComponent implements OnInit {
+export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
   @Input() visible = false;
   @Input() task: Task | null = null;
   @Input() householdId: string | null = null;
@@ -139,11 +139,35 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Add taskId control if no task provided
+    // Load household members
+    this.loadHouseholdMembers();
+    this.currentUser.set(this.authService.getCurrentUser() || null);
+
+    // Initial setup
+    this.setupForm();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Handle changes to @Input() properties
+    if (changes['task'] || changes['initialDate']) {
+      this.setupForm();
+    }
+  }
+
+  private setupForm(): void {
+    // Add or remove taskId control based on whether task is provided
     if (!this.task) {
-      this.createEventForm.addControl('taskId', this.fb.control(null, [Validators.required]));
+      // No task provided - need to select from list
+      if (!this.createEventForm.get('taskId')) {
+        this.createEventForm.addControl('taskId', this.fb.control(null, [Validators.required]));
+      }
       // Load available tasks
       this.loadAvailableTasks();
+    } else {
+      // Task is provided - remove taskId control if it exists
+      if (this.createEventForm.get('taskId')) {
+        this.createEventForm.removeControl('taskId');
+      }
     }
 
     // Initialize form with task priority and initial date
@@ -160,10 +184,6 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
     if (Object.keys(patchData).length > 0) {
       this.createEventForm.patchValue(patchData);
     }
-
-    // Load household members
-    this.loadHouseholdMembers();
-    this.currentUser.set(this.authService.getCurrentUser() || null);
   }
 
   /**
@@ -292,5 +312,19 @@ export class CreateEventFromTaskDialogComponent implements OnInit {
       priority: this.task?.priority || Priority.MEDIUM
     });
     this.onClose.emit();
+  }
+
+  /**
+   * Helper method to debug form validation errors
+   */
+  getFormValidationErrors(): any {
+    const errors: any = {};
+    Object.keys(this.createEventForm.controls).forEach(key => {
+      const control = this.createEventForm.get(key);
+      if (control && control.invalid) {
+        errors[key] = control.errors;
+      }
+    });
+    return errors;
   }
 }

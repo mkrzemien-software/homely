@@ -344,12 +344,45 @@ The application uses a proactive event generation strategy instead of creating e
 **API Endpoints**:
 - `POST /api/tasks/{id}/regenerate-events` - Manual regeneration for specific task
 - `POST /api/maintenance/refill-events?householdId={id}` - Refill for household
+- `POST /api/events` - Create event (ONLY for one-time tasks, see Manual Event Creation below)
 
 **Benefits**:
 - Users see all upcoming events immediately
 - No need to wait for previous event completion
 - Better planning and visibility
 - Reduced database load (no triggers on event completion)
+
+### Manual Event Creation
+**Implemented in**: `EventService.CreateEventAsync()` (backend/HomelyApi/Homely.API/Services/EventService.cs:168)
+
+The `POST /api/events` endpoint has restricted usage to prevent conflicts with the pre-generation strategy:
+
+**For Recurring Tasks** (tasks with any interval value > 0):
+- Manual event creation is **BLOCKED**
+- Events are automatically pre-generated when task is created
+- To modify events for recurring tasks:
+  - Update the task template (PUT /api/tasks/{id})
+  - Use regenerate-events endpoint (POST /api/tasks/{id}/regenerate-events)
+- Attempting to manually create events returns `InvalidOperationException`
+
+**For One-Time Tasks** (tasks with all interval values = 0 or null):
+- Manual event creation is **ALLOWED**
+- These tasks don't have pre-generated events
+- Use `POST /api/events` to create events as needed
+
+**Validation Logic**:
+```csharp
+// Task is considered recurring if ANY interval value > 0
+bool isRecurringTask = (YearsValue > 0) || (MonthsValue > 0) ||
+                       (WeeksValue > 0) || (DaysValue > 0);
+```
+
+**Error Response** (when attempting to create event for recurring task):
+```
+InvalidOperationException: "Cannot manually create events for recurring task {taskId}.
+Events for recurring tasks are automatically generated and managed.
+To modify events, update the task template or use the regenerate-events endpoint."
+```
 
 ### Event Completion Logic
 **Implemented in**: `EventService.CompleteEventAsync()` (backend/HomelyApi/Homely.API/Services/EventService.cs:269)
