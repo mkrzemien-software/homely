@@ -232,7 +232,10 @@ public class DashboardService : IDashboardService
                 LastName = entity.AssignedToUser?.LastName ?? ""
             },
             Priority = entity.Priority,
-            Status = entity.Status
+            Status = entity.Status,
+            CompletionDate = entity.CompletionDate.HasValue
+                ? entity.CompletionDate.Value.ToString("yyyy-MM-dd") + "T00:00:00Z"
+                : null
         };
     }
 }

@@ -49,11 +49,75 @@
 
   <!-- Event Form -->
   <form [formGroup]="createEventForm" (ngSubmit)="onSubmit()">
-    <!-- Task Selection (only when no task provided) -->
+    <!-- Cascading Selection (only when no task provided) -->
     @if (!task) {
+      <!-- Category Type Selection -->
+      <div class="form-field">
+        <label for="categoryTypeSelect" class="form-label">
+          Typ kategorii *
+        </label>
+        <p-select
+          id="categoryTypeSelect"
+          formControlName="categoryTypeId"
+          [options]="categoryTypeOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Wybierz typ kategorii"
+          [style]="{ width: '100%' }"
+          [disabled]="categoryTypeOptions().length === 0"
+          (onChange)="onCategoryTypeChange($event.value)"
+        ></p-select>
+        @if (categoryTypeOptions().length === 0) {
+          <small class="form-info">
+            <i class="pi pi-info-circle"></i>
+            Brak dostępnych typów kategorii.
+          </small>
+        }
+        <div class="form-error-container">
+          @if (createEventForm.get('categoryTypeId')?.invalid && createEventForm.get('categoryTypeId')?.touched) {
+            <small class="form-error">Typ kategorii jest wymagany</small>
+          }
+        </div>
+      </div>
+
+      <!-- Category Selection (filtered by Category Type) -->
+      <div class="form-field">
+        <label for="categorySelect" class="form-label">
+          Kategoria *
+        </label>
+        <p-select
+          id="categorySelect"
+          formControlName="categoryId"
+          [options]="categoryOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Wybierz kategorię"
+          [style]="{ width: '100%' }"
+          [disabled]="!selectedCategoryTypeId() || categoryOptions().length === 0"
+          (onChange)="onCategoryChange($event.value)"
+        ></p-select>
+        @if (!selectedCategoryTypeId()) {
+          <small class="form-info">
+            <i class="pi pi-info-circle"></i>
+            Najpierw wybierz typ kategorii.
+          </small>
+        } @else if (categoryOptions().length === 0) {
+          <small class="form-info">
+            <i class="pi pi-info-circle"></i>
+            Brak kategorii dla wybranego typu.
+          </small>
+        }
+        <div class="form-error-container">
+          @if (createEventForm.get('categoryId')?.invalid && createEventForm.get('categoryId')?.touched) {
+            <small class="form-error">Kategoria jest wymagana</small>
+          }
+        </div>
+      </div>
+
+      <!-- Task Selection (filtered by Category, only one-time tasks) -->
       <div class="form-field">
         <label for="taskSelect" class="form-label">
-          Zadanie *
+          Zadanie jednorazowe *
         </label>
         <p-select
           id="taskSelect"
@@ -61,16 +125,21 @@
           [options]="taskOptions()"
           optionLabel="label"
           optionValue="value"
-          placeholder="Wybierz zadanie"
+          placeholder="Wybierz zadanie jednorazowe"
           [style]="{ width: '100%' }"
-          [disabled]="taskOptions().length === 0"
-          [filter]="true"
+          [disabled]="!selectedCategoryId() || taskOptions().length === 0"
+          [filter]="taskOptions().length > 5"
           filterPlaceholder="Szukaj zadania..."
         ></p-select>
-        @if (taskOptions().length === 0) {
+        @if (!selectedCategoryId()) {
           <small class="form-info">
             <i class="pi pi-info-circle"></i>
-            Brak dostępnych zadań w tym gospodarstwie.
+            Najpierw wybierz kategorię.
+          </small>
+        } @else if (taskOptions().length === 0) {
+          <small class="form-info">
+            <i class="pi pi-info-circle"></i>
+            Brak zadań jednorazowych w wybranej kategorii.
           </small>
         }
         <div class="form-error-container">

@@ -22,11 +22,13 @@
             styleClass="status-tag">
           </p-tag>
 
-          <p-tag
-            [value]="getUrgencyLabel(ev)"
-            [severity]="getUrgencySeverity(ev)"
-            styleClass="urgency-tag">
-          </p-tag>
+          @if (ev.status !== 'completed' && ev.status !== 'cancelled') {
+            <p-tag
+              [value]="getUrgencyLabel(ev)"
+              [severity]="getUrgencySeverity(ev)"
+              styleClass="urgency-tag">
+            </p-tag>
+          }
 
           @if (ev.priority) {
             <p-tag
@@ -77,6 +79,17 @@
           </div>
         </div>
 
+        <!-- Completion Date (only for completed events) -->
+        @if (ev.status === 'completed' && ev.completionDate) {
+          <div class="detail-item">
+            <div class="detail-label">
+              <i class="pi pi-check-circle" aria-hidden="true"></i>
+              <span>Data wykonania</span>
+            </div>
+            <div class="detail-value date-value">{{ formatDate(ev.completionDate) }}</div>
+          </div>
+        }
+
         <!-- Task ID (optional, for debugging) -->
         <!-- <div class="detail-item">
           <div class="detail-label">
@@ -99,10 +112,18 @@
 
           <div class="form-field">
             <label for="completion-date" class="field-label">Data wykonania</label>
-            <div class="completion-date-display">
-              <i class="pi pi-calendar" aria-hidden="true"></i>
-              <span>{{ formatCompletionDate() }}</span>
-            </div>
+            <p-calendar
+              id="completion-date"
+              [(ngModel)]="completionDate"
+              [showIcon]="true"
+              [maxDate]="minDate"
+              dateFormat="dd.mm.yy"
+              placeholder="Wybierz datę wykonania"
+              [style]="{ width: '100%' }"
+              appendTo="body"
+              [showOnFocus]="false"
+              aria-label="Wybierz datę wykonania">
+            </p-calendar>
           </div>
 
           <div class="form-field">

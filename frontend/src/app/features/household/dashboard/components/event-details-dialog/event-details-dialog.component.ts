@@ -13,7 +13,7 @@ import { InputTextarea } from 'primeng/inputtextarea';
 
 // Models
 import { DashboardEvent } from '../../models/dashboard.model';
-import { getDashboardUrgencySeverity, getDashboardUrgencyLabel } from '../../models/dashboard.model';
+import { getDashboardUrgencySeverity, getDashboardUrgencyLabel, getActualUrgencyStatus } from '../../models/dashboard.model';
 import { getEventStatusLabel, getEventStatusSeverity } from '../../../events/models/event.model';
 
 /**
@@ -120,9 +120,9 @@ export class EventDetailsDialogComponent {
   completionNotes = signal<string>('');
 
   /**
-   * Completion date
+   * Completion date (regular property for ngModel binding)
    */
-  completionDate = signal<Date>(new Date());
+  completionDate: Date = new Date();
 
   /**
    * Cancel reason
@@ -133,6 +133,14 @@ export class EventDetailsDialogComponent {
    * Minimum date for postpone (today)
    */
   readonly minDate = new Date();
+
+  /**
+   * Reset completion date to today's date (aligned with minDate)
+   * to avoid issues with calendar maxDate validation.
+   */
+  private resetCompletionDate(): void {
+    this.completionDate = new Date(this.minDate);
+  }
 
   /**
    * Dialog header title
@@ -176,10 +184,13 @@ export class EventDetailsDialogComponent {
         this.newDueDate.set(null);
         this.postponeReason.set('');
         this.completionNotes.set('');
-        this.completionDate.set(new Date());
+        this.resetCompletionDate();
         this.cancelReason.set('');
       }
     });
+
+    // Initialize completion date when component is created
+    this.resetCompletionDate();
   }
 
   /**
@@ -222,25 +233,27 @@ export class EventDetailsDialogComponent {
    */
   showCompleteForm(): void {
     this.completeMode.set(true);
-    this.completionDate.set(new Date()); // Default to today
+    this.resetCompletionDate(); // Default to today (aligned with minDate)
   }
 
   /**
    * Cancel complete
    */
   cancelComplete(): void {
+    this.closeCalendarOverlay();
     this.completeMode.set(false);
     this.completionNotes.set('');
-    this.completionDate.set(new Date());
+    this.resetCompletionDate();
   }
 
   /**
    * Confirm complete
    */
   confirmComplete(): void {
+    this.closeCalendarOverlay();
     const ev = this.event();
     const notes = this.completionNotes();
-    const date = this.completionDate();
+    const date = this.completionDate;
 
     if (ev && date) {
       this.action.emit({
@@ -248,7 +261,7 @@ export class EventDetailsDialogComponent {
         event: ev,
         data: {
           completionNotes: notes,
-          completionDate: date.toISOString().split('T')[0] // YYYY-MM-DD format
+          completionDate: this.formatDateToYYYYMMDD(date)
         }
       });
       this.closeDialog();
@@ -360,17 +373,19 @@ export class EventDetailsDialogComponent {
   }
 
   /**
-   * Get urgency severity
+   * Get urgency severity (recalculated based on current date)
    */
   getUrgencySeverity(event: DashboardEvent): 'danger' | 'warn' | 'info' {
-    return getDashboardUrgencySeverity(event.urgencyStatus);
+    const actualUrgency = getActualUrgencyStatus(event);
+    return getDashboardUrgencySeverity(actualUrgency);
   }
 
   /**
-   * Get urgency label
+   * Get urgency label (recalculated based on current date)
    */
   getUrgencyLabel(event: DashboardEvent): string {
-    return getDashboardUrgencyLabel(event.urgencyStatus);
+    const actualUrgency = getActualUrgencyStatus(event);
+    return getDashboardUrgencyLabel(actualUrgency);
   }
 
   /**
@@ -458,7 +473,7 @@ export class EventDetailsDialogComponent {
    * Check if complete form is valid
    */
   isCompleteFormValid(): boolean {
-    return this.completionDate() !== null;
+    return this.completionDate !== null;
   }
 
   /**
@@ -469,15 +484,27 @@ export class EventDetailsDialogComponent {
   }
 
   /**
-   * Format completion date (always today)
+   * Format completion date for display (kept for potential future use)
    */
   formatCompletionDate(): string {
-    const today = new Date();
-    return today.toLocaleDateString('pl-PL', {
+    const date = this.completionDate;
+    return date.toLocaleDateString('pl-PL', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
       year: 'numeric'
     });
+  }
+
+  /**
+   * Format date to YYYY-MM-DD string for API
+   * @param date Date to format
+   * @returns Formatted date string in YYYY-MM-DD format
+   */
+  private formatDateToYYYYMMDD(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

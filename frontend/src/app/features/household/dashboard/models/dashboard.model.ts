@@ -82,6 +82,11 @@ export interface DashboardEvent {
    * Event status
    */
   status: EventStatus;
+
+  /**
+   * Completion date (when status is completed, ISO 8601 format)
+   */
+  completionDate?: string | null;
 }
 
 /**
@@ -223,6 +228,44 @@ export interface DashboardStatisticsResponse {
      */
     membersLimit: number;
   };
+}
+
+/**
+ * Calculate urgency status based on due date and current date
+ * This ensures the urgency is always accurate regardless of backend cache
+ */
+export function calculateUrgencyStatus(dueDate: string): 'overdue' | 'today' | 'upcoming' {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const datePart = dueDate.split('T')[0];
+  const [year, month, day] = datePart.split('-').map(Number);
+  const dueDateObj = new Date(year, month - 1, day);
+  dueDateObj.setHours(0, 0, 0, 0);
+
+  const diffTime = dueDateObj.getTime() - today.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return 'overdue';
+  } else if (diffDays === 0) {
+    return 'today';
+  } else {
+    return 'upcoming';
+  }
+}
+
+/**
+ * Get actual urgency status for an event, recalculating based on current date
+ * For completed or cancelled events, return 'upcoming' (neutral status)
+ * since urgency doesn't matter for resolved events
+ */
+export function getActualUrgencyStatus(event: DashboardEvent): 'overdue' | 'today' | 'upcoming' {
+  // Completed or cancelled events should not show as overdue - return neutral status
+  if (event.status === 'completed' || event.status === 'cancelled') {
+    return 'upcoming';
+  }
+  return calculateUrgencyStatus(event.dueDate);
 }
 
 /**

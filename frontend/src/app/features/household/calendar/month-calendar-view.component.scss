@@ -154,35 +154,30 @@
                 white-space: nowrap;
               }
 
-              // Urgency classes
+              // Overdue - yellow/amber
               &.event-overdue {
-                background-color: #fee2e2;
-                border-color: #ef4444;
-                color: #991b1b;
-              }
-
-              &.event-today {
                 background-color: #fef3c7;
                 border-color: #f59e0b;
                 color: #92400e;
               }
 
-              &.event-upcoming {
+              // Priority classes
+              &.event-priority-high {
+                background-color: #fee2e2;
+                border-color: #ef4444;
+                color: #991b1b;
+              }
+
+              &.event-priority-medium {
                 background-color: #dbeafe;
                 border-color: #3b82f6;
                 color: #1e40af;
+              }
 
-                &.event-priority-high {
-                  background-color: #fef3c7;
-                  border-color: #f59e0b;
-                  color: #92400e;
-                }
-
-                &.event-priority-low {
-                  background-color: #d1fae5;
-                  border-color: #10b981;
-                  color: #065f46;
-                }
+              &.event-priority-low {
+                background-color: #d1fae5;
+                border-color: #10b981;
+                color: #065f46;
               }
             }
 

@@ -40,6 +40,11 @@ public class DashboardEventDto
     /// Event status
     /// </summary>
     public string Status { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Completion date (when status is completed, ISO 8601 format)
+    /// </summary>
+    public string? CompletionDate { get; set; }
 }
 
 /// <summary>

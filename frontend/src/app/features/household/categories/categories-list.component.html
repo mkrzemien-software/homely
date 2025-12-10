@@ -179,7 +179,7 @@
                   label="Dodaj podkategorię"
                   size="small"
                   [outlined]="true"
-                  (onClick)="addNewCategory()"
+                  (onClick)="addNewCategory(typeGroup.categoryTypeId)"
                 ></p-button>
               </div>
             } @else {
@@ -320,6 +320,7 @@
 >
   <app-create-category-dialog
     [categoryTypes]="allCategoryTypes()"
+    [preselectedCategoryTypeId]="preselectedCategoryTypeId()"
     (categoryCreated)="onCategoryCreated()"
     (dialogClosed)="hideCreateDialog()"
   />

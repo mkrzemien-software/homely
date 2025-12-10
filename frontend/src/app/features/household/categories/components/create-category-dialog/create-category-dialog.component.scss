@@ -29,6 +29,10 @@
       width: 100%;
     }
 
+    .error-placeholder {
+      min-height: 1.5rem;
+    }
+
     .p-error {
       font-size: 0.875rem;
       color: var(--p-red-500);

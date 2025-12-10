@@ -138,6 +138,11 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
   createDialogVisible = signal<boolean>(false);
 
   /**
+   * Preselected category type ID for create dialog
+   */
+  preselectedCategoryTypeId = signal<number | null>(null);
+
+  /**
    * Create category type dialog visibility
    */
   createCategoryTypeDialogVisible = signal<boolean>(false);
@@ -341,8 +346,10 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
 
   /**
    * Open add new category dialog
+   * @param categoryTypeId Optional category type ID to preselect
    */
-  addNewCategory(): void {
+  addNewCategory(categoryTypeId?: number): void {
+    this.preselectedCategoryTypeId.set(categoryTypeId ?? null);
     this.createDialogVisible.set(true);
   }
 
@@ -351,6 +358,7 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
    */
   hideCreateDialog(): void {
     this.createDialogVisible.set(false);
+    this.preselectedCategoryTypeId.set(null);
   }
 
   /**

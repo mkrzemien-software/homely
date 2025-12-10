@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input, Output, EventEmitter } from '@angular/core';
+import { Component, inject, signal, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
@@ -33,8 +33,9 @@ import { CategoryType, CreateCategoryDto } from '../../models/category.model';
   templateUrl: './create-category-dialog.component.html',
   styleUrls: ['./create-category-dialog.component.scss']
 })
-export class CreateCategoryDialogComponent {
+export class CreateCategoryDialogComponent implements OnChanges {
   @Input() categoryTypes: CategoryType[] = [];
+  @Input() preselectedCategoryTypeId: number | null = null;
   @Output() categoryCreated = new EventEmitter<void>();
   @Output() dialogClosed = new EventEmitter<void>();
 
@@ -52,6 +53,14 @@ export class CreateCategoryDialogComponent {
       description: ['', [Validators.maxLength(500)]],
       sortOrder: [0, [Validators.min(0)]]
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['preselectedCategoryTypeId'] && this.preselectedCategoryTypeId !== null) {
+      this.createCategoryForm.patchValue({
+        categoryTypeId: this.preselectedCategoryTypeId
+      });
+    }
   }
 
   onSubmit(): void {

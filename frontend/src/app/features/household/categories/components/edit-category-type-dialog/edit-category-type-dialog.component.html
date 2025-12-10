@@ -14,16 +14,18 @@
         [class.ng-invalid]="editCategoryTypeForm.controls['name'].invalid && editCategoryTypeForm.controls['name'].touched"
         [class.ng-dirty]="editCategoryTypeForm.controls['name'].dirty"
       />
-      @if (editCategoryTypeForm.controls['name'].invalid && editCategoryTypeForm.controls['name'].touched) {
-        <small class="p-error">
-          @if (editCategoryTypeForm.controls['name'].errors?.['required']) {
-            Nazwa kategorii jest wymagana.
-          }
-          @if (editCategoryTypeForm.controls['name'].errors?.['maxlength']) {
-            Nazwa nie może przekroczyć 100 znaków.
-          }
-        </small>
-      }
+      <div class="error-placeholder">
+        @if (editCategoryTypeForm.controls['name'].invalid && editCategoryTypeForm.controls['name'].touched) {
+          <small class="p-error">
+            @if (editCategoryTypeForm.controls['name'].errors?.['required']) {
+              Nazwa kategorii jest wymagana.
+            }
+            @if (editCategoryTypeForm.controls['name'].errors?.['maxlength']) {
+              Nazwa nie może przekroczyć 100 znaków.
+            }
+          </small>
+        }
+      </div>
     </div>
 
     <!-- Description -->
@@ -38,13 +40,15 @@
         [class.ng-invalid]="editCategoryTypeForm.controls['description'].invalid && editCategoryTypeForm.controls['description'].touched"
         [class.ng-dirty]="editCategoryTypeForm.controls['description'].dirty"
       ></textarea>
-      @if (editCategoryTypeForm.controls['description'].invalid && editCategoryTypeForm.controls['description'].touched) {
-        <small class="p-error">
-          @if (editCategoryTypeForm.controls['description'].errors?.['maxlength']) {
-            Opis nie może przekroczyć 500 znaków.
-          }
-        </small>
-      }
+      <div class="error-placeholder">
+        @if (editCategoryTypeForm.controls['description'].invalid && editCategoryTypeForm.controls['description'].touched) {
+          <small class="p-error">
+            @if (editCategoryTypeForm.controls['description'].errors?.['maxlength']) {
+              Opis nie może przekroczyć 500 znaków.
+            }
+          </small>
+        }
+      </div>
     </div>
 
     <!-- Sort Order -->
@@ -59,13 +63,15 @@
         [class.ng-invalid]="editCategoryTypeForm.controls['sortOrder'].invalid && editCategoryTypeForm.controls['sortOrder'].touched"
         [class.ng-dirty]="editCategoryTypeForm.controls['sortOrder'].dirty"
       ></p-inputNumber>
-      @if (editCategoryTypeForm.controls['sortOrder'].invalid && editCategoryTypeForm.controls['sortOrder'].touched) {
-        <small class="p-error">
-          @if (editCategoryTypeForm.controls['sortOrder'].errors?.['min']) {
-            Kolejność sortowania musi być większa lub równa 0.
-          }
-        </small>
-      }
+      <div class="error-placeholder">
+        @if (editCategoryTypeForm.controls['sortOrder'].invalid && editCategoryTypeForm.controls['sortOrder'].touched) {
+          <small class="p-error">
+            @if (editCategoryTypeForm.controls['sortOrder'].errors?.['min']) {
+              Kolejność sortowania musi być większa lub równa 0.
+            }
+          </small>
+        }
+      </div>
     </div>
   </div>
 

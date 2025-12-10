@@ -11,7 +11,7 @@ import { BadgeModule } from 'primeng/badge';
 
 // Models
 import { DashboardEvent } from '../../models/dashboard.model';
-import { getDashboardUrgencySeverity, getDashboardUrgencyLabel } from '../../models/dashboard.model';
+import { getDashboardUrgencySeverity, getDashboardUrgencyLabel, getActualUrgencyStatus } from '../../models/dashboard.model';
 import { getEventStatusLabel } from '../../../events/models/event.model';
 
 /**
@@ -97,17 +97,19 @@ export class DashboardEventsListComponent {
   }
 
   /**
-   * Get urgency severity for PrimeNG tag
+   * Get urgency severity for PrimeNG tag (recalculated based on current date)
    */
   getUrgencySeverity(event: DashboardEvent): 'danger' | 'warn' | 'info' {
-    return getDashboardUrgencySeverity(event.urgencyStatus);
+    const actualUrgency = getActualUrgencyStatus(event);
+    return getDashboardUrgencySeverity(actualUrgency);
   }
 
   /**
-   * Get urgency label
+   * Get urgency label (recalculated based on current date)
    */
   getUrgencyLabel(event: DashboardEvent): string {
-    return getDashboardUrgencyLabel(event.urgencyStatus);
+    const actualUrgency = getActualUrgencyStatus(event);
+    return getDashboardUrgencyLabel(actualUrgency);
   }
 
   /**

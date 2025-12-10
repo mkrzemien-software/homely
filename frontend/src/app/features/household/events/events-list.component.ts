@@ -507,8 +507,8 @@ export class EventsListComponent implements OnInit {
       categoryId: this.selectedCategoryId(),
       priority: this.selectedPriority(),
       status: this.selectedStatus(),
-      startDate: this.startDate()?.toISOString(),
-      endDate: this.endDate()?.toISOString(),
+      startDate: this.formatDateToYYYYMMDD(this.startDate()),
+      endDate: this.formatDateToYYYYMMDD(this.endDate()),
       isOverdue: this.showOverdueOnly() ? true : undefined,
       sortBy: this.sortBy(),
       sortOrder: this.sortOrder(),
@@ -654,7 +654,7 @@ export class EventsListComponent implements OnInit {
   completeEvent(event: Event): void {
     if (confirm(`Czy na pewno chcesz oznaczyć wydarzenie "${event.taskName}" jako wykonane?`)) {
       this.eventsService.completeEvent(event.id, {
-        completionDate: new Date().toISOString().split('T')[0],
+        completionDate: this.formatDateToYYYYMMDD(new Date())!,
         notes: 'notatki',
         attachmentUrl: 'Jaki URL'
       }).subscribe({
@@ -693,7 +693,7 @@ export class EventsListComponent implements OnInit {
       }
 
       this.eventsService.postponeEvent(event.id, {
-        newDueDate: newDueDate.toISOString().split('T')[0],
+        newDueDate: this.formatDateToYYYYMMDD(newDueDate)!,
         reason: reason.trim()
       }).subscribe({
         next: (updatedEvent) => {
@@ -823,7 +823,7 @@ export class EventsListComponent implements OnInit {
     // Build CreateEventDto
     // Format dueDate as YYYY-MM-DD (DateOnly format for backend)
     const dueDate = this.newEventDueDate()!;
-    const dueDateString = `${dueDate.getFullYear()}-${String(dueDate.getMonth() + 1).padStart(2, '0')}-${String(dueDate.getDate()).padStart(2, '0')}`;
+    const dueDateString = this.formatDateToYYYYMMDD(dueDate)!;
 
     const createDto: CreateEventDto = {
       householdId: this.householdId(),
@@ -850,5 +850,18 @@ export class EventsListComponent implements OnInit {
         alert(errorMessage);
       }
     });
+  }
+
+  /**
+   * Format date to YYYY-MM-DD string for API
+   * @param date Date to format
+   * @returns Formatted date string or undefined if date is not provided
+   */
+  private formatDateToYYYYMMDD(date: Date | undefined): string | undefined {
+    if (!date) return undefined;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

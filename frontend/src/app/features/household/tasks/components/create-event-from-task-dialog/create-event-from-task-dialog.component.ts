@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, computed } from '@angular/core';
+import { Component, inject, signal, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
@@ -14,7 +14,8 @@ import { DividerModule } from 'primeng/divider';
 import { TagModule } from 'primeng/tag';
 
 // Models
-import { Task, Priority, getPriorityLabel, getPrioritySeverity, formatInterval } from '../../models/task.model';
+import { Task, Priority, getPriorityLabel, getPrioritySeverity, formatInterval, hasInterval } from '../../models/task.model';
+import { Category, CategoryType } from '../../../categories/models/category.model';
 
 // Services
 import { EventsService } from '../../../events/services/events.service';
@@ -22,6 +23,7 @@ import { HouseholdService } from '../../../../../core/services/household.service
 import { CreateEventDto } from '../../../events/models/event.model';
 import { AuthService, UserProfile } from '../../../../../core/services/auth.service';
 import { TasksService } from '../../services/tasks.service';
+import { CategoryService } from '../../../categories/services/category.service';
 
 /**
  * CreateEventFromTaskDialogComponent
@@ -72,6 +74,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
   private eventsService = inject(EventsService);
   private authService = inject(AuthService);
   private tasksService = inject(TasksService);
+  private categoryService = inject(CategoryService);
 
   createEventForm: FormGroup;
   isLoading = signal<boolean>(false);
@@ -83,9 +86,29 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
   householdMembers = signal<Array<{ id: string; userId: string; firstName: string; lastName: string; email: string; role: string }>>([]);
 
   /**
-   * Available tasks loaded from API (when no task provided)
+   * All tasks loaded from API (when no task provided)
    */
-  availableTasks = signal<Task[]>([]);
+  allTasks = signal<Task[]>([]);
+
+  /**
+   * All category types loaded from API
+   */
+  allCategoryTypes = signal<CategoryType[]>([]);
+
+  /**
+   * All categories loaded from API
+   */
+  allCategories = signal<Category[]>([]);
+
+  /**
+   * Selected category type ID
+   */
+  selectedCategoryTypeId = signal<number | null>(null);
+
+  /**
+   * Selected category ID
+   */
+  selectedCategoryId = signal<number | null>(null);
 
   /**
    * Priority options for dropdown
@@ -107,11 +130,48 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
   });
 
   /**
-   * Task options for dropdown (when no task provided)
+   * Category type options for dropdown
+   */
+  categoryTypeOptions = computed(() => {
+    return this.allCategoryTypes().map(categoryType => ({
+      label: categoryType.name,
+      value: categoryType.id
+    }));
+  });
+
+  /**
+   * Category options filtered by selected category type
+   */
+  categoryOptions = computed(() => {
+    const selectedTypeId = this.selectedCategoryTypeId();
+    if (!selectedTypeId) return [];
+
+    return this.allCategories()
+      .filter(category => category.categoryTypeId === selectedTypeId)
+      .map(category => ({
+        label: category.name,
+        value: category.id
+      }));
+  });
+
+  /**
+   * One-time tasks (no interval) filtered by selected category
+   */
+  oneTimeTasks = computed(() => {
+    const selectedCategoryId = this.selectedCategoryId();
+    if (!selectedCategoryId) return [];
+
+    return this.allTasks().filter(task =>
+      task.category.id === selectedCategoryId && !hasInterval(task)
+    );
+  });
+
+  /**
+   * Task options for dropdown (filtered by category and only one-time tasks)
    */
   taskOptions = computed(() => {
-    return this.availableTasks().map(task => ({
-      label: `${task.name} (${task.category.categoryType.name} → ${task.category.name})`,
+    return this.oneTimeTasks().map(task => ({
+      label: task.name,
       value: task.id
     }));
   });
@@ -145,6 +205,10 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
 
     // Initial setup
     this.setupForm();
+
+    // Load category types and categories (needed for cascading dropdowns)
+    this.loadCategoryTypes();
+    this.loadCategories();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -155,16 +219,28 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
   }
 
   private setupForm(): void {
-    // Add or remove taskId control based on whether task is provided
+    // Add or remove controls based on whether task is provided
     if (!this.task) {
-      // No task provided - need to select from list
+      // No task provided - need cascading selection: CategoryType → Category → Task
+      if (!this.createEventForm.get('categoryTypeId')) {
+        this.createEventForm.addControl('categoryTypeId', this.fb.control(null, [Validators.required]));
+      }
+      if (!this.createEventForm.get('categoryId')) {
+        this.createEventForm.addControl('categoryId', this.fb.control(null, [Validators.required]));
+      }
       if (!this.createEventForm.get('taskId')) {
         this.createEventForm.addControl('taskId', this.fb.control(null, [Validators.required]));
       }
       // Load available tasks
       this.loadAvailableTasks();
     } else {
-      // Task is provided - remove taskId control if it exists
+      // Task is provided - remove cascading selection controls
+      if (this.createEventForm.get('categoryTypeId')) {
+        this.createEventForm.removeControl('categoryTypeId');
+      }
+      if (this.createEventForm.get('categoryId')) {
+        this.createEventForm.removeControl('categoryId');
+      }
       if (this.createEventForm.get('taskId')) {
         this.createEventForm.removeControl('taskId');
       }
@@ -184,6 +260,10 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
     if (Object.keys(patchData).length > 0) {
       this.createEventForm.patchValue(patchData);
     }
+
+    // Reset selections when setting up form
+    this.selectedCategoryTypeId.set(null);
+    this.selectedCategoryId.set(null);
   }
 
   /**
@@ -215,7 +295,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Load available tasks from API
+   * Load available tasks from API (all tasks for the household)
    */
   private loadAvailableTasks(): void {
     if (!this.householdId) {
@@ -227,18 +307,84 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
 
     this.tasksService.getTasks({ householdId: this.householdId }).subscribe({
       next: (response) => {
-        this.availableTasks.set(response.data || []);
+        this.allTasks.set(response.data || []);
         console.log('Loaded available tasks:', response.data);
       },
       error: (error) => {
         console.error('Error loading tasks:', error);
-        this.availableTasks.set([]);
+        this.allTasks.set([]);
         this.messageService.add({
           severity: 'error',
           summary: 'Błąd',
           detail: 'Nie udało się załadować listy zadań'
         });
       }
+    });
+  }
+
+  /**
+   * Load category types from API
+   */
+  private loadCategoryTypes(): void {
+    this.categoryService.getCategoryTypes().subscribe({
+      next: (categoryTypes) => {
+        this.allCategoryTypes.set(categoryTypes || []);
+        console.log('Loaded category types:', categoryTypes);
+      },
+      error: (error) => {
+        console.error('Error loading category types:', error);
+        this.allCategoryTypes.set([]);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Błąd',
+          detail: 'Nie udało się załadować typów kategorii'
+        });
+      }
+    });
+  }
+
+  /**
+   * Load categories from API
+   */
+  private loadCategories(): void {
+    this.categoryService.getCategories().subscribe({
+      next: (categories) => {
+        this.allCategories.set(categories || []);
+        console.log('Loaded categories:', categories);
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.allCategories.set([]);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Błąd',
+          detail: 'Nie udało się załadować kategorii'
+        });
+      }
+    });
+  }
+
+  /**
+   * Handle category type selection change
+   */
+  onCategoryTypeChange(categoryTypeId: number | null): void {
+    this.selectedCategoryTypeId.set(categoryTypeId);
+    // Reset category and task selections
+    this.selectedCategoryId.set(null);
+    this.createEventForm.patchValue({
+      categoryId: null,
+      taskId: null
+    });
+  }
+
+  /**
+   * Handle category selection change
+   */
+  onCategoryChange(categoryId: number | null): void {
+    this.selectedCategoryId.set(categoryId);
+    // Reset task selection
+    this.createEventForm.patchValue({
+      taskId: null
     });
   }
 
@@ -311,6 +457,9 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
     this.createEventForm.reset({
       priority: this.task?.priority || Priority.MEDIUM
     });
+    // Reset cascading selection signals
+    this.selectedCategoryTypeId.set(null);
+    this.selectedCategoryId.set(null);
     this.onClose.emit();
   }
 

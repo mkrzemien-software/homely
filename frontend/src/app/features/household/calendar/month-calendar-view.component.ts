@@ -154,17 +154,13 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
 
       const classes: string[] = [];
 
-      // Add urgency class
-      if (event.isOverdue) {
+      // Overdue always takes priority (red)
+      if (event.isOverdue && event.status === 'pending') {
         classes.push('event-overdue');
-      } else if (this.isToday(new Date(event.dueDate))) {
-        classes.push('event-today');
       } else {
-        classes.push('event-upcoming');
+        // Otherwise show priority color
+        classes.push(`event-priority-${event.priority}`);
       }
-
-      // Add priority class
-      classes.push(`event-priority-${event.priority}`);
 
       return classes;
     },
@@ -270,23 +266,18 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get event color based on urgency and priority
+   * Get event color based on overdue status and priority
    */
   private getEventColor(event: Event): string {
-    // Overdue events are always red
+    // Overdue events are yellow/amber
     if (event.isOverdue && event.status === 'pending') {
-      return '#ef4444'; // Red
+      return '#f59e0b'; // Yellow/Amber
     }
 
-    // Today events are orange
-    if (this.isToday(new Date(event.dueDate)) && event.status === 'pending') {
-      return '#f59e0b'; // Orange
-    }
-
-    // Upcoming events by priority
+    // Color by priority
     switch (event.priority) {
       case 'high':
-        return '#f59e0b'; // Orange
+        return '#ef4444'; // Red
       case 'medium':
         return '#3b82f6'; // Blue
       case 'low':

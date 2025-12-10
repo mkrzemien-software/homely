@@ -10,7 +10,7 @@ import { BadgeModule } from 'primeng/badge';
 
 // Models
 import { DashboardEvent } from '../../models/dashboard.model';
-import { getDashboardUrgencySeverity } from '../../models/dashboard.model';
+import { getDashboardUrgencySeverity, getActualUrgencyStatus } from '../../models/dashboard.model';
 
 /**
  * Week day interface
@@ -230,10 +230,11 @@ export class WeekCalendarViewComponent implements OnInit {
   }
 
   /**
-   * Get severity class for event urgency
+   * Get severity class for event urgency (recalculated based on current date)
    */
   getEventSeverity(event: DashboardEvent): 'danger' | 'warn' | 'info' {
-    return getDashboardUrgencySeverity(event.urgencyStatus);
+    const actualUrgency = getActualUrgencyStatus(event);
+    return getDashboardUrgencySeverity(actualUrgency);
   }
 
   /**
