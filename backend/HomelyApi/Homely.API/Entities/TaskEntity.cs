@@ -74,6 +74,12 @@ public class TaskEntity
     [Column("is_active")]
     public bool IsActive { get; set; } = true;
 
+    /// <summary>
+    /// Default user assignment for events generated from this task template (optional)
+    /// </summary>
+    [Column("assigned_to")]
+    public Guid? AssignedTo { get; set; }
+
     [Required]
     [Column("created_by")]
     public Guid CreatedBy { get; set; }
@@ -96,6 +102,9 @@ public class TaskEntity
 
     [ForeignKey("CreatedBy")]
     public virtual UserProfileEntity CreatedByUser { get; set; } = null!;
+
+    [ForeignKey("AssignedTo")]
+    public virtual UserProfileEntity? AssignedToUser { get; set; }
 
     /// <summary>
     /// Events (concrete occurrences) generated from this task template

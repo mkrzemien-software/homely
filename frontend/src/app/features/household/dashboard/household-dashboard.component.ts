@@ -313,10 +313,17 @@ export class HouseholdDashboardComponent implements OnInit {
       this.currentWeekStartDate.set(this.getWeekStart(new Date()));
     }
 
+    // Get current week start date and format it for API
+    const weekStartDate = this.currentWeekStartDate();
+    const startDate = weekStartDate
+      ? this.formatDateLocal(weekStartDate)
+      : undefined;
+
     this.dashboardService
       .getUpcomingEvents({
         days: this.selectedDays(),
         householdId,
+        startDate: startDate,
         includeCompleted: this.showCompletedEvents()
       })
       .subscribe({
@@ -357,8 +364,9 @@ export class HouseholdDashboardComponent implements OnInit {
       return;
     }
 
-    // Format date to ISO 8601 (YYYY-MM-DD)
-    const formattedStartDate = startDate.toISOString().split('T')[0];
+    // Format date to ISO 8601 (YYYY-MM-DD) using LOCAL timezone, not UTC
+    const formattedStartDate = this.formatDateLocal(startDate);
+    console.log('Formatted startDate for API:', formattedStartDate);
 
     // Fetch events for the new week (7 days from startDate)
     this.eventsLoading.set(true);
@@ -423,14 +431,15 @@ export class HouseholdDashboardComponent implements OnInit {
     console.log('Completing event:', event, data);
 
     this.eventsService.completeEvent(event.id, {
-      completionDate: data?.completionDate || new Date().toISOString().split('T')[0],
+      completionDate: data?.completionDate || this.formatDateLocal(new Date()),
       notes: data?.completionNotes || ''
     }).subscribe({
       next: (completedEvent) => {
         console.log('Event completed successfully:', completedEvent);
-        // Reload events to show updated list
+        // Invalidate cache and reload events to show updated list
         const id = this.householdId();
         if (id) {
+          this.dashboardService.invalidateCache(id);
           this.loadUpcomingEvents(id);
           this.loadHouseholdData(id); // Reload statistics
         }
@@ -454,9 +463,10 @@ export class HouseholdDashboardComponent implements OnInit {
     }).subscribe({
       next: (postponedEvent) => {
         console.log('Event postponed successfully:', postponedEvent);
-        // Reload events to show updated list
+        // Invalidate cache and reload events to show updated list
         const id = this.householdId();
         if (id) {
+          this.dashboardService.invalidateCache(id);
           this.loadUpcomingEvents(id);
           this.loadHouseholdData(id); // Reload statistics
         }
@@ -480,23 +490,25 @@ export class HouseholdDashboardComponent implements OnInit {
   /**
    * Cancel event (changes status to 'cancelled')
    */
-  private cancelEvent(event: DashboardEvent, data?: { cancelReason: string }): void {
+  private cancelEvent(event: DashboardEvent, data?: { reason: string }): void {
     console.log('Cancelling event:', event, data);
 
-    if (!data?.cancelReason) {
+    if (!data?.reason) {
       console.error('Cancel reason is required');
       return;
     }
 
     this.eventsService.cancelEvent(event.id, {
-      reason: data.cancelReason
+      reason: data.reason
     }).subscribe({
       next: (cancelledEvent) => {
         console.log('Event cancelled successfully:', cancelledEvent);
-        // Reload events to show updated list
+        // Invalidate cache and reload events to show updated list
         const id = this.householdId();
         if (id) {
+          this.dashboardService.invalidateCache(id);
           this.loadUpcomingEvents(id);
+          this.loadHouseholdData(id); // Reload statistics
         }
       },
       error: (error) => {
@@ -525,7 +537,7 @@ export class HouseholdDashboardComponent implements OnInit {
       // Use current week start date if available, otherwise use default
       const weekStartDate = this.currentWeekStartDate();
       const startDate = weekStartDate
-        ? weekStartDate.toISOString().split('T')[0]
+        ? this.formatDateLocal(weekStartDate)
         : undefined;
 
       this.dashboardService
@@ -552,13 +564,28 @@ export class HouseholdDashboardComponent implements OnInit {
   /**
    * Get week start date (Monday) for given date
    * Helper method to calculate the Monday of the week containing the given date
+   * Week starts on Monday (ISO 8601)
    */
   private getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
-    d.setDate(diff);
+    // Convert Sunday (0) to 7 for easier calculation
+    const dayOfWeek = day === 0 ? 7 : day;
+    // Calculate days to subtract to get to Monday (day 1)
+    const daysFromMonday = dayOfWeek - 1;
+    d.setDate(d.getDate() - daysFromMonday);
     d.setHours(0, 0, 0, 0);
     return d;
+  }
+
+  /**
+   * Format date to ISO 8601 string (YYYY-MM-DD) using local timezone
+   * This avoids timezone conversion issues with toISOString()
+   */
+  private formatDateLocal(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

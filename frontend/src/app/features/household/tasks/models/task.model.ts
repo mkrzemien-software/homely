@@ -200,6 +200,11 @@ export interface CreateTaskDto {
   notes?: string;
 
   /**
+   * Default user assignment for events generated from this task template (optional)
+   */
+  assignedTo?: string;
+
+  /**
    * ID of user creating the task
    */
   createdBy: string;

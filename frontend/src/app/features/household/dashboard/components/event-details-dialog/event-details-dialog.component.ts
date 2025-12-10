@@ -1,4 +1,4 @@
-import { Component, signal, computed, output, input, effect } from '@angular/core';
+import { Component, signal, computed, output, input, effect, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -8,7 +8,7 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 import { AvatarModule } from 'primeng/avatar';
-import { CalendarModule } from 'primeng/calendar';
+import { Calendar, CalendarModule } from 'primeng/calendar';
 import { InputTextarea } from 'primeng/inputtextarea';
 
 // Models
@@ -80,6 +80,11 @@ export class EventDetailsDialogComponent {
   action = output<{ action: EventAction; event: DashboardEvent; data?: any }>();
 
   /**
+   * Reference to the calendar component
+   */
+  @ViewChild(Calendar) calendar?: Calendar;
+
+  /**
    * Internal dialog visibility state
    */
   dialogVisible = signal<boolean>(false);
@@ -138,11 +143,11 @@ export class EventDetailsDialogComponent {
   });
 
   /**
-   * Can complete event (only pending events)
+   * Can complete event (pending and postponed events)
    */
   canComplete = computed(() => {
     const ev = this.event();
-    return ev?.status === 'pending';
+    return ev?.status === 'pending' || ev?.status === 'postponed';
   });
 
   /**
@@ -150,7 +155,7 @@ export class EventDetailsDialogComponent {
    */
   canPostpone = computed(() => {
     const ev = this.event();
-    return ev?.status === 'pending';
+    return ev?.status === 'pending' || ev?.status === 'postponed';
   });
 
   constructor() {
@@ -162,6 +167,9 @@ export class EventDetailsDialogComponent {
     // Reset all modes and forms when dialog closes
     effect(() => {
       if (!this.dialogVisible()) {
+        // Close calendar overlay if open before resetting
+        this.closeCalendarOverlay();
+
         this.postponeMode.set(false);
         this.completeMode.set(false);
         this.cancelMode.set(false);
@@ -186,8 +194,27 @@ export class EventDetailsDialogComponent {
    * Close dialog
    */
   closeDialog(): void {
+    this.closeCalendarOverlay();
     this.onVisibleChange(false);
     this.action.emit({ action: 'close', event: this.event()! });
+  }
+
+  /**
+   * Close calendar overlay to prevent animation errors
+   */
+  private closeCalendarOverlay(): void {
+    try {
+      if (this.calendar?.overlayVisible) {
+        this.calendar.overlayVisible = false;
+        // Force hide the overlay element
+        if (this.calendar.overlay) {
+          this.calendar.hideOverlay();
+        }
+      }
+    } catch (error) {
+      // Ignore errors during cleanup
+      console.debug('Calendar overlay cleanup:', error);
+    }
   }
 
   /**
@@ -249,6 +276,7 @@ export class EventDetailsDialogComponent {
    * Cancel postpone
    */
   cancelPostpone(): void {
+    this.closeCalendarOverlay();
     this.postponeMode.set(false);
     this.newDueDate.set(null);
     this.postponeReason.set('');
@@ -263,6 +291,9 @@ export class EventDetailsDialogComponent {
     const reason = this.postponeReason();
 
     if (ev && newDate) {
+      // Close calendar overlay before proceeding
+      this.closeCalendarOverlay();
+
       // Format date in local timezone to avoid timezone issues
       const year = newDate.getFullYear();
       const month = String(newDate.getMonth() + 1).padStart(2, '0');
@@ -435,5 +466,18 @@ export class EventDetailsDialogComponent {
    */
   isCancelFormValid(): boolean {
     return this.cancelReason().trim().length > 0;
+  }
+
+  /**
+   * Format completion date (always today)
+   */
+  formatCompletionDate(): string {
+    const today = new Date();
+    return today.toLocaleDateString('pl-PL', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
   }
 }

@@ -40,6 +40,8 @@ public class DashboardService : IDashboardService
 
             var today = startDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
             var endDate = today.AddDays(days);
+            
+            _logger.LogInformation("Using date range: {StartDate} to {EndDate} (exclusive)", today, endDate);
 
             // Build status filter
             var statusFilter = includeCompleted

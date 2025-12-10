@@ -84,6 +84,24 @@
       ></p-select>
     </div>
 
+    <!-- Assigned To -->
+    <div class="form-field">
+      <label for="assignedTo" class="form-label">
+        Domyślnie przypisane do
+      </label>
+      <p-select
+        id="assignedTo"
+        formControlName="assignedTo"
+        [options]="memberOptions()"
+        placeholder="Wybierz osobę (opcjonalnie)"
+        [style]="{ width: '100%' }"
+        [showClear]="true"
+      ></p-select>
+      <small class="form-help">
+        Jeśli wybierzesz osobę, wszystkie wydarzenia z tego zadania będą domyślnie do niej przypisane
+      </small>
+    </div>
+
     <p-divider></p-divider>
 
     <!-- Interval Section -->

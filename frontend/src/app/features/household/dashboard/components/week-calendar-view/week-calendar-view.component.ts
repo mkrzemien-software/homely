@@ -238,12 +238,16 @@ export class WeekCalendarViewComponent implements OnInit {
 
   /**
    * Get week start date (Monday) for given date
+   * Week starts on Monday (ISO 8601)
    */
   private getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
-    d.setDate(diff);
+    // Convert Sunday (0) to 7 for easier calculation
+    const dayOfWeek = day === 0 ? 7 : day;
+    // Calculate days to subtract to get to Monday (day 1)
+    const daysFromMonday = dayOfWeek - 1;
+    d.setDate(d.getDate() - daysFromMonday);
     d.setHours(0, 0, 0, 0);
     return d;
   }

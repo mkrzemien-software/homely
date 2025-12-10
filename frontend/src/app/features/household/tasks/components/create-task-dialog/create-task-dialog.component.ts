@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input, Output, EventEmitter, OnInit, computed, input } from '@angular/core';
+import { Component, inject, signal, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
@@ -17,6 +17,7 @@ import { DividerModule } from 'primeng/divider';
 // Services
 import { TasksService } from '../../services/tasks.service';
 import { AuthService } from '../../../../../core/services/auth.service';
+import { HouseholdService, HouseholdMember } from '../../../../../core/services/household.service';
 
 // Models
 import { Category } from '../../../categories/models/category.model';
@@ -54,7 +55,7 @@ import { Priority, CreateTaskDto, getPriorityLabel } from '../../models/task.mod
   templateUrl: './create-task-dialog.component.html',
   styleUrl: './create-task-dialog.component.scss'
 })
-export class CreateTaskDialogComponent implements OnInit {
+export class CreateTaskDialogComponent implements OnInit, OnChanges {
   @Input() visible = false;
   @Input() householdId: string | null = null;
   categories = input<Category[]>([]);
@@ -65,10 +66,12 @@ export class CreateTaskDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
   private tasksService = inject(TasksService);
   private authService = inject(AuthService);
+  private householdService = inject(HouseholdService);
   private messageService = inject(MessageService);
 
   createTaskForm: FormGroup;
   isLoading = signal<boolean>(false);
+  householdMembers = signal<HouseholdMember[]>([]);
 
   /**
    * Priority options for dropdown
@@ -78,6 +81,16 @@ export class CreateTaskDialogComponent implements OnInit {
     { label: getPriorityLabel(Priority.MEDIUM), value: Priority.MEDIUM },
     { label: getPriorityLabel(Priority.HIGH), value: Priority.HIGH }
   ];
+
+  /**
+   * Household member options for dropdown
+   */
+  memberOptions = computed(() => {
+    return this.householdMembers().map(member => ({
+      label: `${member.firstName} ${member.lastName}`,
+      value: member.userId
+    }));
+  });
 
   /**
    * Category tree nodes for tree select
@@ -119,6 +132,7 @@ export class CreateTaskDialogComponent implements OnInit {
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: [''],
       priority: [Priority.MEDIUM, [Validators.required]],
+      assignedTo: [null], // Optional field for default user assignment
       yearsValue: [0, [Validators.min(0)]],
       monthsValue: [0, [Validators.min(0)]],
       weeksValue: [0, [Validators.min(0)]],
@@ -128,7 +142,36 @@ export class CreateTaskDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Initialize with default values if needed
+    // Load household members when household ID is available
+    if (this.householdId) {
+      this.loadHouseholdMembers();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Reload members when dialog becomes visible or household changes
+    if ((changes['visible'] && this.visible) || changes['householdId']) {
+      if (this.householdId) {
+        this.loadHouseholdMembers();
+      }
+    }
+  }
+
+  /**
+   * Load household members for assignment dropdown
+   */
+  private loadHouseholdMembers(): void {
+    if (!this.householdId) return;
+
+    this.householdService.getHouseholdMembers(this.householdId).subscribe({
+      next: (members) => {
+        this.householdMembers.set(members);
+      },
+      error: (error) => {
+        console.error('Error loading household members:', error);
+        // Don't show error to user - assignment is optional
+      }
+    });
   }
 
   /**
@@ -186,6 +229,7 @@ export class CreateTaskDialogComponent implements OnInit {
       name: formValue.name.trim(),
       description: formValue.description?.trim() || undefined,
       priority: formValue.priority,
+      assignedTo: formValue.assignedTo || undefined,
       yearsValue: formValue.yearsValue || undefined,
       monthsValue: formValue.monthsValue || undefined,
       weeksValue: formValue.weeksValue || undefined,
@@ -225,6 +269,7 @@ export class CreateTaskDialogComponent implements OnInit {
   closeDialog(): void {
     this.createTaskForm.reset({
       priority: Priority.MEDIUM,
+      assignedTo: null,
       yearsValue: 0,
       monthsValue: 0,
       weeksValue: 0,

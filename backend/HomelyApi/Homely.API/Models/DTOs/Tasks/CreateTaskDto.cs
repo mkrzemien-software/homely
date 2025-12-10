@@ -78,6 +78,11 @@ public class CreateTaskDto
     public bool IsActive { get; set; } = true;
 
     /// <summary>
+    /// Default user assignment for events generated from this task template (optional)
+    /// </summary>
+    public Guid? AssignedTo { get; set; }
+
+    /// <summary>
     /// User ID creating the task (will be set from authentication context)
     /// </summary>
     [Required(ErrorMessage = "Created by user ID is required")]

@@ -175,6 +175,7 @@ public class TaskService : ITaskService
                 Priority = createDto.Priority,
                 Notes = createDto.Notes,
                 IsActive = createDto.IsActive,
+                AssignedTo = createDto.AssignedTo,
                 CreatedBy = createDto.CreatedBy,
                 CreatedAt = DateTimeOffset.UtcNow,
                 UpdatedAt = DateTimeOffset.UtcNow
@@ -242,6 +243,7 @@ public class TaskService : ITaskService
             task.Priority = updateDto.Priority;
             task.Notes = updateDto.Notes;
             task.IsActive = updateDto.IsActive;
+            task.AssignedTo = updateDto.AssignedTo;
             task.UpdatedAt = DateTimeOffset.UtcNow;
 
             await _unitOfWork.Tasks.UpdateAsync(task, cancellationToken);
@@ -378,6 +380,18 @@ public class TaskService : ITaskService
             LastName = entity.CreatedByUser?.LastName ?? string.Empty
         };
 
+        // Create assigned to user object (optional)
+        TaskUserDto? assignedToUser = null;
+        if (entity.AssignedTo.HasValue && entity.AssignedToUser != null)
+        {
+            assignedToUser = new TaskUserDto
+            {
+                Id = entity.AssignedTo.Value.ToString(),
+                FirstName = entity.AssignedToUser.FirstName ?? string.Empty,
+                LastName = entity.AssignedToUser.LastName ?? string.Empty
+            };
+        }
+
         return new TaskDto
         {
             Id = entity.Id.ToString(),
@@ -389,6 +403,7 @@ public class TaskService : ITaskService
             Priority = entity.Priority,
             Notes = entity.Notes,
             IsActive = entity.IsActive,
+            AssignedTo = assignedToUser,
             CreatedBy = createdByUser,
             CreatedAt = entity.CreatedAt.ToString("o"), // ISO 8601 format
             UpdatedAt = entity.UpdatedAt.ToString("o") // ISO 8601 format

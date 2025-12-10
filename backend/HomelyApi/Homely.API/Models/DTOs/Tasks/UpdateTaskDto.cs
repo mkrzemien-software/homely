@@ -70,4 +70,9 @@ public class UpdateTaskDto
     /// Whether task is active
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Default user assignment for events generated from this task template (optional)
+    /// </summary>
+    public Guid? AssignedTo { get; set; }
 }

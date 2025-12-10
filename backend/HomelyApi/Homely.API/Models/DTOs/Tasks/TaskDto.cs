@@ -91,6 +91,11 @@ public class TaskDto
     public bool IsActive { get; set; }
 
     /// <summary>
+    /// Default user assignment for events generated from this task template (optional)
+    /// </summary>
+    public TaskUserDto? AssignedTo { get; set; }
+
+    /// <summary>
     /// User who created the task
     /// </summary>
     public TaskUserDto CreatedBy { get; set; } = new();

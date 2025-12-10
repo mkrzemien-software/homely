@@ -182,6 +182,16 @@ export const appConfig: ApplicationConfig = {
           darkModeSelector: '.p-dark',
           cssLayer: false
         }
+      },
+      translation: {
+        dayNames: ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
+        dayNamesShort: ['Nie', 'Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob'],
+        dayNamesMin: ['N', 'P', 'W', 'Ś', 'C', 'P', 'S'],
+        monthNames: ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
+        monthNamesShort: ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'],
+        weekHeader: 'Tydz',
+        firstDayOfWeek: 1,
+        dateFormat: 'dd.mm.yy',
       }
     }),
     MessageService

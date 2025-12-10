@@ -54,6 +54,14 @@
   font-size: 0.875rem;
 }
 
+.form-help {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--p-text-muted-color);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
 // Interval section
 .interval-section {
   margin: 1rem 0;

@@ -457,7 +457,7 @@ public class EventService : IEventService
                 {
                     TaskId = task.Id,
                     HouseholdId = task.HouseholdId,
-                    AssignedTo = null, // Will be assigned later
+                    AssignedTo = task.AssignedTo, // Copy from task template
                     DueDate = currentDueDate,
                     Status = "pending",
                     Priority = task.Priority,

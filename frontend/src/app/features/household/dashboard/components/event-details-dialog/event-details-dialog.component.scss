@@ -218,6 +218,25 @@
   margin-bottom: 0.5rem;
 }
 
+.completion-date-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--p-surface-100);
+  border: 1px solid var(--p-border-color);
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--p-text-color);
+
+  i {
+    font-size: 1.1rem;
+    color: var(--p-primary-color);
+  }
+}
+
+
 .form-actions {
   display: flex;
   align-items: center;
