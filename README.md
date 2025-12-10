@@ -206,15 +206,7 @@ Post-MVP planned features:
 - [x] Testing suite (unit, integration, and E2E tests with Playwright)
 - [x] CI/CD pipeline (GitHub Actions workflows)
 - [ ] Email notification system
-- [ ] Document upload functionality
 - [ ] Production deployment
-
-### Success Metrics
-- 1000+ registered users within 3 months
-- 40% retention rate after 3 months
-- 60% of users active after 30 days
-- 3% conversion rate from free to premium
-- Average 3+ devices/visits per active user
 
 ## License
 
