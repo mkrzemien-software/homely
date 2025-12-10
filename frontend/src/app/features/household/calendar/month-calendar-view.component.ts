@@ -489,7 +489,8 @@ export class MonthCalendarViewComponent implements OnInit, OnDestroy {
         lastName: event.assignedToLastName || ''
       },
       priority: event.priority,
-      status: event.status as any
+      status: event.status as any,
+      completionDate: event.completionDate
     };
   }
 

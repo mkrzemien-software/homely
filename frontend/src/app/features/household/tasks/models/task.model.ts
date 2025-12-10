@@ -190,6 +190,11 @@ export interface CreateTaskDto {
   daysValue?: number;
 
   /**
+   * Start date for the first event in the series (ISO string)
+   */
+  startDate?: string;
+
+  /**
    * Task priority
    */
   priority: Priority;

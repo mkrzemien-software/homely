@@ -171,6 +171,10 @@
         &.warning {
           color: var(--p-orange-500);
         }
+
+        &.danger {
+          color: var(--p-red-500);
+        }
       }
 
       .stat-details {

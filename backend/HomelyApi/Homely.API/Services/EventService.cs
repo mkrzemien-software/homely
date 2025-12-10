@@ -516,18 +516,9 @@ public class EventService : IEventService
             var currentDueDate = startDate;
 
             // Generate events until we reach the end date
-            while (true)
+            while (currentDueDate <= endDate)
             {
-                // Calculate next due date
-                currentDueDate = CalculateNextDueDate(currentDueDate, task);
-
-                // Stop if next event would be beyond our future window
-                if (currentDueDate > endDate)
-                {
-                    break;
-                }
-
-                // Create event
+                // Create event at current due date
                 var eventEntity = new EventEntity
                 {
                     TaskId = task.Id,
@@ -544,6 +535,9 @@ public class EventService : IEventService
 
                 await _unitOfWork.Events.AddAsync(eventEntity, cancellationToken);
                 eventsGenerated++;
+
+                // Calculate next due date for the next iteration
+                currentDueDate = CalculateNextDueDate(currentDueDate, task);
             }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);

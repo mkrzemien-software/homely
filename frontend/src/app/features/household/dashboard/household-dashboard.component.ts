@@ -152,13 +152,28 @@ export class HouseholdDashboardComponent implements OnInit {
   eventsSummary = signal<{ overdue: number; today: number; thisWeek: number } | null>(null);
 
   /**
-   * Dashboard statistics from API
+   * Dashboard statistics computed from current week's events
+   * Statistics update automatically when week changes or events are reloaded
    */
-  dashboardStats = signal<{
-    pending: number;
-    overdue: number;
-    completedThisMonth: number;
-  } | null>(null);
+  dashboardStats = computed(() => {
+    const events = this.upcomingEvents();
+
+    // Calculate stats from events for current week
+    const pending = events.filter(e => e.status === 'pending').length;
+    const overdue = events.filter(e =>
+      e.status === 'pending' &&
+      e.urgencyStatus === 'overdue'
+    ).length;
+    const postponed = events.filter(e => e.status === 'postponed').length;
+    const completedThisWeek = events.filter(e => e.status === 'completed').length;
+
+    return {
+      pending,
+      overdue,
+      postponed,
+      completedThisWeek
+    };
+  });
 
   /**
    * Loading state for events
@@ -222,47 +237,12 @@ export class HouseholdDashboardComponent implements OnInit {
       const id = params['householdId'];
       if (id) {
         this.householdId.set(id);
-        this.loadHouseholdData(id);
         this.loadUpcomingEvents(id);
       }
     });
 
     // TODO: Get user role from authentication service
     // For now, using default 'admin' role
-  }
-
-  /**
-   * Load household data and statistics
-   * Fetches real statistics from API
-   *
-   * @param householdId - The household ID
-   */
-  private loadHouseholdData(householdId: string): void {
-    console.log('Loading household statistics for:', householdId);
-
-    // Fetch statistics from API
-    this.dashboardService
-      .getStatistics(householdId)
-      .subscribe({
-        next: (response) => {
-          // Set statistics from events data
-          this.dashboardStats.set({
-            pending: response.events.pending,
-            overdue: response.events.overdue,
-            completedThisMonth: response.events.completedThisMonth
-          });
-          console.log('Loaded statistics:', this.dashboardStats());
-        },
-        error: (error) => {
-          console.error('Error loading statistics:', error);
-          // Set default values on error
-          this.dashboardStats.set({
-            pending: 0,
-            overdue: 0,
-            completedThisMonth: 0
-          });
-        }
-      });
   }
 
   /**
@@ -284,7 +264,7 @@ export class HouseholdDashboardComponent implements OnInit {
   refreshDashboard(): void {
     const id = this.householdId();
     if (id) {
-      this.loadHouseholdData(id);
+      this.loadUpcomingEvents(id);
     }
   }
 
@@ -437,11 +417,11 @@ export class HouseholdDashboardComponent implements OnInit {
       next: (completedEvent) => {
         console.log('Event completed successfully:', completedEvent);
         // Invalidate cache and reload events to show updated list
+        // Statistics are computed from events so they update automatically
         const id = this.householdId();
         if (id) {
           this.dashboardService.invalidateCache(id);
           this.loadUpcomingEvents(id);
-          this.loadHouseholdData(id); // Reload statistics
         }
       },
       error: (error) => {
@@ -464,11 +444,11 @@ export class HouseholdDashboardComponent implements OnInit {
       next: (postponedEvent) => {
         console.log('Event postponed successfully:', postponedEvent);
         // Invalidate cache and reload events to show updated list
+        // Statistics are computed from events so they update automatically
         const id = this.householdId();
         if (id) {
           this.dashboardService.invalidateCache(id);
           this.loadUpcomingEvents(id);
-          this.loadHouseholdData(id); // Reload statistics
         }
       },
       error: (error) => {
@@ -504,11 +484,11 @@ export class HouseholdDashboardComponent implements OnInit {
       next: (cancelledEvent) => {
         console.log('Event cancelled successfully:', cancelledEvent);
         // Invalidate cache and reload events to show updated list
+        // Statistics are computed from events so they update automatically
         const id = this.householdId();
         if (id) {
           this.dashboardService.invalidateCache(id);
           this.loadUpcomingEvents(id);
-          this.loadHouseholdData(id); // Reload statistics
         }
       },
       error: (error) => {

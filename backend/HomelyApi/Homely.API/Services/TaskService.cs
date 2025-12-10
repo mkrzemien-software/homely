@@ -156,10 +156,10 @@ public class TaskService : ITaskService
             }
 
             // Check if adding this task would exceed plan limit
-            if (await _planUsageService.WouldExceedLimitAsync(createDto.HouseholdId, Models.Constants.DatabaseConstants.PlanUsageTypes.Tasks, cancellationToken))
-            {
-                throw new InvalidOperationException($"Cannot create task: Household {createDto.HouseholdId} has reached its plan limit for tasks. Please upgrade to a premium plan.");
-            }
+            // if (await _planUsageService.WouldExceedLimitAsync(createDto.HouseholdId, Models.Constants.DatabaseConstants.PlanUsageTypes.Tasks, cancellationToken))
+            // {
+            //     throw new InvalidOperationException($"Cannot create task: Household {createDto.HouseholdId} has reached its plan limit for tasks. Please upgrade to a premium plan.");
+            // }
 
             var task = new TaskEntity
             {
@@ -190,7 +190,8 @@ public class TaskService : ITaskService
             await _planUsageService.UpdateTasksUsageAsync(createDto.HouseholdId, cancellationToken);
 
             // Generate series of future events if task has an interval
-            var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            // Use provided start date or default to today
+            var startDate = createDto.StartDate ?? DateOnly.FromDateTime(DateTime.Today);
             var eventsGenerated = await _eventService.GenerateEventSeriesAsync(
                 task.Id,
                 startDate,

@@ -119,6 +119,29 @@
         Pozostaw wszystkie pola na 0, jeśli zadanie ma być jednorazowe.
       </p>
 
+      <!-- Start Date -->
+      <div class="form-field">
+        <label for="startDate" class="form-label">
+          Data rozpoczęcia serii
+        </label>
+        <p-datepicker
+          id="startDate"
+          formControlName="startDate"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          dateFormat="dd.mm.yy"
+          placeholder="Wybierz datę rozpoczęcia"
+          [style]="{ width: '100%' }"
+          [minDate]="minStartDate"
+          todayButtonStyleClass="p-button-text"
+          clearButtonStyleClass="p-button-text"
+          appendTo="body"
+        ></p-datepicker>
+        <small class="form-help">
+          Od tej daty zostanie utworzone pierwsze wydarzenie w serii
+        </small>
+      </div>
+
       <div class="interval-grid">
         <!-- Years -->
         <div class="form-field">

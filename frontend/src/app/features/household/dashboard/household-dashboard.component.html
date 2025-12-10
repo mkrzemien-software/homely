@@ -23,40 +23,48 @@
 
     <p-divider></p-divider>
 
-    <!-- Statistics Cards -->
-    @if (dashboardStats()) {
-      <div class="stats-grid">
-        <p-card class="stat-card">
-          <div class="stat-content">
-            <i class="pi pi-clock stat-icon info"></i>
-            <div class="stat-details">
-              <div class="stat-value">{{ dashboardStats()!.pending }}</div>
-              <div class="stat-label">Oczekujące</div>
-            </div>
+    <!-- Statistics Cards (for current week) -->
+    <div class="stats-grid">
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <i class="pi pi-exclamation-triangle stat-icon danger"></i>
+          <div class="stat-details">
+            <div class="stat-value">{{ dashboardStats().overdue }}</div>
+            <div class="stat-label">Przekroczone</div>
           </div>
-        </p-card>
+        </div>
+      </p-card>
 
-        <p-card class="stat-card">
-          <div class="stat-content">
-            <i class="pi pi-exclamation-triangle stat-icon warning"></i>
-            <div class="stat-details">
-              <div class="stat-value">{{ dashboardStats()!.overdue }}</div>
-              <div class="stat-label">Przekroczone</div>
-            </div>
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <i class="pi pi-clock stat-icon info"></i>
+          <div class="stat-details">
+            <div class="stat-value">{{ dashboardStats().pending }}</div>
+            <div class="stat-label">Oczekujące</div>
           </div>
-        </p-card>
+        </div>
+      </p-card>
 
-        <p-card class="stat-card">
-          <div class="stat-content">
-            <i class="pi pi-check-circle stat-icon success"></i>
-            <div class="stat-details">
-              <div class="stat-value">{{ dashboardStats()!.completedThisMonth }}</div>
-              <div class="stat-label">Wykonane w tym miesiącu</div>
-            </div>
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <i class="pi pi-history stat-icon warning"></i>
+          <div class="stat-details">
+            <div class="stat-value">{{ dashboardStats().postponed }}</div>
+            <div class="stat-label">Przełożone</div>
           </div>
-        </p-card>
-      </div>
-    }
+        </div>
+      </p-card>
+
+      <p-card class="stat-card">
+        <div class="stat-content">
+          <i class="pi pi-check-circle stat-icon success"></i>
+          <div class="stat-details">
+            <div class="stat-value">{{ dashboardStats().completedThisWeek }}</div>
+            <div class="stat-label">Wykonane w tym tygodniu</div>
+          </div>
+        </div>
+      </p-card>
+    </div>
 
     <!-- Dashboard Widgets Section -->
     <section class="dashboard-widgets">

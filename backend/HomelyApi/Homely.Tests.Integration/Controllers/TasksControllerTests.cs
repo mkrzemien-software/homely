@@ -165,7 +165,7 @@ public class TasksControllerTests : IntegrationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact]
+    [Fact(Skip = "Temporarily disabled - plan limit in post-MVP phase")]
     public async Task CreateTask_WhenExceedingFreePlanLimit_ShouldReturnBadRequest()
     {
         // Arrange

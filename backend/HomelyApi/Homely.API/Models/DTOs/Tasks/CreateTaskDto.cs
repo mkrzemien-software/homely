@@ -61,6 +61,12 @@ public class CreateTaskDto
     public DateOnly? LastDate { get; set; }
 
     /// <summary>
+    /// Start date for the first event in the series (optional).
+    /// If not provided, defaults to today's date.
+    /// </summary>
+    public DateOnly? StartDate { get; set; }
+
+    /// <summary>
     /// Priority level: low, medium, high
     /// </summary>
     [RegularExpression("^(low|medium|high)$", ErrorMessage = "Priority must be 'low', 'medium', or 'high'")]

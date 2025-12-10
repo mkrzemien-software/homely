@@ -282,13 +282,15 @@ export class AuthService {
 
   /**
    * Clear all authentication data from localStorage
+   * Note: ACTIVE_HOUSEHOLD_KEY is intentionally NOT removed
+   * so that user's last selected household is remembered after re-login
    */
   private clearAuthData(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.REFRESH_TOKEN_KEY);
       localStorage.removeItem(this.USER_KEY);
-      localStorage.removeItem(this.ACTIVE_HOUSEHOLD_KEY);
+      // Don't remove ACTIVE_HOUSEHOLD_KEY - keep user's last selection for next login
     }
   }
 
@@ -315,8 +317,19 @@ export class AuthService {
 
       try {
         const user = JSON.parse(userJson) as UserProfile;
-        const activeHousehold = this.getActiveHouseholdId();
+        const storedActiveHousehold = this.getActiveHouseholdId();
         const households = user.households || [];
+
+        // Validate stored household - use it only if user still belongs to it
+        // Otherwise fall back to first available household
+        const activeHousehold = storedActiveHousehold && households.some(h => h.householdId === storedActiveHousehold)
+          ? storedActiveHousehold
+          : households[0]?.householdId || null;
+
+        // Update stored household if it was invalid
+        if (activeHousehold && activeHousehold !== storedActiveHousehold) {
+          this.storeActiveHousehold(activeHousehold);
+        }
 
         this.isAuthenticated.set(true);
         this.currentUser.set(user);

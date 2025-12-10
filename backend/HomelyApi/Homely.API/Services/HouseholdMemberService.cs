@@ -43,10 +43,10 @@ public class HouseholdMemberService : IHouseholdMemberService
             }
 
             // Check if adding this member would exceed plan limit
-            if (await _planUsageService.WouldExceedLimitAsync(householdId, DatabaseConstants.PlanUsageTypes.HouseholdMembers, cancellationToken))
-            {
-                throw new InvalidOperationException($"Cannot add member: Household {householdId} has reached its plan limit for members. Please upgrade to a premium plan.");
-            }
+            // if (await _planUsageService.WouldExceedLimitAsync(householdId, DatabaseConstants.PlanUsageTypes.HouseholdMembers, cancellationToken))
+            // {
+            //     throw new InvalidOperationException($"Cannot add member: Household {householdId} has reached its plan limit for members. Please upgrade to a premium plan.");
+            // }
 
             // If member was previously deleted, restore them
             if (existingMember != null && existingMember.DeletedAt != null)

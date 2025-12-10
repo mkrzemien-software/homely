@@ -36,20 +36,20 @@
 
     <p-card class="stat-card">
       <div class="stat-content">
-        <i class="pi pi-clock stat-icon info"></i>
+        <i class="pi pi-exclamation-triangle stat-icon danger"></i>
         <div class="stat-details">
-          <div class="stat-value">{{ statusCounters().pending }}</div>
-          <div class="stat-label">Oczekujące</div>
+          <div class="stat-value">{{ statusCounters().overdue }}</div>
+          <div class="stat-label">Przekroczone</div>
         </div>
       </div>
     </p-card>
 
     <p-card class="stat-card">
       <div class="stat-content">
-        <i class="pi pi-check-circle stat-icon success"></i>
+        <i class="pi pi-clock stat-icon info"></i>
         <div class="stat-details">
-          <div class="stat-value">{{ statusCounters().completed }}</div>
-          <div class="stat-label">Wykonane</div>
+          <div class="stat-value">{{ statusCounters().pending }}</div>
+          <div class="stat-label">Oczekujące</div>
         </div>
       </div>
     </p-card>
@@ -66,10 +66,10 @@
 
     <p-card class="stat-card">
       <div class="stat-content">
-        <i class="pi pi-exclamation-triangle stat-icon danger"></i>
+        <i class="pi pi-check-circle stat-icon success"></i>
         <div class="stat-details">
-          <div class="stat-value">{{ statusCounters().overdue }}</div>
-          <div class="stat-label">Przekroczone</div>
+          <div class="stat-value">{{ statusCounters().completed }}</div>
+          <div class="stat-label">Wykonane</div>
         </div>
       </div>
     </p-card>

@@ -13,6 +13,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { MessageService, TreeNode } from 'primeng/api';
 import { DividerModule } from 'primeng/divider';
+import { DatePickerModule } from 'primeng/datepicker';
 
 // Services
 import { TasksService } from '../../services/tasks.service';
@@ -49,7 +50,8 @@ import { Priority, CreateTaskDto, getPriorityLabel } from '../../models/task.mod
     TreeSelectModule,
     InputNumberModule,
     ToastModule,
-    DividerModule
+    DividerModule,
+    DatePickerModule
   ],
   providers: [MessageService],
   templateUrl: './create-task-dialog.component.html',
@@ -72,6 +74,7 @@ export class CreateTaskDialogComponent implements OnInit, OnChanges {
   createTaskForm: FormGroup;
   isLoading = signal<boolean>(false);
   householdMembers = signal<HouseholdMember[]>([]);
+  minStartDate = new Date();
 
   /**
    * Priority options for dropdown
@@ -133,6 +136,7 @@ export class CreateTaskDialogComponent implements OnInit, OnChanges {
       description: [''],
       priority: [Priority.MEDIUM, [Validators.required]],
       assignedTo: [null], // Optional field for default user assignment
+      startDate: [null],
       yearsValue: [0, [Validators.min(0)]],
       monthsValue: [0, [Validators.min(0)]],
       weeksValue: [0, [Validators.min(0)]],
@@ -230,6 +234,7 @@ export class CreateTaskDialogComponent implements OnInit, OnChanges {
       description: formValue.description?.trim() || undefined,
       priority: formValue.priority,
       assignedTo: formValue.assignedTo || undefined,
+      startDate: formValue.startDate ? this.formatDateOnly(formValue.startDate) : undefined,
       yearsValue: formValue.yearsValue || undefined,
       monthsValue: formValue.monthsValue || undefined,
       weeksValue: formValue.weeksValue || undefined,
@@ -264,12 +269,23 @@ export class CreateTaskDialogComponent implements OnInit, OnChanges {
   }
 
   /**
+   * Format date as YYYY-MM-DD string (local time, without timezone conversion)
+   */
+  private formatDateOnly(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
    * Close dialog and reset form
    */
   closeDialog(): void {
     this.createTaskForm.reset({
       priority: Priority.MEDIUM,
       assignedTo: null,
+      startDate: null,
       yearsValue: 0,
       monthsValue: 0,
       weeksValue: 0,
