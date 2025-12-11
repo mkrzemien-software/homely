@@ -153,7 +153,8 @@ jobs:
           echo ""
           
           # Reset the database - this drops all data and re-runs all migrations
-          supabase db reset --db-url "${{ steps.db-url.outputs.db_url }}"
+          # --no-confirm skips the interactive confirmation prompt
+          supabase db reset --db-url "${{ steps.db-url.outputs.db_url }}" --no-confirm
           
           echo ""
           echo "✅ Database reset completed!"
