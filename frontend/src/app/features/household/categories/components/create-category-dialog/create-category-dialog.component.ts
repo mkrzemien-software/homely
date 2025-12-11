@@ -105,7 +105,12 @@ export class CreateCategoryDialogComponent implements OnChanges {
   }
 
   closeDialog(): void {
-    this.createCategoryForm.reset();
+    this.createCategoryForm.reset({
+      categoryTypeId: null,
+      name: '',
+      description: '',
+      sortOrder: 0
+    });
     this.dialogClosed.emit();
   }
 }

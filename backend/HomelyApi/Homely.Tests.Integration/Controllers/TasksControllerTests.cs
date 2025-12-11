@@ -67,13 +67,26 @@ public class TasksControllerTests : IntegrationTestBase
         };
         dbContext.HouseholdMembers.Add(householdMember);
 
+        // Create a test category
+        var categoryId = Guid.NewGuid();
+        var category = new CategoryEntity
+        {
+            Id = categoryId,
+            HouseholdId = householdId,
+            Name = "Przegląd samochodu",
+            IsActive = true,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        dbContext.Categories.Add(category);
+
         await dbContext.SaveChangesAsync();
 
         // Create valid CreateTaskDto
         var createTaskDto = new CreateTaskDto
         {
             HouseholdId = householdId,
-            CategoryId = 1, // "Przegląd samochodu" from seeded data
+            CategoryId = categoryId,
             Name = "Car Annual Inspection",
             Description = "Annual mandatory car inspection",
             YearsValue = 1,
@@ -101,7 +114,7 @@ public class TasksControllerTests : IntegrationTestBase
         createdTask.IsActive.Should().BeTrue();
         createdTask.HouseholdId.Should().Be(householdId.ToString());
         createdTask.Category.Should().NotBeNull();
-        createdTask.Category.Id.Should().Be(1);
+        createdTask.Category!.Id.Should().Be(categoryId.ToString());
         createdTask.Interval.Should().NotBeNull();
         createdTask.Interval!.Years.Should().Be(1);
         createdTask.Interval.Months.Should().Be(0);
@@ -118,7 +131,7 @@ public class TasksControllerTests : IntegrationTestBase
 
         taskInDb.Should().NotBeNull("Task should exist in database");
         taskInDb!.HouseholdId.Should().Be(householdId);
-        taskInDb.CategoryId.Should().Be(1);
+        taskInDb.CategoryId.Should().Be(categoryId);
         taskInDb.Description.Should().Be("Annual mandatory car inspection");
         taskInDb.YearsValue.Should().Be(1);
         taskInDb.MonthsValue.Should().Be(0);
@@ -207,13 +220,26 @@ public class TasksControllerTests : IntegrationTestBase
         };
         dbContext.HouseholdMembers.Add(householdMember);
 
+        // Create a test category
+        var categoryId = Guid.NewGuid();
+        var category = new CategoryEntity
+        {
+            Id = categoryId,
+            HouseholdId = householdId,
+            Name = "Test Category",
+            IsActive = true,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        dbContext.Categories.Add(category);
+
         // Create 5 tasks (free plan limit)
         for (int i = 1; i <= 5; i++)
         {
             var task = new TaskEntity
             {
                 HouseholdId = householdId,
-                CategoryId = 1,
+                CategoryId = categoryId,
                 Name = $"Task {i}",
                 Description = $"Test task {i}",
                 Priority = "medium",
@@ -244,7 +270,7 @@ public class TasksControllerTests : IntegrationTestBase
         var createTaskDto = new CreateTaskDto
         {
             HouseholdId = householdId,
-            CategoryId = 1,
+            CategoryId = categoryId,
             Name = "Task 6 - Should Fail",
             Description = "This should exceed the free plan limit",
             Priority = "high",

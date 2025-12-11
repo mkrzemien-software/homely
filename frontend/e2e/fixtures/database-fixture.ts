@@ -30,13 +30,13 @@ export const test = base.extend({
       console.log('🔧 [Fixture] Cleaning database before test...');
       await truncateAllTables();
 
+      // Create test household with all test users assigned (must be done first to get householdId)
+      console.log('🔧 [Fixture] Setting up test household and users...');
+      const householdId = await setupTestHouseholdWithUsers();
+
       // Seed reference data from migrations (category_types, categories)
       console.log('🔧 [Fixture] Seeding reference data from migrations...');
-      await seedAllReferenceData();
-
-      // Create test household with all test users assigned
-      console.log('🔧 [Fixture] Setting up test household and users...');
-      await setupTestHouseholdWithUsers();
+      await seedAllReferenceData(householdId);
 
       // Run the test
       await use();
