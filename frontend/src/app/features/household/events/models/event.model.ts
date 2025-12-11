@@ -78,9 +78,9 @@ export interface Event {
   assignedToLastName?: string;
 
   /**
-   * Category ID from the task
+   * Category ID from the task (UUID)
    */
-  categoryId?: number;
+  categoryId?: string;
 
   /**
    * Category name from the task
@@ -308,9 +308,9 @@ export interface EventsQueryParams {
   assignedToId?: string;
 
   /**
-   * Filter by category ID
+   * Filter by category ID (UUID)
    */
-  categoryId?: number;
+  categoryId?: string;
 
   /**
    * Filter by priority

@@ -110,7 +110,7 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
   /**
    * Selected category type filter
    */
-  selectedCategoryTypeId = signal<number | undefined>(undefined);
+  selectedCategoryTypeId = signal<string | undefined>(undefined);
 
   /**
    * Loading state
@@ -140,7 +140,7 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
   /**
    * Preselected category type ID for create dialog
    */
-  preselectedCategoryTypeId = signal<number | null>(null);
+  preselectedCategoryTypeId = signal<string | null>(null);
 
   /**
    * Create category type dialog visibility
@@ -212,7 +212,7 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
     const categoryTypes = this.allCategoryTypes();
 
     // Group categories by type
-    const grouped = new Map<number, Category[]>();
+    const grouped = new Map<string, Category[]>();
     categories.forEach(category => {
       if (!grouped.has(category.categoryTypeId)) {
         grouped.set(category.categoryTypeId, []);
@@ -347,7 +347,7 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
   /**
    * Handle category type filter change
    */
-  onCategoryTypeFilterChange(categoryTypeId: number | undefined): void {
+  onCategoryTypeFilterChange(categoryTypeId: string | undefined): void {
     this.selectedCategoryTypeId.set(categoryTypeId);
   }
 
@@ -362,7 +362,7 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
    * Open add new category dialog
    * @param categoryTypeId Optional category type ID to preselect
    */
-  addNewCategory(categoryTypeId?: number): void {
+  addNewCategory(categoryTypeId?: string): void {
     this.preselectedCategoryTypeId.set(categoryTypeId ?? null);
     this.createDialogVisible.set(true);
   }
@@ -456,7 +456,7 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
   /**
    * Edit category type
    */
-  editCategoryType(categoryTypeId: number): void {
+  editCategoryType(categoryTypeId: string): void {
     const categoryType = this.allCategoryTypes().find(ct => ct.id === categoryTypeId);
     if (categoryType) {
       this.categoryTypeToEdit.set(categoryType);
@@ -510,7 +510,7 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
    * Handle drop event for drag & drop reordering
    * Only works in grouped view - subcategories can only be reordered within the same category
    */
-  onCategoryDrop(event: CdkDragDrop<Category[]>, categoryTypeId: number): void {
+  onCategoryDrop(event: CdkDragDrop<Category[]>, categoryTypeId: string): void {
     // Get the categories for this category type
     const categoryGroup = this.categoriesByType().find(
       group => group.categoryTypeId === categoryTypeId

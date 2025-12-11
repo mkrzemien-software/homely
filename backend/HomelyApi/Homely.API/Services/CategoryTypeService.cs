@@ -51,7 +51,7 @@ public class CategoryTypeService : ICategoryTypeService
     }
 
     /// <inheritdoc/>
-    public async Task<CategoryTypeDto?> GetCategoryTypeByIdAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default)
+    public async Task<CategoryTypeDto?> GetCategoryTypeByIdAsync(Guid householdId, Guid categoryTypeId, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -110,7 +110,7 @@ public class CategoryTypeService : ICategoryTypeService
     }
 
     /// <inheritdoc/>
-    public async Task<CategoryTypeDto> UpdateCategoryTypeAsync(Guid householdId, int categoryTypeId, UpdateCategoryTypeDto updateDto, CancellationToken cancellationToken = default)
+    public async Task<CategoryTypeDto> UpdateCategoryTypeAsync(Guid householdId, Guid categoryTypeId, UpdateCategoryTypeDto updateDto, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -151,7 +151,7 @@ public class CategoryTypeService : ICategoryTypeService
     }
 
     /// <inheritdoc/>
-    public async Task<bool> DeleteCategoryTypeAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteCategoryTypeAsync(Guid householdId, Guid categoryTypeId, CancellationToken cancellationToken = default)
     {
         try
         {

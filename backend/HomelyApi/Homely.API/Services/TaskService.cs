@@ -66,7 +66,7 @@ public class TaskService : ITaskService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<TaskDto>> GetTasksByCategoryAsync(Guid householdId, int categoryId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TaskDto>> GetTasksByCategoryAsync(Guid householdId, Guid categoryId, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -364,11 +364,11 @@ public class TaskService : ITaskService
         // Create category object
         var category = new TaskCategoryDto
         {
-            Id = entity.Category?.Id ?? 0,
+            Id = entity.Category?.Id.ToString() ?? string.Empty,
             Name = entity.Category?.Name ?? string.Empty,
             CategoryType = new TaskCategoryTypeDto
             {
-                Id = entity.Category?.CategoryType?.Id ?? 0,
+                Id = entity.Category?.CategoryType?.Id.ToString() ?? string.Empty,
                 Name = entity.Category?.CategoryType?.Name ?? string.Empty
             }
         };

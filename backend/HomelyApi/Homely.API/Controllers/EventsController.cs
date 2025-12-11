@@ -51,7 +51,7 @@ public class EventsController : ControllerBase
         [FromQuery] Guid householdId,
         [FromQuery] Guid? taskId = null,
         [FromQuery] Guid? assignedToId = null,
-        [FromQuery] int? categoryId = null,
+        [FromQuery] Guid? categoryId = null,
         [FromQuery] string? status = null,
         [FromQuery] string? priority = null,
         [FromQuery] string? startDate = null,

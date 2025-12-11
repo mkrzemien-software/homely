@@ -47,10 +47,10 @@ export interface TaskInterval {
  * Category reference in task
  */
 export interface TaskCategory {
-  id: number;
+  id: string;
   name: string;
   categoryType: {
-    id: number;
+    id: string;
     name: string;
   };
 }
@@ -155,9 +155,9 @@ export interface CreateTaskDto {
   householdId: string;
 
   /**
-   * Category (subcategory) ID
+   * Category (subcategory) ID (UUID)
    */
-  categoryId: number;
+  categoryId: string;
 
   /**
    * Task name (max 100 characters)
@@ -220,9 +220,9 @@ export interface CreateTaskDto {
  */
 export interface UpdateTaskDto {
   /**
-   * Category (subcategory) ID
+   * Category (subcategory) ID (UUID)
    */
-  categoryId?: number;
+  categoryId?: string;
 
   /**
    * Task name (max 100 characters)
@@ -280,9 +280,9 @@ export interface TasksQueryParams {
   householdId?: string;
 
   /**
-   * Filter by category (subcategory) ID
+   * Filter by category (subcategory) ID (UUID)
    */
-  categoryId?: number;
+  categoryId?: string;
 
   /**
    * Filter by priority

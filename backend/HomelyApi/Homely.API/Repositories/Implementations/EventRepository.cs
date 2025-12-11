@@ -264,7 +264,7 @@ public class EventRepository : BaseRepository<EventEntity, Guid>, IEventReposito
         Guid householdId,
         Guid? taskId = null,
         Guid? assignedTo = null,
-        int? categoryId = null,
+        Guid? categoryId = null,
         string? status = null,
         string? priority = null,
         DateOnly? dueDateFrom = null,

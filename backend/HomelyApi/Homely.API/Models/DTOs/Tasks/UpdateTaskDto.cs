@@ -10,7 +10,7 @@ public class UpdateTaskDto
     /// <summary>
     /// Category ID (optional)
     /// </summary>
-    public int? CategoryId { get; set; }
+    public Guid? CategoryId { get; set; }
 
     /// <summary>
     /// Task name

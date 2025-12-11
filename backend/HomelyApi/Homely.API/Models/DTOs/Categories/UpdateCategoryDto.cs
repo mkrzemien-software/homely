@@ -10,7 +10,7 @@ public class UpdateCategoryDto
     /// <summary>
     /// Category type ID
     /// </summary>
-    public int? CategoryTypeId { get; set; }
+    public Guid? CategoryTypeId { get; set; }
 
     /// <summary>
     /// Category name

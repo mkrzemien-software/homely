@@ -95,10 +95,10 @@ export class CategoryService {
    * Get all categories for a household
    *
    * @param householdId - The household ID
-   * @param categoryTypeId - Optional filter by category type
+   * @param categoryTypeId - Optional filter by category type (UUID)
    * @returns Observable of categories array
    */
-  getCategories(householdId: string, categoryTypeId?: number): Observable<Category[]> {
+  getCategories(householdId: string, categoryTypeId?: string): Observable<Category[]> {
     // Build query params
     let params = new HttpParams().append('householdId', householdId);
     if (categoryTypeId !== undefined) {
@@ -141,10 +141,10 @@ export class CategoryService {
    * Get a single category by ID for a household
    *
    * @param householdId - The household ID
-   * @param categoryId - The category ID
+   * @param categoryId - The category ID (UUID)
    * @returns Observable of category
    */
-  getCategory(householdId: string, categoryId: number): Observable<Category> {
+  getCategory(householdId: string, categoryId: string): Observable<Category> {
     const params = new HttpParams().append('householdId', householdId);
 
     return this.http.get<Category>(`${this.API_URL}/categories/${categoryId}`, { params })
@@ -184,11 +184,11 @@ export class CategoryService {
    * Update an existing category for a household
    *
    * @param householdId - The household ID
-   * @param categoryId - The category ID
+   * @param categoryId - The category ID (UUID)
    * @param updateDto - Update data
    * @returns Observable of updated category
    */
-  updateCategory(householdId: string, categoryId: number, updateDto: UpdateCategoryDto): Observable<Category> {
+  updateCategory(householdId: string, categoryId: string, updateDto: UpdateCategoryDto): Observable<Category> {
     const params = new HttpParams().append('householdId', householdId);
 
     return this.http.put<Category>(`${this.API_URL}/categories/${categoryId}`, updateDto, { params })
@@ -214,10 +214,10 @@ export class CategoryService {
    * Delete a category for a household
    *
    * @param householdId - The household ID
-   * @param categoryId - The category ID
+   * @param categoryId - The category ID (UUID)
    * @returns Observable of success status
    */
-  deleteCategory(householdId: string, categoryId: number): Observable<{ success: boolean }> {
+  deleteCategory(householdId: string, categoryId: string): Observable<{ success: boolean }> {
     const params = new HttpParams().append('householdId', householdId);
 
     return this.http.delete<{ success: boolean }>(`${this.API_URL}/categories/${categoryId}`, { params })
@@ -238,10 +238,10 @@ export class CategoryService {
    * Get a single category type by ID for a household
    *
    * @param householdId - The household ID
-   * @param categoryTypeId - The category type ID
+   * @param categoryTypeId - The category type ID (UUID)
    * @returns Observable of category type
    */
-  getCategoryType(householdId: string, categoryTypeId: number): Observable<CategoryType> {
+  getCategoryType(householdId: string, categoryTypeId: string): Observable<CategoryType> {
     const params = new HttpParams().append('householdId', householdId);
 
     return this.http.get<CategoryType>(`${this.API_URL}/category-types/${categoryTypeId}`, { params })
@@ -281,11 +281,11 @@ export class CategoryService {
    * Update an existing category type for a household
    *
    * @param householdId - The household ID
-   * @param categoryTypeId - The category type ID
+   * @param categoryTypeId - The category type ID (UUID)
    * @param updateDto - Update data
    * @returns Observable of updated category type
    */
-  updateCategoryType(householdId: string, categoryTypeId: number, updateDto: UpdateCategoryTypeDto): Observable<CategoryType> {
+  updateCategoryType(householdId: string, categoryTypeId: string, updateDto: UpdateCategoryTypeDto): Observable<CategoryType> {
     const params = new HttpParams().append('householdId', householdId);
 
     return this.http.put<CategoryType>(`${this.API_URL}/category-types/${categoryTypeId}`, updateDto, { params })
@@ -311,10 +311,10 @@ export class CategoryService {
    * Delete a category type for a household
    *
    * @param householdId - The household ID
-   * @param categoryTypeId - The category type ID
+   * @param categoryTypeId - The category type ID (UUID)
    * @returns Observable of success status
    */
-  deleteCategoryType(householdId: string, categoryTypeId: number): Observable<{ success: boolean }> {
+  deleteCategoryType(householdId: string, categoryTypeId: string): Observable<{ success: boolean }> {
     const params = new HttpParams().append('householdId', householdId);
 
     return this.http.delete<{ success: boolean }>(`${this.API_URL}/category-types/${categoryTypeId}`, { params })

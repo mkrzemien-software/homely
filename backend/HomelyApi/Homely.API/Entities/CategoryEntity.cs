@@ -8,14 +8,14 @@ public class CategoryEntity
 {
     [Key]
     [Column("id")]
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
     [Column("household_id")]
     public Guid HouseholdId { get; set; }
 
     [Column("category_type_id")]
-    public int? CategoryTypeId { get; set; }
+    public Guid? CategoryTypeId { get; set; }
 
     [Required]
     [MaxLength(100)]

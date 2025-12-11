@@ -20,7 +20,7 @@ public interface ITaskService
     /// <summary>
     /// Get tasks by category
     /// </summary>
-    Task<IEnumerable<TaskDto>> GetTasksByCategoryAsync(Guid householdId, int categoryId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TaskDto>> GetTasksByCategoryAsync(Guid householdId, Guid categoryId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get recurring tasks for a household

@@ -67,7 +67,7 @@ public class CategoriesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoriesResponse>> GetAllCategories(
         [FromQuery] Guid householdId,
-        [FromQuery] int? categoryTypeId = null,
+        [FromQuery] Guid? categoryTypeId = null,
         CancellationToken cancellationToken = default)
     {
         try
@@ -105,13 +105,13 @@ public class CategoriesController : ControllerBase
     /// <param name="householdId">Household ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Category details</returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryDto>> GetCategoryById(
-        int id,
+        Guid id,
         [FromQuery] Guid householdId,
         CancellationToken cancellationToken = default)
     {
@@ -210,9 +210,9 @@ public class CategoriesController : ControllerBase
     /// <remarks>
     /// Sample request:
     ///
-    ///     PUT /api/categories/1?householdId=123e4567-e89b-12d3-a456-426614174000
+    ///     PUT /api/categories/123e4567-e89b-12d3-a456-426614174000?householdId=123e4567-e89b-12d3-a456-426614174000
     ///     {
-    ///         "categoryTypeId": 1,
+    ///         "categoryTypeId": "123e4567-e89b-12d3-a456-426614174001",
     ///         "name": "Updated Boiler Maintenance",
     ///         "description": "Updated description",
     ///         "sortOrder": 15,
@@ -220,14 +220,14 @@ public class CategoriesController : ControllerBase
     ///     }
     ///
     /// </remarks>
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryDto>> UpdateCategory(
-        int id,
+        Guid id,
         [FromQuery] Guid householdId,
         [FromBody] UpdateCategoryDto updateDto,
         CancellationToken cancellationToken = default)
@@ -271,13 +271,13 @@ public class CategoriesController : ControllerBase
     /// <param name="householdId">Household ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> DeleteCategory(
-        int id,
+        Guid id,
         [FromQuery] Guid householdId,
         CancellationToken cancellationToken = default)
     {

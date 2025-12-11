@@ -36,7 +36,7 @@ import { CategoryType, CreateCategoryDto } from '../../models/category.model';
 export class CreateCategoryDialogComponent implements OnChanges {
   @Input({ required: true }) householdId!: string;
   @Input() categoryTypes: CategoryType[] = [];
-  @Input() preselectedCategoryTypeId: number | null = null;
+  @Input() preselectedCategoryTypeId: string | null = null;
   @Output() categoryCreated = new EventEmitter<void>();
   @Output() dialogClosed = new EventEmitter<void>();
 

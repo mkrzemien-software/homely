@@ -16,7 +16,7 @@ public class TaskIntervalDto
 /// </summary>
 public class TaskCategoryDto
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public TaskCategoryTypeDto CategoryType { get; set; } = new();
 }
@@ -26,7 +26,7 @@ public class TaskCategoryDto
 /// </summary>
 public class TaskCategoryTypeDto
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
 }
 

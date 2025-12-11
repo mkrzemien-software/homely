@@ -55,6 +55,9 @@ comment on index idx_household_members_unique_active is 'Prevents duplicate acti
 -- ============================================================================
 -- 4. CATEGORY TYPES INDEXES
 -- ============================================================================
+-- Index for household filtering (critical for multi-tenant isolation)
+create index idx_category_types_household on category_types(household_id) where deleted_at is null;
+
 -- Index for active category types
 create index idx_category_types_active on category_types(is_active);
 
@@ -64,12 +67,20 @@ create index idx_category_types_sort_order on category_types(sort_order);
 -- Index for soft delete filtering
 create index idx_category_types_deleted_at on category_types(deleted_at);
 
+-- Unique constraint: household + name
+create unique index idx_category_types_household_name_unique on category_types(household_id, name) where deleted_at is null;
+
+comment on index idx_category_types_household is 'Optimizes household-specific category type queries with RLS';
 comment on index idx_category_types_active is 'Filters active category types for display';
 comment on index idx_category_types_sort_order is 'Optimizes category type ordering queries';
+comment on index idx_category_types_household_name_unique is 'Ensures unique category type names within each household';
 
 -- ============================================================================
 -- 5. CATEGORIES INDEXES
 -- ============================================================================
+-- Index for household filtering (critical for multi-tenant isolation)
+create index idx_categories_household on categories(household_id) where deleted_at is null;
+
 -- Index for category type relationships
 create index idx_categories_type on categories(category_type_id);
 
@@ -79,11 +90,13 @@ create index idx_categories_active on categories(is_active) where deleted_at is 
 -- Index for soft delete filtering
 create index idx_categories_deleted_at on categories(deleted_at);
 
--- Unique constraint for category names within category types (full constraint for ON CONFLICT support)
-alter table categories add constraint categories_unique_name unique (category_type_id, name);
+-- Unique constraint: household + category_type + name
+create unique index idx_categories_household_type_name_unique on categories(household_id, category_type_id, name) where deleted_at is null;
 
+comment on index idx_categories_household is 'Optimizes household-specific category queries with RLS';
 comment on index idx_categories_type is 'Optimizes category type to categories relationships';
 comment on index idx_categories_active is 'Filters active categories for item assignment';
+comment on index idx_categories_household_type_name_unique is 'Ensures unique category names within category type and household';
 
 -- ============================================================================
 -- 6. TASKS INDEXES

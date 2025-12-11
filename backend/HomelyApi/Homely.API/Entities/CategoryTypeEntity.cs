@@ -8,7 +8,7 @@ public class CategoryTypeEntity
 {
     [Key]
     [Column("id")]
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
     [Column("household_id")]

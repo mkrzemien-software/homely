@@ -31,9 +31,9 @@ export interface ItemSort {
  */
 export interface ItemFilter {
   /**
-   * Filter by category IDs
+   * Filter by category IDs (UUIDs)
    */
-  categoryIds?: number[];
+  categoryIds?: string[];
 
   /**
    * Filter by assigned user IDs
@@ -100,7 +100,7 @@ export const PRIORITY_ORDER: Record<ItemPriority, number> = {
  * Helper function to apply filters to items array
  */
 export function applyItemFilters<T extends {
-  categoryId?: number;
+  categoryId?: string;
   assignedTo?: string;
   priority?: ItemPriority;
   name?: string;
@@ -156,7 +156,7 @@ export function applyItemSort<T extends {
   name?: string;
   lastServiceDate?: Date | string;
   priority?: ItemPriority;
-  categoryId?: number;
+  categoryId?: string;
   category?: { name: string };
 }>(items: T[], sort: ItemSort): T[] {
   return [...items].sort((a, b) => {
@@ -205,10 +205,10 @@ export function applyItemSort<T extends {
  * Group items by category
  */
 export function groupItemsByCategory<T extends {
-  categoryId: number;
+  categoryId: string;
   category?: { name: string };
-}>(items: T[]): Map<number, T[]> {
-  const grouped = new Map<number, T[]>();
+}>(items: T[]): Map<string, T[]> {
+  const grouped = new Map<string, T[]>();
 
   items.forEach(item => {
     const categoryId = item.categoryId;

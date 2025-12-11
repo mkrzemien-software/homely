@@ -30,9 +30,9 @@ export interface Item {
   householdId: string;
 
   /**
-   * Category ID (technical inspections, waste collection, medical visits)
+   * Category ID (technical inspections, waste collection, medical visits) - UUID
    */
-  categoryId: number;
+  categoryId: string;
 
   /**
    * Category details (populated from backend)
@@ -99,8 +99,8 @@ export interface Item {
  * Category interface
  */
 export interface Category {
-  id: number;
-  categoryTypeId: number;
+  id: string;
+  categoryTypeId: string;
   categoryTypeName?: string;
   name: string;
   description?: string;
@@ -127,7 +127,7 @@ export interface HouseholdMember {
  */
 export interface CreateItemDto {
   householdId: string;
-  categoryId: number;
+  categoryId: string;
   name: string;
   description?: string;
   assignedTo?: string;
@@ -143,7 +143,7 @@ export interface CreateItemDto {
  * DTO for updating an existing item
  */
 export interface UpdateItemDto {
-  categoryId?: number;
+  categoryId?: string;
   name?: string;
   description?: string;
   assignedTo?: string;
@@ -167,7 +167,7 @@ export interface ItemWithCategory extends Item {
  * Items grouped by category
  */
 export interface ItemsByCategory {
-  categoryId: number;
+  categoryId: string;
   categoryName: string;
   categoryColor: string;
   categoryIcon: string;

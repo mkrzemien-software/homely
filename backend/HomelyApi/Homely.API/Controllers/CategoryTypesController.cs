@@ -91,13 +91,13 @@ public class CategoryTypesController : ControllerBase
     /// <param name="householdId">Household ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Category type details</returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(CategoryTypeDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryTypeDto>> GetCategoryTypeById(
-        int id,
+        Guid id,
         [FromQuery] Guid householdId,
         CancellationToken cancellationToken = default)
     {
@@ -195,7 +195,7 @@ public class CategoryTypesController : ControllerBase
     /// <remarks>
     /// Sample request:
     ///
-    ///     PUT /api/category-types/1?householdId=123e4567-e89b-12d3-a456-426614174000
+    ///     PUT /api/category-types/123e4567-e89b-12d3-a456-426614174000?householdId=123e4567-e89b-12d3-a456-426614174000
     ///     {
     ///         "name": "Updated Home Appliances",
     ///         "description": "Updated description",
@@ -204,14 +204,14 @@ public class CategoryTypesController : ControllerBase
     ///     }
     ///
     /// </remarks>
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(CategoryTypeDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryTypeDto>> UpdateCategoryType(
-        int id,
+        Guid id,
         [FromQuery] Guid householdId,
         [FromBody] UpdateCategoryTypeDto updateDto,
         CancellationToken cancellationToken = default)
@@ -255,13 +255,13 @@ public class CategoryTypesController : ControllerBase
     /// <param name="householdId">Household ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> DeleteCategoryType(
-        int id,
+        Guid id,
         [FromQuery] Guid householdId,
         CancellationToken cancellationToken = default)
     {

@@ -81,7 +81,7 @@ comment on view dashboard_upcoming_tasks is 'Optimized dashboard view showing pe
 --    - Integrated in TaskService and HouseholdMemberService
 
 -- ============================================================================
--- 5. INSERT DEFAULT PLAN TYPES AND CATEGORY DATA
+-- 5. INSERT DEFAULT PLAN TYPES
 -- ============================================================================
 -- Wstawienie domyślnych typów planów dla modelu freemium
 insert into plan_types (id, name, description, max_household_members, max_tasks, price_monthly, price_yearly, features, is_active) values
@@ -90,26 +90,9 @@ insert into plan_types (id, name, description, max_household_members, max_tasks,
 (3, 'Rodzinny', 'Kompletne rozwiązanie dla rodziny', null, null, 19.99, 199.99, '["podstawowe_zadania", "widok_kalendarza", "powiadomienia_email", "dokumenty", "analityka", "historia", "wsparcie_priorytetowe", "nieograniczeni_czlonkowie", "nieograniczone_zadania"]', true)
 on conflict (id) do nothing;
 
--- Wstawienie domyślnych typów kategorii (tylko MVP)
-insert into category_types (name, description, sort_order, is_active) values
-('Przeglądy techniczne', 'Przeglądy techniczne pojazdów i urządzeń', 1, true),
-('Wywóz śmieci', 'Harmonogram wywozu śmieci', 2, true),
-('Wizyty medyczne', 'Wizyty zdrowotne członków gospodarstwa', 3, true)
-on conflict (name) do nothing;
-
--- Wstawienie domyślnych kategorii (tylko MVP)
-insert into categories (category_type_id, name, description, sort_order, is_active) values
--- Przeglądy techniczne
-((select id from category_types where name = 'Przeglądy techniczne'), 'Przegląd samochodu', 'Obowiązkowy przegląd techniczny pojazdu', 1, true),
-((select id from category_types where name = 'Przeglądy techniczne'), 'Przegląd kotła', 'Przegląd kotła grzewczego', 2, true),
--- Wywóz śmieci  
-((select id from category_types where name = 'Wywóz śmieci'), 'Śmieci zmieszane', 'Wywóz śmieci zmieszanych', 1, true),
-((select id from category_types where name = 'Wywóz śmieci'), 'Odpady segregowane', 'Wywóz odpadów segregowanych', 2, true),
--- Wizyty medyczne
-((select id from category_types where name = 'Wizyty medyczne'), 'Lekarz rodzinny', 'Wizyty u lekarza pierwszego kontaktu', 1, true),
-((select id from category_types where name = 'Wizyty medyczne'), 'Dentysta', 'Wizyty dentystyczne', 2, true),
-((select id from category_types where name = 'Wizyty medyczne'), 'Badania kontrolne', 'Regularne badania profilaktyczne', 3, true)
-on conflict (category_type_id, name) do nothing;
+-- Note: Category types and categories are now multi-tenant (household-specific)
+-- They should be created per-household via the API or during household initialization
+-- No global seed data for categories
 
 comment on view dashboard_upcoming_tasks is 'Main dashboard view with all pending events and urgency classification';
 

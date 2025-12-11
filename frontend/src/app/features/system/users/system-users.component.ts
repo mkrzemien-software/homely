@@ -14,13 +14,14 @@ import { DialogModule } from 'primeng/dialog';
 // Custom Components
 import { GlobalUserSearchComponent } from './components/global-user-search/global-user-search.component';
 import { UserDetailsPanelComponent } from './components/user-details-panel/user-details-panel.component';
-import { RoleManagementFormComponent } from './components/role-management-form/role-management-form.component';
+// import { RoleManagementFormComponent } from './components/role-management-form/role-management-form.component';
 import { AccountActionsToolbarComponent } from './components/account-actions-toolbar/account-actions-toolbar.component';
 import { CreateUserDialogComponent } from './components/create-user-dialog/create-user-dialog.component';
 import { HouseholdAssignmentComponent } from './components/household-assignment/household-assignment.component';
 
 // Services and Interfaces
 import { SystemUsersService, SystemUser, UserSearchFilters, UserRole, UserAccountStatus } from '../../../core/services/system-users.service';
+// import { Divider } from "primeng/divider";
 
 @Component({
   selector: 'app-system-users',
@@ -36,11 +37,12 @@ import { SystemUsersService, SystemUser, UserSearchFilters, UserRole, UserAccoun
     DialogModule,
     GlobalUserSearchComponent,
     UserDetailsPanelComponent,
-    RoleManagementFormComponent,
+    // RoleManagementFormComponent,
     AccountActionsToolbarComponent,
     CreateUserDialogComponent,
-    HouseholdAssignmentComponent
-  ],
+    HouseholdAssignmentComponent,
+    // Divider
+],
   templateUrl: './system-users.component.html',
   styleUrl: './system-users.component.scss'
 })

@@ -131,28 +131,116 @@ comment on policy "household_admins_can_insert_members" on household_members is 
 comment on policy "household_members_can_delete_members" on household_members is 'Admins can remove members, users can leave households';
 
 -- ============================================================================
--- 4. CATEGORY TYPES POLICIES (PUBLIC READ-ONLY)
+-- 4. CATEGORY TYPES POLICIES (HOUSEHOLD-BASED)
 -- ============================================================================
--- Category types are publicly readable for item categorization
+-- Category types are now multi-tenant, accessible only to household members
 
--- Select policy: Anyone can view active category types
-create policy "anyone_can_select_active_category_types" on category_types
-    for select to anon, authenticated
-    using (is_active = true and deleted_at is null);
+-- Select policy: Household members can view their household's category types
+create policy "household_members_can_select_category_types" on category_types
+    for select to authenticated
+    using (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
 
-comment on policy "anyone_can_select_active_category_types" on category_types is 'Public access to view item category types';
+-- Insert policy: Household members can create category types
+create policy "household_members_can_insert_category_types" on category_types
+    for insert to authenticated
+    with check (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
+
+-- Update policy: Household members can update their household's category types
+create policy "household_members_can_update_category_types" on category_types
+    for update to authenticated
+    using (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    )
+    with check (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
+
+-- Delete policy: Household members can delete their household's category types
+create policy "household_members_can_delete_category_types" on category_types
+    for delete to authenticated
+    using (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
+
+comment on policy "household_members_can_select_category_types" on category_types is 'Members can view household category types';
+comment on policy "household_members_can_insert_category_types" on category_types is 'Members can create category types for their household';
+comment on policy "household_members_can_update_category_types" on category_types is 'Members can update household category types';
+comment on policy "household_members_can_delete_category_types" on category_types is 'Members can delete household category types';
 
 -- ============================================================================
--- 5. CATEGORIES POLICIES (PUBLIC READ-ONLY)
+-- 5. CATEGORIES POLICIES (HOUSEHOLD-BASED)
 -- ============================================================================
--- Categories are publicly readable for item classification
+-- Categories are now multi-tenant, accessible only to household members
 
--- Select policy: Anyone can view active categories
-create policy "anyone_can_select_active_categories" on categories
-    for select to anon, authenticated
-    using (is_active = true and deleted_at is null);
+-- Select policy: Household members can view their household's categories
+create policy "household_members_can_select_categories" on categories
+    for select to authenticated
+    using (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
 
-comment on policy "anyone_can_select_active_categories" on categories is 'Public access to view item categories';
+-- Insert policy: Household members can create categories
+create policy "household_members_can_insert_categories" on categories
+    for insert to authenticated
+    with check (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
+
+-- Update policy: Household members can update their household's categories
+create policy "household_members_can_update_categories" on categories
+    for update to authenticated
+    using (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    )
+    with check (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
+
+-- Delete policy: Household members can delete their household's categories
+create policy "household_members_can_delete_categories" on categories
+    for delete to authenticated
+    using (
+        household_id in (
+            select household_id from household_members
+            where user_id = auth.uid() and deleted_at is null
+        )
+    );
+
+comment on policy "household_members_can_select_categories" on categories is 'Members can view household categories';
+comment on policy "household_members_can_insert_categories" on categories is 'Members can create categories for their household';
+comment on policy "household_members_can_update_categories" on categories is 'Members can update household categories';
+comment on policy "household_members_can_delete_categories" on categories is 'Members can delete household categories';
 
 -- ============================================================================
 -- 6. TASKS POLICIES

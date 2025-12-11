@@ -114,7 +114,7 @@ public interface IEventRepository : IBaseRepository<EventEntity, Guid>
         Guid householdId,
         Guid? taskId = null,
         Guid? assignedTo = null,
-        int? categoryId = null,
+        Guid? categoryId = null,
         string? status = null,
         string? priority = null,
         DateOnly? dueDateFrom = null,

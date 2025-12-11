@@ -21,7 +21,7 @@ public interface ITaskRepository : IBaseRepository<TaskEntity, Guid>
     /// Get tasks by category
     /// </summary>
     Task<IEnumerable<TaskEntity>> GetByCategoryAsync(
-        int categoryId,
+        Guid categoryId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -29,7 +29,7 @@ public interface ITaskRepository : IBaseRepository<TaskEntity, Guid>
     /// </summary>
     Task<IEnumerable<TaskEntity>> GetByCategoryAsync(
         Guid householdId,
-        int categoryId,
+        Guid categoryId,
         CancellationToken cancellationToken = default);
 
     /// <summary>

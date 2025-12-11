@@ -21,9 +21,9 @@ export interface EventFilters {
   assignedUserId?: string | null;
 
   /**
-   * Filter by category ID
+   * Filter by category ID (UUID)
    */
-  categoryId?: number | null;
+  categoryId?: string | null;
 
   /**
    * Filter by priority
@@ -116,9 +116,9 @@ export class EventFiltersToolbarComponent implements OnInit {
   selectedUser = signal<string | null>(null);
 
   /**
-   * Selected category
+   * Selected category (UUID)
    */
-  selectedCategory = signal<number | null>(null);
+  selectedCategory = signal<string | null>(null);
 
   /**
    * Selected priority

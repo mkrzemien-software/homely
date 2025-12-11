@@ -20,7 +20,7 @@ public class TaskEntity
     public Guid HouseholdId { get; set; }
 
     [Column("category_id")]
-    public int? CategoryId { get; set; }
+    public Guid? CategoryId { get; set; }
 
     [Required]
     [MaxLength(100)]

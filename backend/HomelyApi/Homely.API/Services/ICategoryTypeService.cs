@@ -20,7 +20,7 @@ public interface ICategoryTypeService
     /// <summary>
     /// Get category type by ID for a household
     /// </summary>
-    Task<CategoryTypeDto?> GetCategoryTypeByIdAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default);
+    Task<CategoryTypeDto?> GetCategoryTypeByIdAsync(Guid householdId, Guid categoryTypeId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Create new category type for a household
@@ -30,10 +30,10 @@ public interface ICategoryTypeService
     /// <summary>
     /// Update existing category type for a household
     /// </summary>
-    Task<CategoryTypeDto> UpdateCategoryTypeAsync(Guid householdId, int categoryTypeId, UpdateCategoryTypeDto updateDto, CancellationToken cancellationToken = default);
+    Task<CategoryTypeDto> UpdateCategoryTypeAsync(Guid householdId, Guid categoryTypeId, UpdateCategoryTypeDto updateDto, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Delete category type (soft delete) for a household
     /// </summary>
-    Task<bool> DeleteCategoryTypeAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default);
+    Task<bool> DeleteCategoryTypeAsync(Guid householdId, Guid categoryTypeId, CancellationToken cancellationToken = default);
 }

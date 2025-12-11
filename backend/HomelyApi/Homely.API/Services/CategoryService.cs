@@ -39,7 +39,7 @@ public class CategoryService : ICategoryService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<CategoryDto>> GetCategoriesByCategoryTypeAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CategoryDto>> GetCategoriesByCategoryTypeAsync(Guid householdId, Guid categoryTypeId, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -56,7 +56,7 @@ public class CategoryService : ICategoryService
     }
 
     /// <inheritdoc/>
-    public async Task<CategoryDto?> GetCategoryByIdAsync(Guid householdId, int categoryId, CancellationToken cancellationToken = default)
+    public async Task<CategoryDto?> GetCategoryByIdAsync(Guid householdId, Guid categoryId, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -148,7 +148,7 @@ public class CategoryService : ICategoryService
     }
 
     /// <inheritdoc/>
-    public async Task<CategoryDto> UpdateCategoryAsync(Guid householdId, int categoryId, UpdateCategoryDto updateDto, CancellationToken cancellationToken = default)
+    public async Task<CategoryDto> UpdateCategoryAsync(Guid householdId, Guid categoryId, UpdateCategoryDto updateDto, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -204,7 +204,7 @@ public class CategoryService : ICategoryService
     }
 
     /// <inheritdoc/>
-    public async Task<bool> DeleteCategoryAsync(Guid householdId, int categoryId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteCategoryAsync(Guid householdId, Guid categoryId, CancellationToken cancellationToken = default)
     {
         try
         {

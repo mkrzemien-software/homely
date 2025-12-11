@@ -114,7 +114,7 @@ export class CreateTaskDialogComponent implements OnInit, OnChanges {
       }
       acc[typeId].categories.push(cat);
       return acc;
-    }, {} as Record<number, { typeId: number; typeName: string; categories: Category[] }>);
+    }, {} as Record<string, { typeId: string; typeName: string; categories: Category[] }>);
 
     // Convert to TreeNode structure
     return Object.values(grouped).map(group => ({

@@ -45,7 +45,7 @@ public class TasksController : ControllerBase
     public async Task<ActionResult<TasksResponse>> GetTasks(
         [FromQuery] Guid householdId,
         [FromQuery] bool activeOnly = true,
-        [FromQuery] int? categoryId = null,
+        [FromQuery] Guid? categoryId = null,
         [FromQuery] bool recurringOnly = false,
         [FromQuery] bool oneTimeOnly = false,
         [FromQuery] int page = 1,

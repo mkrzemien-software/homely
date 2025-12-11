@@ -15,12 +15,12 @@ public interface ICategoryService
     /// <summary>
     /// Get categories by category type for a household
     /// </summary>
-    Task<IEnumerable<CategoryDto>> GetCategoriesByCategoryTypeAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CategoryDto>> GetCategoriesByCategoryTypeAsync(Guid householdId, Guid categoryTypeId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get category by ID for a household
     /// </summary>
-    Task<CategoryDto?> GetCategoryByIdAsync(Guid householdId, int categoryId, CancellationToken cancellationToken = default);
+    Task<CategoryDto?> GetCategoryByIdAsync(Guid householdId, Guid categoryId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get all categories (including inactive) for a household
@@ -35,12 +35,12 @@ public interface ICategoryService
     /// <summary>
     /// Update existing category for a household
     /// </summary>
-    Task<CategoryDto> UpdateCategoryAsync(Guid householdId, int categoryId, UpdateCategoryDto updateDto, CancellationToken cancellationToken = default);
+    Task<CategoryDto> UpdateCategoryAsync(Guid householdId, Guid categoryId, UpdateCategoryDto updateDto, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Delete category (soft delete) for a household
     /// </summary>
-    Task<bool> DeleteCategoryAsync(Guid householdId, int categoryId, CancellationToken cancellationToken = default);
+    Task<bool> DeleteCategoryAsync(Guid householdId, Guid categoryId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Update sort order for multiple categories for a household

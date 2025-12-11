@@ -108,7 +108,7 @@ export class TasksListComponent implements OnInit {
   /**
    * Selected category filter
    */
-  selectedCategoryId = signal<number | undefined>(undefined);
+  selectedCategoryId = signal<string | undefined>(undefined);
 
   /**
    * Selected priority filter
@@ -330,7 +330,7 @@ export class TasksListComponent implements OnInit {
   /**
    * Handle category filter change
    */
-  onCategoryFilterChange(categoryId: number | undefined): void {
+  onCategoryFilterChange(categoryId: string | undefined): void {
     this.selectedCategoryId.set(categoryId);
     this.currentPage.set(1); // Reset to first page
     this.loadTasks();

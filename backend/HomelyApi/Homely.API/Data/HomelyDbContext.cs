@@ -385,20 +385,8 @@ public class HomelyDbContext : DbContext
             }
         );
 
-        modelBuilder.Entity<CategoryTypeEntity>().HasData(
-            new CategoryTypeEntity { Id = 1, Name = "Przeglądy techniczne", Description = "Przeglądy techniczne pojazdów i urządzeń", SortOrder = 1, IsActive = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow },
-            new CategoryTypeEntity { Id = 2, Name = "Wywóz śmieci", Description = "Harmonogram wywozu śmieci", SortOrder = 2, IsActive = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow },
-            new CategoryTypeEntity { Id = 3, Name = "Wizyty medyczne", Description = "Wizyty zdrowotne członków gospodarstwa", SortOrder = 3, IsActive = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow }
-        );
-
-        modelBuilder.Entity<CategoryEntity>().HasData(
-            new CategoryEntity { Id = 1, CategoryTypeId = 1, Name = "Przegląd samochodu", Description = "Obowiązkowy przegląd techniczny pojazdu", SortOrder = 1, IsActive = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow },
-            new CategoryEntity { Id = 2, CategoryTypeId = 1, Name = "Przegląd kotła", Description = "Przegląd kotła grzewczego", SortOrder = 2, IsActive = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow },
-            new CategoryEntity { Id = 3, CategoryTypeId = 2, Name = "Śmieci zmieszane", Description = "Wywóz śmieci zmieszanych", SortOrder = 1, IsActive = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow },
-            new CategoryEntity { Id = 4, CategoryTypeId = 2, Name = "Odpady segregowane", Description = "Wywóz odpadów segregowanych", SortOrder = 2, IsActive = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow },
-            new CategoryEntity { Id = 5, CategoryTypeId = 3, Name = "Lekarz rodzinny", Description = "Wizyty u lekarza pierwszego kontaktu", SortOrder = 1, IsActive = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow },
-            new CategoryEntity { Id = 6, CategoryTypeId = 3, Name = "Dentysta", Description = "Wizyty dentystyczne", SortOrder = 2, IsActive = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow },
-            new CategoryEntity { Id = 7, CategoryTypeId = 3, Name = "Badania kontrolne", Description = "Regularne badania profilaktyczne", SortOrder = 3, IsActive = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow }
-        );
+        // Note: CategoryType and Category seed data removed
+        // Categories are now multi-tenant (household-specific) and should be created per-household
+        // via the API or through household initialization logic, not as global seed data.
     }
 }

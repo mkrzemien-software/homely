@@ -141,11 +141,7 @@
   >
     @if (selectedUser()) {
       <div class="dialog-content">
-        <!-- Account Actions Toolbar -->
-        <app-account-actions-toolbar
-          [user]="selectedUser()!"
-          (actionCompleted)="onActionCompleted()"
-        ></app-account-actions-toolbar>
+
 
         <!-- User Details -->
         <app-user-details-panel [user]="selectedUser()!"></app-user-details-panel>
@@ -155,13 +151,19 @@
           <app-household-assignment [user]="selectedUser()!"></app-household-assignment>
         </div>
 
+        <!-- Account Actions Toolbar -->
+        <app-account-actions-toolbar
+          [user]="selectedUser()!"
+          (actionCompleted)="onActionCompleted()"
+        ></app-account-actions-toolbar>
+
         <!-- Role Management -->
-        <div class="role-management-section">
+        <!-- <div class="role-management-section">
           <app-role-management-form
             [user]="selectedUser()!"
             (roleUpdated)="onRoleUpdated($event)"
           ></app-role-management-form>
-        </div>
+        </div> -->
       </div>
     }
   </p-dialog>

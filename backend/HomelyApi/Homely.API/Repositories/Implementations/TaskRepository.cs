@@ -35,7 +35,7 @@ public class TaskRepository : BaseRepository<TaskEntity, Guid>, ITaskRepository
     }
 
     public async Task<IEnumerable<TaskEntity>> GetByCategoryAsync(
-        int categoryId,
+        Guid categoryId,
         CancellationToken cancellationToken = default)
     {
         return await GetWhereAsync(
@@ -45,7 +45,7 @@ public class TaskRepository : BaseRepository<TaskEntity, Guid>, ITaskRepository
 
     public async Task<IEnumerable<TaskEntity>> GetByCategoryAsync(
         Guid householdId,
-        int categoryId,
+        Guid categoryId,
         CancellationToken cancellationToken = default)
     {
         return await GetWhereAsync(

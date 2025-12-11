@@ -8,7 +8,7 @@ public class CategoryTypeDto
     /// <summary>
     /// Category type ID
     /// </summary>
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Category type name

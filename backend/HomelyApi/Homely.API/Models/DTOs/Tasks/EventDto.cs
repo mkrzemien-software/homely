@@ -50,7 +50,7 @@ public class EventDto
     /// <summary>
     /// Category ID from the task
     /// </summary>
-    public int? CategoryId { get; set; }
+    public Guid? CategoryId { get; set; }
 
     /// <summary>
     /// Category name from the task

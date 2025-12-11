@@ -3,26 +3,26 @@ using Homely.API.Repositories.Base;
 
 namespace Homely.API.Repositories.Interfaces;
 
-public interface ICategoryRepository : IBaseRepository<CategoryEntity, int>
+public interface ICategoryRepository : IBaseRepository<CategoryEntity, Guid>
 {
     Task<IEnumerable<CategoryEntity>> GetActiveCategoriesAsync(Guid householdId, CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<CategoryEntity>> GetByCategoryTypeAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CategoryEntity>> GetByCategoryTypeAsync(Guid householdId, Guid categoryTypeId, CancellationToken cancellationToken = default);
 
-    Task<CategoryEntity?> GetWithCategoryTypeAsync(Guid householdId, int categoryId, CancellationToken cancellationToken = default);
+    Task<CategoryEntity?> GetWithCategoryTypeAsync(Guid householdId, Guid categoryId, CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<CategoryEntity>> GetOrderedCategoriesAsync(Guid householdId, int? categoryTypeId = null, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CategoryEntity>> GetOrderedCategoriesAsync(Guid householdId, Guid? categoryTypeId = null, CancellationToken cancellationToken = default);
 
-    Task<bool> ExistsWithNameInCategoryTypeAsync(Guid householdId, int categoryTypeId, string name, int? excludeId = null, CancellationToken cancellationToken = default);
+    Task<bool> ExistsWithNameInCategoryTypeAsync(Guid householdId, Guid categoryTypeId, string name, Guid? excludeId = null, CancellationToken cancellationToken = default);
 }
 
-public interface ICategoryTypeRepository : IBaseRepository<CategoryTypeEntity, int>
+public interface ICategoryTypeRepository : IBaseRepository<CategoryTypeEntity, Guid>
 {
     Task<IEnumerable<CategoryTypeEntity>> GetActiveCategoryTypesAsync(Guid householdId, CancellationToken cancellationToken = default);
 
-    Task<CategoryTypeEntity?> GetWithCategoriesAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default);
+    Task<CategoryTypeEntity?> GetWithCategoriesAsync(Guid householdId, Guid categoryTypeId, CancellationToken cancellationToken = default);
 
     Task<IEnumerable<CategoryTypeEntity>> GetOrderedCategoryTypesAsync(Guid householdId, CancellationToken cancellationToken = default);
 
-    Task<bool> ExistsWithNameAsync(Guid householdId, string name, int? excludeId = null, CancellationToken cancellationToken = default);
+    Task<bool> ExistsWithNameAsync(Guid householdId, string name, Guid? excludeId = null, CancellationToken cancellationToken = default);
 }

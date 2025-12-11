@@ -103,12 +103,12 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
   /**
    * Selected category type ID
    */
-  selectedCategoryTypeId = signal<number | null>(null);
+  selectedCategoryTypeId = signal<string | null>(null);
 
   /**
    * Selected category ID
    */
-  selectedCategoryId = signal<number | null>(null);
+  selectedCategoryId = signal<string | null>(null);
 
   /**
    * Priority options for dropdown
@@ -377,7 +377,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
   /**
    * Handle category type selection change
    */
-  onCategoryTypeChange(categoryTypeId: number | null): void {
+  onCategoryTypeChange(categoryTypeId: string | null): void {
     this.selectedCategoryTypeId.set(categoryTypeId);
     // Reset category and task selections
     this.selectedCategoryId.set(null);
@@ -390,7 +390,7 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
   /**
    * Handle category selection change
    */
-  onCategoryChange(categoryId: number | null): void {
+  onCategoryChange(categoryId: string | null): void {
     this.selectedCategoryId.set(categoryId);
     // Reset task selection
     this.createEventForm.patchValue({

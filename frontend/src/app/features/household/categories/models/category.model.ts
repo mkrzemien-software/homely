@@ -13,9 +13,9 @@
  */
 export interface CategoryType {
   /**
-   * Unique identifier
+   * Unique identifier (UUID)
    */
-  id: number;
+  id: string;
 
   /**
    * Category type name
@@ -40,14 +40,14 @@ export interface CategoryType {
  */
 export interface Category {
   /**
-   * Unique identifier
+   * Unique identifier (UUID)
    */
-  id: number;
+  id: string;
 
   /**
-   * Parent category type ID
+   * Parent category type ID (UUID)
    */
-  categoryTypeId: number;
+  categoryTypeId: string;
 
   /**
    * Category type name (returned from backend as flat field)
@@ -110,7 +110,7 @@ export interface CategoriesResponse {
  * Categories grouped by type
  */
 export interface CategoriesByType {
-  categoryTypeId: number;
+  categoryTypeId: string;
   categoryTypeName: string;
   categoryTypeDescription: string;
   categories: Category[];
@@ -121,7 +121,7 @@ export interface CategoriesByType {
  * DTO for creating a new category
  */
 export interface CreateCategoryDto {
-  categoryTypeId: number;
+  categoryTypeId: string;
   name: string;
   description: string;
   sortOrder?: number;
@@ -131,7 +131,7 @@ export interface CreateCategoryDto {
  * DTO for updating an existing category
  */
 export interface UpdateCategoryDto {
-  categoryTypeId?: number;
+  categoryTypeId?: string;
   name?: string;
   isActive?: boolean;
   description?: string;
@@ -162,7 +162,7 @@ export interface UpdateCategoryTypeDto {
  * Single category sort order item
  */
 export interface CategorySortOrderItem {
-  id: number;
+  id: string;
   sortOrder: number;
 }
 
@@ -175,20 +175,15 @@ export interface UpdateCategoriesSortOrderDto {
 
 /**
  * Helper function to get category type color
+ * Uses a hash of the UUID to determine color
  */
-export function getCategoryTypeColor(categoryTypeId: number): string {
-  const colorMap: Record<number, string> = {
-    1: 'primary',
-    2: 'success',
-    3: 'danger',
-    4: 'warning',
-    5: 'secondary',
-    6: 'info',
-    7: 'purple',
-    8: 'teal',
-    9: 'gray',
-    10: 'light',
-    11: 'dark',
-  };
-  return colorMap[categoryTypeId] || 'secondary';
+export function getCategoryTypeColor(categoryTypeId: string): string {
+  const colors = ['primary', 'success', 'danger', 'warning', 'secondary', 'info', 'purple', 'teal', 'gray'];
+  // Simple hash function for UUID to get consistent color
+  let hash = 0;
+  for (let i = 0; i < categoryTypeId.length; i++) {
+    hash = categoryTypeId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
 }

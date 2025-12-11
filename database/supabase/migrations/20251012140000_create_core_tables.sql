@@ -84,9 +84,11 @@ comment on column household_members.invitation_expires_at is 'Expiration time fo
 -- 4. CATEGORY TYPES TABLE
 -- ============================================================================
 -- High-level category groupings (maintenance, medical visits, waste management)
+-- Multi-tenant: Each household has its own category types
 create table category_types (
-    id serial primary key,
-    name varchar(100) not null unique,
+    id uuid primary key default gen_random_uuid(),
+    household_id uuid references households(id) on delete cascade not null,
+    name varchar(100) not null,
     description text,
     sort_order integer default 0,
     is_active boolean default true,
@@ -98,16 +100,19 @@ create table category_types (
 -- Enable RLS for category types
 alter table category_types enable row level security;
 
-comment on table category_types is 'High-level category groupings for organizing item categories';
+comment on table category_types is 'High-level category groupings for organizing item categories (multi-tenant per household)';
+comment on column category_types.household_id is 'Household that owns this category type - enables multi-tenant isolation';
 comment on column category_types.sort_order is 'Display order for category types';
 
 -- ============================================================================
 -- 5. CATEGORIES TABLE
 -- ============================================================================
 -- Specific categories within category types
+-- Multi-tenant: Each household has its own categories
 create table categories (
-    id serial primary key,
-    category_type_id integer references category_types(id),
+    id uuid primary key default gen_random_uuid(),
+    household_id uuid references households(id) on delete cascade not null,
+    category_type_id uuid references category_types(id) on delete set null,
     name varchar(100) not null,
     description text,
     sort_order integer default 0,
@@ -120,8 +125,9 @@ create table categories (
 -- Enable RLS for categories
 alter table categories enable row level security;
 
-comment on table categories is 'Specific categories within category types for item classification';
-comment on column categories.category_type_id is 'References category_types.id for hierarchical organization';
+comment on table categories is 'Specific categories within category types for item classification (multi-tenant per household)';
+comment on column categories.household_id is 'Household that owns this category - enables multi-tenant isolation';
+comment on column categories.category_type_id is 'References category_types.id (UUID) for hierarchical organization';
 
 -- ============================================================================
 -- 6. TASKS TABLE
@@ -130,7 +136,7 @@ comment on column categories.category_type_id is 'References category_types.id f
 create table tasks (
     id uuid primary key default gen_random_uuid(),
     household_id uuid references households(id) on delete cascade not null,
-    category_id integer references categories(id),
+    category_id uuid references categories(id) on delete set null,
     name varchar(100) not null,
     description text,
     years_value integer,
@@ -141,6 +147,7 @@ create table tasks (
     priority varchar(10) default 'medium' check (priority in ('low', 'medium', 'high')),
     notes text,
     is_active boolean default true,
+    assigned_to uuid references auth.users(id),
     created_by uuid references auth.users(id) not null,
     created_at timestamp with time zone default now(),
     updated_at timestamp with time zone default now(),
@@ -151,13 +158,14 @@ create table tasks (
 alter table tasks enable row level security;
 
 comment on table tasks is 'Task templates defining what needs to be done and how often (intervals)';
-comment on column tasks.category_id is 'References categories.id for task categorization';
+comment on column tasks.category_id is 'References categories.id (UUID) for task categorization';
 comment on column tasks.years_value is 'Recurrence interval in years';
 comment on column tasks.months_value is 'Recurrence interval in months';
 comment on column tasks.weeks_value is 'Recurrence interval in weeks';
 comment on column tasks.days_value is 'Recurrence interval in days';
 comment on column tasks.last_date is 'Date when this task was last completed';
 comment on column tasks.priority is 'Task priority level: low, medium, high';
+comment on column tasks.assigned_to is 'Default user assignment for events generated from this task template (optional)';
 comment on column tasks.is_active is 'Whether this task template is active';
 
 -- ============================================================================

@@ -8,7 +8,7 @@ public class CategorySortOrderItem
     /// <summary>
     /// Category ID
     /// </summary>
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// New sort order value
