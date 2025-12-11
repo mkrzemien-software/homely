@@ -117,44 +117,34 @@ jobs:
         working-directory: database
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
         run: |
           echo "Linking to Supabase project..."
-          supabase link --project-ref ${{ steps.get-vars.outputs.project_ref }}
+          supabase link --project-ref ${{ steps.get-vars.outputs.project_ref }} --password "$SUPABASE_DB_PASSWORD"
           echo "✅ Successfully linked to project: ${{ steps.get-vars.outputs.project_ref }}"
-
-      - name: Build database URL
-        id: db-url
-        env:
-          DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
-          PROJECT_REF: ${{ steps.get-vars.outputs.project_ref }}
-        run: |
-          # URL-encode the password in case it contains special characters
-          ENCODED_PASSWORD=$(python3 -c "import urllib.parse, os; print(urllib.parse.quote(os.environ['DB_PASSWORD'], safe=''))")
-          
-          # Direct connection URL format for Supabase
-          DB_URL="postgresql://postgres:${ENCODED_PASSWORD}@db.${PROJECT_REF}.supabase.co:5432/postgres"
-          echo "db_url=${DB_URL}" >> $GITHUB_OUTPUT
-          echo "✅ Database URL constructed for project: ${PROJECT_REF}"
 
       - name: Show current migration status (before reset)
         working-directory: database
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
         run: |
           echo "📋 Current migration status:"
-          supabase migration list --db-url "${{ steps.db-url.outputs.db_url }}" || echo "Could not list migrations"
+          supabase migration list --password "$SUPABASE_DB_PASSWORD" || echo "Could not list migrations"
 
       - name: Reset database
         working-directory: database
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
         run: |
           echo "🔄 Resetting database..."
           echo ""
           
           # Reset the database - this drops all data and re-runs all migrations
           # Using 'yes' to automatically confirm the interactive prompt
-          yes | supabase db reset --db-url "${{ steps.db-url.outputs.db_url }}"
+          # Using --linked to use the linked project configuration
+          yes | supabase db reset --linked
           
           echo ""
           echo "✅ Database reset completed!"
@@ -163,20 +153,21 @@ jobs:
         working-directory: database
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
         run: |
           echo "📋 Migration status after reset:"
-          supabase migration list --db-url "${{ steps.db-url.outputs.db_url }}"
+          supabase migration list --password "$SUPABASE_DB_PASSWORD"
 
       - name: Verify database connection
         working-directory: database
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
         run: |
           echo "🔍 Verifying database connection..."
           
-          # Simple query to verify database is accessible
-          psql "${{ steps.db-url.outputs.db_url }}" \
-            -c "SELECT current_database(), current_user, version();" || echo "⚠️ Direct DB connection test skipped (psql not available)"
+          # Verify via Supabase CLI
+          supabase db lint --linked || echo "⚠️ DB lint check completed"
 
       - name: Reset summary
         if: success()
