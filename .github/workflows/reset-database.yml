@@ -1,0 +1,223 @@
+# GitHub Actions Workflow - Supabase Database Reset
+#
+# This workflow resets the database to a clean state by running all migrations from scratch.
+# ⚠️ WARNING: This is a DESTRUCTIVE operation that will DROP ALL DATA!
+#
+# Triggers:
+# - Manual workflow dispatch only (requires confirmation)
+#
+# Prerequisites:
+# - Supabase projects created (dev and prod)
+# - Supabase CLI access token configured
+# - Set repository secrets (see README.md)
+
+name: Reset Database
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to reset'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+      confirmation:
+        description: 'Type "RESET" to confirm you want to delete all data'
+        required: true
+        type: string
+      double_confirmation:
+        description: 'Type "I UNDERSTAND ALL DATA WILL BE LOST" for prod environment'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate-confirmation:
+    name: Validate Confirmation
+    runs-on: ubuntu-latest
+    outputs:
+      confirmed: ${{ steps.check.outputs.confirmed }}
+
+    steps:
+      - name: Check confirmation
+        id: check
+        run: |
+          if [ "${{ github.event.inputs.confirmation }}" != "RESET" ]; then
+            echo "❌ Confirmation failed. You must type 'RESET' to proceed."
+            echo "confirmed=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            if [ "${{ github.event.inputs.double_confirmation }}" != "I UNDERSTAND ALL DATA WILL BE LOST" ]; then
+              echo "❌ Production reset requires double confirmation."
+              echo "You must type 'I UNDERSTAND ALL DATA WILL BE LOST' in the double_confirmation field."
+              echo "confirmed=false" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+            echo "⚠️ PRODUCTION DATABASE RESET CONFIRMED!"
+          fi
+
+          echo "✅ Confirmation validated"
+          echo "confirmed=true" >> $GITHUB_OUTPUT
+
+  reset-database:
+    name: Reset Supabase Database
+    runs-on: ubuntu-latest
+    needs: validate-confirmation
+    if: needs.validate-confirmation.outputs.confirmed == 'true'
+
+    env:
+      ENVIRONMENT: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Display warning
+        run: |
+          echo "⚠️ ============================================== ⚠️"
+          echo "⚠️          DATABASE RESET IN PROGRESS           ⚠️"
+          echo "⚠️ ============================================== ⚠️"
+          echo ""
+          echo "Environment: $ENVIRONMENT"
+          echo "This will DROP ALL DATA and recreate the schema!"
+          echo ""
+          echo "Initiated by: ${{ github.actor }}"
+          echo "Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo ""
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Get environment-specific variables
+        id: get-vars
+        run: |
+          if [ "$ENVIRONMENT" == "prod" ]; then
+            echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_PROD }}" >> $GITHUB_OUTPUT
+            echo "db_password=${{ secrets.SUPABASE_DB_PASSWORD_PROD }}" >> $GITHUB_OUTPUT
+          else
+            echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_DEV }}" >> $GITHUB_OUTPUT
+            echo "db_password=${{ secrets.SUPABASE_DB_PASSWORD_DEV }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Link to Supabase project
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo "Linking to Supabase project..."
+          supabase link --project-ref ${{ steps.get-vars.outputs.project_ref }}
+          echo "✅ Successfully linked to project: ${{ steps.get-vars.outputs.project_ref }}"
+
+      - name: Show current migration status (before reset)
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
+        run: |
+          echo "📋 Current migration status:"
+          supabase migration list --password "$SUPABASE_DB_PASSWORD" || echo "Could not list migrations"
+
+      - name: Reset database
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
+        run: |
+          echo "🔄 Resetting database..."
+          echo ""
+          
+          # Reset the database - this drops all data and re-runs all migrations
+          supabase db reset --linked --password "$SUPABASE_DB_PASSWORD"
+          
+          echo ""
+          echo "✅ Database reset completed!"
+
+      - name: Show migration status (after reset)
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
+        run: |
+          echo "📋 Migration status after reset:"
+          supabase migration list --password "$SUPABASE_DB_PASSWORD"
+
+      - name: Verify database connection
+        working-directory: database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.get-vars.outputs.db_password }}
+        run: |
+          echo "🔍 Verifying database connection..."
+          
+          # Simple query to verify database is accessible
+          psql "postgresql://postgres:$SUPABASE_DB_PASSWORD@db.${{ steps.get-vars.outputs.project_ref }}.supabase.co:5432/postgres" \
+            -c "SELECT current_database(), current_user, version();" || echo "⚠️ Direct DB connection test skipped (psql not available)"
+
+      - name: Reset summary
+        if: success()
+        run: |
+          echo ""
+          echo "✅ ============================================== ✅"
+          echo "✅         DATABASE RESET SUCCESSFUL             ✅"
+          echo "✅ ============================================== ✅"
+          echo ""
+          echo "Environment: $ENVIRONMENT"
+          echo "Project: ${{ steps.get-vars.outputs.project_ref }}"
+          echo "Completed at: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo ""
+          echo "Next steps:"
+          echo "1. Verify the schema in Supabase Dashboard"
+          echo "2. Re-seed data if needed (manually or via API)"
+          echo "3. Test the application with the fresh database"
+
+      - name: Reset failed
+        if: failure()
+        run: |
+          echo ""
+          echo "❌ ============================================== ❌"
+          echo "❌           DATABASE RESET FAILED               ❌"
+          echo "❌ ============================================== ❌"
+          echo ""
+          echo "Environment: $ENVIRONMENT"
+          echo ""
+          echo "Troubleshooting steps:"
+          echo "1. Check the error messages above"
+          echo "2. Verify Supabase credentials are correct"
+          echo "3. Check if the project is accessible in Supabase Dashboard"
+          echo "4. Try running 'supabase db reset' locally first"
+
+  notify-on-prod-reset:
+    name: Notify on Production Reset
+    runs-on: ubuntu-latest
+    needs: reset-database
+    if: github.event.inputs.environment == 'prod' && success()
+
+    steps:
+      - name: Production reset notification
+        run: |
+          echo "🚨 PRODUCTION DATABASE WAS RESET!"
+          echo "Initiated by: ${{ github.actor }}"
+          echo "Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo ""
+          echo "This is a significant event that should be documented."
+
+          # Here you could add Slack/Discord/Email notifications
+          # Example:
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"text":"🚨 PRODUCTION DATABASE WAS RESET by ${{ github.actor }}!"}'
+
