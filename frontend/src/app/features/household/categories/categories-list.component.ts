@@ -275,6 +275,8 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
       const id = params['householdId'];
       if (id) {
         this.householdId.set(id);
+        // Clear cache when household changes to avoid showing data from previous household
+        this.categoryService.clearAllCaches();
         this.loadCategories();
         this.loadCategoryTypes();
       }

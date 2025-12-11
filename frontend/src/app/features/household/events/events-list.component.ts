@@ -314,7 +314,7 @@ export class EventsListComponent implements OnInit {
       { label: 'Wszyscy użytkownicy', value: undefined },
       ...members.map(m => ({
         label: `${m.firstName} ${m.lastName}`,
-        value: m.id
+        value: m.userId
       }))
     ];
   });
@@ -434,6 +434,8 @@ export class EventsListComponent implements OnInit {
       const id = params['householdId'];
       if (id) {
         this.householdId.set(id);
+        // Clear cache when household changes to avoid showing data from previous household
+        this.categoryService.clearAllCaches();
         this.loadCategories();
         this.loadHouseholdMembers();
         this.loadTasks();
