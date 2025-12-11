@@ -122,6 +122,16 @@ public class SystemUsersService : ISystemUsersService
     {
         try
         {
+            // Step 0: Validate household exists (if provided)
+            if (createUserDto.HouseholdId.HasValue)
+            {
+                var household = await _householdRepository.GetByIdAsync(createUserDto.HouseholdId.Value, cancellationToken);
+                if (household == null)
+                {
+                    throw new InvalidOperationException($"Household {createUserDto.HouseholdId} not found");
+                }
+            }
+
             // Step 1: Create user in Supabase auth.users (via Supabase Admin API)
             _logger.LogInformation("Creating user in Supabase Auth for email: {Email}", createUserDto.Email);
             var userId = await _supabaseAuthService.CreateUserAsync(
@@ -145,18 +155,21 @@ public class SystemUsersService : ISystemUsersService
 
             await _userProfileRepository.AddAsync(userProfile, cancellationToken);
 
-            // Step 3: Add user to household
-            var householdMember = new HouseholdMemberEntity
+            // Step 3: Add user to household (if HouseholdId provided)
+            if (createUserDto.HouseholdId.HasValue)
             {
-                HouseholdId = createUserDto.HouseholdId,
-                UserId = userId,
-                Role = createUserDto.Role,
-                JoinedAt = DateTimeOffset.UtcNow,
-                CreatedAt = DateTimeOffset.UtcNow,
-                UpdatedAt = DateTimeOffset.UtcNow
-            };
+                var householdMember = new HouseholdMemberEntity
+                {
+                    HouseholdId = createUserDto.HouseholdId.Value,
+                    UserId = userId,
+                    Role = createUserDto.Role,
+                    JoinedAt = DateTimeOffset.UtcNow,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    UpdatedAt = DateTimeOffset.UtcNow
+                };
 
-            await _householdMemberRepository.AddAsync(householdMember, cancellationToken);
+                await _householdMemberRepository.AddAsync(householdMember, cancellationToken);
+            }
 
             // Step 4: Save changes
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -263,6 +276,13 @@ public class SystemUsersService : ISystemUsersService
             if (userProfile == null)
             {
                 throw new InvalidOperationException($"User {userId} not found");
+            }
+
+            // Validate new household exists
+            var newHousehold = await _householdRepository.GetByIdAsync(newHouseholdId, cancellationToken);
+            if (newHousehold == null)
+            {
+                throw new InvalidOperationException($"Household {newHouseholdId} not found");
             }
 
             // Get current primary membership (first active one)

@@ -47,7 +47,12 @@ BEGIN
 
         RAISE NOTICE 'Migrated existing categories to household: %', first_household_id;
     ELSE
-        RAISE NOTICE 'No households found - skipping data migration';
+        -- No households exist - delete orphaned seed data
+        -- (categories should be created per-household going forward)
+        RAISE NOTICE 'No households found - removing orphaned seed data';
+        
+        DELETE FROM categories WHERE household_id IS NULL;
+        DELETE FROM category_types WHERE household_id IS NULL;
     END IF;
 END $$;
 

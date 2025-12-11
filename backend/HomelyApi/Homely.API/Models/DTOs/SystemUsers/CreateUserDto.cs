@@ -44,10 +44,9 @@ public class CreateUserDto
     public string Role { get; set; } = "member";
 
     /// <summary>
-    /// Household ID to assign user to
+    /// Household ID to assign user to (optional - user can be created without a household)
     /// </summary>
-    [Required(ErrorMessage = "Household ID is required")]
-    public Guid HouseholdId { get; set; }
+    public Guid? HouseholdId { get; set; }
 
     /// <summary>
     /// Optional phone number
