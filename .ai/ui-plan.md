@@ -2,33 +2,58 @@
 
 ## 1. Przegląd struktury UI
 
-Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeNG, przeznaczona do zarządzania zadaniami domowymi i wydarzeniami. System opiera się na szablonach zadań (Tasks), z których użytkownicy tworzą konkretne wydarzenia (Events) w kalendarzu. Architektura UI opiera się na modelu freemium z role-based access control, obsługując trzy typy użytkowników: Administrator, Domownik i Dashboard (tylko odczyt).
+Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 19 z PrimeNG, przeznaczona do zarządzania zadaniami domowymi i wydarzeniami. System opiera się na szablonach zadań (Tasks), z których użytkownicy tworzą konkretne wydarzenia (Events) w kalendarzu. Architektura UI opiera się na modelu freemium z role-based access control, obsługując cztery typy użytkowników: System Developer, Administrator, Domownik i Dashboard (tylko odczyt).
+
+> **Status implementacji (grudzień 2024):** Większość głównych widoków została zaimplementowana. Szczegóły poniżej oznaczone jako ✅ (zaimplementowane), 🚧 (w trakcie), 📋 (zaplanowane).
 
 ### Kluczowe założenia architektoniczne:
-- **Stack technologiczny**: Angular 20 + PrimeNG + CSS Grid/Flexbox
-- **Responsywność**: Desktop-first z optymalizacją dla tablet i mobile browser
-- **Autoryzacja**: JWT Bearer Token z role-based guards
-- **Nawigacja**: Dynamiczna, oparta na rolach z lazy loading
-- **Dostępność**: WCAG 2.1 compliance z keyboard navigation i screen reader support
-- **Model biznesowy**: Freemium z jasnym rozróżnieniem funkcjonalności premium
+- **Stack technologiczny**: Angular 19 + PrimeNG + SCSS + CSS Grid/Flexbox ✅
+- **Responsywność**: Desktop-first z optymalizacją dla tablet i mobile browser ✅
+- **Autoryzacja**: JWT Bearer Token z role-based guards ✅
+- **Nawigacja**: Dynamiczna, oparta na rolach z lazy loading ✅
+- **Dostępność**: WCAG 2.1 compliance z keyboard navigation i screen reader support 🚧
+- **Model biznesowy**: Freemium z jasnym rozróżnieniem funkcjonalności premium 📋
 
 ## 2. Lista widoków
 
+### Status implementacji widoków (grudzień 2024)
+
+| Widok | Ścieżka | Status |
+|-------|---------|--------|
+| Login | `/auth/login` | ✅ Zaimplementowany |
+| Register | `/auth/register` | 📋 Placeholder (redirects to login) |
+| Reset Password | `/auth/forgot-password` | 📋 Placeholder |
+| Household Dashboard | `/:householdId/dashboard` | ✅ Zaimplementowany |
+| Monthly Calendar | `/:householdId/calendar` | ✅ Zaimplementowany |
+| Events List | `/:householdId/events` | ✅ Zaimplementowany |
+| Tasks List | `/:householdId/tasks` | ✅ Zaimplementowany |
+| Categories | `/:householdId/categories` | ✅ Zaimplementowany |
+| System Dashboard | `/system/dashboard` | ✅ Zaimplementowany |
+| System Users | `/system/users` | ✅ Zaimplementowany |
+| System Households | `/system/households` | ✅ Zaimplementowany |
+| Error 403 | `/error/403` | ✅ Zaimplementowany |
+| Error 404 | `/error/404` | ✅ Zaimplementowany |
+| Household Settings | `/:householdId/settings` | 📋 Zaplanowany |
+| Monitor Dashboard | `/monitor` | 📋 Zaplanowany |
+| Premium Views | `/premium/*` | 📋 Zaplanowane (Post-MVP) |
+
 ### 2.1 Authentication Views
 
-#### Login View
+#### Login View ✅
 - **Ścieżka**: `/auth/login`
+- **Status**: ✅ Zaimplementowany
 - **Cel**: Uwierzytelnienie użytkownika w systemie
 - **Kluczowe informacje**: Formularz logowania, opcja "zapamiętaj mnie", linki do rejestracji i resetowania hasła
 - **Komponenty**: 
-  - LoginForm (email, hasło, walidacja)
-  - AuthLinks (rejestracja, reset hasła)
-  - ThemeToggle
+  - LoginFormComponent (email, hasło, walidacja) ✅
+  - AuthLinksComponent (rejestracja, reset hasła) ✅
+  - ThemeToggleComponent ✅
 - **UX/Dostępność**: Focus management, keyboard navigation, clear error messages
 - **Bezpieczeństwo**: Rate limiting, CSRF protection, input sanitization
 
-#### Register View
+#### Register View 📋
 - **Ścieżka**: `/auth/register`
+- **Status**: 📋 Placeholder - obecnie przekierowuje do login
 - **Cel**: Rejestracja nowego użytkownika z zgodami RODO
 - **Kluczowe informacje**: Formularz rejestracji, informacje o przetwarzaniu danych, zgody
 - **Komponenty**:
@@ -51,8 +76,9 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 
 ### 2.2 Main Application Views
 
-#### Dashboard Główny
-- **Ścieżka**: `/dashboard`
+#### Dashboard Główny ✅
+- **Ścieżka**: `/:householdId/dashboard`
+- **Status**: ✅ Zaimplementowany
 - **Cel**: Centralny hub z nawigacją kafelkową i interaktywnym kalendarzem tygodniowym
 - **Kluczowe informacje**: 
   - **Kafelki nawigacyjne** (duże przyciski z ikonami) przekierowujące do głównych widoków:
@@ -79,14 +105,14 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
     - **(Post-MVP)** Statystyki wykorzystania limitu (progress bars)
   - **Przełącznik gospodarstw**: w menu nawigacyjnym (sidebar)
 - **Komponenty**:
-  - NavigationTiles (kafelki: Kalendarz, Wydarzenia, Zadania, Kategorie)
-  - WeekCalendarView (interaktywny kalendarz tygodniowy z barami wydarzeń)
-  - EventsListView (scrollowalna lista z filtrowaniem)
-  - EventDetailsDialog (dialog z akcjami: potwierdź, przełóż, edytuj, anuluj)
-  - DateRangeSelector (dropdown: 7/14/30 dni)
-  - EventFiltersToolbar (filtry w prawym górnym rogu)
-  - AddEventButton (quick action w toolbar)
-  - **(Post-MVP)** UsageStatistics (progress bars dla limitów)
+  - NavigationTilesComponent (kafelki: Kalendarz, Wydarzenia, Zadania, Kategorie) ✅
+  - WeekCalendarViewComponent (interaktywny kalendarz tygodniowy z barami wydarzeń) ✅
+  - DashboardEventsListComponent (scrollowalna lista z filtrowaniem) ✅
+  - EventDetailsDialogComponent (dialog z akcjami: potwierdź, przełóż, edytuj, anuluj) ✅
+  - DateRangeSelectorComponent (dropdown: 7/14/30 dni) ✅
+  - EventFiltersToolbarComponent (filtry w prawym górnym rogu) ✅
+  - AddEventButton (quick action w toolbar) ✅
+  - **(Post-MVP)** UsageStatistics (progress bars dla limitów) 📋
 - **Responsywność**:
   - Desktop: Kafelki 4 kolumny (2x2), kalendarz tygodniowy poziomy (7 dni obok siebie)
   - Mobile/Tablet: Kafelki spadają pionowo, kalendarz pionowy (każdy dzień jako nowy rząd)
@@ -95,8 +121,9 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 
 **Uwaga**: Interaktywny kalendarz tygodniowy jest kluczowym elementem dashboardu. Pełny widok miesięczny dostępny jest pod `/calendar`, a lista wydarzeń pod `/events`.
 
-#### Widok Kalendarza Miesięcznego
-- **Ścieżka**: `/calendar`
+#### Widok Kalendarza Miesięcznego ✅
+- **Ścieżka**: `/:householdId/calendar`
+- **Status**: ✅ Zaimplementowany
 - **Cel**: Widok pełnego miesiąca z zaznaczonymi wydarzeniami (podobny do Google Calendar)
 - **Kluczowe informacje**:
   - **Kalendarz miesięczny** w siatce (7x5/6 wierszy dla dni)
@@ -127,8 +154,9 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 - **Bezpieczeństwo**: Role-based event visibility, permission checks
 - **Dostęp przez**: Sidebar (📅 Kalendarz), kafelek na dashboardzie, bottom navigation (mobile)
 
-#### Widok Wydarzeń
-- **Ścieżka**: `/events`
+#### Widok Wydarzeń ✅
+- **Ścieżka**: `/:householdId/events`
+- **Status**: ✅ Zaimplementowany
 - **Cel**: Pełna lista wszystkich wydarzeń z filtrowaniem (podobna do `/tasks`)
 - **Kluczowe informacje**:
   - Lista wydarzeń w formie tabeli/kart (podobnie jak widok zadań)
@@ -150,8 +178,9 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 - **Bezpieczeństwo**: Permission checks per event based on assignment
 - **Dostęp przez**: Sidebar (📋 Wydarzenia) lub kafelek na dashboardzie
 
-#### Widok Zadań (Templates)
-- **Ścieżka**: `/tasks`
+#### Widok Zadań (Templates) ✅
+- **Ścieżka**: `/:householdId/tasks`
+- **Status**: ✅ Zaimplementowany
 - **Cel**: Zarządzanie szablonami zadań, z których tworzone są wydarzenia
 - **Kluczowe informacje**:
   - Lista wszystkich zadań w gospodarstwie
@@ -169,8 +198,9 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 - **Bezpieczeństwo**: Role-based task management
 - **Dostęp przez**: Sidebar (📋 Zadania) lub kafelek na dashboardzie
 
-#### Widok Kategorii
-- **Ścieżka**: `/categories`
+#### Widok Kategorii ✅
+- **Ścieżka**: `/:householdId/categories`
+- **Status**: ✅ Zaimplementowany
 - **Cel**: Zarządzanie kategoriami (podkategoriami) i typami kategorii, z widokiem przypisanych zadań
 - **Kluczowe informacje**:
   - Lista wszystkich kategorii (podkategorii) pogrupowanych po typach
@@ -423,8 +453,9 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 
 ### 2.7 System Developer Views (Super Admin)
 
-#### Dashboard Systemu
+#### Dashboard Systemu ✅
 - **Ścieżka**: `/system/dashboard`
+- **Status**: ✅ Zaimplementowany
 - **Cel**: Główny panel administracyjny dla zarządzania całą platformą
 - **Kluczowe informacje**:
   - Kafelki nawigacyjne do głównych sekcji systemowych
@@ -446,8 +477,9 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 - **UX/Dostępność**: Quick navigation via tiles; **(Post-MVP)** High-level overview, drill-down capabilities
 - **Bezpieczeństwo**: Super admin role verification, audit logging
 
-#### Zarządzanie Gospodarstwami
+#### Zarządzanie Gospodarstwami ✅
 - **Ścieżka**: `/system/households`
+- **Status**: ✅ Zaimplementowany
 - **Cel**: Przegląd i zarządzanie wszystkimi gospodarstwami w systemie
 - **Kluczowe informacje**:
   - Lista wszystkich gospodarstw z podstawowymi statystykami
@@ -462,8 +494,9 @@ Aplikacja Homely to responsywna aplikacja webowa zbudowana w Angular 20 z PrimeN
 - **UX/Dostępność**: Advanced search, bulk operations, export funkcje
 - **Bezpieczeństwo**: Audit trail dla wszystkich operacji
 
-#### Zarządzanie Użytkownikami Globalnie
+#### Zarządzanie Użytkownikami Globalnie ✅
 - **Ścieżka**: `/system/users`
+- **Status**: ✅ Zaimplementowany
 - **Cel**: Administracja wszystkich kont użytkowników w systemie
 - **Kluczowe informacje**:
   - Wyszukiwanie użytkowników w całym systemie

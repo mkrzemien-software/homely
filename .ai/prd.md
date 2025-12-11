@@ -1798,3 +1798,66 @@ Jeśli te cele zostaną osiągnięte, będziemy kontynuować rozwój produktu zg
 ### 7. Pomysł na użycie AI
 
 OCR dokumentów - Automatyczne wyciąganie kluczowych informacji (data, kwota, nazwa usługi, treść instrukcji dla konkretnej czynności).
+
+## 8. Status implementacji (aktualizacja: grudzień 2024)
+
+### 8.1 Zaimplementowane funkcjonalności
+
+#### Backend (.NET 9 + ASP.NET Core)
+- ✅ AuthController - logowanie, JWT tokens, refresh tokens
+- ✅ TasksController - pełne CRUD dla szablonów zadań
+- ✅ EventsController - CRUD + akcje: complete, postpone, cancel
+- ✅ CategoriesController - pełne CRUD dla kategorii (podkategorii)
+- ✅ CategoryTypesController - pełne CRUD dla typów kategorii
+- ✅ HouseholdsController - zarządzanie gospodarstwami
+- ✅ DashboardController - upcoming events, statistics
+- ✅ SystemUsersController - administracja użytkownikami
+- ✅ SystemHouseholdsController - administracja gospodarstwami
+- ✅ Middleware autoryzacyjne i interceptory
+
+#### Frontend (Angular 19 + PrimeNG)
+- ✅ Logowanie z JWT
+- ✅ Sidebar z dwoma sekcjami (Gospodarstwo + System)
+- ✅ Przełącznik gospodarstw (HouseholdSwitcher)
+- ✅ Dashboard gospodarstwa z:
+  - Kafelkami nawigacyjnymi (Kalendarz, Wydarzenia, Zadania, Kategorie)
+  - Interaktywnym kalendarzem tygodniowym
+  - Listą wydarzeń z wyborem zakresu dat
+  - Dialogiem szczegółów wydarzenia z akcjami
+  - Paskiem filtrów
+- ✅ Lista zadań (TasksListComponent) z dialogami tworzenia/edycji
+- ✅ Lista wydarzeń (EventsListComponent) z filtrowaniem i sortowaniem
+- ✅ Widok kalendarza miesięcznego (MonthCalendarViewComponent)
+- ✅ Lista kategorii (CategoriesListComponent) z dialogami CRUD
+- ✅ Panel systemowy (SystemDashboardComponent)
+- ✅ Zarządzanie użytkownikami (SystemUsersComponent)
+- ✅ Zarządzanie gospodarstwami (SystemHouseholdsComponent)
+- ✅ Testy E2E z Playwright
+
+#### Baza danych (Supabase/PostgreSQL)
+- ✅ Migracje core tables
+- ✅ Indeksy
+- ✅ Polityki RLS
+- ✅ Widoki i triggery
+- ✅ Tabela user_profiles
+
+### 8.2 W trakcie implementacji
+- 🚧 Rejestracja użytkowników z weryfikacją email
+- 🚧 Reset hasła
+- 🚧 Automatyczne generowanie kolejnego wydarzenia po completion
+- 🚧 Zarządzanie członkami gospodarstwa (UI)
+- 🚧 Limity freemium (5 zadań, 3 członkowie)
+
+### 8.3 Zaplanowane (Post-MVP)
+- 📋 System powiadomień email
+- 📋 Upload i przechowywanie dokumentów
+- 📋 Funkcje premium (historia, raporty, analizy)
+- 📋 Onboarding nowego użytkownika
+- 📋 Widok monitor (uproszczony dashboard)
+- 📋 Wdrożenie produkcyjne na AWS
+
+### 8.4 Zmiany względem oryginalnego planu
+1. **Uproszczenie modelu danych**: Zamiast osobnych tabel dla "urządzeń" i "wizyt", zastosowano ujednolicony model Task (szablon) + Event (wystąpienie)
+2. **Kategorie zamiast predefiniowanych typów**: System dynamicznych kategorii i typów kategorii zamiast sztywnych kategorii MVP
+3. **Brak powiadomień w MVP**: System powiadomień email przesunięty do post-MVP
+4. **Brak dokumentów w MVP**: Upload dokumentów przesunięty do post-MVP

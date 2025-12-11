@@ -34,21 +34,24 @@ Homeowners managing household operations who need to organize and monitor variou
 ## Tech Stack
 
 ### Frontend
-- **Angular 19** - Modern web framework for building responsive user interfaces
-- **PrimeNG** - Comprehensive UI component library
+- **Angular 19** - Modern web framework with standalone components and signals
+- **PrimeNG** - Comprehensive UI component library (buttons, dialogs, tables, calendar)
+- **TypeScript** - Type-safe JavaScript
 - **Playwright** - End-to-end testing framework
 
 ### Backend
 - **.NET 9** - Robust framework for business logic and API development
-- **ASP.NET Core** - Web API framework
+- **ASP.NET Core** - RESTful Web API framework
+- **Entity Framework Core** - ORM for database access
 
 ### Database
 - **Supabase** - Open-source PostgreSQL database with built-in authentication
-- **PostgreSQL** - Reliable relational database
+- **PostgreSQL** - Reliable relational database with Row Level Security (RLS)
 
 ### Infrastructure & DevOps
 - **GitHub Actions** - CI/CD pipeline automation (backend, frontend, database, E2E tests)
-- **AWS** - Cloud hosting platform (planned)
+- **AWS** - Cloud hosting platform (ECS, CloudFront, ALB, S3)
+- **Terraform** - Infrastructure as Code for AWS deployment
 - **Docker** - Containerization for E2E testing and deployment
 
 ## Getting Started Locally
@@ -162,31 +165,43 @@ Make sure you have the following installed:
 
 ### MVP Features ✅
 
-The first version includes four core categories:
-- **Technical Inspections** - Home appliance maintenance tracking
-- **Waste Collection** - Garbage collection schedule management  
-- **Medical Visits** - Family member appointment tracking
+The first version supports flexible category management:
+- **Dynamic Categories** - User-defined categories grouped by types
+- **Category Types** - Technical inspections, medical visits, waste collection, and custom types
+- **Task Templates** - Reusable task definitions with optional intervals
 
-### Core Functionality
-- User authentication and household management
-- Device and visit management with automated scheduling
-- Email notification system
-- Document storage and management
-- Responsive web interface with calendar and dashboard views
-- Freemium model with usage limits
+### Core Functionality (Implemented)
+- ✅ User authentication with JWT (login, session management)
+- ✅ Multi-household support with role-based access
+- ✅ Task template management (create, edit, delete)
+- ✅ Event scheduling from task templates
+- ✅ Event actions (complete, postpone, cancel)
+- ✅ Dashboard with weekly calendar and event list
+- ✅ Monthly calendar view
+- ✅ Category and category type management
+- ✅ System administration for platform managers
+- ✅ Responsive web interface with PrimeNG components
+
+### Planned Features (In Progress) 🚧
+- User registration with email verification
+- Password reset functionality
+- Household member invitation and management
+- Automatic next event generation on completion
+- Freemium limits enforcement (5 tasks, 3 members on free plan)
 
 ### Future Enhancements 🚀
 
 Post-MVP planned features:
+- Email notification system with reminders
+- Document upload and storage
+- Premium features (event history, cost reports, analytics)
 - Additional categories (plants, insurance, recurring payments, pets)
 - Native mobile applications with push notifications
 - External calendar integrations (Google Calendar, Outlook)
 - OCR document processing
 - Predictive maintenance recommendations
-- Service provider marketplace
-- Advanced analytics and cost reporting
 
-### Out of Scope
+### Out of Scope (MVP)
 
 - Native mobile apps (web-responsive only for MVP)
 - AI/ML features (OCR, prediction algorithms)
@@ -196,17 +211,53 @@ Post-MVP planned features:
 
 ## Project Status
 
-🚧 **In Development** - MVP Phase
+🚧 **In Development** - MVP Phase (Active)
 
 ### Current Progress
+
+#### ✅ Core Infrastructure
 - [x] Project planning and requirements documentation
 - [x] Technology stack selection
-- [x] Backend API development (controllers, services, repositories)
-- [x] Frontend application development (Angular 19 with PrimeNG)
-- [x] Database schema implementation
-- [x] Authentication system (JWT-based with Supabase)
-- [x] Core CRUD operations (tasks, events, categories, households)
-- [x] Testing suite (unit, integration, and E2E tests with Playwright)
+- [x] Database schema implementation (PostgreSQL via Supabase)
 - [x] CI/CD pipeline (GitHub Actions workflows)
+- [x] Terraform infrastructure modules for AWS deployment
+
+#### ✅ Backend API (.NET 9)
+- [x] Authentication system (JWT-based with Supabase Auth)
+- [x] Tasks API - CRUD operations for task templates
+- [x] Events API - CRUD + complete, postpone, cancel actions
+- [x] Categories & CategoryTypes API - Full management
+- [x] Households API - Multi-household support
+- [x] Dashboard API - Upcoming events, statistics
+- [x] System Admin APIs - User & household management
+- [x] Unit and integration tests
+
+#### ✅ Frontend Application (Angular 19 + PrimeNG)
+- [x] Authentication (Login with JWT)
+- [x] Sidebar navigation with role-based menu sections
+- [x] Household Dashboard with:
+  - Navigation tiles (Calendar, Events, Tasks, Categories)
+  - Interactive weekly calendar view
+  - Events list with date range selection
+  - Event details dialog with actions
+- [x] Tasks management (list, create, edit, delete, create event from task)
+- [x] Events management (list, filtering, sorting, pagination)
+- [x] Monthly calendar view with day events panel
+- [x] Categories management (CRUD for categories and category types)
+- [x] Household switcher for multi-household users
+- [x] System Dashboard for administrators
+- [x] System Users management
+- [x] System Households management
+- [x] E2E tests with Playwright
+
+#### 🚧 In Progress
+- [ ] Event completion with automatic next event generation
+- [ ] User registration and email verification
+- [ ] Password reset flow
+- [ ] Household member management UI
+
+#### 📋 Planned (Post-MVP)
 - [ ] Email notification system
-- [ ] Production deployment
+- [ ] Document upload and storage
+- [ ] Premium features (history, reports, analytics)
+- [ ] Production deployment to AWS

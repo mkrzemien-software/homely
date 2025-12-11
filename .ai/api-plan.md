@@ -1,26 +1,28 @@
 # REST API Plan
 
+> **Status implementacji (grudzień 2024):** Większość głównych endpointów została zaimplementowana. Szczegóły poniżej oznaczone jako ✅ (zaimplementowane), 🚧 (w trakcie), 📋 (zaplanowane).
+
 ## 1. Resources
 
-- **Profiles** - User profile data (`user_profiles` table)
-- **Households** - Household management (`households` table)
-- **HouseholdMembers** - Household membership with roles (`household_members` table)
-- **PlanTypes** - Subscription plan definitions (`plan_types` table)
-- **CategoryTypes** - High-level categories (`category_types` table)
-- **Categories** - Specific categories within types (subcategories) (`categories` table)
-- **Tasks** - Task templates/definitions (`tasks` table)
-- **Events** - Scheduled appointments/occurrences (`events` table)
-- **EventsHistory** - Completed events archive (`events_history` table)
-- **Dashboard** - Aggregated dashboard data (multiple tables via views)
-  - Weekly calendar widget with events
-  - Event list with configurable date range (7/14/30 days)
-  - Monthly calendar view with event counts per day
+- **Profiles** - User profile data (`user_profiles` table) 🚧
+- **Households** - Household management (`households` table) ✅
+- **HouseholdMembers** - Household membership with roles (`household_members` table) ✅
+- **PlanTypes** - Subscription plan definitions (`plan_types` table) 📋
+- **CategoryTypes** - High-level categories (`category_types` table) ✅
+- **Categories** - Specific categories within types (subcategories) (`categories` table) ✅
+- **Tasks** - Task templates/definitions (`tasks` table) ✅
+- **Events** - Scheduled appointments/occurrences (`events` table) ✅
+- **EventsHistory** - Completed events archive (`events_history` table) 📋
+- **Dashboard** - Aggregated dashboard data (multiple tables via views) ✅
+  - Weekly calendar widget with events ✅
+  - Event list with configurable date range (7/14/30 days) ✅
+  - Statistics endpoint ✅
 
 ## 2. Endpoints
 
-### Authentication
+### Authentication ✅
 
-#### POST /auth/register
+#### POST /auth/register 📋
 - **Description**: Register new user account
 - **Request Body**:
 ```json
@@ -36,8 +38,9 @@
   - **400**: `{ "error": "Validation failed", "details": ["email already exists"] }`
   - **422**: `{ "error": "Invalid input format" }`
 
-#### POST /auth/login
+#### POST /auth/login ✅
 - **Description**: Authenticate user
+- **Status**: ✅ Zaimplementowany
 - **Request Body**:
 ```json
 {
@@ -50,14 +53,16 @@
   - **200**: `{ "token": "jwt_token", "user": { "id": "uuid", "email": "string" } }`
   - **401**: `{ "error": "Invalid credentials" }`
 
-#### POST /auth/logout
+#### POST /auth/logout ✅
 - **Description**: Logout current user
+- **Status**: ✅ Zaimplementowany
 - **Headers**: `Authorization: Bearer {token}`
 - **Response**: 
   - **200**: `{ "message": "Logout successful" }`
 
-#### POST /auth/reset-password
+#### POST /auth/reset-password 📋
 - **Description**: Initiate password reset
+- **Status**: 📋 Zaplanowany
 - **Request Body**:
 ```json
 {
@@ -114,10 +119,11 @@
 }
 ```
 
-### Households
+### Households ✅
 
-#### GET /households
+#### GET /households ✅
 - **Description**: Get households for current user
+- **Status**: ✅ Zaimplementowany (pełne CRUD)
 - **Headers**: `Authorization: Bearer {token}`
 - **Response**: 
   - **200**: 
@@ -245,10 +251,11 @@
   - **200**: `{ "message": "Member removed" }`
   - **403**: `{ "error": "Admin access required" }`
 
-### Category Types
+### Category Types ✅
 
-#### GET /category-types
+#### GET /category-types ✅
 - **Description**: Get all available category types
+- **Status**: ✅ Zaimplementowany
 - **Response**:
   - **200**:
 ```json
@@ -299,10 +306,11 @@
   - **200**: `{ "success": true, "message": "Category type deleted successfully" }`
   - **404**: `{ "error": "Category type not found" }`
 
-### Categories
+### Categories ✅
 
-#### GET /categories
+#### GET /categories ✅
 - **Description**: Get categories (subcategories) by type
+- **Status**: ✅ Zaimplementowany (pełne CRUD)
 - **Query Parameters**: `categoryTypeId` (optional)
 - **Response**: 
   - **200**: 
@@ -320,10 +328,11 @@
 }
 ```
 
-### Tasks
+### Tasks ✅
 
-#### GET /tasks
+#### GET /tasks ✅
 - **Description**: Get task templates for user's households
+- **Status**: ✅ Zaimplementowany (pełne CRUD + filtering + pagination)
 - **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**: 
   - `householdId` (optional)
@@ -426,10 +435,11 @@
   - **403**: `{ "error": "Admin access required" }`
   - **400**: `{ "error": "Cannot delete task with active events. Archive or complete all events first." }`
 
-### Events
+### Events ✅
 
-#### GET /events
+#### GET /events ✅
 - **Description**: Get events (scheduled occurrences) for user's households
+- **Status**: ✅ Zaimplementowany (pełne CRUD + complete/postpone/cancel actions + filtering + pagination)
 - **Important**: Events do NOT have their own title field - the event title is `task.name` from the associated task template
 - **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**: 
@@ -597,10 +607,11 @@
   - **200**: `{ "message": "Event deleted" }`
   - **403**: `{ "error": "Admin access required" }`
 
-### Events History (Premium)
+### Events History (Premium) 📋
 
-#### GET /events-history
+#### GET /events-history 📋
 - **Description**: Get completed events history (premium only)
+- **Status**: 📋 Zaplanowany (Post-MVP)
 - **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**: 
   - `householdId` (optional)
@@ -616,10 +627,11 @@
   - **200**: Array of completed events with completion details
   - **403**: `{ "error": "Premium subscription required" }`
 
-### Dashboard
+### Dashboard ✅
 
-#### GET /dashboard/upcoming-events
+#### GET /dashboard/upcoming-events ✅
 - **Description**: Get upcoming events for dashboard (for weekly calendar widget and event list)
+- **Status**: ✅ Zaimplementowany
 - **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**:
   - `days` (optional, default: 7, max: 30) - number of days to fetch
@@ -706,8 +718,9 @@
 }
 ```
 
-#### GET /dashboard/statistics
+#### GET /dashboard/statistics ✅
 - **Description**: Get household statistics
+- **Status**: ✅ Zaimplementowany
 - **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**: `householdId` (optional)
 - **Response**: 
@@ -820,3 +833,40 @@
 - All data operations automatically filter by user's household memberships
 - Cross-household access is strictly forbidden via RLS policies
 - User can belong to multiple households but data remains isolated per household
+
+## 5. Status implementacji (grudzień 2024)
+
+### 5.1 Zaimplementowane endpointy
+
+| Kontroler | Ścieżka bazowa | Status | Operacje |
+|-----------|----------------|--------|----------|
+| AuthController | `/api/auth` | ✅ | login, logout, refresh |
+| TasksController | `/api/tasks` | ✅ | GET (list, by ID), POST, PUT, DELETE, count, regenerate-events |
+| EventsController | `/api/events` | ✅ | GET (list, by ID, upcoming, overdue, assigned), POST, PUT, DELETE, complete, postpone, cancel |
+| CategoriesController | `/api/categories` | ✅ | GET (list, by ID), POST, PUT, DELETE |
+| CategoryTypesController | `/api/category-types` | ✅ | GET (list, by ID), POST, PUT, DELETE |
+| HouseholdsController | `/api/households` | ✅ | GET (list, by ID), POST, PUT, DELETE |
+| DashboardController | `/api/dashboard` | ✅ | upcoming-events, statistics |
+| SystemUsersController | `/api/system/users` | ✅ | list, search, details, households |
+| SystemHouseholdsController | `/api/system/households` | ✅ | list, search, details, create |
+| MaintenanceController | `/api/maintenance` | ✅ | E2E database operations |
+
+### 5.2 Dodatkowe endpointy (nieplanowane w oryginalnym API Plan)
+
+- `GET /api/events/upcoming` - Upcoming events endpoint
+- `GET /api/events/overdue` - Overdue events endpoint
+- `GET /api/events/assigned` - Events assigned to user
+- `GET /api/tasks/active` - Active tasks only
+- `GET /api/tasks/recurring` - Recurring tasks only
+- `GET /api/tasks/one-time` - One-time tasks only
+- `GET /api/tasks/count` - Count active tasks
+- `POST /api/tasks/{id}/regenerate-events` - Regenerate events for task
+
+### 5.3 Zaplanowane endpointy (Post-MVP)
+
+- `POST /auth/register` - User registration
+- `POST /auth/reset-password` - Password reset
+- `GET /events-history` - Events history (premium)
+- `GET /plan-types` - Subscription plans
+- `GET /profiles/me` - User profile
+- `PUT /profiles/me` - Update profile
