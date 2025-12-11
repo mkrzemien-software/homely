@@ -2,6 +2,9 @@
 
 A comprehensive web application for managing household service appointments and family visits, designed to help homeowners efficiently organize and track various home maintenance tasks and family schedules.
 
+<!-- Screenshot aplikacji - dodaj plik do docs/screenshots/ i odkomentuj poniższy kod -->
+![Homely Dashboard](docs/screenshots/dashboard-screenshot.png)
+
 ## Table of Contents
 
 - [Project Description](#project-description)
