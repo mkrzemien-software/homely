@@ -292,7 +292,14 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    this.categoryService.getCategories().subscribe({
+    const householdId = this.householdId();
+    if (!householdId) {
+      this.errorMessage.set('Brak ID gospodarstwa domowego');
+      this.isLoading.set(false);
+      return;
+    }
+
+    this.categoryService.getCategories(householdId).subscribe({
       next: (categories) => {
         this.allCategories.set(categories);
         this.isLoading.set(false);
@@ -311,7 +318,12 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
    * Load category types from API
    */
   private loadCategoryTypes(): void {
-    this.categoryService.getCategoryTypes().subscribe({
+    const householdId = this.householdId();
+    if (!householdId) {
+      return;
+    }
+
+    this.categoryService.getCategoryTypes(householdId).subscribe({
       next: (categoryTypes) => {
         this.allCategoryTypes.set(categoryTypes);
         // Update accordion after data is loaded
@@ -419,8 +431,13 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
    * Delete category
    */
   deleteCategory(category: Category): void {
+    const householdId = this.householdId();
+    if (!householdId) {
+      return;
+    }
+
     if (confirm(`Czy na pewno chcesz usunąć podkategorię "${category.name}"?`)) {
-      this.categoryService.deleteCategory(category.id).subscribe({
+      this.categoryService.deleteCategory(householdId, category.id).subscribe({
         next: () => {
           // Remove from local state
           const categories = this.allCategories();
@@ -525,7 +542,14 @@ export class CategoriesListComponent implements OnInit, AfterViewInit {
     this.allCategories.set(updatedCategories);
 
     // Call API to persist the changes
-    this.categoryService.updateCategoriesOrder(updates).subscribe({
+    const householdId = this.householdId();
+    if (!householdId) {
+      // Rollback on error
+      this.loadCategories();
+      return;
+    }
+
+    this.categoryService.updateCategoriesOrder(householdId, updates).subscribe({
       next: () => {
         // Success - state already updated optimistically
       },

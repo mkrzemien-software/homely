@@ -34,6 +34,7 @@ import { CategoryType, CreateCategoryDto } from '../../models/category.model';
   styleUrls: ['./create-category-dialog.component.scss']
 })
 export class CreateCategoryDialogComponent implements OnChanges {
+  @Input({ required: true }) householdId!: string;
   @Input() categoryTypes: CategoryType[] = [];
   @Input() preselectedCategoryTypeId: number | null = null;
   @Output() categoryCreated = new EventEmitter<void>();
@@ -79,7 +80,7 @@ export class CreateCategoryDialogComponent implements OnChanges {
       sortOrder: formValue.sortOrder
     };
 
-    this.categoryService.createCategory(createDto).subscribe({
+    this.categoryService.createCategory(this.householdId, createDto).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',

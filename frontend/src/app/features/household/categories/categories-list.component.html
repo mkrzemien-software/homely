@@ -114,7 +114,7 @@
   }
 
   <!-- Empty state -->
-  @else if (filteredCategoriesCount() === 0 && totalCategoriesCount() === 0) {
+  @else if (filteredCategoriesCount() === 0 && totalCategoriesCount() === 0 && allCategoryTypes().length === 0) {
     <div class="empty-state">
       <i class="pi pi-inbox empty-icon"></i>
       <h3>Brak podkategorii</h3>
@@ -319,6 +319,7 @@
   [resizable]="false"
 >
   <app-create-category-dialog
+    [householdId]="householdId()"
     [categoryTypes]="allCategoryTypes()"
     [preselectedCategoryTypeId]="preselectedCategoryTypeId()"
     (categoryCreated)="onCategoryCreated()"
@@ -338,6 +339,7 @@
   [resizable]="false"
 >
   <app-create-category-type-dialog
+    [householdId]="householdId()"
     (categoryTypeCreated)="onCategoryTypeCreated()"
     (dialogClosed)="hideCreateCategoryTypeDialog()"
   />
@@ -355,6 +357,7 @@
   [resizable]="false"
 >
   <app-edit-category-dialog
+    [householdId]="householdId()"
     [category]="categoryToEdit()"
     [categoryTypes]="allCategoryTypes()"
     (categoryUpdated)="onCategoryUpdated()"
@@ -374,6 +377,7 @@
   [resizable]="false"
 >
   <app-edit-category-type-dialog
+    [householdId]="householdId()"
     [categoryType]="categoryTypeToEdit()"
     (categoryTypeUpdated)="onCategoryTypeUpdated()"
     (dialogClosed)="hideEditCategoryTypeDialog()"

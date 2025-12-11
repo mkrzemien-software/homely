@@ -53,17 +53,20 @@ export class CategoryService {
   private categoriesCache$ = new BehaviorSubject<Category[]>([]);
 
   /**
-   * Get all category types
+   * Get all category types for a household
    *
+   * @param householdId - The household ID
    * @returns Observable of category types array
    */
-  getCategoryTypes(): Observable<CategoryType[]> {
+  getCategoryTypes(householdId: string): Observable<CategoryType[]> {
     // Return cached if available
     if (this.categoryTypesCache$.value.length > 0) {
       return this.categoryTypesCache$.asObservable();
     }
 
-    return this.http.get<CategoryTypesResponse>(`${this.API_URL}/category-types`)
+    const params = new HttpParams().append('householdId', householdId);
+
+    return this.http.get<CategoryTypesResponse>(`${this.API_URL}/category-types`, { params })
       .pipe(
         map(response => response.data),
         tap(data => {
@@ -78,23 +81,26 @@ export class CategoryService {
 
   /**
    * Get cached category types
+   *
+   * @param householdId - The household ID
    */
-  getCachedCategoryTypes(): Observable<CategoryType[]> {
+  getCachedCategoryTypes(householdId: string): Observable<CategoryType[]> {
     if (this.categoryTypesCache$.value.length === 0) {
-      this.getCategoryTypes().subscribe();
+      this.getCategoryTypes(householdId).subscribe();
     }
     return this.categoryTypesCache$.asObservable();
   }
 
   /**
-   * Get all categories
+   * Get all categories for a household
    *
+   * @param householdId - The household ID
    * @param categoryTypeId - Optional filter by category type
    * @returns Observable of categories array
    */
-  getCategories(categoryTypeId?: number): Observable<Category[]> {
+  getCategories(householdId: string, categoryTypeId?: number): Observable<Category[]> {
     // Build query params
-    let params = new HttpParams();
+    let params = new HttpParams().append('householdId', householdId);
     if (categoryTypeId !== undefined) {
       params = params.append('categoryTypeId', categoryTypeId.toString());
     }
@@ -121,22 +127,27 @@ export class CategoryService {
 
   /**
    * Get cached categories
+   *
+   * @param householdId - The household ID
    */
-  getCachedCategories(): Observable<Category[]> {
+  getCachedCategories(householdId: string): Observable<Category[]> {
     if (this.categoriesCache$.value.length === 0) {
-      this.getCategories().subscribe();
+      this.getCategories(householdId).subscribe();
     }
     return this.categoriesCache$.asObservable();
   }
 
   /**
-   * Get a single category by ID
+   * Get a single category by ID for a household
    *
+   * @param householdId - The household ID
    * @param categoryId - The category ID
    * @returns Observable of category
    */
-  getCategory(categoryId: number): Observable<Category> {
-    return this.http.get<Category>(`${this.API_URL}/categories/${categoryId}`)
+  getCategory(householdId: string, categoryId: number): Observable<Category> {
+    const params = new HttpParams().append('householdId', householdId);
+
+    return this.http.get<Category>(`${this.API_URL}/categories/${categoryId}`, { params })
       .pipe(
         catchError(error => {
           console.error('Error fetching category:', error);
@@ -146,13 +157,16 @@ export class CategoryService {
   }
 
   /**
-   * Create a new category
+   * Create a new category for a household
    *
+   * @param householdId - The household ID
    * @param createDto - Category creation data
    * @returns Observable of created category
    */
-  createCategory(createDto: CreateCategoryDto): Observable<Category> {
-    return this.http.post<Category>(`${this.API_URL}/categories`, createDto)
+  createCategory(householdId: string, createDto: CreateCategoryDto): Observable<Category> {
+    const params = new HttpParams().append('householdId', householdId);
+
+    return this.http.post<Category>(`${this.API_URL}/categories`, createDto, { params })
       .pipe(
         tap(category => {
           // Update cache
@@ -167,14 +181,17 @@ export class CategoryService {
   }
 
   /**
-   * Update an existing category
+   * Update an existing category for a household
    *
+   * @param householdId - The household ID
    * @param categoryId - The category ID
    * @param updateDto - Update data
    * @returns Observable of updated category
    */
-  updateCategory(categoryId: number, updateDto: UpdateCategoryDto): Observable<Category> {
-    return this.http.put<Category>(`${this.API_URL}/categories/${categoryId}`, updateDto)
+  updateCategory(householdId: string, categoryId: number, updateDto: UpdateCategoryDto): Observable<Category> {
+    const params = new HttpParams().append('householdId', householdId);
+
+    return this.http.put<Category>(`${this.API_URL}/categories/${categoryId}`, updateDto, { params })
       .pipe(
         tap(category => {
           // Update cache
@@ -194,13 +211,16 @@ export class CategoryService {
   }
 
   /**
-   * Delete a category
+   * Delete a category for a household
    *
+   * @param householdId - The household ID
    * @param categoryId - The category ID
    * @returns Observable of success status
    */
-  deleteCategory(categoryId: number): Observable<{ success: boolean }> {
-    return this.http.delete<{ success: boolean }>(`${this.API_URL}/categories/${categoryId}`)
+  deleteCategory(householdId: string, categoryId: number): Observable<{ success: boolean }> {
+    const params = new HttpParams().append('householdId', householdId);
+
+    return this.http.delete<{ success: boolean }>(`${this.API_URL}/categories/${categoryId}`, { params })
       .pipe(
         tap(() => {
           // Remove from cache
@@ -215,13 +235,16 @@ export class CategoryService {
   }
 
   /**
-   * Get a single category type by ID
+   * Get a single category type by ID for a household
    *
+   * @param householdId - The household ID
    * @param categoryTypeId - The category type ID
    * @returns Observable of category type
    */
-  getCategoryType(categoryTypeId: number): Observable<CategoryType> {
-    return this.http.get<CategoryType>(`${this.API_URL}/category-types/${categoryTypeId}`)
+  getCategoryType(householdId: string, categoryTypeId: number): Observable<CategoryType> {
+    const params = new HttpParams().append('householdId', householdId);
+
+    return this.http.get<CategoryType>(`${this.API_URL}/category-types/${categoryTypeId}`, { params })
       .pipe(
         catchError(error => {
           console.error('Error fetching category type:', error);
@@ -231,13 +254,16 @@ export class CategoryService {
   }
 
   /**
-   * Create a new category type
+   * Create a new category type for a household
    *
+   * @param householdId - The household ID
    * @param createDto - Category type creation data
    * @returns Observable of created category type
    */
-  createCategoryType(createDto: CreateCategoryTypeDto): Observable<CategoryType> {
-    return this.http.post<CategoryType>(`${this.API_URL}/category-types`, createDto)
+  createCategoryType(householdId: string, createDto: CreateCategoryTypeDto): Observable<CategoryType> {
+    const params = new HttpParams().append('householdId', householdId);
+
+    return this.http.post<CategoryType>(`${this.API_URL}/category-types`, createDto, { params })
       .pipe(
         tap(categoryType => {
           // Update cache
@@ -252,14 +278,17 @@ export class CategoryService {
   }
 
   /**
-   * Update an existing category type
+   * Update an existing category type for a household
    *
+   * @param householdId - The household ID
    * @param categoryTypeId - The category type ID
    * @param updateDto - Update data
    * @returns Observable of updated category type
    */
-  updateCategoryType(categoryTypeId: number, updateDto: UpdateCategoryTypeDto): Observable<CategoryType> {
-    return this.http.put<CategoryType>(`${this.API_URL}/category-types/${categoryTypeId}`, updateDto)
+  updateCategoryType(householdId: string, categoryTypeId: number, updateDto: UpdateCategoryTypeDto): Observable<CategoryType> {
+    const params = new HttpParams().append('householdId', householdId);
+
+    return this.http.put<CategoryType>(`${this.API_URL}/category-types/${categoryTypeId}`, updateDto, { params })
       .pipe(
         tap(categoryType => {
           // Update cache
@@ -279,13 +308,16 @@ export class CategoryService {
   }
 
   /**
-   * Delete a category type
+   * Delete a category type for a household
    *
+   * @param householdId - The household ID
    * @param categoryTypeId - The category type ID
    * @returns Observable of success status
    */
-  deleteCategoryType(categoryTypeId: number): Observable<{ success: boolean }> {
-    return this.http.delete<{ success: boolean }>(`${this.API_URL}/category-types/${categoryTypeId}`)
+  deleteCategoryType(householdId: string, categoryTypeId: number): Observable<{ success: boolean }> {
+    const params = new HttpParams().append('householdId', householdId);
+
+    return this.http.delete<{ success: boolean }>(`${this.API_URL}/category-types/${categoryTypeId}`, { params })
       .pipe(
         tap(() => {
           // Remove from cache
@@ -300,15 +332,17 @@ export class CategoryService {
   }
 
   /**
-   * Update sort order for multiple categories
+   * Update sort order for multiple categories for a household
    *
+   * @param householdId - The household ID
    * @param updates - Array of category ID and sort order updates
    * @returns Observable of success status
    */
-  updateCategoriesOrder(updates: CategorySortOrderItem[]): Observable<{ success: boolean }> {
+  updateCategoriesOrder(householdId: string, updates: CategorySortOrderItem[]): Observable<{ success: boolean }> {
     const dto: UpdateCategoriesSortOrderDto = { items: updates };
+    const params = new HttpParams().append('householdId', householdId);
 
-    return this.http.patch<{ success: boolean }>(`${this.API_URL}/categories/sort-order`, dto)
+    return this.http.patch<{ success: boolean }>(`${this.API_URL}/categories/sort-order`, dto, { params })
       .pipe(
         tap(() => {
           // Update cache with new sort orders

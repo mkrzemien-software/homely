@@ -18,29 +18,32 @@ public class CategoryRepository : BaseRepository<CategoryEntity, int>, ICategory
         return x => x.Id == id;
     }
 
-    public async Task<IEnumerable<CategoryEntity>> GetActiveCategoriesAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CategoryEntity>> GetActiveCategoriesAsync(Guid householdId, CancellationToken cancellationToken = default)
     {
         return await Query()
-            .Where(c => c.IsActive)
+            .Where(c => c.HouseholdId == householdId && c.IsActive)
             .OrderBy(c => c.SortOrder)
             .ThenBy(c => c.Name)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<CategoryEntity>> GetByCategoryTypeAsync(int categoryTypeId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CategoryEntity>> GetByCategoryTypeAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default)
     {
-        return await GetWhereAsync(c => c.CategoryTypeId == categoryTypeId && c.IsActive,
+        return await GetWhereAsync(c => c.HouseholdId == householdId && c.CategoryTypeId == categoryTypeId && c.IsActive,
             c => c.CategoryType);
     }
 
-    public async Task<CategoryEntity?> GetWithCategoryTypeAsync(int categoryId, CancellationToken cancellationToken = default)
+    public async Task<CategoryEntity?> GetWithCategoryTypeAsync(Guid householdId, int categoryId, CancellationToken cancellationToken = default)
     {
-        return await GetByIdAsync(categoryId, c => c.CategoryType);
+        return await Query()
+            .Where(c => c.HouseholdId == householdId && c.Id == categoryId && c.DeletedAt == null)
+            .Include(c => c.CategoryType)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<CategoryEntity>> GetOrderedCategoriesAsync(int? categoryTypeId = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CategoryEntity>> GetOrderedCategoriesAsync(Guid householdId, int? categoryTypeId = null, CancellationToken cancellationToken = default)
     {
-        var query = Query().Where(c => c.IsActive);
+        var query = Query().Where(c => c.HouseholdId == householdId && c.IsActive);
 
         if (categoryTypeId.HasValue)
             query = query.Where(c => c.CategoryTypeId == categoryTypeId.Value);
@@ -52,10 +55,10 @@ public class CategoryRepository : BaseRepository<CategoryEntity, int>, ICategory
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<bool> ExistsWithNameInCategoryTypeAsync(int categoryTypeId, string name, int? excludeId = null, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsWithNameInCategoryTypeAsync(Guid householdId, int categoryTypeId, string name, int? excludeId = null, CancellationToken cancellationToken = default)
     {
         var query = Query()
-            .Where(c => c.CategoryTypeId == categoryTypeId && c.Name == name && c.DeletedAt == null);
+            .Where(c => c.HouseholdId == householdId && c.CategoryTypeId == categoryTypeId && c.Name == name && c.DeletedAt == null);
 
         if (excludeId.HasValue)
         {
@@ -80,34 +83,37 @@ public class CategoryTypeRepository : BaseRepository<CategoryTypeEntity, int>, I
         return x => x.Id == id;
     }
 
-    public async Task<IEnumerable<CategoryTypeEntity>> GetActiveCategoryTypesAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CategoryTypeEntity>> GetActiveCategoryTypesAsync(Guid householdId, CancellationToken cancellationToken = default)
     {
         return await Query()
-            .Where(ct => ct.IsActive)
+            .Where(ct => ct.HouseholdId == householdId && ct.IsActive)
             .OrderBy(ct => ct.SortOrder)
             .ThenBy(ct => ct.Name)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<CategoryTypeEntity?> GetWithCategoriesAsync(int categoryTypeId, CancellationToken cancellationToken = default)
-    {
-        return await GetByIdAsync(categoryTypeId, ct => ct.Categories);
-    }
-
-    public async Task<IEnumerable<CategoryTypeEntity>> GetOrderedCategoryTypesAsync(CancellationToken cancellationToken = default)
+    public async Task<CategoryTypeEntity?> GetWithCategoriesAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default)
     {
         return await Query()
-            .Where(ct => ct.IsActive)
+            .Where(ct => ct.HouseholdId == householdId && ct.Id == categoryTypeId && ct.DeletedAt == null)
+            .Include(ct => ct.Categories.Where(c => c.IsActive && c.DeletedAt == null))
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<CategoryTypeEntity>> GetOrderedCategoryTypesAsync(Guid householdId, CancellationToken cancellationToken = default)
+    {
+        return await Query()
+            .Where(ct => ct.HouseholdId == householdId && ct.IsActive)
             .OrderBy(ct => ct.SortOrder)
             .ThenBy(ct => ct.Name)
             .Include(ct => ct.Categories.Where(c => c.IsActive && c.DeletedAt == null))
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<bool> ExistsWithNameAsync(string name, int? excludeId = null, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsWithNameAsync(Guid householdId, string name, int? excludeId = null, CancellationToken cancellationToken = default)
     {
         var query = Query()
-            .Where(ct => ct.Name == name && ct.DeletedAt == null);
+            .Where(ct => ct.HouseholdId == householdId && ct.Name == name && ct.DeletedAt == null);
 
         if (excludeId.HasValue)
         {

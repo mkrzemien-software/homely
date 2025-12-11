@@ -34,6 +34,7 @@ import { CategoryType, UpdateCategoryTypeDto } from '../../models/category.model
   styleUrls: ['./edit-category-type-dialog.component.scss']
 })
 export class EditCategoryTypeDialogComponent implements OnInit, OnChanges {
+  @Input({ required: true }) householdId!: string;
   @Input() categoryType: CategoryType | null = null;
   @Output() categoryTypeUpdated = new EventEmitter<void>();
   @Output() dialogClosed = new EventEmitter<void>();
@@ -82,7 +83,7 @@ export class EditCategoryTypeDialogComponent implements OnInit, OnChanges {
       sortOrder: formValue.sortOrder
     };
 
-    this.categoryService.updateCategoryType(this.categoryType.id, updateDto).subscribe({
+    this.categoryService.updateCategoryType(this.householdId, this.categoryType.id, updateDto).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',

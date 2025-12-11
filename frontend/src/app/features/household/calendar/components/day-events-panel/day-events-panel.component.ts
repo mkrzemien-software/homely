@@ -8,7 +8,7 @@ import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 
 // Models
-import { Event, getEventUrgency, getUrgencySeverity, formatEventDate } from '../../../events/models/event.model';
+import { Event, EventStatus, getEventUrgency, getUrgencySeverity, formatEventDate, getEventStatusLabel, getEventStatusSeverity } from '../../../events/models/event.model';
 
 /**
  * DayEventsPanelComponent
@@ -114,7 +114,28 @@ export class DayEventsPanelComponent {
   }
 
   /**
-   * Get urgency severity for an event
+   * Check if event is completed or cancelled
+   */
+  isEventFinished(event: Event): boolean {
+    return event.status === EventStatus.COMPLETED || event.status === EventStatus.CANCELLED;
+  }
+
+  /**
+   * Get status label for completed/cancelled events
+   */
+  getStatusLabel(event: Event): string {
+    return getEventStatusLabel(event.status);
+  }
+
+  /**
+   * Get status severity for completed/cancelled events
+   */
+  getStatusSeverity(event: Event): 'success' | 'info' | 'warn' | 'danger' {
+    return getEventStatusSeverity(event.status);
+  }
+
+  /**
+   * Get urgency severity for an event (only for pending/postponed events)
    */
   getUrgencySeverity(event: Event): 'danger' | 'warn' | 'info' {
     const urgency = getEventUrgency(event);
@@ -122,7 +143,7 @@ export class DayEventsPanelComponent {
   }
 
   /**
-   * Get urgency label
+   * Get urgency label (only for pending/postponed events)
    */
   getUrgencyLabel(event: Event): string {
     const urgency: 'overdue' | 'today' | 'upcoming' = getEventUrgency(event);

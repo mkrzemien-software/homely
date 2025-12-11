@@ -1,4 +1,4 @@
-import { Component, inject, signal, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, inject, signal, Output, EventEmitter, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
@@ -32,6 +32,7 @@ import { CreateCategoryTypeDto } from '../../models/category.model';
   styleUrls: ['./create-category-type-dialog.component.scss']
 })
 export class CreateCategoryTypeDialogComponent implements OnInit {
+  @Input({ required: true }) householdId!: string;
   @Output() categoryTypeCreated = new EventEmitter<void>();
   @Output() dialogClosed = new EventEmitter<void>();
 
@@ -71,7 +72,7 @@ export class CreateCategoryTypeDialogComponent implements OnInit {
       isActive: formValue.isActive
     };
 
-    this.categoryService.createCategoryType(createDto).subscribe({
+    this.categoryService.createCategoryType(this.householdId, createDto).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',

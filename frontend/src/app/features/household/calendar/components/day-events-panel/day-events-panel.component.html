@@ -31,7 +31,8 @@
         @for (event of events(); track event.id) {
           <div
             class="event-card"
-            [class.overdue]="event.isOverdue"
+            [class.overdue]="event.isOverdue && !isEventFinished(event)"
+            [class.finished]="isEventFinished(event)"
             (click)="onEventClick(event)"
             tabindex="0"
             role="button"
@@ -43,11 +44,19 @@
               <div class="event-header">
                 <h4 class="event-title">{{ event.taskName }}</h4>
                 <div class="event-badges">
-                  <p-tag
-                    [value]="getUrgencyLabel(event)"
-                    [severity]="getUrgencySeverity(event)"
-                    [rounded]="true"
-                  />
+                  @if (isEventFinished(event)) {
+                    <p-tag
+                      [value]="getStatusLabel(event)"
+                      [severity]="getStatusSeverity(event)"
+                      [rounded]="true"
+                    />
+                  } @else {
+                    <p-tag
+                      [value]="getUrgencyLabel(event)"
+                      [severity]="getUrgencySeverity(event)"
+                      [rounded]="true"
+                    />
+                  }
                   <p-tag
                     [value]="getPriorityLabel(event.priority)"
                     [severity]="getPrioritySeverity(event.priority)"

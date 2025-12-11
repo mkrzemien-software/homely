@@ -10,6 +10,10 @@ public class CategoryEntity
     [Column("id")]
     public int Id { get; set; }
 
+    [Required]
+    [Column("household_id")]
+    public Guid HouseholdId { get; set; }
+
     [Column("category_type_id")]
     public int? CategoryTypeId { get; set; }
 
@@ -35,6 +39,9 @@ public class CategoryEntity
 
     [Column("deleted_at")]
     public DateTimeOffset? DeletedAt { get; set; }
+
+    [ForeignKey("HouseholdId")]
+    public virtual HouseholdEntity Household { get; set; } = null!;
 
     [ForeignKey("CategoryTypeId")]
     public virtual CategoryTypeEntity? CategoryType { get; set; }

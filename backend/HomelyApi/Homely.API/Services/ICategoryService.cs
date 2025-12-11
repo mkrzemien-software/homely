@@ -8,42 +8,42 @@ namespace Homely.API.Services;
 public interface ICategoryService
 {
     /// <summary>
-    /// Get all active categories
+    /// Get all active categories for a household
     /// </summary>
-    Task<IEnumerable<CategoryDto>> GetActiveCategoriesAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<CategoryDto>> GetActiveCategoriesAsync(Guid householdId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get categories by category type
+    /// Get categories by category type for a household
     /// </summary>
-    Task<IEnumerable<CategoryDto>> GetCategoriesByCategoryTypeAsync(int categoryTypeId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CategoryDto>> GetCategoriesByCategoryTypeAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get category by ID
+    /// Get category by ID for a household
     /// </summary>
-    Task<CategoryDto?> GetCategoryByIdAsync(int categoryId, CancellationToken cancellationToken = default);
+    Task<CategoryDto?> GetCategoryByIdAsync(Guid householdId, int categoryId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get all categories (including inactive)
+    /// Get all categories (including inactive) for a household
     /// </summary>
-    Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync(Guid householdId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Create new category
+    /// Create new category for a household
     /// </summary>
-    Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto createDto, CancellationToken cancellationToken = default);
+    Task<CategoryDto> CreateCategoryAsync(Guid householdId, CreateCategoryDto createDto, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Update existing category
+    /// Update existing category for a household
     /// </summary>
-    Task<CategoryDto> UpdateCategoryAsync(int categoryId, UpdateCategoryDto updateDto, CancellationToken cancellationToken = default);
+    Task<CategoryDto> UpdateCategoryAsync(Guid householdId, int categoryId, UpdateCategoryDto updateDto, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Delete category (soft delete)
+    /// Delete category (soft delete) for a household
     /// </summary>
-    Task<bool> DeleteCategoryAsync(int categoryId, CancellationToken cancellationToken = default);
+    Task<bool> DeleteCategoryAsync(Guid householdId, int categoryId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Update sort order for multiple categories
+    /// Update sort order for multiple categories for a household
     /// </summary>
-    Task UpdateCategoriesSortOrderAsync(UpdateCategoriesSortOrderDto updateDto, CancellationToken cancellationToken = default);
+    Task UpdateCategoriesSortOrderAsync(Guid householdId, UpdateCategoriesSortOrderDto updateDto, CancellationToken cancellationToken = default);
 }

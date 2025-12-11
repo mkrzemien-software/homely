@@ -11,6 +11,10 @@ public class CategoryTypeEntity
     public int Id { get; set; }
 
     [Required]
+    [Column("household_id")]
+    public Guid HouseholdId { get; set; }
+
+    [Required]
     [MaxLength(100)]
     [Column("name")]
     public string Name { get; set; } = string.Empty;
@@ -32,6 +36,9 @@ public class CategoryTypeEntity
 
     [Column("deleted_at")]
     public DateTimeOffset? DeletedAt { get; set; }
+
+    [ForeignKey("HouseholdId")]
+    public virtual HouseholdEntity Household { get; set; } = null!;
 
     public virtual ICollection<CategoryEntity> Categories { get; set; } = new List<CategoryEntity>();
 }

@@ -21,43 +21,43 @@ public class CategoryTypeService : ICategoryTypeService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<CategoryTypeDto>> GetActiveCategoryTypesAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CategoryTypeDto>> GetActiveCategoryTypesAsync(Guid householdId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var categoryTypes = await _unitOfWork.CategoryTypes.GetActiveCategoryTypesAsync(cancellationToken);
+            var categoryTypes = await _unitOfWork.CategoryTypes.GetActiveCategoryTypesAsync(householdId, cancellationToken);
             return categoryTypes.Select(MapToDto);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving active category types");
+            _logger.LogError(ex, "Error retrieving active category types for household {HouseholdId}", householdId);
             throw;
         }
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<CategoryTypeDto>> GetAllCategoryTypesAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CategoryTypeDto>> GetAllCategoryTypesAsync(Guid householdId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var categoryTypes = await _unitOfWork.CategoryTypes.GetOrderedCategoryTypesAsync(cancellationToken);
+            var categoryTypes = await _unitOfWork.CategoryTypes.GetOrderedCategoryTypesAsync(householdId, cancellationToken);
             return categoryTypes.Select(MapToDto);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving all category types");
+            _logger.LogError(ex, "Error retrieving all category types for household {HouseholdId}", householdId);
             throw;
         }
     }
 
     /// <inheritdoc/>
-    public async Task<CategoryTypeDto?> GetCategoryTypeByIdAsync(int categoryTypeId, CancellationToken cancellationToken = default)
+    public async Task<CategoryTypeDto?> GetCategoryTypeByIdAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var categoryType = await _unitOfWork.CategoryTypes.GetByIdAsync(categoryTypeId);
+            var categoryType = await _unitOfWork.CategoryTypes.GetWithCategoriesAsync(householdId, categoryTypeId, cancellationToken);
 
-            if (categoryType == null || categoryType.DeletedAt != null)
+            if (categoryType == null)
             {
                 return null;
             }
@@ -66,25 +66,26 @@ public class CategoryTypeService : ICategoryTypeService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving category type {CategoryTypeId}", categoryTypeId);
+            _logger.LogError(ex, "Error retrieving category type {CategoryTypeId} for household {HouseholdId}", categoryTypeId, householdId);
             throw;
         }
     }
 
     /// <inheritdoc/>
-    public async Task<CategoryTypeDto> CreateCategoryTypeAsync(CreateCategoryTypeDto createDto, CancellationToken cancellationToken = default)
+    public async Task<CategoryTypeDto> CreateCategoryTypeAsync(Guid householdId, CreateCategoryTypeDto createDto, CancellationToken cancellationToken = default)
     {
         try
         {
-            // Check if category type with the same name already exists
-            var exists = await _unitOfWork.CategoryTypes.ExistsWithNameAsync(createDto.Name, cancellationToken: cancellationToken);
+            // Check if category type with the same name already exists in this household
+            var exists = await _unitOfWork.CategoryTypes.ExistsWithNameAsync(householdId, createDto.Name, cancellationToken: cancellationToken);
             if (exists)
             {
-                throw new InvalidOperationException($"Category type with name '{createDto.Name}' already exists");
+                throw new InvalidOperationException($"Category type with name '{createDto.Name}' already exists in this household");
             }
 
             var entity = new CategoryTypeEntity
             {
+                HouseholdId = householdId,
                 Name = createDto.Name,
                 Description = createDto.Description,
                 SortOrder = createDto.SortOrder,
@@ -103,28 +104,28 @@ public class CategoryTypeService : ICategoryTypeService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating category type");
+            _logger.LogError(ex, "Error creating category type for household {HouseholdId}", householdId);
             throw;
         }
     }
 
     /// <inheritdoc/>
-    public async Task<CategoryTypeDto> UpdateCategoryTypeAsync(int categoryTypeId, UpdateCategoryTypeDto updateDto, CancellationToken cancellationToken = default)
+    public async Task<CategoryTypeDto> UpdateCategoryTypeAsync(Guid householdId, int categoryTypeId, UpdateCategoryTypeDto updateDto, CancellationToken cancellationToken = default)
     {
         try
         {
-            var entity = await _unitOfWork.CategoryTypes.GetByIdAsync(categoryTypeId);
+            var entity = await _unitOfWork.CategoryTypes.GetWithCategoriesAsync(householdId, categoryTypeId, cancellationToken);
 
-            if (entity == null || entity.DeletedAt != null)
+            if (entity == null)
             {
-                throw new InvalidOperationException($"Category type with ID {categoryTypeId} not found");
+                throw new InvalidOperationException($"Category type with ID {categoryTypeId} not found in household {householdId}");
             }
 
-            // Check if another category type with the same name already exists
-            var exists = await _unitOfWork.CategoryTypes.ExistsWithNameAsync(updateDto.Name, categoryTypeId, cancellationToken);
+            // Check if another category type with the same name already exists in this household
+            var exists = await _unitOfWork.CategoryTypes.ExistsWithNameAsync(householdId, updateDto.Name, categoryTypeId, cancellationToken);
             if (exists)
             {
-                throw new InvalidOperationException($"Category type with name '{updateDto.Name}' already exists");
+                throw new InvalidOperationException($"Category type with name '{updateDto.Name}' already exists in this household");
             }
 
             entity.Name = updateDto.Name;
@@ -144,19 +145,19 @@ public class CategoryTypeService : ICategoryTypeService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating category type {CategoryTypeId}", categoryTypeId);
+            _logger.LogError(ex, "Error updating category type {CategoryTypeId} for household {HouseholdId}", categoryTypeId, householdId);
             throw;
         }
     }
 
     /// <inheritdoc/>
-    public async Task<bool> DeleteCategoryTypeAsync(int categoryTypeId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteCategoryTypeAsync(Guid householdId, int categoryTypeId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var entity = await _unitOfWork.CategoryTypes.GetByIdAsync(categoryTypeId);
+            var entity = await _unitOfWork.CategoryTypes.GetWithCategoriesAsync(householdId, categoryTypeId, cancellationToken);
 
-            if (entity == null || entity.DeletedAt != null)
+            if (entity == null)
             {
                 return false;
             }
@@ -170,7 +171,7 @@ public class CategoryTypeService : ICategoryTypeService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting category type {CategoryTypeId}", categoryTypeId);
+            _logger.LogError(ex, "Error deleting category type {CategoryTypeId} for household {HouseholdId}", categoryTypeId, householdId);
             throw;
         }
     }

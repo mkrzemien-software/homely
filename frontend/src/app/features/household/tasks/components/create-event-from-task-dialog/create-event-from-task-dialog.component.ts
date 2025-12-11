@@ -326,7 +326,12 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
    * Load category types from API
    */
   private loadCategoryTypes(): void {
-    this.categoryService.getCategoryTypes().subscribe({
+    if (!this.householdId) {
+      this.allCategoryTypes.set([]);
+      return;
+    }
+
+    this.categoryService.getCategoryTypes(this.householdId).subscribe({
       next: (categoryTypes) => {
         this.allCategoryTypes.set(categoryTypes || []);
         console.log('Loaded category types:', categoryTypes);
@@ -347,7 +352,12 @@ export class CreateEventFromTaskDialogComponent implements OnInit, OnChanges {
    * Load categories from API
    */
   private loadCategories(): void {
-    this.categoryService.getCategories().subscribe({
+    if (!this.householdId) {
+      this.allCategories.set([]);
+      return;
+    }
+
+    this.categoryService.getCategories(this.householdId).subscribe({
       next: (categories) => {
         this.allCategories.set(categories || []);
         console.log('Loaded categories:', categories);

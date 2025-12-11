@@ -264,7 +264,13 @@ export class TasksListComponent implements OnInit {
    * Load categories from API
    */
   private loadCategories(): void {
-    this.categoryService.getCategories().subscribe({
+    const householdId = this.householdId();
+    if (!householdId) {
+      this.allCategories.set([]);
+      return;
+    }
+
+    this.categoryService.getCategories(householdId).subscribe({
       next: (categories) => {
         this.allCategories.set(categories);
       },
