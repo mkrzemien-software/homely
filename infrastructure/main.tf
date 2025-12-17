@@ -110,6 +110,10 @@ module "backend" {
   # Uses the same wildcard certificate as CloudFront (*.maflint.com)
   acm_certificate_arn = module.acm.certificate_arn
 
+  # Enable HTTPS (set to true to create HTTPS listener)
+  # Using explicit boolean to avoid count dependency issues during destroy
+  enable_https = true
+
   # Monitoring
   cloudwatch_log_retention_days = var.cloudwatch_log_retention_days
   enable_alb_access_logs        = var.enable_alb_access_logs

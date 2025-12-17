@@ -114,6 +114,12 @@ variable "acm_certificate_arn" {
   default     = ""
 }
 
+variable "enable_https" {
+  description = "Enable HTTPS listener (should be true when ACM certificate is provided)"
+  type        = bool
+  default     = false
+}
+
 # Monitoring
 variable "cloudwatch_log_retention_days" {
   description = "Number of days to retain CloudWatch logs"

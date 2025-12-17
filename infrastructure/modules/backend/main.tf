@@ -267,12 +267,12 @@ resource "aws_lb_listener" "http" {
   port              = "80"
   protocol          = "HTTP"
 
-  # Redirect HTTP to HTTPS if certificate is provided
+  # Redirect HTTP to HTTPS if HTTPS is enabled
   default_action {
-    type = var.acm_certificate_arn != "" ? "redirect" : "forward"
+    type = var.enable_https ? "redirect" : "forward"
 
     dynamic "redirect" {
-      for_each = var.acm_certificate_arn != "" ? [1] : []
+      for_each = var.enable_https ? [1] : []
       content {
         port        = "443"
         protocol    = "HTTPS"
@@ -280,13 +280,14 @@ resource "aws_lb_listener" "http" {
       }
     }
 
-    target_group_arn = var.acm_certificate_arn == "" ? aws_lb_target_group.backend.arn : null
+    target_group_arn = var.enable_https ? null : aws_lb_target_group.backend.arn
   }
 }
 
-# ALB Listener (HTTPS) - Only if ACM certificate is provided
+# ALB Listener (HTTPS) - Only if HTTPS is enabled
+# Uses enable_https variable instead of checking ARN to avoid count issues during destroy
 resource "aws_lb_listener" "https" {
-  count = var.acm_certificate_arn != "" ? 1 : 0
+  count = var.enable_https ? 1 : 0
 
   load_balancer_arn = aws_lb.backend.arn
   port              = "443"
@@ -297,6 +298,10 @@ resource "aws_lb_listener" "https" {
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.backend.arn
+  }
+
+  lifecycle {
+    create_before_destroy = false
   }
 }
 
