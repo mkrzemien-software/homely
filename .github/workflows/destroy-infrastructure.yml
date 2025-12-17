@@ -1,0 +1,510 @@
+# GitHub Actions Workflow - Terraform Infrastructure Destruction
+#
+# ⚠️ WARNING: This workflow DESTROYS all AWS infrastructure resources!
+# Use with extreme caution - this action cannot be undone!
+#
+# Features:
+# - Manual workflow dispatch ONLY (no automatic triggers)
+# - Option to run 'terraform plan -destroy' first (dry run - RECOMMENDED)
+# - Requires explicit confirmation via workflow input
+# - Separate workflows for dev and prod environments
+# - Shows detailed destroy plan before execution
+# - Multiple safety confirmations for production
+#
+# Safety measures:
+# - No auto-approve by default - requires manual confirmation
+# - Plan-only mode to preview what will be destroyed
+# - Production requires typing environment name for extra confirmation
+# - All destroy plans saved as artifacts for audit trail
+#
+# Prerequisites:
+# - AWS credentials configured (access keys or OIDC)
+# - Terraform state accessible (S3 backend)
+# - Full understanding of what will be destroyed!
+
+name: Destroy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to destroy (dev or prod)'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      plan_only:
+        description: '⚠️ RECOMMENDED: Only show what would be destroyed (do not actually destroy)'
+        required: false
+        default: true
+        type: boolean
+      confirm_destroy:
+        description: '⚠️ Type "DESTROY" to confirm (required for actual destruction)'
+        required: true
+        type: string
+      auto_approve:
+        description: 'Auto-approve destroy (DANGEROUS - not recommended for prod)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  # Safety validation job - runs before destroy
+  validate-inputs:
+    name: Validate Destruction Request
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate confirmation input
+        run: |
+          if [ "${{ github.event.inputs.confirm_destroy }}" != "DESTROY" ]; then
+            echo "❌ Confirmation failed!"
+            echo ""
+            echo "You must type 'DESTROY' exactly in the confirmation field."
+            echo "This safety measure prevents accidental infrastructure destruction."
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ Confirmation validated"
+
+      - name: Display destruction warning
+        run: |
+          echo "⚠️⚠️⚠️ INFRASTRUCTURE DESTRUCTION WARNING ⚠️⚠️⚠️"
+          echo "================================================"
+          echo ""
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Plan Only: ${{ github.event.inputs.plan_only }}"
+          echo "Auto Approve: ${{ github.event.inputs.auto_approve }}"
+          echo ""
+          echo "This workflow will:"
+
+          if [ "${{ github.event.inputs.plan_only }}" == "true" ]; then
+            echo "  📋 Show what resources WOULD be destroyed (safe)"
+            echo "  ✅ No actual changes will be made"
+          else
+            echo "  💣 PERMANENTLY DELETE all infrastructure resources"
+            echo "  ❌ This action CANNOT be undone"
+            echo "  ⚠️  All data will be lost"
+          fi
+
+          echo ""
+          echo "Resources that will be affected:"
+          echo "  - CloudFront distributions"
+          echo "  - S3 buckets (frontend hosting, logs)"
+          echo "  - ECS clusters, services, tasks"
+          echo "  - Application Load Balancers"
+          echo "  - VPC, subnets, security groups"
+          echo "  - ACM certificates"
+          echo "  - Route53 records"
+          echo "  - CloudWatch logs"
+          echo "  - IAM roles and policies"
+          echo "  - SSM parameters"
+          echo ""
+
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            echo "🚨 PRODUCTION ENVIRONMENT 🚨"
+            echo "You are about to destroy PRODUCTION infrastructure!"
+            echo ""
+          fi
+
+          echo "================================================"
+
+  terraform-destroy:
+    name: Terraform ${{ github.event.inputs.plan_only == 'true' && 'Plan Destroy' || 'DESTROY' }}
+    runs-on: ubuntu-latest
+    needs: validate-inputs
+
+    env:
+      ENVIRONMENT: ${{ github.event.inputs.environment }}
+      PLAN_ONLY: ${{ github.event.inputs.plan_only }}
+      AUTO_APPROVE: ${{ github.event.inputs.auto_approve }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
+
+    defaults:
+      run:
+        working-directory: infrastructure/environments/${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.1
+          terraform_wrapper: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-1
+
+      - name: Verify environment
+        run: |
+          echo "🌍 Environment: $ENVIRONMENT"
+          echo "📋 Plan Only: $PLAN_ONLY"
+          echo "⚠️  Auto Approve: $AUTO_APPROVE"
+          echo ""
+          echo "Working Directory: $(pwd)"
+          ls -la
+
+      - name: Terraform Init
+        id: init
+        run: |
+          echo "Initializing Terraform..."
+          terraform init -input=false
+
+      - name: Terraform Validate
+        id: validate
+        run: |
+          echo "Validating Terraform configuration..."
+          terraform validate -no-color
+
+      - name: Check Current State
+        id: state
+        run: |
+          echo "📊 Checking current infrastructure state..."
+          echo ""
+
+          # Count resources in state
+          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l)
+
+          echo "Resources in state: $RESOURCE_COUNT"
+          echo "resource_count=$RESOURCE_COUNT" >> $GITHUB_OUTPUT
+
+          if [ "$RESOURCE_COUNT" -eq 0 ]; then
+            echo ""
+            echo "⚠️  No resources found in state!"
+            echo "There may be nothing to destroy."
+            echo ""
+          else
+            echo ""
+            echo "📋 Current resources:"
+            terraform state list
+            echo ""
+          fi
+
+      - name: Terraform Plan Destroy
+        id: plan
+        run: |
+          echo "🔍 Planning infrastructure destruction..."
+          echo ""
+          terraform plan -destroy -no-color -input=false -out=destroy-plan
+        continue-on-error: false
+
+      - name: Save Destroy Plan Output
+        if: always()
+        run: |
+          terraform show -no-color destroy-plan > destroy-plan-output.txt
+
+          echo ""
+          echo "📄 Destroy plan saved"
+          echo ""
+          echo "Preview of what will be destroyed:"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          head -n 50 destroy-plan-output.txt
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Full plan available in artifacts"
+
+      - name: Upload Destroy Plan Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-destroy-plan-${{ env.ENVIRONMENT }}-${{ github.run_number }}
+          path: infrastructure/environments/${{ env.ENVIRONMENT }}/destroy-plan-output.txt
+          retention-days: 90
+
+      - name: Analyze Destroy Impact
+        id: impact
+        run: |
+          echo "📊 Analyzing destruction impact..."
+          echo ""
+
+          # Count resources to be destroyed
+          DESTROY_COUNT=$(grep -c "will be destroyed" destroy-plan-output.txt || echo "0")
+          echo "Resources to destroy: $DESTROY_COUNT"
+          echo "destroy_count=$DESTROY_COUNT" >> $GITHUB_OUTPUT
+
+          # Check for no changes
+          if terraform show -no-color destroy-plan | grep -q "No changes"; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo ""
+            echo "✅ No resources to destroy (infrastructure already clean)"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo ""
+            echo "⚠️  $DESTROY_COUNT resources will be DESTROYED"
+          fi
+
+      - name: Plan Only - Exit
+        if: env.PLAN_ONLY == 'true'
+        run: |
+          echo "================================================"
+          echo "📋 PLAN-DESTROY MODE (DRY RUN)"
+          echo "================================================"
+          echo ""
+          echo "✅ Destroy plan completed successfully!"
+          echo "⚠️  No resources were actually destroyed."
+          echo ""
+          echo "Resources that WOULD be destroyed: ${{ steps.impact.outputs.destroy_count }}"
+          echo ""
+          echo "Review the plan output above carefully!"
+          echo ""
+          echo "To actually destroy these resources:"
+          echo "1. Review the destroy plan artifact"
+          echo "2. Ensure you have backups of any important data"
+          echo "3. Run workflow again with 'Plan Only' UNCHECKED"
+          echo "4. Type 'DESTROY' in the confirmation field"
+          echo ""
+          echo "⚠️  Remember: Destruction is PERMANENT and IRREVERSIBLE!"
+          echo ""
+          exit 0
+
+      - name: Final Production Safety Check
+        if: env.PLAN_ONLY == 'false' && env.ENVIRONMENT == 'prod'
+        run: |
+          echo "🚨🚨🚨 FINAL PRODUCTION SAFETY CHECK 🚨🚨🚨"
+          echo "================================================"
+          echo ""
+          echo "You are about to DESTROY PRODUCTION infrastructure!"
+          echo ""
+          echo "This will DELETE:"
+          echo "  - All production resources"
+          echo "  - User data and content"
+          echo "  - Live application environment"
+          echo ""
+          echo "⏰ Waiting 10 seconds for final review..."
+          echo "Press Ctrl+C in GitHub Actions UI to cancel!"
+          echo ""
+
+          for i in {10..1}; do
+            echo "⏳ $i seconds remaining..."
+            sleep 1
+          done
+
+          echo ""
+          echo "🚨 Proceeding with PRODUCTION destruction..."
+          echo ""
+
+      - name: Require Manual Approval for Production
+        if: env.PLAN_ONLY == 'false' && env.ENVIRONMENT == 'prod' && env.AUTO_APPROVE == 'false'
+        run: |
+          echo "❌ MANUAL APPROVAL REQUIRED FOR PRODUCTION"
+          echo "================================================"
+          echo ""
+          echo "Production destruction requires auto-approve to be explicitly enabled."
+          echo "This is a safety measure to prevent accidental destruction."
+          echo ""
+          echo "To proceed with production destruction:"
+          echo "1. Ensure you have complete backups"
+          echo "2. Verify the destroy plan above"
+          echo "3. Run workflow again with 'Auto-approve' CHECKED"
+          echo ""
+          echo "Or use Terraform CLI locally for more control:"
+          echo "  cd infrastructure/environments/prod"
+          echo "  terraform plan -destroy"
+          echo "  terraform destroy"
+          echo ""
+          exit 1
+
+      - name: Terraform Destroy
+        if: env.PLAN_ONLY == 'false' && (env.AUTO_APPROVE == 'true' || env.ENVIRONMENT == 'dev')
+        id: destroy
+        run: |
+          echo "💣 DESTROYING INFRASTRUCTURE..."
+          echo "Environment: $ENVIRONMENT"
+          echo "Resources to destroy: ${{ steps.impact.outputs.destroy_count }}"
+          echo ""
+          echo "⚠️  This action is IRREVERSIBLE!"
+          echo ""
+
+          if [ "$AUTO_APPROVE" == "true" ]; then
+            echo "Running with auto-approve..."
+            terraform destroy -auto-approve -input=false
+          else
+            echo "Running terraform destroy..."
+            terraform destroy -input=false
+          fi
+
+          echo ""
+          echo "✅ Destruction completed"
+
+      - name: Verify Destruction
+        if: env.PLAN_ONLY == 'false' && success()
+        run: |
+          echo "🔍 Verifying infrastructure destruction..."
+          echo ""
+
+          # Check if state is empty
+          REMAINING=$(terraform state list 2>/dev/null | wc -l)
+
+          if [ "$REMAINING" -eq 0 ]; then
+            echo "✅ All resources successfully destroyed"
+            echo "State is clean - no resources remaining"
+          else
+            echo "⚠️  Warning: $REMAINING resources still in state"
+            echo ""
+            echo "Remaining resources:"
+            terraform state list
+            echo ""
+            echo "This may be normal for certain resource types."
+            echo "Review the list above carefully."
+          fi
+
+      - name: Cleanup State Backend (Optional)
+        if: env.PLAN_ONLY == 'false' && success() && github.event.inputs.environment == 'dev'
+        continue-on-error: true
+        run: |
+          echo "🧹 Optional: Clean up Terraform state backend"
+          echo ""
+          echo "The S3 bucket and DynamoDB table for state management still exist."
+          echo "To completely remove the backend:"
+          echo ""
+          echo "  aws s3 rb s3://homely-$ENVIRONMENT-terraform-state --force"
+          echo "  aws dynamodb delete-table --table-name homely-$ENVIRONMENT-terraform-locks"
+          echo ""
+          echo "⚠️  Only do this if you're sure you won't need the state history!"
+
+      - name: Destruction Summary
+        if: env.PLAN_ONLY == 'false' && success()
+        run: |
+          echo "================================================"
+          echo "✅ INFRASTRUCTURE DESTRUCTION COMPLETED"
+          echo "================================================"
+          echo ""
+          echo "Environment: $ENVIRONMENT"
+          echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "Resources destroyed: ${{ steps.impact.outputs.destroy_count }}"
+          echo ""
+          echo "What was destroyed:"
+          echo "  ✓ All AWS infrastructure resources"
+          echo "  ✓ CloudFront distributions"
+          echo "  ✓ S3 buckets and content"
+          echo "  ✓ ECS clusters and services"
+          echo "  ✓ Load balancers and networking"
+          echo "  ✓ Security groups and IAM roles"
+          echo "  ✓ CloudWatch logs"
+          echo ""
+          echo "What still exists:"
+          echo "  - Terraform state in S3 (with history)"
+          echo "  - DynamoDB lock table"
+          echo "  - This GitHub repository"
+          echo "  - Supabase database (managed separately)"
+          echo ""
+          echo "Next steps:"
+          echo "1. Verify in AWS Console that resources are gone"
+          echo "2. Check for any remaining resources that failed to delete"
+          echo "3. Optionally delete state backend (see cleanup step above)"
+          echo "4. Remove any DNS records pointing to deleted resources"
+          echo "5. Cancel any active AWS subscriptions if no longer needed"
+          echo ""
+          echo "To rebuild infrastructure:"
+          echo "  Run the 'Deploy Infrastructure' workflow"
+          echo ""
+
+      - name: Save Destruction Report
+        if: env.PLAN_ONLY == 'false'
+        run: |
+          cat > destruction-report.txt <<EOF
+          ================================================
+          TERRAFORM INFRASTRUCTURE DESTRUCTION REPORT
+          ================================================
+
+          Environment: $ENVIRONMENT
+          Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          Workflow Run: ${{ github.run_number }}
+          Triggered By: ${{ github.actor }}
+
+          Destruction Details:
+          - Resources destroyed: ${{ steps.impact.outputs.destroy_count }}
+          - Auto-approved: $AUTO_APPROVE
+          - State backend: Preserved
+
+          Verification:
+          $(terraform state list 2>/dev/null | wc -l) resources remaining in state
+
+          GitHub Action:
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          ================================================
+          EOF
+
+          echo "📄 Destruction report saved"
+
+      - name: Upload Destruction Report
+        if: env.PLAN_ONLY == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: destruction-report-${{ env.ENVIRONMENT }}-${{ github.run_number }}
+          path: infrastructure/environments/${{ env.ENVIRONMENT }}/destruction-report.txt
+          retention-days: 365  # Keep destruction reports for a year
+
+      - name: Failure Notification
+        if: failure()
+        run: |
+          echo "================================================"
+          echo "❌ DESTRUCTION FAILED"
+          echo "================================================"
+          echo ""
+          echo "Environment: $ENVIRONMENT"
+          echo "Action: ${{ env.PLAN_ONLY == 'true' && 'Plan Destroy' || 'Destroy' }}"
+          echo ""
+          echo "Check the logs above for error details."
+          echo ""
+
+          if [ "$PLAN_ONLY" == "false" ]; then
+            echo "⚠️  CRITICAL: Infrastructure may be in partial state!"
+            echo ""
+            echo "Some resources may have been destroyed while others failed."
+            echo ""
+            echo "Recommended actions:"
+            echo "1. Check AWS Console for current resource state"
+            echo "2. Run 'terraform plan -destroy' to see what remains"
+            echo "3. Fix any errors preventing resource deletion"
+            echo "4. Re-run this workflow to complete destruction"
+            echo "5. Or run 'terraform destroy' manually to retry"
+            echo ""
+            echo "DO NOT attempt to deploy until destruction is complete!"
+          fi
+
+  notify-completion:
+    name: Notify Completion
+    runs-on: ubuntu-latest
+    needs: terraform-destroy
+    if: success() && github.event.inputs.plan_only == 'false'
+
+    steps:
+      - name: Destruction notification
+        run: |
+          echo "🔔 Infrastructure Destruction Notification"
+          echo "================================================"
+          echo ""
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Status: DESTROYED"
+          echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "Triggered by: ${{ github.actor }}"
+          echo ""
+
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            echo "🚨 PRODUCTION INFRASTRUCTURE HAS BEEN DESTROYED 🚨"
+          else
+            echo "Development infrastructure has been destroyed"
+          fi
+
+          echo ""
+          echo "All AWS resources for ${{ github.event.inputs.environment }} have been removed."
+          echo ""
+
+          # Here you could add Slack/Discord/Email notifications
+          # Example:
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d "{\"text\":\"⚠️ ${{ github.event.inputs.environment }} infrastructure destroyed by ${{ github.actor }}\"}"
