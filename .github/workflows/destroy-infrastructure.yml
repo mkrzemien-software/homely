@@ -242,27 +242,35 @@ jobs:
       - name: Analyze Destroy Impact
         id: impact
         run: |
-          set -e
-
           echo "📊 Analyzing destruction impact..."
           echo ""
 
-          # Count resources to be destroyed
-          DESTROY_COUNT=$(grep -c "will be destroyed" destroy-plan-output.txt 2>/dev/null || echo "0")
-          echo "Resources to destroy: $DESTROY_COUNT"
+          # Count resources to be destroyed (disable errexit for grep)
+          set +e
+          DESTROY_COUNT=$(grep -c "will be destroyed" destroy-plan-output.txt)
+          GREP_EXIT=$?
+          set -e
 
-          # Save to output file properly
-          {
-            echo "destroy_count=$DESTROY_COUNT"
-          } >> "$GITHUB_OUTPUT"
+          # If grep found nothing, set count to 0
+          if [ $GREP_EXIT -ne 0 ]; then
+            DESTROY_COUNT=0
+          fi
+
+          echo "Resources to destroy: $DESTROY_COUNT"
+          echo "destroy_count=${DESTROY_COUNT}" >> $GITHUB_OUTPUT
 
           # Check for no changes
-          if terraform show -no-color destroy-plan | grep -q "No changes"; then
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          set +e
+          terraform show -no-color destroy-plan | grep -q "No changes"
+          NO_CHANGES=$?
+          set -e
+
+          if [ $NO_CHANGES -eq 0 ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
             echo ""
             echo "✅ No resources to destroy (infrastructure already clean)"
           else
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
             echo ""
             echo "⚠️  $DESTROY_COUNT resources will be DESTROYED"
           fi
