@@ -8,7 +8,8 @@ locals {
 
 # S3 Bucket for Frontend Assets
 resource "aws_s3_bucket" "frontend" {
-  bucket = local.bucket_name
+  bucket        = local.bucket_name
+  force_destroy = true # Allow deletion even if bucket contains objects
 
   tags = merge(
     var.tags,
@@ -89,7 +90,8 @@ resource "aws_s3_bucket_cors_configuration" "frontend" {
 
 # S3 Bucket for CloudFront Logs
 resource "aws_s3_bucket" "cloudfront_logs" {
-  bucket = "${local.name_prefix}-cloudfront-logs"
+  bucket        = "${local.name_prefix}-cloudfront-logs"
+  force_destroy = true # Allow deletion even if bucket contains log files
 
   tags = merge(
     var.tags,

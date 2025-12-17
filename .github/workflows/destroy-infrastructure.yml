@@ -155,6 +155,23 @@ jobs:
           echo "Working Directory: $(pwd)"
           ls -la
 
+      - name: Pre-Destroy Cleanup
+        if: env.PLAN_ONLY == 'false'
+        continue-on-error: true
+        run: |
+          echo "🧹 Cleaning up resources before destroy..."
+          echo ""
+
+          # Make cleanup script executable
+          chmod +x ../../../infrastructure/scripts/cleanup-before-destroy.sh
+
+          # Run cleanup script
+          ../../../infrastructure/scripts/cleanup-before-destroy.sh "$ENVIRONMENT" "us-east-1"
+
+          echo ""
+          echo "✅ Pre-destroy cleanup completed"
+        working-directory: infrastructure/environments/${{ github.event.inputs.environment }}
+
       - name: Terraform Init
         id: init
         run: |

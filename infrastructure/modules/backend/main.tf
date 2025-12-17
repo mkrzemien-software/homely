@@ -12,6 +12,7 @@ locals {
 resource "aws_ecr_repository" "backend" {
   name                 = local.ecr_repository
   image_tag_mutability = "MUTABLE"
+  force_delete         = true # Allow deletion even if repository contains images
 
   image_scanning_configuration {
     scan_on_push = true # Free basic scanning
